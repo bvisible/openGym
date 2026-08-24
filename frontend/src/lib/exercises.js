@@ -112,8 +112,27 @@ export function matchesExercise(e, q) {
   )
 }
 
-export const imgSrc = ex => IMG_BASE + ex.img
-export const gifSrc = ex => GIF_BASE + ex.gif
+//// Neoffice — un club peut poser SON média sur un exercice.
+//// Une URL absolue (« /files/… », posée par le desk) est servie telle quelle ;
+//// un nom de fichier nu reste celui de la bibliothèque, préfixé du dossier.
+//// Le test porte sur la forme de la valeur et non sur un drapeau : le carnet
+//// n'a pas à savoir d'où vient un média, seulement où aller le chercher.
+const isAbsolute = v => typeof v === 'string' && (v.startsWith('/') || v.startsWith('http'))
+export const imgSrc = ex => (isAbsolute(ex.img) ? ex.img : IMG_BASE + ex.img)
+export const gifSrc = ex => (isAbsolute(ex.gif) ? ex.gif : GIF_BASE + ex.gif)
+
+//// Neoffice — les médias que le club a posés sur des exercices de la
+//// bibliothèque, appliqués par id. Rien d'autre de la fiche ne bouge : le nom,
+//// les consignes et les muscles restent ceux de la bibliothèque.
+export function applyClubMedia(media) {
+  if (!media) return
+  Object.keys(media).forEach(id => {
+    const e = EXIDX[id]
+    if (!e) return
+    if (media[id].img) e.img = media[id].img
+    if (media[id].gif) e.gif = media[id].gif
+  })
+}
 
 // Cardio exercises log time + speed instead of weight × reps.
 export const isCardio = idOrEx => (typeof idOrEx === 'string' ? EXIDX[idOrEx] : idOrEx)?.bp === 'cardio'

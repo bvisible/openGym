@@ -5,6 +5,8 @@ import { create } from 'zustand'
 //// than from a round-trip. Naming the calls instead of the URLs means moving
 //// an endpoint never reaches in here.
 import { getState, putState, logout, currentUser } from '../lib/api.js'
+//// Neoffice — les médias que le club a filmés lui-même.
+import { applyClubMedia } from '../lib/exercises.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
 import { LANGS } from '../lib/i18n.js'
@@ -197,6 +199,10 @@ export const useStore = create((set, get) => {
           const active = S.active
           const next = Object.assign(clone(DEF), state)
           if (active) next.active = active
+          //// Neoffice — appliqué avant de persister, pour que le premier rendu
+          //// montre déjà la photo de la machine du club et non le dessin de la
+          //// bibliothèque. Après, l'écran aurait clignoté.
+          applyClubMedia(next.clubMedia)
           persist(next, false)
         } else if (hasData(S)) { await get().pushState() }
       } catch (e) { /* offline — keep local */ }
