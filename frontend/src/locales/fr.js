@@ -684,6 +684,10 @@ export default {
   'Unpair': 'Dissocier',
 
   //// Neoffice — le coaching : l'offre de programme d'un coach.
+  'This replaces the routine you got from an earlier version of this program.': 'Ceci remplace la routine que vous avez reçue d’une version précédente de ce programme.',
+  'This replaces the {0} routines you got from an earlier version of this program.': 'Ceci remplace les {0} routines que vous avez reçues d’une version précédente de ce programme.',
+  '{0} exercise in this program isn’t in your library and was left out.': '{0} exercice de ce programme n’est pas dans votre bibliothèque et a été écarté.',
+  '{0} exercises in this program aren’t in your library and were left out.': '{0} exercices de ce programme ne sont pas dans votre bibliothèque et ont été écartés.',
   'Program from your coach': 'Programme de votre coach',
   'This program could not be read: {0}': 'Impossible de lire ce programme : {0}',
   'Close': 'Fermer',
