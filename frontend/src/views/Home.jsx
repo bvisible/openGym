@@ -43,15 +43,21 @@ export default function Home() {
   useEffect(() => {
     let alive = true
     const load = () => {
-      if (document.hidden) return
       programInbox().then(list => { if (alive) setOffers(Array.isArray(list) ? list : []) }).catch(() => {})
     }
+    //// Neoffice — le premier chargement est INCONDITIONNEL.
+    //// Une première version sautait quand document.hidden était vrai. C'est
+    //// faux au montage : un onglet monté caché ne recevra jamais de
+    //// visibilitychange s'il était déjà dans cet état — plus aucune offre,
+    //// jamais. Le garde n'a de sens que sur les recharges suivantes, où il
+    //// évite un appel au moment où l'on QUITTE l'onglet.
     load()
-    document.addEventListener('visibilitychange', load)
+    const onVisible = () => { if (!document.hidden) load() }
+    document.addEventListener('visibilitychange', onVisible)
     window.addEventListener('online', load)
     return () => {
       alive = false
-      document.removeEventListener('visibilitychange', load)
+      document.removeEventListener('visibilitychange', onVisible)
       window.removeEventListener('online', load)
     }
   }, [])
