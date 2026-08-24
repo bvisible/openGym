@@ -19,3 +19,7 @@ app_license = "AGPL-3.0-or-later"
 #//// neoffice_gym, which renders the shell with the session and the boot data.
 #//// Two apps claiming the same route would be a resolution order nobody can
 #//// read six months later.
+
+#//// Neoffice — ../modules.txt is an added file too ("openGym", one line). It
+#//// carries no marker of its own because Frappe parses that file as a bare list
+#//// of module names: a comment line would register a phantom module.

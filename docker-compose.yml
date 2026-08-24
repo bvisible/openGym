@@ -1,3 +1,7 @@
+#//// Neoffice — NOT USED on Neoffice (no Docker anywhere in our infrastructure:
+#//// every service is a systemd unit). Kept so merges with upstream stay small.
+#//// The Neoffice deployment is: bench get-app on this fork + the private
+#//// neoffice_gym app, which serves /gym.
 name: opengym
 
 services:

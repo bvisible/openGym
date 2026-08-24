@@ -47,6 +47,23 @@ admin dashboard only exist in a self-hosted instance.</sub>
 
 </div>
 
+> ### //// Neoffice fork
+>
+> This is **bvisible/openGym**, the Neoffice fork of [openGym](https://github.com/DuarteSantos8/openGym) — still AGPL-3.0, still public, and every change we make to the journal lands here rather than in a private repository.
+>
+> **What is different from upstream**, and why:
+>
+> | | Upstream | Here |
+> |---|---|---|
+> | Serving | its own nginx, at the site root | a **Frappe app**: route `/gym`, shell rendered by the private `neoffice_gym` app |
+> | Accounts | passkeys in the app's own `db.json` | the **Frappe session** — the club's existing accounts |
+> | Storage | `api/server.js` (Node, no database) | Frappe (`Gym Member Profile`, then real records) |
+> | Build | `frontend/dist`, served live | `opengym/public/frontend`, **committed** — the fleet never rebuilds a SPA on an instance |
+>
+> `api/`, `web/` and `docker-compose.yml` are **dead code here** and say so in their own headers; they stay in the tree only to keep merges with upstream small.
+>
+> Every divergence is marked `//// Neoffice` **with its reason** — `grep -rn "//// Neoffice"` maps the whole thing. The business layer (members, coaches, programs, subscriptions) is NOT in this repository: it lives in a separate private app that talks to this one over HTTP/JSON and never imports from it.
+
 ## Why
 
 Most workout apps lock your data behind a login on their servers, nag you to upgrade, or
