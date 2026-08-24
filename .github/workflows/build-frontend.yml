@@ -1,0 +1,68 @@
+# //// Neoffice — added file (no upstream equivalent).
+#
+# The fleet NEVER rebuilds a SPA on an instance: an instance pulls assets that
+# are already compiled and committed. So the build has to happen somewhere, and
+# doing it by hand means the day someone forgets, every club runs a stale
+# journal without a single error to show for it.
+#
+# Same shape as the eleven Frappe SPAs we run (crm, helpdesk, drive, raven…):
+# a push that touches frontend/ rebuilds and commits the artefacts back.
+name: build-frontend
+
+on:
+  push:
+    branches: [version-15]
+    paths:
+      - 'frontend/**'
+      - '!**/node_modules/**'
+      # Ignore the artefacts themselves, or the bot's own commit re-triggers us.
+      - '!opengym/public/frontend/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    # Belt and braces with the paths filter above: never answer our own commit.
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: cd frontend && npm ci
+
+      # The training logic — progression rules, 1RM, how a logged session reads
+      # back — is pure functions with tests next to them. Shipping a bundle that
+      # fails them would put wrong weights in front of people mid-workout.
+      - name: Test
+        run: cd frontend && npm test
+
+      - name: Build
+        run: cd frontend && npm run build
+
+      - name: Commit artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add opengym/public/frontend
+          if git diff --cached --quiet; then
+            echo "No artifact changes to commit"
+            exit 0
+          fi
+          git commit --no-verify -m "[skip-build] frontend artifacts for ${GITHUB_SHA::8}"
+          git push

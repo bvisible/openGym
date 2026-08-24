@@ -14,3 +14,15 @@ node_modules/
 *.log
 .DS_Store
 node_modules
+
+#//// Neoffice — LES MÉDIAS NE SONT JAMAIS COMMITÉS. Les 1 324 GIF et JPG du jeu
+#//// de données amont sont © Gym visual, redistribués avec permission DANS le
+#//// dépôt du dataset — pas dans le nôtre. Les commiter ici, dans un dépôt
+#//// PUBLIC, serait une redistribution caractérisée. L'instance les télécharge
+#//// (scripts/fetch-media.sh), exactement comme le `docker compose up` amont le
+#//// fait chez l'auto-hébergeur.
+opengym/public/media/
+
+#//// Neoffice — le carnet compilé EST commité (opengym/public/frontend) : la
+#//// flotte ne recompile jamais une SPA sur une instance.
+frontend/dist/

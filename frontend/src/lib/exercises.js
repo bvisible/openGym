@@ -56,8 +56,14 @@ export const allExercises = st => [...(st.customEx || []), ...EXDB]
 // try_files, so it 404s rather than falling through to index.html, leaving a blank image
 // and nothing in the console.
 const ENV = import.meta.env || {}
-const IMG_BASE = ENV.VITE_IMG_BASE || '/img/'
-const GIF_BASE = ENV.VITE_GIF_BASE || '/gif/'
+//// Neoffice — les médias sont servis par Frappe depuis l'app, pas depuis la
+//// racine du site : '/img/' ne mène nulle part sur une instance Frappe. Le
+//// dossier media/ N'EST PAS dans le dépôt (voir .gitignore) — l'instance le
+//// télécharge avec scripts/fetch-media.sh, comme le `docker compose up` amont
+//// le fait chez l'auto-hébergeur. Les variables d'environnement restent
+//// prioritaires : c'est ce qui permet au build mobile de pointer sur un CDN.
+const IMG_BASE = ENV.VITE_IMG_BASE || '/assets/opengym/media/img/'
+const GIF_BASE = ENV.VITE_GIF_BASE || '/assets/opengym/media/gif/'
 export const imgSrc = ex => IMG_BASE + ex.img
 export const gifSrc = ex => GIF_BASE + ex.gif
 

@@ -1,7 +1,17 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const backend = process.env.API_TARGET || 'http://127.0.0.1:3000'
+//// Neoffice — le build vise une app Frappe, pas un nginx autonome.
+////   base    → /assets/opengym/frontend/, parce que Frappe sert le public/
+////             d'une app depuis /assets/<app>/ et que les noms hachés doivent
+////             résoudre depuis là quelle que soit la route de la SPA.
+////   outDir  → ../opengym/public/frontend, COMMITÉ : la flotte ne recompile
+////             JAMAIS une SPA sur une instance, elle sert des assets déjà faits.
+////   manifest → pour que gym.py lise les noms hachés au lieu qu'on les fige
+////             dans la coquille à chaque release.
+//// Le plugin Umami de l'amont est conservé tel quel : il ne s'injecte que si
+//// les deux variables sont posées, donc un build Neoffice reste sans télémétrie.
+const backend = process.env.API_TARGET || 'http://127.0.0.1:8000'
 const media = process.env.MEDIA_TARGET || 'http://127.0.0.1:8888'
 
 // Optional web analytics (Umami). Injected only when BOTH vars are set at build time,
@@ -24,7 +34,7 @@ const umami = {
 
 export default defineConfig({
   plugins: [react(), umami],
-  base: './',
+  base: '/assets/opengym/frontend/',
   server: {
     proxy: {
       '/api': { target: backend, changeOrigin: true },
@@ -32,5 +42,10 @@ export default defineConfig({
       '/gif': { target: media, changeOrigin: true }
     }
   },
-  build: { chunkSizeWarningLimit: 1500 }
+  build: {
+    outDir: '../opengym/public/frontend',
+    emptyOutDir: true,
+    manifest: true,
+    chunkSizeWarningLimit: 1500
+  }
 })

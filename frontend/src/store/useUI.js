@@ -1,14 +1,21 @@
 import { create } from 'zustand'
 import { uid } from '../lib/format.js'
 import { beep, vibrate } from '../lib/sound.js'
-import { api } from '../lib/api.js'
 import { t } from '../lib/i18n.js'
 import { useStore } from './useStore.js'
 
-// Fire-and-forget: lets the server push a "rest over" alert if this tab gets suspended
-// before the local timer completes. No-ops for guests / offline.
-const pushRestTimer = sec => { if (useStore.getState().user) api('/api/push/rest-timer', { method: 'POST', body: JSON.stringify({ seconds: sec }) }).catch(() => {}) }
-const cancelPushRestTimer = () => { if (useStore.getState().user) api('/api/push/rest-timer/cancel', { method: 'POST', body: '{}' }).catch(() => {}) }
+//// Neoffice — the server-side rest alert is a no-op here. Upstream asked its
+//// Node server to push a "rest over" notification in case this tab got
+//// suspended mid-countdown; that server is gone, and Frappe self-hosted has no
+//// push relay either (frappe/push_notification talks to Frappe Cloud, which our
+//// instances do not have). It comes back with pywebpush, in its own lot.
+////
+//// It matters much less than it did: maybeRestNotification() below fires a
+//// LOCAL notification when the tab is hidden, which covers the case the server
+//// push existed for. Left as named no-ops rather than deleted so the timer
+//// keeps calling them and there is exactly one place to fill in.
+const pushRestTimer = () => {}
+const cancelPushRestTimer = () => {}
 
 const notificationsSupported = () => typeof window !== 'undefined' && 'Notification' in window
 let requestRestNotificationPermissionP = null

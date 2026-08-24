@@ -1,3 +1,10 @@
+//// Neoffice — NOT USED on Neoffice. This whole Node server is dead code here:
+//// the journal is served by Frappe (app neoffice_gym, route /gym), the session
+//// is the Frappe session, and the state lives in Gym Workout / Gym Routine /
+//// Gym Member Profile. Kept in the tree rather than deleted so merges with
+//// upstream stay small — a mass deletion turns every upstream touch of this
+//// file into a conflict. Do not start it, do not point the frontend at it.
+////
 /* opengym-api — passkey (WebAuthn) auth + per-user state storage for openGym
    No framework, JSON-file storage, signed session cookies.               */
 import http from 'node:http';

@@ -50,6 +50,26 @@ demo</a> is the real app with example data — no account, nothing to install.</
 
 </div>
 
+> ### //// Neoffice fork
+>
+> **bvisible/openGym** — le fork Neoffice d'[openGym](https://gitlab.com/DuarteSantos8/opengym). Toujours AGPL-3.0, toujours public, et **toute modification du carnet atterrit ici** plutôt que dans un dépôt privé.
+>
+> **Amont** : `gitlab.com/DuarteSantos8/opengym` (miroir sur `gitea.com/DuarteSantos/openGym`). ⚠️ Le dépôt GitHub `arvids-unavailable/openGym` est une copie **sans historique**, figée au 3 août 2026 — ne pas s'y fier, et `DuarteSantos8/openGym` sur GitHub n'existe plus.
+>
+> **Ce qui diffère de l'amont** :
+>
+> | | Amont | Ici |
+> |---|---|---|
+> | Service | son propre nginx, à la racine | une **app Frappe** : route `/gym`, coquille rendue par l'app privée `neoffice_gym` |
+> | Comptes | passkeys dans son `db.json` | la **session Frappe** — les comptes existants du club |
+> | Stockage | `api/server.js` (Node, sans base) | Frappe : `Gym Workout`, `Gym Routine`, `Gym Member Profile`… |
+> | Build | `frontend/dist`, servi en direct | `opengym/public/frontend`, **commité** — la flotte ne recompile jamais une SPA sur une instance |
+> | Langue | tutoiement | **vouvoiement**, interface et 7 710 consignes d'exercices |
+>
+> `api/`, `web/` et `docker-compose.yml` sont **du code mort ici** et le disent dans leur en-tête ; ils restent dans l'arbre pour que les merges amont restent petits.
+>
+> Toute divergence est marquée `//// Neoffice` **avec sa raison** — `grep -rn "//// Neoffice"` en donne la carte. La couche métier (membres, coachs, programmes, abonnements) n'est PAS dans ce dépôt : elle vit dans une app privée séparée qui parle à celle-ci en HTTP/JSON et n'importe jamais depuis elle.
+
 ## Why
 
 Most workout apps lock your data behind a login on their servers, nag you to upgrade, or

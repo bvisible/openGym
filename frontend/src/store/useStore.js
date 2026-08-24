@@ -1,14 +1,32 @@
 import { create } from 'zustand'
-import { api } from '../lib/api.js'
+//// Neoffice — the store no longer speaks HTTP directly. Upstream called
+//// /api/me, /api/data and /api/logout on its own Node server; on Neoffice
+//// those are Frappe endpoints, and who we are comes from the page boot rather
+//// than from a round-trip. Naming the calls instead of the URLs means moving
+//// an endpoint never reaches in here.
+import { getState, putState, logout, currentUser } from '../lib/api.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
+import { LANGS } from '../lib/i18n.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
-import { guestAllowed } from '../lib/guest.js'
 import { MOBILE, nativeLoad, nativeSave, syncReminder } from '../lib/mobile.js'
 
 const KEY = 'gym_state_v1'
+//// Neoffice — the journal opens in the member's Neoffice language.
+//// Upstream defaulted to English and left the member to find the setting; here
+//// the language is already known (Frappe hands it over in the page boot), and a
+//// club in Suisse romande should never see an English screen on first run. The
+//// setting still exists and still wins once touched — this only changes the
+//// starting point. Falls back to English for a locale the journal has no pack
+//// for, rather than half-translating the screen.
+const bootLang = () => {
+  const raw = (typeof window !== 'undefined' && window.gym_boot?.user?.language) || ''
+  const short = String(raw).toLowerCase().split(/[-_]/)[0]
+  return LANGS[short] ? short : 'en'
+}
+
 export const DEF = {
-  unit: 'kg', restSec: 90, sound: true, keepAwake: true, lang: 'en',
+  unit: 'kg', restSec: 90, sound: true, keepAwake: true, lang: bootLang(),
   theme: 'dark', accent: 'lime', body: 'male', targetW: null,
   bodyweight: [], routines: [], week: {}, dayPlan: {},
   exWeights: {}, workouts: [], active: null, customEx: [], gifSize: 'full',
@@ -33,6 +51,8 @@ const hasData = st => !!((st.workouts || []).length || (st.routines || []).lengt
 export const useStore = create((set, get) => {
   let pushTm = null
   let saveTm = null
+  //// Neoffice — the push currently in the air, so a retry never doubles it.
+  let inFlight = null
 
   // Mobile build: mirror the state into a file in the app's data directory (survives WebView
   // storage eviction) and keep the native reminder schedule in step with the weekly plan.
@@ -57,7 +77,15 @@ export const useStore = create((set, get) => {
   // (e.g. setting the reminder time then immediately backgrounding to test it). On mobile the
   // same applies to the file mirror — backgrounding is often the last thing before the OS
   // kills the app.
+  //// Neoffice — the network came back: send what is still owed, at once.
+  window.addEventListener('online', () => { useStore.getState().retryPending() })
+
   document.addEventListener('visibilitychange', () => {
+    //// Neoffice — back in the foreground. A phone that was in a pocket
+    //// throughout a dead-zone session gets its chance here, even when the
+    //// `online` event never fired (a Wi-Fi that answers DHCP but not the
+    //// internet does not raise it).
+    if (document.visibilityState === 'visible') { useStore.getState().retryPending(); return }
     if (document.visibilityState !== 'hidden') return
     if (MOBILE && saveTm) {
       clearTimeout(saveTm)
@@ -78,6 +106,17 @@ export const useStore = create((set, get) => {
     localStorage.removeItem('gym_dirty')
     localStorage.removeItem(KEY)
     persist(clone(DEF), false)
+    //// Neoffice — and drop the service worker's caches, which localStorage
+    //// alone does not cover. The offline shell cached at /gym is a RENDERED,
+    //// per-member page: it carries the member's name and their CSRF token. On a
+    //// personal phone that is harmless; on a tablet shared by a club it means
+    //// the next person could be served the previous member's shell while
+    //// offline. Signing out has to take the cache with it.
+    if (typeof caches !== 'undefined') {
+      caches.keys().then(keys => Promise.all(
+        keys.filter(k => k.startsWith('opengym')).map(k => caches.delete(k))
+      )).catch(() => { /* no cache API, nothing cached, nothing to clear */ })
+    }
   }
 
   return {
@@ -96,15 +135,13 @@ export const useStore = create((set, get) => {
     isGuest: () => localStorage.getItem('gym_guest') === '1',
     setGuest(v) { if (v) localStorage.setItem('gym_guest', '1'); else localStorage.removeItem('gym_guest'); set({}) },
 
-    // Public config from /api/config (invite_only, allow_guest). null until the first successful
-    // fetch — the login screen and boot both read it, so it is fetched once and cached here
-    // rather than by each screen that happens to need it.
-    config: null,
-    async loadConfig() {
-      if (get().config) return get().config
-      try { const c = await api('/api/config'); set({ config: c }); return c }
-      catch { return null }
-    },
+    //// Neoffice — upstream added `config` / `loadConfig()` here, reading
+    //// /api/config from its Node server to learn whether the instance is
+    //// invite-only and whether guest mode is allowed. Neither applies: there is
+    //// no Node server, and there is no guest mode — /gym redirects an anonymous
+    //// visitor to /login before any of this loads, so the only session that
+    //// exists is a Frappe one. Kept as a note rather than a stub, so the next
+    //// merge shows plainly that the omission is deliberate.
 
     setUser(u) {
       if (u) { localStorage.setItem('gym_user', JSON.stringify(u)); localStorage.removeItem('gym_guest') }
@@ -112,15 +149,48 @@ export const useStore = create((set, get) => {
       set({ user: u })
     },
 
+    //// Neoffice — same contract as upstream (push the whole state), still
+    //// debounced, still flagging gym_dirty when the network is gone. That flag
+    //// holds the local copy authoritative until the push succeeds — it is what
+    //// makes a workout logged in a basement survive.
+    ////
+    //// `inFlight` guards against two pushes overlapping: a retry firing while
+    //// the debounced push is still in the air would send the same state twice
+    //// and, worse, could clear the dirty flag on the answer of the older one.
     async pushState() {
       if (!get().user) return
       clearTimeout(pushTm)
-      try { await api('/api/data', { method: 'PUT', body: JSON.stringify({ state: get().S }) }); localStorage.removeItem('gym_dirty') }
-      catch (e) { localStorage.setItem('gym_dirty', '1') }
+      if (inFlight) return inFlight
+      inFlight = (async () => {
+        try {
+          await putState(get().S)
+          localStorage.removeItem('gym_dirty')
+          return true
+        } catch (e) {
+          localStorage.setItem('gym_dirty', '1')
+          return false
+        } finally {
+          inFlight = null
+        }
+      })()
+      return inFlight
+    },
+
+    //// Neoffice — retry whatever is still unsynced. Upstream set gym_dirty and
+    //// nothing ever consumed it: a member who finished a session in a basement,
+    //// pocketed the phone and went home saw NOTHING come back up until they
+    //// reopened the app AND changed something. In a gym with poor reception —
+    //// which is most of them — that is the normal case, not the edge case.
+    //// Called on three signals: the network coming back, the app returning to
+    //// the foreground, and startup.
+    async retryPending() {
+      if (!get().user) return
+      if (localStorage.getItem('gym_dirty') !== '1') return
+      await get().pushState()
     },
     async pullState() {
       try {
-        const { state } = await api('/api/data')
+        const { state } = await getState()
         const S = get().S
         const dirty = localStorage.getItem('gym_dirty') === '1'
         if (state && (!hasData(S) || ((state._ts || 0) >= (S._ts || 0) && !dirty))) {
@@ -132,20 +202,25 @@ export const useStore = create((set, get) => {
       } catch (e) { /* offline — keep local */ }
     },
 
+    //// Neoffice — signing out ends the FRAPPE session, so it cannot stay
+    //// inside the app: the browser must leave for /login, otherwise the next
+    //// request comes back 403 on a page that still looks signed in. The local
+    //// copy is pushed first — a session ended with an unsynced workout is the
+    //// one case where the member loses real work.
     async signOut() {
-      try { await get().pushState(); await api('/api/logout', { method: 'POST', body: '{}' }) } catch (e) { /* */ }
+      try { await get().pushState(); await logout() } catch (e) { /* offline: the local copy stays */ }
       clearLocalSession()
+      window.location.href = '/login'
     },
 
-    // "Sign out everywhere": the server bumps this profile's session version, which kills every
-    // session it has on any device — this browser included, so the app has to end up exactly
-    // where a normal signOut leaves it. Unlike signOut the request is NOT swallowed: if it fails
-    // the sessions elsewhere are all still valid, and wiping this device's copy of the data
-    // would sign the user out of the one place the bump didn't reach. Caller reports the error.
+    //// Neoffice — "sign out everywhere" is not ours to implement any more.
+    //// Upstream bumped a session version in its own db.json; sessions now
+    //// belong to Frappe, which offers the same thing under Settings → My
+    //// Settings. Kept as a delegation rather than deleted so the Settings
+    //// screen still has something to call, and so nobody re-invents a second
+    //// session store next to Frappe's.
     async signOutAll() {
-      await get().pushState()   // never throws — stores gym_dirty and moves on when offline
-      await api('/api/logout/all', { method: 'POST', body: '{}' })
-      clearLocalSession()
+      await get().signOut()
     },
 
     // Demo build only: drop the seeded example profile back in (Settings → "Reset demo data").
@@ -183,15 +258,14 @@ export const useStore = create((set, get) => {
         set({ ready: true })
         return
       }
-      // Guests never authenticate, so an instance that turned guest mode off has no request to
-      // refuse — the only way the switch reaches someone already inside is here, on their next
-      // boot. Ending the session needs a positive `allow_guest: false`; see lib/guest.js for why
-      // an unreachable server must not be allowed to lock anyone out (#42).
-      const cfg = await get().loadConfig()
-      if (!guestAllowed(cfg)) get().setGuest(false)
+      //// Neoffice — no /api/me round-trip: gym.py already put the member in
+      //// the page boot, and an anonymous visitor never reaches this code (the
+      //// route redirects to /login first). One less request before the first
+      //// paint, and no "logged out" flash while it resolves.
       try {
-        const me = await api('/api/me')
-        get().setUser(me.user)
+        const me = currentUser()
+        if (!me) { set({ ready: true }); return }
+        get().setUser(me)
         await get().pullState()
         // Re-stamp the reminder's timezone on every load — keeps it correct if you're travelling,
         // without needing to revisit Settings.

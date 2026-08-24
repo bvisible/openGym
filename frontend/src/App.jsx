@@ -15,7 +15,6 @@ import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Modals from './components/Modals.jsx'
 import Toast from './components/Toast.jsx'
 import RestTimer from './components/RestTimer.jsx'
-import Login from './views/Login.jsx'
 import Home from './views/Home.jsx'
 import Plan from './views/Plan.jsx'
 import RoutineEdit from './views/RoutineEdit.jsx'
@@ -24,7 +23,6 @@ import Stats from './views/Stats.jsx'
 import History from './views/History.jsx'
 import Library from './views/Library.jsx'
 import Settings from './views/Settings.jsx'
-import Admin from './views/Admin.jsx'
 
 bindUI(useUI)   // lets the shared controls open sheets without importing the store at module scope
 
@@ -51,6 +49,9 @@ function Shell() {
   // bound to the workout, not to the route — checking Stats mid-session keeps the screen on
   useWakeLock(!!S.active && S.keepAwake !== false)
 
+  //// Neoffice — il n'y a pas d'état non authentifié à rendre : /gym redirige
+  //// un visiteur anonyme vers /login avant que ce code ne charge, et le membre
+  //// revient déjà connecté. `authed` ne garde donc que l'écran de démarrage.
   const authed = user || isGuest
   if (!ready && !authed) return (
     <div id="app">
@@ -66,7 +67,7 @@ function Shell() {
           re-mounts the boundary, so the tab bar is always a way out */}
       <div id="app" className="vfade" key={loc.pathname}>
         <ErrorBoundary>
-          {!authed ? <Login /> : (
+          {(
             <Routes>
               <Route path="/home" element={<Home />} />
               <Route path="/plan" element={<Plan />} />
@@ -76,7 +77,10 @@ function Shell() {
               <Route path="/history" element={<History />} />
               <Route path="/library" element={<Library />} />
               <Route path="/settings" element={<Settings />} />
-              <Route path="/admin" element={user?.admin ? <Admin /> : <Navigate to="/home" replace />} />
+              {/* //// Neoffice — /admin retiré. Le tableau de bord d'openGym
+                  listait les profils et les codes d'invitation de son magasin
+                  d'utilisateurs Node ; le club gère ses membres, ses coachs et
+                  ses abonnements dans le desk Frappe. */}
               <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
           )}

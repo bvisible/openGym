@@ -1,3 +1,20 @@
+//// Neoffice — added file (no upstream equivalent), and the SOURCE OF TRUTH for
+//// the service worker on Neoffice. frontend/public/sw.js still exists for the
+//// standalone build; this copy is the one Frappe serves.
+////
+//// Why here, and why this name: a worker only controls URLs under its own
+//// directory. Under /assets/opengym/… its scope excludes the page (that is the
+//// bug Frappe CRM, hrms and pos_next all ship). At /gym/sw.js the scope is
+//// "/gym/", which still excludes the bare "/gym" the page lives on — measured:
+//// activated, controlling nothing. From the site root the maximum scope is "/",
+//// so neoffice_gym registers it with {scope: "/gym"} and that covers both.
+////
+//// It lives in THIS repository because it is part of the journal (AGPL), not
+//// part of our private integration — the private app only registers it.
+////
+//// ⚠️ Keep in step with frontend/public/sw.js until the build generates this
+//// file (one npm script away, worth doing the day the caching strategy changes).
+
 /* openGym service worker — runtime caching (works with Vite's hashed asset names).
    Media (img/gif) cache-first; everything else network-first with offline fallback. */
 const CACHE = 'opengym-rt-v1'
