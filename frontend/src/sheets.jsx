@@ -17,6 +17,10 @@ import BodyMap from './components/BodyMap.jsx'
 import { exerciseMuscleSnapshot, loadOfWorkouts } from './lib/muscles.js'
 import { parseImport, mergeImport } from './lib/import-csv.js'
 import { buildPlanBundle, parsePlan, mergePlan, printPlan } from './lib/plan-share.js'
+//// Neoffice — l'offre d'un coach passe par le même mergePlan que l'import
+//// d'un ami, mais elle REMPLACE ce que la version précédente avait posé.
+import { applyCoachProgram, describeOffer, countProgramRoutines } from './lib/coach-program.js'
+import { programAccept, programDecline } from './lib/api.js'
 import { estimate1RM, best1RM, is1RMRecord, REP_CAP } from './lib/onerm.js'
 import { nextPrescription, applyPrescription, policyFor, defaultIncrement, POLICIES_FOR, POLICY_NAME, POLICY_DESC, MAX_BW_SETS } from './lib/progression.js'
 import { MOBILE, shareExport } from './lib/mobile.js'
@@ -734,6 +738,87 @@ function DayOverride({ iso, close }) {
     </div>
   </>
 }
+//// Neoffice — added: l'offre de programme d'un coach.
+////
+//// Volontairement PAS le même écran que l'import d'un ami, malgré la fusion
+//// identique dessous. Trois choses diffèrent, et chacune se voit :
+////   * le message du coach, en toutes lettres ;
+////   * la semaine n'est PAS un interrupteur — c'est le coach qui a décidé, et
+////     une semaine à moitié remplacée mélange silencieusement deux plans ;
+////   * une révision annonce combien de routines de la version précédente elle
+////     remplace. Détruire en silence ce qu'un membre entraînait depuis six
+////     semaines est la seule chose que cet écran ne doit jamais faire.
+export const coachOfferSheet = offer => ui().openSheet(close => <CoachOffer offer={offer} close={close} />)
+
+function CoachOffer({ offer, close }) {
+  const [busy, setBusy] = useState(false)
+  const info = describeOffer(offer)
+  const replacing = countProgramRoutines(S(), offer.program)
+
+  if (!info.ok) {
+    return <>
+      <h3>{t('Program from your coach')}</h3>
+      <div className="small" style={{ color: 'var(--red)', margin: '10px 2px 16px', lineHeight: 1.4 }}>
+        {t('This program could not be read: {0}', info.error)}
+      </div>
+      <Button variant="ghost" className="dim" onClick={close}>{t('Close')}</Button>
+    </>
+  }
+
+  const accept = async () => {
+    setBusy(true)
+    let result
+    // The merge happens first and locally. If the network is down the member
+    // still gets their program — the acceptance is what waits, not the plan.
+    update(s => { result = applyCoachProgram(s, offer) })
+    try { await programAccept(offer.id) } catch (e) { /* the store retries pending pushes */ }
+    close()
+    toast(result.replaced
+      ? t('Program updated — {0} routines replaced', result.replaced)
+      : t('Added {0} routines to your plan', result.added))
+    nav('/plan')
+  }
+
+  const decline = async () => {
+    setBusy(true)
+    try { await programDecline(offer.id) } catch (e) { toast(t('Could not answer — try again when you are online')); setBusy(false); return }
+    close()
+    toast(t('Program declined'))
+  }
+
+  return <>
+    <h3>{info.name || t('Program from your coach')}</h3>
+    <div className="muted small" style={{ marginBottom: 12 }}>
+      {offer.coach ? t('Sent by {0}', offer.coach) : t('Sent by your coach')}
+      {offer.version > 1 ? ' · ' + t('version {0}', offer.version) : ''}
+    </div>
+    {offer.message && <div style={{ background: 'var(--card2)', borderRadius: 12, padding: '11px 13px', marginBottom: 14, lineHeight: 1.45 }}>{offer.message}</div>}
+    <div className="muted small" style={{ marginBottom: 14 }}>
+      {t(info.routineCount === 1 ? '{0} routine' : '{0} routines', info.routineCount)}
+      {' · ' + exCount(info.exerciseCount)}
+      {info.scheduledDays > 0
+        ? ' · ' + t(info.scheduledDays === 1 ? 'scheduled on {0} day' : 'scheduled on {0} days', info.scheduledDays)
+        : ''}
+    </div>
+    {replacing > 0 && <div className="small" style={{ color: 'var(--yellow)', marginBottom: 14, lineHeight: 1.4 }}>
+      {t(replacing === 1
+        ? 'This replaces the routine you got from an earlier version of this program.'
+        : 'This replaces the {0} routines you got from an earlier version of this program.', replacing)}
+    </div>}
+    {offer.replaceSchedule && info.scheduledDays > 0 && <div className="dim small" style={{ marginBottom: 14, lineHeight: 1.4 }}>
+      {t('Your Mon–Sun schedule will follow this program. Days it leaves empty become rest days.')}
+    </div>}
+    {info.dropped > 0 && <div className="small" style={{ color: 'var(--yellow)', marginBottom: 14, lineHeight: 1.4 }}>
+      {t(info.dropped === 1
+        ? '{0} exercise in this program isn’t in your library and was left out.'
+        : '{0} exercises in this program aren’t in your library and were left out.', info.dropped)}
+    </div>}
+    <Button variant="primary" onClick={accept} disabled={busy}>{t('Add to my plan')}</Button>
+    <div style={{ height: 8 }} />
+    <Button variant="ghost" className="dim" onClick={decline} disabled={busy}>{t('Not now')}</Button>
+  </>
+}
+
 export const dayOverrideSheet = iso => ui().openSheet(close => <DayOverride iso={iso} close={close} />)
 
 function DayAssign({ day, close }) {

@@ -24,6 +24,12 @@ const M = {
   stateGet: '/api/method/neoffice_gym.api.state.get',
   statePut: '/api/method/neoffice_gym.api.state.put',
   logout: '/api/method/logout',
+  //// Neoffice — programmes écrits par un coach. Le carnet demande ce qui
+  //// l'attend, fusionne LUI-MÊME (mergePlan est amont et testé amont, et
+  //// c'est le téléphone qui possède l'état hors ligne), puis répond.
+  programInbox: '/api/method/neoffice_gym.api.program.inbox',
+  programAccept: '/api/method/neoffice_gym.api.program.accept',
+  programDecline: '/api/method/neoffice_gym.api.program.decline',
 }
 
 /**
@@ -77,3 +83,12 @@ export function currentUser() {
   if (!u || !u.name || u.name === 'Guest') return null
   return { id: u.name, name: u.full_name || u.name, lang: u.language || null }
 }
+
+//// Neoffice — les trois appels du coaching. `accept` part APRÈS la fusion :
+//// si la fusion échoue sur le téléphone, l'offre doit encore être là au
+//// prochain lancement. Accepter d'abord perdrait un programme sur un plantage.
+export const programInbox = () => api(M.programInbox)
+export const programAccept = (assignment) =>
+  api(M.programAccept, { method: 'POST', body: JSON.stringify({ assignment }) })
+export const programDecline = (assignment, reason) =>
+  api(M.programDecline, { method: 'POST', body: JSON.stringify({ assignment, reason }) })

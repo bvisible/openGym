@@ -2,13 +2,28 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
 import { effectiveRoutine, effectiveRoutineId, streakWeeks, lastBW, setsDoneActive } from '../lib/history.js'
-import { fmtNum, fmtDate, todayISO, isoOf, weekKey, DAYS } from '../lib/format.js'
+import { fmtNum, fmtDate, todayISO, isoOf, weekKey, DAYS, exCount } from '../lib/format.js'
 import { t, dateLocale } from '../lib/i18n.js'
-import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadStarterPlan, bwDeltaColor } from '../sheets.jsx'
+import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadStarterPlan, bwDeltaColor, coachOfferSheet } from '../sheets.jsx'
+//// Neoffice — le bandeau « votre coach vous a envoyé un programme ».
+import { useEffect } from 'react'
+import { programInbox } from '../lib/api.js'
+import { describeOffer } from '../lib/coach-program.js'
 import LineChart from '../components/LineChart.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 import { glyphOf } from '../lib/glyphs.js'
+
+//// Neoffice — ce que l'offre contient, dit dans la langue du membre.
+function offerSummary(o) {
+  const d = describeOffer(o)
+  if (!d.ok) return t('This program could not be read: {0}', d.error)
+  const parts = [t(d.routineCount === 1 ? '{0} routine' : '{0} routines', d.routineCount), exCount(d.exerciseCount)]
+  if (d.scheduledDays > 0) {
+    parts.push(t(d.scheduledDays === 1 ? 'scheduled on {0} day' : 'scheduled on {0} days', d.scheduledDays))
+  }
+  return parts.join(' · ')
+}
 
 // Home = what to do now + a quick glance. Deep charts & history live in Stats.
 export default function Home() {
@@ -16,6 +31,30 @@ export default function Home() {
   const S = useStore(s => s.S)
   const user = useStore(s => s.user)
   const [weekOffset, setWeekOffset] = useState(0)
+
+  //// Neoffice — ce que le coach a envoyé.
+  ////
+  //// Interrogé au montage et à chaque retour d'onglet, pas par un intervalle :
+  //// un membre ouvre le carnet pour s'entraîner, et une offre qui apparaît en
+  //// pleine séance n'aide personne. L'échec est SILENCIEUX — hors ligne, il
+  //// n'y a pas d'offre à montrer et ce n'est pas une erreur à afficher à
+  //// quelqu'un qui s'apprête à soulever.
+  const [offers, setOffers] = useState([])
+  useEffect(() => {
+    let alive = true
+    const load = () => {
+      if (document.hidden) return
+      programInbox().then(list => { if (alive) setOffers(Array.isArray(list) ? list : []) }).catch(() => {})
+    }
+    load()
+    document.addEventListener('visibilitychange', load)
+    window.addEventListener('online', load)
+    return () => {
+      alive = false
+      document.removeEventListener('visibilitychange', load)
+      window.removeEventListener('online', load)
+    }
+  }, [])
 
   const today = new Date()
   const routine = effectiveRoutine(S, todayISO())
@@ -50,6 +89,24 @@ export default function Home() {
       <div><h1>{user ? t('Hi {0}', user.name) : 'openGym'}</h1><div className="sub">{today.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}</div></div>
       <button className="iconbtn" onClick={() => nav('/settings')} aria-label={t('Settings')}><Icon name="gear" /></button>
     </div>
+
+    {/* //// Neoffice — au-dessus de la semaine, jamais en pop-up : une offre de
+         programme n'interrompt pas, elle attend d'être vue. */}
+    {offers.map(o => <div key={o.id} className="card" style={{ cursor: 'pointer', borderColor: 'var(--acc)' }} onClick={() => coachOfferSheet(o)}>
+      <div className="row" style={{ gap: 10, minWidth: 0 }}>
+        <span className="lrow-i" style={{ background: 'var(--acc)' }}><Icon name="clipboard" /></span>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div className="lbl2">{o.coach ? t('{0} sent you a program', o.coach) : t('Your coach sent you a program')}</div>
+          {/* //// Neoffice — le résumé se compose ICI, pas côté serveur.
+              Le serveur rendrait la phrase dans la langue du COACH au moment
+              de l'envoi, et elle resterait figée : un membre francophone
+              lirait « 1 routine · 2 exercises ». Le bundle voyage avec
+              l'offre, donc le carnet compte lui-même, dans sa langue. */}
+          <div className="ttl">{offerSummary(o)}</div>
+        </div>
+        <Icon name="chevronRight" className="chev" />
+      </div>
+    </div>)}
 
     <div className="card">
       <div className="row between" style={{ marginBottom: 8 }}>

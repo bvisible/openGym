@@ -682,4 +682,19 @@ export default {
   'No exercises with an estimated 1RM yet.': 'Aucun exercice avec un 1RM estimé pour l\'instant.',
   'Tap a muscle to see its exercises.': 'Touchez un muscle pour voir ses exercices.',
   'Unpair': 'Dissocier',
+
+  //// Neoffice — le coaching : l'offre de programme d'un coach.
+  'Program from your coach': 'Programme de votre coach',
+  'This program could not be read: {0}': 'Impossible de lire ce programme : {0}',
+  'Close': 'Fermer',
+  'Program updated — {0} routines replaced': 'Programme mis à jour — {0} routines remplacées',
+  'Could not answer — try again when you are online': 'Impossible de répondre — réessayez une fois en ligne',
+  'Program declined': 'Programme refusé',
+  'Sent by {0}': 'Envoyé par {0}',
+  'Sent by your coach': 'Envoyé par votre coach',
+  'version {0}': 'version {0}',
+  'Your Mon–Sun schedule will follow this program. Days it leaves empty become rest days.': 'Votre planning du lundi–dimanche suivra ce programme. Les jours qu’il laisse vides deviennent des jours de repos.',
+  'Not now': 'Pas maintenant',
+  '{0} sent you a program': '{0} vous a envoyé un programme',
+  'Your coach sent you a program': 'Votre coach vous a envoyé un programme',
 }
