@@ -1,5 +1,11 @@
+#//// Neoffice — added file (upstream had no .gitignore at the repo root, which
+#//// is how a first `npm install` put 9 500 files of node_modules into a commit).
+node_modules/
+.DS_Store
+__pycache__/
+*.pyc
 
 #//// Neoffice — the built journal IS committed (see opengym/public/frontend):
-#//// the fleet never rebuilds a SPA on an instance. Only the local artefacts of
-#//// the old standalone build stay ignored.
+#//// the fleet never rebuilds a SPA on an instance, so the assets have to be in
+#//// the repository. Only the artefacts of the old standalone build stay ignored.
 frontend/dist/
