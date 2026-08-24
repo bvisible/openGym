@@ -24,6 +24,38 @@ export const smOf = ex => {
 
 export const EXIDX = {}
 EXDB.forEach(e => { EXIDX[e.id] = e })
+
+//// Neoffice — les noms d'exercices suivent la langue.
+////
+//// L'amont traduit les consignes mais pas les noms : la bibliothèque reste en
+//// anglais dans toutes les langues. On applique donc un pack de noms
+//// (src/names/<lang>.js) au changement de langue.
+////
+//// La traduction MUTE `e.n` sur les objets de EXDB, au lieu d'ajouter un
+//// nameFor(ex) appelé partout. La raison est le nombre d'appelants : le nom est
+//// lu par la liste, la recherche, les filtres, la fiche, le minuteur, le PDF
+//// imprimable, l'export CSV et le fil de la séance. Un accesseur aurait été
+//// oublié à un endroit — et l'endroit oublié aurait été un écran en anglais au
+//// milieu d'une app française, sans erreur pour le signaler.
+////
+//// Le nom anglais reste disponible en `e.en`, ce qui rend la recherche
+//// BILINGUE : taper « bench press » trouve le développé couché. Un membre qui
+//// vient d'une autre app connaît les noms anglais.
+////
+//// `buildPlanBundle` ne copie que l'id, jamais `n` — un plan partagé avec un
+//// ami reste donc neutre en langue, et c'est ce qu'on veut.
+const ORIGINAL_NAMES = new Map()
+
+export function applyExerciseNames(pack) {
+  // Premier passage : mémoriser l'anglais avant de le remplacer. Sans ça, un
+  // second changement de langue traduirait une traduction.
+  if (!ORIGINAL_NAMES.size) EXDB.forEach(e => ORIGINAL_NAMES.set(e.id, e.n))
+  EXDB.forEach(e => {
+    const en = ORIGINAL_NAMES.get(e.id)
+    e.en = en
+    e.n = (pack && pack[e.id]) || en
+  })
+}
 export const BODYPARTS = [...new Set(EXDB.map(e => e.bp))].sort()
 
 // Equipment options present in a given list of exercises, most common first (issue #6).
@@ -64,6 +96,22 @@ const ENV = import.meta.env || {}
 //// prioritaires : c'est ce qui permet au build mobile de pointer sur un CDN.
 const IMG_BASE = ENV.VITE_IMG_BASE || '/assets/opengym/media/img/'
 const GIF_BASE = ENV.VITE_GIF_BASE || '/assets/opengym/media/gif/'
+//// Neoffice — la correspondance de recherche, en un seul endroit.
+//// Elle regarde AUSSI `e.en`, le nom anglais mémorisé par applyExerciseNames :
+//// taper « bench press » dans une app en français trouve le développé couché.
+//// Un membre qui arrive d'une autre application connaît les noms anglais, et
+//// les coachs mélangent les deux à l'oral.
+export function matchesExercise(e, q) {
+  if (!q) return true
+  return (
+    (e.n || '').toLowerCase().includes(q) ||
+    (e.en || '').toLowerCase().includes(q) ||
+    (e.tg || '').includes(q) ||
+    (e.eq || '').includes(q) ||
+    (e.desc || '').toLowerCase().includes(q)
+  )
+}
+
 export const imgSrc = ex => IMG_BASE + ex.img
 export const gifSrc = ex => GIF_BASE + ex.gif
 
