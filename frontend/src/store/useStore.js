@@ -1,5 +1,10 @@
 import { create } from 'zustand'
-import { api } from '../lib/api.js'
+//// Neoffice — the store no longer speaks HTTP directly. Upstream called
+//// /api/me, /api/data and /api/logout on its own Node server; on Neoffice
+//// those are Frappe endpoints, and who we are comes from the page boot rather
+//// than from a round-trip. Naming the calls instead of the URLs means moving
+//// an endpoint never reaches in here.
+import { getState, putState, logout, currentUser } from '../lib/api.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
@@ -104,12 +109,16 @@ export const useStore = create((set, get) => {
     async pushState() {
       if (!get().user) return
       clearTimeout(pushTm)
-      try { await api('/api/data', { method: 'PUT', body: JSON.stringify({ state: get().S }) }); localStorage.removeItem('gym_dirty') }
+      //// Neoffice — same contract as upstream (push the whole state), still
+      //// debounced, still flagging gym_dirty when the network is gone. That
+      //// last part is what makes a workout logged in a basement survive: the
+      //// flag holds the local copy authoritative until the push succeeds.
+      try { await putState(get().S); localStorage.removeItem('gym_dirty') }
       catch (e) { localStorage.setItem('gym_dirty', '1') }
     },
     async pullState() {
       try {
-        const { state } = await api('/api/data')
+        const { state } = await getState()
         const S = get().S
         const dirty = localStorage.getItem('gym_dirty') === '1'
         if (state && (!hasData(S) || ((state._ts || 0) >= (S._ts || 0) && !dirty))) {
@@ -121,20 +130,25 @@ export const useStore = create((set, get) => {
       } catch (e) { /* offline — keep local */ }
     },
 
+    //// Neoffice — signing out ends the FRAPPE session, so it cannot stay
+    //// inside the app: the browser must leave for /login, otherwise the next
+    //// request comes back 403 on a page that still looks signed in. The local
+    //// copy is pushed first — a session ended with an unsynced workout is the
+    //// one case where the member loses real work.
     async signOut() {
-      try { await get().pushState(); await api('/api/logout', { method: 'POST', body: '{}' }) } catch (e) { /* */ }
+      try { await get().pushState(); await logout() } catch (e) { /* offline: the local copy stays */ }
       clearLocalSession()
+      window.location.href = '/login'
     },
 
-    // "Sign out everywhere": the server bumps this profile's session version, which kills every
-    // session it has on any device — this browser included, so the app has to end up exactly
-    // where a normal signOut leaves it. Unlike signOut the request is NOT swallowed: if it fails
-    // the sessions elsewhere are all still valid, and wiping this device's copy of the data
-    // would sign the user out of the one place the bump didn't reach. Caller reports the error.
+    //// Neoffice — "sign out everywhere" is not ours to implement any more.
+    //// Upstream bumped a session version in its own db.json; sessions now
+    //// belong to Frappe, which offers the same thing under Settings → My
+    //// Settings. Kept as a delegation rather than deleted so the Settings
+    //// screen still has something to call, and so nobody re-invents a second
+    //// session store next to Frappe's.
     async signOutAll() {
-      await get().pushState()   // never throws — stores gym_dirty and moves on when offline
-      await api('/api/logout/all', { method: 'POST', body: '{}' })
-      clearLocalSession()
+      await get().signOut()
     },
 
     // Demo build only: drop the seeded example profile back in (Settings → "Reset demo data").
@@ -172,9 +186,14 @@ export const useStore = create((set, get) => {
         set({ ready: true })
         return
       }
+      //// Neoffice — no /api/me round-trip: gym.py already put the member in
+      //// the page boot, and an anonymous visitor never reaches this code (the
+      //// route redirects to /login first). One less request before the first
+      //// paint, and no "logged out" flash while it resolves.
       try {
-        const me = await api('/api/me')
-        get().setUser(me.user)
+        const me = currentUser()
+        if (!me) { set({ ready: true }); return }
+        get().setUser(me)
         await get().pullState()
         // Re-stamp the reminder's timezone on every load — keeps it correct if you're travelling,
         // without needing to revisit Settings.

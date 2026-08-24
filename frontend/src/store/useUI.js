@@ -1,14 +1,20 @@
 import { create } from 'zustand'
 import { uid } from '../lib/format.js'
 import { beep, vibrate } from '../lib/sound.js'
-import { api } from '../lib/api.js'
 import { t } from '../lib/i18n.js'
 import { useStore } from './useStore.js'
 
-// Fire-and-forget: lets the server push a "rest over" alert if this tab gets suspended
-// before the local timer completes. No-ops for guests / offline.
-const pushRestTimer = sec => { if (useStore.getState().user) api('/api/push/rest-timer', { method: 'POST', body: JSON.stringify({ seconds: sec }) }).catch(() => {}) }
-const cancelPushRestTimer = () => { if (useStore.getState().user) api('/api/push/rest-timer/cancel', { method: 'POST', body: '{}' }).catch(() => {}) }
+//// Neoffice — the server-side rest alert is not wired yet, so these are no-ops.
+//// Upstream asked its Node server to push a "rest over" notification in case
+//// this tab got suspended mid-countdown; that endpoint went away with the Node
+//// server. Frappe self-hosted has no push relay either (frappe/push_notification
+//// speaks to Frappe Cloud), so this comes back with pywebpush in the push lot.
+//// Left as named no-ops rather than deleted: the timer keeps calling them, and
+//// the day the endpoints exist there is exactly one place to fill in. Note the
+//// countdown itself is local and unaffected — and the screen stays awake during
+//// a workout, which is what makes the missing push survivable in the meantime.
+const pushRestTimer = () => {}
+const cancelPushRestTimer = () => {}
 
 let toastTm = null
 let timerInt = null

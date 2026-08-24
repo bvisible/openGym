@@ -1,0 +1,5 @@
+
+#//// Neoffice — the built journal IS committed (see opengym/public/frontend):
+#//// the fleet never rebuilds a SPA on an instance. Only the local artefacts of
+#//// the old standalone build stay ignored.
+frontend/dist/
