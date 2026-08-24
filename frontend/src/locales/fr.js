@@ -684,6 +684,22 @@ export default {
   'Unpair': 'Dissocier',
 
   //// Neoffice — le coaching : l'offre de programme d'un coach.
+
+  //// Neoffice — les cours collectifs.
+  'Classes': 'Cours collectifs',
+  'Book in two taps — you are already signed in': 'Inscrivez-vous en deux touches — vous êtes déjà connecté',
+  'Loading…': 'Chargement…',
+  'The class schedule could not be loaded. Try again once you are back online.': 'Le planning des cours n’a pas pu être chargé. Réessayez une fois la connexion rétablie.',
+  'No class published for the next {0} days.': 'Aucun cours publié pour les {0} prochains jours.',
+  '{0} places left': '{0} places restantes',
+  'full — you can join the waiting list': 'complet — liste d’attente disponible',
+  'you are in': 'inscrit',
+  'on the waiting list': 'sur liste d’attente',
+  'done': 'terminé',
+  'Book': 'S’inscrire',
+  'Waiting list': 'Liste d’attente',
+  'Your next classes': 'Vos prochains cours',
+  'See the schedule': 'Voir le planning',
   'Your coach writes your plan. You can train it and log your sets — the routines themselves are theirs to change.': 'Votre coach écrit votre plan. Vous pouvez l’entraîner et journaliser vos séries — les routines, elles, lui appartiennent.',
   'This replaces the routine you got from an earlier version of this program.': 'Ceci remplace la routine que vous avez reçue d’une version précédente de ce programme.',
   'This replaces the {0} routines you got from an earlier version of this program.': 'Ceci remplace les {0} routines que vous avez reçues d’une version précédente de ce programme.',
