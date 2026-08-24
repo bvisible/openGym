@@ -7,12 +7,26 @@ import { create } from 'zustand'
 import { getState, putState, logout, currentUser } from '../lib/api.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
+import { LANGS } from '../lib/i18n.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
 import { MOBILE, nativeLoad, nativeSave, syncReminder } from '../lib/mobile.js'
 
 const KEY = 'gym_state_v1'
+//// Neoffice — the journal opens in the member's Neoffice language.
+//// Upstream defaulted to English and left the member to find the setting; here
+//// the language is already known (Frappe hands it over in the page boot), and a
+//// club in Suisse romande should never see an English screen on first run. The
+//// setting still exists and still wins once touched — this only changes the
+//// starting point. Falls back to English for a locale the journal has no pack
+//// for, rather than half-translating the screen.
+const bootLang = () => {
+  const raw = (typeof window !== 'undefined' && window.gym_boot?.user?.language) || ''
+  const short = String(raw).toLowerCase().split(/[-_]/)[0]
+  return LANGS[short] ? short : 'en'
+}
+
 export const DEF = {
-  unit: 'kg', restSec: 90, sound: true, keepAwake: true, lang: 'en',
+  unit: 'kg', restSec: 90, sound: true, keepAwake: true, lang: bootLang(),
   theme: 'dark', accent: 'lime', body: 'male', targetW: null,
   bodyweight: [], routines: [], week: {}, dayPlan: {},
   exWeights: {}, workouts: [], active: null, customEx: [], gifSize: 'full',
