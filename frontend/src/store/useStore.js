@@ -82,6 +82,17 @@ export const useStore = create((set, get) => {
     localStorage.removeItem('gym_dirty')
     localStorage.removeItem(KEY)
     persist(clone(DEF), false)
+    //// Neoffice — and drop the service worker's caches, which localStorage
+    //// alone does not cover. The offline shell cached at /gym is a RENDERED,
+    //// per-member page: it carries the member's name and their CSRF token. On a
+    //// personal phone that is harmless; on a tablet shared by a club it means
+    //// the next person could be served the previous member's shell while
+    //// offline. Signing out has to take the cache with it.
+    if (typeof caches !== 'undefined') {
+      caches.keys().then(keys => Promise.all(
+        keys.filter(k => k.startsWith('opengym')).map(k => caches.delete(k))
+      )).catch(() => { /* no cache API, nothing cached, nothing to clear */ })
+    }
   }
 
   return {
