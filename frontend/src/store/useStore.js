@@ -51,6 +51,8 @@ const hasData = st => !!((st.workouts || []).length || (st.routines || []).lengt
 export const useStore = create((set, get) => {
   let pushTm = null
   let saveTm = null
+  //// Neoffice — the push currently in the air, so a retry never doubles it.
+  let inFlight = null
 
   // Mobile build: mirror the state into a file in the app's data directory (survives WebView
   // storage eviction) and keep the native reminder schedule in step with the weekly plan.
@@ -75,7 +77,15 @@ export const useStore = create((set, get) => {
   // (e.g. setting the reminder time then immediately backgrounding to test it). On mobile the
   // same applies to the file mirror — backgrounding is often the last thing before the OS
   // kills the app.
+  //// Neoffice — the network came back: send what is still owed, at once.
+  window.addEventListener('online', () => { useStore.getState().retryPending() })
+
   document.addEventListener('visibilitychange', () => {
+    //// Neoffice — back in the foreground. A phone that was in a pocket
+    //// throughout a dead-zone session gets its chance here, even when the
+    //// `online` event never fired (a Wi-Fi that answers DHCP but not the
+    //// internet does not raise it).
+    if (document.visibilityState === 'visible') { useStore.getState().retryPending(); return }
     if (document.visibilityState !== 'hidden') return
     if (MOBILE && saveTm) {
       clearTimeout(saveTm)
@@ -131,15 +141,44 @@ export const useStore = create((set, get) => {
       set({ user: u })
     },
 
+    //// Neoffice — same contract as upstream (push the whole state), still
+    //// debounced, still flagging gym_dirty when the network is gone. That flag
+    //// holds the local copy authoritative until the push succeeds — it is what
+    //// makes a workout logged in a basement survive.
+    ////
+    //// `inFlight` guards against two pushes overlapping: a retry firing while
+    //// the debounced push is still in the air would send the same state twice
+    //// and, worse, could clear the dirty flag on the answer of the older one.
     async pushState() {
       if (!get().user) return
       clearTimeout(pushTm)
-      //// Neoffice — same contract as upstream (push the whole state), still
-      //// debounced, still flagging gym_dirty when the network is gone. That
-      //// last part is what makes a workout logged in a basement survive: the
-      //// flag holds the local copy authoritative until the push succeeds.
-      try { await putState(get().S); localStorage.removeItem('gym_dirty') }
-      catch (e) { localStorage.setItem('gym_dirty', '1') }
+      if (inFlight) return inFlight
+      inFlight = (async () => {
+        try {
+          await putState(get().S)
+          localStorage.removeItem('gym_dirty')
+          return true
+        } catch (e) {
+          localStorage.setItem('gym_dirty', '1')
+          return false
+        } finally {
+          inFlight = null
+        }
+      })()
+      return inFlight
+    },
+
+    //// Neoffice — retry whatever is still unsynced. Upstream set gym_dirty and
+    //// nothing ever consumed it: a member who finished a session in a basement,
+    //// pocketed the phone and went home saw NOTHING come back up until they
+    //// reopened the app AND changed something. In a gym with poor reception —
+    //// which is most of them — that is the normal case, not the edge case.
+    //// Called on three signals: the network coming back, the app returning to
+    //// the foreground, and startup.
+    async retryPending() {
+      if (!get().user) return
+      if (localStorage.getItem('gym_dirty') !== '1') return
+      await get().pushState()
     },
     async pullState() {
       try {
