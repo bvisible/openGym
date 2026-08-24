@@ -197,7 +197,7 @@ export default {
   'Freestyle workout — add your first exercise.': 'Séance libre — ajoutez votre premier exercice.',
   'Finish workout early · {0} exercises': 'Terminer plus tôt · {0} exercices',
   'Rest over — next set!': 'Repos fini — série suivante !',
-  'Hi {0}': 'Salut {0}',
+  'Hi {0}': 'Bonjour {0}',
   'This week': 'Cette semaine',
   '{0} — in progress': '{0} — en cours',
   'Resume ▶': 'Reprendre ▶',
@@ -632,4 +632,21 @@ export default {
   '{0} sets of {1} — time to add weight or move to a harder variation.': '{0} séries de {1} — il est temps d’ajouter du poids ou de passer à une variante plus dure.',
   '{0} per side': '{0} par côté',
   'You still log the total: {0} is {1} per side.': 'Vous notez toujours le total : {0}, c’est {1} par côté.',
+  //// Neoffice — chaînes introduites par le portage sur Frappe (la session
+  //// remplace les passkeys) et chaînes du build de démonstration qui
+  //// n'avaient pas de traduction française en amont.
+  'Demo': 'Démo',
+  'Self-host openGym': 'Hébergez openGym vous-même',
+  'Passkey sign-in, sync across your devices, your own data.': 'Connexion par clé d’accès, synchronisation entre vos appareils, vos données chez vous.',
+  'You’re in the demo': 'Vous êtes en mode démo',
+  'Example data, stored only in this browser — change anything you like.': 'Données d’exemple, enregistrées uniquement dans ce navigateur — modifiez-les comme bon vous semble.',
+  'Reset demo data': 'Réinitialiser les données de démo',
+  'Reset demo data?': 'Réinitialiser les données de démo ?',
+  'Puts the example plan, workouts and weigh-ins back the way they started.': 'Remet le plan d’exemple, les séances d’entraînement et les pesées dans leur état initial.',
+  'Reset': 'Réinitialiser',
+  'Demo data reset': 'Données de démo réinitialisées',
+  'Signed in with your Neoffice account.': 'Connexion via votre compte Neoffice.',
+  'Your journal is saved first, then this device is signed out.': 'Votre carnet d’entraînement est d’abord enregistré, puis cet appareil est déconnecté.',
+  'Signing in…': 'Connexion…',
+  'Exercise': 'Exercice',
 }

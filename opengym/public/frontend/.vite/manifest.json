@@ -4,7 +4,7 @@
     "name": "dist"
   },
   "index.html": {
-    "file": "assets/index-lxg33uwJ.js",
+    "file": "assets/index-D12vQHXJ.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -40,7 +40,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/index.js": {
-    "file": "assets/esm-B8MCgCyz.js",
+    "file": "assets/esm-DgIHwRHb.js",
     "name": "esm",
     "src": "node_modules/@capacitor/filesystem/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -53,7 +53,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/web.js": {
-    "file": "assets/web-C0Klmill.js",
+    "file": "assets/web-Bmlr5dEA.js",
     "name": "web",
     "src": "node_modules/@capacitor/filesystem/dist/esm/web.js",
     "isDynamicEntry": true,
@@ -63,7 +63,7 @@
     ]
   },
   "node_modules/@capacitor/local-notifications/dist/esm/index.js": {
-    "file": "assets/esm-CKNqYFGW.js",
+    "file": "assets/esm-BGCvXLpZ.js",
     "name": "esm",
     "src": "node_modules/@capacitor/local-notifications/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -85,7 +85,7 @@
     ]
   },
   "node_modules/@capacitor/share/dist/esm/index.js": {
-    "file": "assets/esm-BuQ42IId.js",
+    "file": "assets/esm-CLIdLyv5.js",
     "name": "esm",
     "src": "node_modules/@capacitor/share/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -113,7 +113,7 @@
     "isDynamicEntry": true
   },
   "src/instr/fr.js": {
-    "file": "assets/fr-6mJbq5QV.js",
+    "file": "assets/fr-Du5y3PST.js",
     "name": "fr",
     "src": "src/instr/fr.js",
     "isDynamicEntry": true
@@ -167,7 +167,7 @@
     "isDynamicEntry": true
   },
   "src/lib/demoSeed.js": {
-    "file": "assets/demoSeed-CA4opm6R.js",
+    "file": "assets/demoSeed-Cp9Yhsnu.js",
     "name": "demoSeed",
     "src": "src/lib/demoSeed.js",
     "isDynamicEntry": true,
@@ -188,7 +188,7 @@
     "isDynamicEntry": true
   },
   "src/locales/fr.js": {
-    "file": "assets/fr-D6ATy4_H.js",
+    "file": "assets/fr-BYccwr5F.js",
     "name": "fr",
     "src": "src/locales/fr.js",
     "isDynamicEntry": true
