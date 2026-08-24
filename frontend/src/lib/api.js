@@ -36,6 +36,10 @@ const M = {
   classesMine: '/api/method/neoffice_gym.api.classes.mine',
   classBook: '/api/method/neoffice_gym.api.classes.book',
   classCancel: '/api/method/neoffice_gym.api.classes.cancel',
+  //// Neoffice — les évaluations physiques. Lecture seule côté membre : c'est
+  //// le coach qui mesure, le carnet ne fait que montrer.
+  assessmentsMine: '/api/method/neoffice_gym.api.assessment.mine',
+  assessmentTrend: '/api/method/neoffice_gym.api.assessment.trend',
 }
 
 /**
@@ -108,3 +112,10 @@ export const classBook = (session) =>
   api(M.classBook, { method: 'POST', body: JSON.stringify({ session }) })
 export const classCancel = (booking, reason) =>
   api(M.classCancel, { method: 'POST', body: JSON.stringify({ booking, reason }) })
+
+//// Neoffice — les évaluations. Aucun endpoint d'écriture : un membre ne se
+//// mesure pas lui-même dans ce module, et lui en donner le moyen créerait deux
+//// vérités sur la même composition corporelle.
+export const assessmentsMine = () => api(M.assessmentsMine)
+export const assessmentTrend = (test) =>
+  api(M.assessmentTrend + '?test=' + encodeURIComponent(test))

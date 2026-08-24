@@ -15,6 +15,9 @@ import { fatigueOf, strengthOf, STRENGTH_FLOOR, LB_TO_KG } from '../lib/recovery
 import { strengthExerciseRowsForMuscle } from '../lib/strength-exercises.js'
 import { fatigueStateOf } from '../lib/recovery-view.js'
 import { e1rmSeries, best1RM } from '../lib/onerm.js'
+//// Neoffice — les évaluations physiques du coach. C'est ici qu'un membre
+//// vient chercher ses chiffres, donc c'est ici que la porte doit être.
+import { assessmentsMine } from '../lib/api.js'
 import {
   hasEffort, displayScale, scaleName, toScale, avgRir, effortSummary, effortWeeks,
   effortHistogram, isHardSet, HARD_RIR
@@ -362,9 +365,33 @@ export default function Stats() {
   if (showE1) exOpts.push({ value: 'e1rm', label: t('Est. 1RM') })
   if (showEff) exOpts.push({ value: 'effort', label: t('Effort') })
 
+  //// Neoffice — chargée une fois, sans bloquer le reste de l'écran : les
+  //// statistiques du carnet se calculent en local et doivent s'afficher même
+  //// quand le serveur ne répond pas.
+  const [lastAssessment, setLastAssessment] = useState(null)
+  useEffect(() => {
+    let alive = true
+    assessmentsMine().then(list => {
+      if (alive && Array.isArray(list) && list.length) setLastAssessment(list[0])
+    }).catch(() => {})
+    return () => { alive = false }
+  }, [])
+
   return <>
     <div className="hdr"><div><h1>{t('Stats')}</h1><div className="sub">{t('Progress & history')}</div></div>
       <button className="iconbtn" onClick={() => nav('/history')} aria-label={t('History')}><Icon name="history" /></button></div>
+
+    {/* //// Neoffice — la dernière évaluation du coach, en haut : c'est la
+         mesure la plus fiable qu'un membre possède, et elle vaut mieux qu'un
+         volume soulevé pour savoir où il en est. Rien ne s'affiche tant que le
+         coach n'a rien mesuré — un club sans évaluations ne voit pas la carte. */}
+    {lastAssessment && <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/assessments')}>
+      <div className="row between" style={{ marginBottom: 6 }}>
+        <div className="lbl2">{t('Last assessment')}</div>
+        <span className="small dim">{fmtDate(lastAssessment.date)}</span>
+      </div>
+      <div className="small dim" style={{ lineHeight: 1.45 }}>{lastAssessment.summary}</div>
+    </div>}
 
     <div className="tiles">
       <div className="tile"><div className="l"><Icon name="dumbbell" />{t('Workouts')}</div><div className="v">{workouts.length}</div></div>

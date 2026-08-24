@@ -22,6 +22,8 @@ import Workout from './views/Workout.jsx'
 import Stats from './views/Stats.jsx'
 //// Neoffice — les cours collectifs, quand le club en donne.
 import Classes from './views/Classes.jsx'
+//// Neoffice — les évaluations physiques du coach.
+import Assessments from './views/Assessments.jsx'
 import History from './views/History.jsx'
 import Library from './views/Library.jsx'
 import Settings from './views/Settings.jsx'
@@ -80,6 +82,8 @@ function Shell() {
               <Route path="/library" element={<Library />} />
           {/* //// Neoffice — cf. views/Classes.jsx */}
           <Route path="/classes" element={<Classes />} />
+          {/* //// Neoffice — cf. views/Assessments.jsx */}
+          <Route path="/assessments" element={<Assessments />} />
               <Route path="/settings" element={<Settings />} />
               {/* //// Neoffice — /admin retiré. Le tableau de bord d'openGym
                   listait les profils et les codes d'invitation de son magasin
