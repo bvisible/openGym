@@ -684,6 +684,7 @@ export default {
   'Unpair': 'Dissocier',
 
   //// Neoffice — le coaching : l'offre de programme d'un coach.
+  'Your coach writes your plan. You can train it and log your sets — the routines themselves are theirs to change.': 'Votre coach écrit votre plan. Vous pouvez l’entraîner et journaliser vos séries — les routines, elles, lui appartiennent.',
   'This replaces the routine you got from an earlier version of this program.': 'Ceci remplace la routine que vous avez reçue d’une version précédente de ce programme.',
   'This replaces the {0} routines you got from an earlier version of this program.': 'Ceci remplace les {0} routines que vous avez reçues d’une version précédente de ce programme.',
   '{0} exercise in this program isn’t in your library and was left out.': '{0} exercice de ce programme n’est pas dans votre bibliothèque et a été écarté.',
