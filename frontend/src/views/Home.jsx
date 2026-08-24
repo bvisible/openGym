@@ -9,6 +9,7 @@ import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadSta
 import { useEffect } from 'react'
 import { programInbox } from '../lib/api.js'
 import { describeOffer } from '../lib/coach-program.js'
+import { classesMine } from '../lib/api.js'
 import LineChart from '../components/LineChart.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
@@ -62,6 +63,23 @@ export default function Home() {
     }
   }, [])
 
+  //// Neoffice — les prochains cours, si le club en donne.
+  //// Chargés à part des offres de programme : deux appels indépendants qui ne
+  //// se bloquent pas l'un l'autre, et un club sans cours ne paie même pas
+  //// l'aller-retour — perms.classes tranche avant de sortir sur le réseau.
+  const [classes, setClasses] = useState([])
+  useEffect(() => {
+    if (S.perms && S.perms.classes === false) return
+    let alive = true
+    const load = () => {
+      classesMine().then(list => { if (alive) setClasses(Array.isArray(list) ? list.slice(0, 3) : []) }).catch(() => {})
+    }
+    load()
+    const onVis = () => { if (!document.hidden) load() }
+    document.addEventListener('visibilitychange', onVis)
+    return () => { alive = false; document.removeEventListener('visibilitychange', onVis) }
+  }, [S.perms && S.perms.classes])
+
   const today = new Date()
   const routine = effectiveRoutine(S, todayISO())
   const todayOvr = S.dayPlan[todayISO()] !== undefined
@@ -95,6 +113,24 @@ export default function Home() {
       <div><h1>{user ? t('Hi {0}', user.name) : 'openGym'}</h1><div className="sub">{today.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}</div></div>
       <button className="iconbtn" onClick={() => nav('/settings')} aria-label={t('Settings')}><Icon name="gear" /></button>
     </div>
+
+    {/* //// Neoffice — les prochains cours. Sous les offres et au-dessus de la
+         semaine : un cours est un RENDEZ-VOUS, donc il se lit avant le plan. */}
+    {classes.length > 0 && <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/classes')}>
+      <div className="row between" style={{ marginBottom: 8 }}>
+        <div className="lbl2">{t('Your next classes')}</div>
+        <span className="small acc">{t('See the schedule')}</span>
+      </div>
+      {classes.map(c => <div key={c.id} className="row" style={{ gap: 9, padding: '4px 0', minWidth: 0 }}>
+        <span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="calendar" /></span>
+        <div style={{ minWidth: 0 }}>
+          <div className="ttl">{c.title}</div>
+          <div className="small dim">{c.start
+            ? new Date(c.start).toLocaleString(dateLocale(), { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+            : ''}{c.coach ? ' \u00b7 ' + c.coach : ''}</div>
+        </div>
+      </div>)}
+    </div>}
 
     {/* //// Neoffice — au-dessus de la semaine, jamais en pop-up : une offre de
          programme n'interrompt pas, elle attend d'être vue. */}

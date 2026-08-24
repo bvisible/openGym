@@ -30,6 +30,12 @@ const M = {
   programInbox: '/api/method/neoffice_gym.api.program.inbox',
   programAccept: '/api/method/neoffice_gym.api.program.accept',
   programDecline: '/api/method/neoffice_gym.api.program.decline',
+  //// Neoffice — les cours collectifs. Une façade sur Booking, pas un second
+  //// module : capacité, liste d'attente et frais d'annulation restent les siens.
+  classesWeek: '/api/method/neoffice_gym.api.classes.week',
+  classesMine: '/api/method/neoffice_gym.api.classes.mine',
+  classBook: '/api/method/neoffice_gym.api.classes.book',
+  classCancel: '/api/method/neoffice_gym.api.classes.cancel',
 }
 
 /**
@@ -92,3 +98,13 @@ export const programAccept = (assignment) =>
   api(M.programAccept, { method: 'POST', body: JSON.stringify({ assignment }) })
 export const programDecline = (assignment, reason) =>
   api(M.programDecline, { method: 'POST', body: JSON.stringify({ assignment, reason }) })
+
+//// Neoffice — les cours. `book` gère lui-même le cas « complet » en inscrivant
+//// sur la liste d'attente : le carnet n'a pas à connaître la règle, il affiche
+//// ce que le serveur répond.
+export const classesWeek = () => api(M.classesWeek)
+export const classesMine = () => api(M.classesMine)
+export const classBook = (session) =>
+  api(M.classBook, { method: 'POST', body: JSON.stringify({ session }) })
+export const classCancel = (booking, reason) =>
+  api(M.classCancel, { method: 'POST', body: JSON.stringify({ booking, reason }) })
