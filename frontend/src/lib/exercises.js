@@ -29,8 +29,15 @@ export const allExercises = st => [...(st.customEx || []), ...EXDB]
 // Media normally sits next to the app (img/ and gif/, mounted into the web container).
 // A build can point them somewhere else — the demo build pulls them off a CDN instead of
 // shipping ~140 MB of images into the deployment.
-const IMG_BASE = import.meta.env.VITE_IMG_BASE || 'img/'
-const GIF_BASE = import.meta.env.VITE_GIF_BASE || 'gif/'
+//// Neoffice — les médias sont servis par Frappe depuis l'app, pas depuis la
+//// racine du site. Le défaut amont ('img/', relatif) résolvait contre la page,
+//// ce qui donne /img/… sur une instance Frappe où rien n'écoute. Le dossier
+//// media/ N'EST PAS dans le dépôt (voir .gitignore) : l'instance le télécharge
+//// avec scripts/fetch-media.sh, comme le `docker compose up` amont le fait.
+//// Les variables d'environnement restent prioritaires — c'est ce qui permet au
+//// build mobile de pointer sur un CDN.
+const IMG_BASE = import.meta.env.VITE_IMG_BASE || '/assets/opengym/media/img/'
+const GIF_BASE = import.meta.env.VITE_GIF_BASE || '/assets/opengym/media/gif/'
 export const imgSrc = ex => IMG_BASE + ex.img
 export const gifSrc = ex => GIF_BASE + ex.gif
 

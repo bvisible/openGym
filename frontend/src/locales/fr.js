@@ -649,4 +649,7 @@ export default {
   'Your journal is saved first, then this device is signed out.': 'Votre carnet d’entraînement est d’abord enregistré, puis cet appareil est déconnecté.',
   'Signing in…': 'Connexion…',
   'Exercise': 'Exercice',
+  'source code': 'code source',
+  'exercise data': 'données d\'exercices',
+  'animations': 'animations',
 }

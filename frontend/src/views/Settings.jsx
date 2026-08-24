@@ -185,9 +185,18 @@ export default function Settings() {
         subtitle={t('to install openGym as a full-screen app.') + ' ' + (user ? t('Your data syncs with your profile — sign in anywhere to see it.') : t('Guest data stays on this device — export a backup now and then!'))} />
     </Section>}
 
+    {/* //// Neoffice — deux corrections, et les deux comptent juridiquement.
+        1. Le lien « code source » pointait vers l'amont. L'AGPL §13 demande le
+           source de LA version qui tourne : c'est notre fork, pas celui d'origine.
+        2. « exercise data: … (CC) » était FAUX pour les médias : les animations
+           sont © Gym visual, pas sous licence Creative Commons. Leur attribution
+           est une condition de leur usage, pas une politesse — on la nomme donc
+           pour ce qu'elle est, et séparément des données (celles-ci bien en MIT). */}
     <div className="dim small" style={{ textAlign: 'center', marginTop: 4, lineHeight: 1.6 }}>
       openGym · {t('free & open source (AGPL v3)')}<br />
-      <a href="https://github.com/DuarteSantos8/openGym" target="_blank" rel="noopener">source code</a> · exercise data: hasaneyldrm/exercises-dataset (CC)
+      <a href="https://github.com/bvisible/openGym" target="_blank" rel="noopener">{t('source code')}</a>
+      {' · '}{t('exercise data')}: hasaneyldrm/exercises-dataset (MIT)<br />
+      {t('animations')}: <a href="https://gymvisual.com/" target="_blank" rel="noopener">© Gym visual</a>
     </div>
   </div>
 }

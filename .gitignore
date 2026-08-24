@@ -9,3 +9,12 @@ __pycache__/
 #//// the fleet never rebuilds a SPA on an instance, so the assets have to be in
 #//// the repository. Only the artefacts of the old standalone build stay ignored.
 frontend/dist/
+
+#//// Neoffice — LES MÉDIAS NE SONT JAMAIS COMMITÉS. Les 1 324 GIF et JPG du jeu
+#//// de données amont sont © Gym visual, redistribués avec permission DANS le
+#//// dépôt du dataset — pas dans le nôtre. Les commiter ici, dans un dépôt
+#//// PUBLIC, serait une redistribution caractérisée. L'instance les télécharge
+#//// (scripts/fetch-media.sh), exactement comme le `docker compose up` amont le
+#//// fait chez l'auto-hébergeur. Cette ligne est le garde-fou : sans elle, un
+#//// `git add -A` pousse 137 Mo de média sous licence tierce en public.
+opengym/public/media/
