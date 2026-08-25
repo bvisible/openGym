@@ -17,6 +17,10 @@ export default {
   'New': '새로 만들기',
   'Log': '기록',
   'Goal': '목표',
+  //// Neoffice — group classes tab label + screen title. New feature (club
+  //// classes), not present upstream.
+  'Classes': '수업',
+  'Group classes': '그룹 수업',
   'Plan': '계획',
   'Today': '오늘',
   'Home': '홈',
@@ -261,6 +265,10 @@ export default {
   'During a workout': '운동 중',
   'Keep screen awake': '화면 켜두기',
   'The screen stays on while a workout is running, so you don’t have to unlock your phone between sets.': '운동이 진행되는 동안 화면이 켜져 있어 세트 사이에 잠금을 해제할 필요가 없습니다.',
+  //// Neoffice — settings toggle for the classes tab's visibility. New
+  //// feature (club classes), not present upstream.
+  'Classes tab': '수업 탭',
+  'Shows your club’s classes in the bottom bar.': '하단 바에 클럽의 수업을 표시합니다.',
   'Weight unit': '무게 단위',
   'Rest timer': '휴식 타이머',
   'Sounds': '소리',

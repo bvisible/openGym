@@ -17,6 +17,10 @@ export default {
   'New': 'नई',
   'Log': 'दर्ज करें',
   'Goal': 'लक्ष्य',
+  //// Neoffice — group classes tab label + screen title. New feature (club
+  //// classes), not present upstream.
+  'Classes': 'कक्षाएं',
+  'Group classes': 'समूह कक्षाएं',
   'Plan': 'योजना',
   'Today': 'आज',
   'Home': 'होम',
@@ -261,6 +265,10 @@ export default {
   'During a workout': 'वर्कआउट के दौरान',
   'Keep screen awake': 'स्क्रीन चालू रखें',
   'The screen stays on while a workout is running, so you don’t have to unlock your phone between sets.': 'वर्कआउट चलने के दौरान स्क्रीन चालू रहती है, ताकि सेट के बीच फ़ोन अनलॉक न करना पड़े।',
+  //// Neoffice — settings toggle for the classes tab's visibility. New
+  //// feature (club classes), not present upstream.
+  'Classes tab': 'कक्षा टैब',
+  'Shows your club’s classes in the bottom bar.': 'आपके क्लब की कक्षाएं निचली पट्टी में दिखाता है।',
   'Weight unit': 'वज़न की इकाई',
   'Rest timer': 'आराम टाइमर',
   'Sounds': 'ध्वनियाँ',

@@ -285,6 +285,10 @@ export default {
   'During a workout': 'Pendant la séance',
   'Keep screen awake': 'Garder l’écran allumé',
   'The screen stays on while a workout is running, so you don’t have to unlock your phone between sets.': 'L’écran reste allumé tant qu’une séance est en cours, pas besoin de déverrouiller votre téléphone entre les séries.',
+  //// Neoffice — settings toggle for the classes tab's visibility. New
+  //// feature (club classes), not present upstream.
+  'Classes tab': 'Onglet Cours',
+  'Shows your club’s classes in the bottom bar.': 'Affiche les cours de votre club dans la barre du bas.',
   'Weight unit': 'Unité de poids',
   'Rest timer': 'Minuteur de repos',
   'Sounds': 'Sons',
@@ -751,8 +755,11 @@ export default {
   'No change since the previous assessment.': 'Aucun changement depuis l’évaluation précédente.',
   'Last assessment': 'Dernière évaluation',
 
-  //// Neoffice — les cours collectifs.
-  'Classes': 'Cours collectifs',
+  //// Neoffice — the bottom-nav tab (7 columns, ~50px each) needs a short
+  //// word; the screen title can stay explicit. Upstream never had this
+  //// club-classes feature and used a single key for both — split in two.
+  'Classes': 'Cours',
+  'Group classes': 'Cours collectifs',
   'Book in two taps — you are already signed in': 'Inscrivez-vous en deux touches — vous êtes déjà connecté',
   'Loading…': 'Chargement…',
   'The class schedule could not be loaded. Try again once you are back online.': 'Le planning des cours n’a pas pu être chargé. Réessayez une fois la connexion rétablie.',

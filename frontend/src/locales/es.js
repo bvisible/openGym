@@ -17,6 +17,10 @@ export default {
   'New': 'Nueva',
   'Log': 'Registrar',
   'Goal': 'Meta',
+  //// Neoffice — group classes tab label + screen title. New feature (club
+  //// classes), not present upstream.
+  'Classes': 'Clases',
+  'Group classes': 'Clases grupales',
   'Plan': 'Plan',
   'Today': 'Hoy',
   'Home': 'Inicio',
@@ -261,6 +265,10 @@ export default {
   'During a workout': 'Durante el entrenamiento',
   'Keep screen awake': 'Mantener la pantalla encendida',
   'The screen stays on while a workout is running, so you don’t have to unlock your phone between sets.': 'La pantalla se mantiene encendida mientras hay un entrenamiento en curso, así no tienes que desbloquear el móvil entre series.',
+  //// Neoffice — settings toggle for the classes tab's visibility. New
+  //// feature (club classes), not present upstream.
+  'Classes tab': 'Pestaña de clases',
+  'Shows your club’s classes in the bottom bar.': 'Muestra las clases de tu club en la barra inferior.',
   'Weight unit': 'Unidad de peso',
   'Rest timer': 'Temporizador de descanso',
   'Sounds': 'Sonidos',

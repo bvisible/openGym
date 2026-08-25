@@ -17,6 +17,10 @@ export default {
   'New': 'Yeni',
   'Log': 'Kaydet',
   'Goal': 'Hedef',
+  //// Neoffice — group classes tab label + screen title. New feature (club
+  //// classes), not present upstream.
+  'Classes': 'Dersler',
+  'Group classes': 'Grup dersleri',
   'Plan': 'Plan',
   'Today': 'Bugün',
   'Home': 'Ana sayfa',
@@ -261,6 +265,10 @@ export default {
   'During a workout': 'Antrenman sırasında',
   'Keep screen awake': 'Ekranı açık tut',
   'The screen stays on while a workout is running, so you don’t have to unlock your phone between sets.': 'Antrenman sürerken ekran açık kalır, böylece setler arasında telefonunu açmak zorunda kalmazsın.',
+  //// Neoffice — settings toggle for the classes tab's visibility. New
+  //// feature (club classes), not present upstream.
+  'Classes tab': 'Dersler sekmesi',
+  'Shows your club’s classes in the bottom bar.': 'Kulübünün derslerini alt çubukta gösterir.',
   'Weight unit': 'Ağırlık birimi',
   'Rest timer': 'Dinlenme sayacı',
   'Sounds': 'Sesler',
