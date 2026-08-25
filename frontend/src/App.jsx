@@ -22,6 +22,7 @@ import Workout from './views/Workout.jsx'
 import Stats from './views/Stats.jsx'
 //// Neoffice — les cours collectifs, quand le club en donne.
 import Classes from './views/Classes.jsx'
+import Challenges from './views/Challenges.jsx'
 //// Neoffice — les évaluations physiques du coach.
 import Assessments from './views/Assessments.jsx'
 import History from './views/History.jsx'
@@ -82,6 +83,9 @@ function Shell() {
               <Route path="/library" element={<Library />} />
           {/* //// Neoffice — cf. views/Classes.jsx */}
           <Route path="/classes" element={<Classes />} />
+        {/* //// Neoffice — les défis du club. Même porte que les cours :
+            on y arrive depuis l'accueil, pas par un sixième onglet. */}
+        <Route path="/challenges" element={<Challenges />} />
           {/* //// Neoffice — cf. views/Assessments.jsx */}
           <Route path="/assessments" element={<Assessments />} />
               <Route path="/settings" element={<Settings />} />

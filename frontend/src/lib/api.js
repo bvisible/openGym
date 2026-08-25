@@ -43,6 +43,14 @@ const M = {
   //// Neoffice — les objectifs. Lecture seule : c'est le coach qui les pose,
   //// et un membre qui déplacerait sa propre cible n'aurait plus d'objectif.
   goalsMine: '/api/method/neoffice_gym.neoffice_gym.doctype.gym_goal.gym_goal.mine',
+  //// Neoffice — les défis du club. Le classement se demande à part et
+  //// n'arrive JAMAIS dans la liste : il montre à quelle fréquence les
+  //// autres s'entraînent, ce qui est de la donnée de santé (LPD). On ne
+  //// le charge que pour un défi qu'on a rejoint.
+  challengesMine: '/api/method/neoffice_gym.api.challenges.mine',
+  challengeJoin: '/api/method/neoffice_gym.api.challenges.join',
+  challengeLeave: '/api/method/neoffice_gym.api.challenges.leave',
+  challengeBoard: '/api/method/neoffice_gym.api.challenges.leaderboard',
 }
 
 /**
@@ -125,3 +133,13 @@ export const assessmentTrend = (test) =>
 
 //// Neoffice — ce que le membre vise, et où il en est.
 export const goalsMine = () => api(M.goalsMine)
+
+//// Neoffice — les défis. `join` EST le consentement du membre à être
+//// classé : il n'existe pas d'endpoint qui inscrive quelqu'un d'autre.
+export const challengesMine = () => api(M.challengesMine)
+export const challengeJoin = (challenge) =>
+  api(M.challengeJoin, { method: 'POST', body: JSON.stringify({ challenge }) })
+export const challengeLeave = (challenge) =>
+  api(M.challengeLeave, { method: 'POST', body: JSON.stringify({ challenge }) })
+export const challengeBoard = (challenge) =>
+  api(M.challengeBoard + '?challenge=' + encodeURIComponent(challenge))
