@@ -326,6 +326,19 @@ h4.sec{
   border:2px solid var(--orange);animation:ping 1.9s var(--ease) infinite;
 }
 @keyframes ping{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.45);opacity:0}}
+/* //// Neoffice — l'attente d'une inscription. Le bouton garde SA largeur et
+   son libellé disparaît : sans ça la ligne se réorganise sous le doigt au
+   moment précis où l'on vient d'appuyer. Un anneau qui tourne, rien de plus —
+   la réponse arrive en une seconde, une barre de progression mentirait sur la
+   durée. */
+.btn.waiting{position:relative;color:transparent!important;pointer-events:none}
+.btn.waiting::after{
+  content:'';position:absolute;inset:0;margin:auto;width:14px;height:14px;
+  border:2px solid currentColor;border-top-color:transparent;border-radius:50%;
+  color:var(--acc);animation:spin .6s linear infinite;
+}
+.btn.tinted.waiting::after{color:var(--acc)}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* ------------------------------------------------------------ week strip -- */
 .week{display:flex;justify-content:space-between;gap:4px}
@@ -340,7 +353,11 @@ h4.sec{
   -webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;
 }
 .daypick::-webkit-scrollbar{display:none}
-.daypick .wday{flex:0 0 46px;scroll-snap-align:center;cursor:pointer}
+/* `1 0 46px` et non `0 0 46px` : quand les jours tiennent tous dans la
+   largeur, ils s'étirent pour l'occuper au lieu de se tasser à gauche en
+   laissant un vide à droite. Au-delà, ils gardent leurs 46 px et la bande
+   défile. Une seule règle pour les deux cas. */
+.daypick .wday{flex:1 0 46px;scroll-snap-align:center;cursor:pointer}
 .daypick .wday .lbl{text-transform:capitalize}
 .wday{
   flex:1;text-align:center;padding:8px 2px 9px;border-radius:10px;

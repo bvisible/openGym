@@ -21,7 +21,7 @@
 //// L'onglet tient à DEUX conditions : le club propose des cours, et le membre
 //// veut les voir (réglage `classesTab`, Réglages → Général).
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
@@ -138,24 +138,67 @@ export default function Classes() {
 }
 
 //// Neoffice — added: le sélecteur de jour.
-//// Il défile horizontalement plutôt que de paginer par semaine : le planning
-//// d'un club tient sur deux semaines, et une flèche « semaine suivante » fait
-//// perdre le fil de ce qu'on cherchait.
+////
+//// Il DÉFILE plutôt que de paginer par semaine — un planning de club tient
+//// souvent sur deux semaines, et une pagination fait perdre le fil de ce
+//// qu'on cherchait. Les flèches poussent la bande d'un cran ; le doigt fait
+//// la même chose sur un téléphone.
+////
+//// Le MOIS est écrit au-dessus, et il change avec le défilement : « jeu. 3 »
+//// tout seul ne dit pas si c'est septembre ou octobre, et c'est précisément
+//// ce qu'on cherche à savoir quand on prend rendez-vous à deux semaines.
 function DayPicker({ days, day, byDay, onPick }) {
-  return <div className="daypick">
-    {days.map(d => {
-      const n = (byDay.get(d) || []).filter(s => s.bookable !== false && !s.booked && !s.past).length
-      const dt = new Date(d + 'T00:00:00')
-      return <button key={d} className={'wday' + (d === day ? ' today' : '')} onClick={() => onPick(d)}>
-        <div className="lbl">{dt.toLocaleDateString(dateLocale(), { weekday: 'short' })}</div>
-        <div className="num">{dt.getDate()}</div>
-        {/* Un point quand il reste quelque chose à prendre ce jour-là : c'est
-            ce qui évite d'ouvrir les jours un par un. */}
-        <div className={'dot' + (n ? ' plan' : '')} />
-      </button>
-    })}
-  </div>
+  const strip = useRef(null)
+  const [month, setMonth] = useState('')
+
+  //// Le mois affiché est celui du PREMIER jour visible, pas celui du jour
+  //// choisi : on lit l'en-tête pour savoir où on est en train de regarder,
+  //// pas où on s'est arrêté.
+  const refreshMonth = () => {
+    const el = strip.current
+    if (!el) return
+    const left = el.scrollLeft
+    let best = days[0]
+    for (const child of el.children) {
+      if (child.offsetLeft + child.offsetWidth > left + 2) { best = child.dataset.day; break }
+    }
+    if (best) setMonth(monthLabel(best))
+  }
+  useEffect(() => { refreshMonth() }, [days.join(',')])
+
+  const push = dir => {
+    const el = strip.current
+    if (!el) return
+    el.scrollBy({ left: dir * Math.max(el.clientWidth * 0.7, 140), behavior: 'smooth' })
+    setTimeout(refreshMonth, 320)
+  }
+
+  return <>
+    <div className="row between" style={{ marginBottom: 6, paddingInline: 2 }}>
+      <button className="iconbtn" style={{ width: 28, height: 28, fontSize: 14 }}
+        onClick={() => push(-1)} aria-label={t('Earlier')}><Icon name="chevronLeft" /></button>
+      <div className="small muted" style={{ fontWeight: 500, textTransform: 'capitalize' }}>{month}</div>
+      <button className="iconbtn" style={{ width: 28, height: 28, fontSize: 14 }}
+        onClick={() => push(1)} aria-label={t('Later')}><Icon name="chevronRight" /></button>
+    </div>
+    <div className="daypick" ref={strip} onScroll={refreshMonth}>
+      {days.map(d => {
+        const n = (byDay.get(d) || []).filter(s => s.bookable !== false && !s.booked && !s.past).length
+        const dt = new Date(d + 'T00:00:00')
+        return <button key={d} data-day={d} className={'wday' + (d === day ? ' today' : '')} onClick={() => onPick(d)}>
+          <div className="lbl">{dt.toLocaleDateString(dateLocale(), { weekday: 'short' })}</div>
+          <div className="num">{dt.getDate()}</div>
+          {/* Un point quand il reste quelque chose à prendre ce jour-là : c'est
+              ce qui évite d'ouvrir les jours un par un. */}
+          <div className={'dot' + (n ? ' plan' : '')} />
+        </button>
+      })}
+    </div>
+  </>
 }
+
+const monthLabel = k => new Date(k + 'T00:00:00').toLocaleDateString(dateLocale(),
+  { month: 'long', year: 'numeric' })
 
 const todayKey = () => new Date().toISOString().slice(0, 10)
 const longDay = k => new Date(k + 'T00:00:00').toLocaleDateString(dateLocale(),
@@ -202,7 +245,9 @@ function ClassRow({ s, busy, act }) {
     </div>
     {s.past ? <span className="tag">{t('done')}</span>
       : s.booked
-        ? <Button size="sm" variant="ghost" disabled={busy}
+        //// Neoffice — `waiting` plutôt que juste `disabled` : un bouton
+        //// simplement grisé ne dit pas si l'application a compris le clic.
+        ? <Button size="sm" variant="ghost" disabled={busy} className={busy ? 'waiting' : ''}
             onClick={() => act(() => classCancel(s.booking.id), s.id)}>{t('Cancel')}</Button>
         : (s.bookable === false && !s.full)
           //// Ni bouton ni faux espoir : la séance a lieu, elle n'est plus
@@ -210,6 +255,7 @@ function ClassRow({ s, busy, act }) {
           //// faisait rien.
           ? <span className="tag">{t('closed')}</span>
           : <Button size="sm" variant={s.full ? 'ghost' : 'tinted'} disabled={busy}
+              className={busy ? 'waiting' : ''}
               onClick={() => act(() => classBook(s.id), s.id)}>
               {s.full ? t('Waiting list') : t('Book')}
             </Button>}
