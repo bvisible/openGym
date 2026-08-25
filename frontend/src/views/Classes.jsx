@@ -167,7 +167,12 @@ export default function Classes() {
 //// ce qu'on cherche à savoir quand on prend rendez-vous à deux semaines.
 function DayPicker({ days, day, byDay, onPick }) {
   const strip = useRef(null)
-  const [month, setMonth] = useState('')
+  //// Neoffice — on retient le JOUR affiché, pas son libellé. Garder la
+  //// phrase déjà formatée la figeait dans la langue du moment : le paquet de
+  //// traduction arrive après ce premier calcul, et l'en-tête restait « August
+  //// 2026 » au-dessus de jours écrits « Mar. / Mer. / Jeu. ». Formater au
+  //// rendu suit la langue sans avoir à s'y abonner.
+  const [monthDay, setMonthDay] = useState('')
 
   //// Le mois affiché est celui du PREMIER jour visible, pas celui du jour
   //// choisi : on lit l'en-tête pour savoir où on est en train de regarder,
@@ -180,7 +185,7 @@ function DayPicker({ days, day, byDay, onPick }) {
     for (const child of el.children) {
       if (child.offsetLeft + child.offsetWidth > left + 2) { best = child.dataset.day; break }
     }
-    if (best) setMonth(monthLabel(best))
+    if (best) setMonthDay(best)
   }
   useEffect(() => { refreshMonth() }, [days.join(',')])
 
@@ -195,7 +200,7 @@ function DayPicker({ days, day, byDay, onPick }) {
     <div className="row between" style={{ marginBottom: 6, paddingInline: 2 }}>
       <button className="iconbtn" style={{ width: 28, height: 28, fontSize: 14 }}
         onClick={() => push(-1)} aria-label={t('Earlier')}><Icon name="chevronLeft" /></button>
-      <div className="small muted" style={{ fontWeight: 500, textTransform: 'capitalize' }}>{month}</div>
+      <div className="small muted" style={{ fontWeight: 500, textTransform: 'capitalize' }}>{monthLabel(monthDay || days[0])}</div>
       <button className="iconbtn" style={{ width: 28, height: 28, fontSize: 14 }}
         onClick={() => push(1)} aria-label={t('Later')}><Icon name="chevronRight" /></button>
     </div>
