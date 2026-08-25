@@ -27,6 +27,7 @@ import { useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
 import { t, dateLocale } from '../lib/i18n.js'
 import { classesWeek, classBook, classCancel } from '../lib/api.js'
+import { classSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 
@@ -235,7 +236,11 @@ function ClassRow({ s, busy, act }) {
     : s.bookable === false ? t('registration closed')
     : t(s.free === 1 ? '{0} place left' : '{0} places left', s.free)
 
-  return <div className="item">
+  //// Neoffice — toute la ligne ouvre la fiche, y compris pour un cours
+  //// fermé : c'est là qu'on veut savoir ce qu'on a manqué et quand il
+  //// repasse. Le bouton, lui, garde son geste — un clic dessus inscrit,
+  //// il n'ouvre pas la fiche.
+  return <div className="item" style={{ cursor: 'pointer' }} onClick={() => classSheet(s, act)}>
     <span className="lrow-i" style={{ background: s.booked ? 'var(--acc)' : 'var(--surface-3)' }}>
       <Icon name={s.booked ? 'check' : 'calendar'} />
     </span>
@@ -248,7 +253,7 @@ function ClassRow({ s, busy, act }) {
         //// Neoffice — `waiting` plutôt que juste `disabled` : un bouton
         //// simplement grisé ne dit pas si l'application a compris le clic.
         ? <Button size="sm" variant="ghost" disabled={busy} className={busy ? 'waiting' : ''}
-            onClick={() => act(() => classCancel(s.booking.id), s.id)}>{t('Cancel')}</Button>
+            onClick={e => { e.stopPropagation(); act(() => classCancel(s.booking.id), s.id) }}>{t('Cancel')}</Button>
         : (s.bookable === false && !s.full)
           //// Ni bouton ni faux espoir : la séance a lieu, elle n'est plus
           //// ouverte. Proposer « s'inscrire » ici, c'était le clic qui ne
@@ -256,7 +261,7 @@ function ClassRow({ s, busy, act }) {
           ? <span className="tag">{t('closed')}</span>
           : <Button size="sm" variant={s.full ? 'ghost' : 'tinted'} disabled={busy}
               className={busy ? 'waiting' : ''}
-              onClick={() => act(() => classBook(s.id), s.id)}>
+              onClick={e => { e.stopPropagation(); act(() => classBook(s.id), s.id) }}>
               {s.full ? t('Waiting list') : t('Book')}
             </Button>}
   </div>

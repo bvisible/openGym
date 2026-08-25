@@ -700,6 +700,13 @@ h4.sec{
 }
 :root[data-theme="light"] .sheet{background:var(--bg)}
 @keyframes sheetup{from{transform:translateY(100%)}to{transform:none}}
+/* //// Neoffice — la photo d'un cours en tête de sa fiche. Hauteur fixe et
+   `cover` : les clubs enverront des images de toutes tailles, et une hauteur
+   qui suit l'image ferait sauter le contenu à chaque ouverture. */
+.sheet-hero{
+  display:block;width:100%;height:150px;object-fit:cover;
+  border-radius:12px;margin-bottom:14px;background:var(--surface-2);
+}
 .sheet .grab{width:36px;height:5px;border-radius:99px;background:var(--label-4);margin:6px auto 14px}
 .sheet h3{font-size:20px;font-weight:600;letter-spacing:-.021em;margin-bottom:14px}
 .center{

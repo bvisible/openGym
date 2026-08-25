@@ -5,7 +5,7 @@ import { EXDB, EXIDX, BODYPARTS, isCardio, isBodyweightEq, allExercises, equipme
 import { fmtDate, fmtNum, fmtVol, fmtDur, durPart, todayISO, uid, exCount, DAYN, MONTHS_LONG, ACCENTS } from './lib/format.js'
 import { lastEntryFor, bestWeightFor, buildSets, effectiveRoutineId, workoutVolume, setsDone, setsDoneActive, lastBW, supersetUnits, unitOf, setLabel, defaultConfig, cleanupSg, modeOf, effortOf, isBw, isPerSide, sideReps, workSetsDone } from './lib/history.js'
 import { beep, vibrate } from './lib/sound.js'
-import { t, instrFor, getLang, INSTR_LANGS } from './lib/i18n.js'
+import { t, instrFor, getLang, INSTR_LANGS, dateLocale } from './lib/i18n.js'
 import { nav } from './lib/nav.js'
 import { starterRoutines } from './lib/starter.js'
 import Media, { Thumb } from './components/Media.jsx'
@@ -20,7 +20,7 @@ import { buildPlanBundle, parsePlan, mergePlan, printPlan } from './lib/plan-sha
 //// Neoffice — l'offre d'un coach passe par le même mergePlan que l'import
 //// d'un ami, mais elle REMPLACE ce que la version précédente avait posé.
 import { applyCoachProgram, describeOffer, countProgramRoutines } from './lib/coach-program.js'
-import { programAccept, programDecline, openRoutines } from './lib/api.js'
+import { programAccept, programDecline, openRoutines, classBook, classCancel } from './lib/api.js'
 import { estimate1RM, best1RM, is1RMRecord, REP_CAP } from './lib/onerm.js'
 import { nextPrescription, applyPrescription, policyFor, defaultIncrement, POLICIES_FOR, POLICY_NAME, POLICY_DESC, MAX_BW_SETS } from './lib/progression.js'
 import { MOBILE, shareExport } from './lib/mobile.js'
@@ -1110,4 +1110,72 @@ function doFinishWorkout() {
   useUI.getState().stopRest()
   beep(snd(), 880, 0.15); beep(snd(), 1100, 0.15, 0.18); beep(snd(), 1320, 0.3, 0.36)
   ui().openSheet(close => <FinishSummary w={w} prs={prs} e1prs={e1prs} close={close} />, { kind: 'center', locked: true })
+}
+
+
+/* ============================ Neoffice — la fiche d'un cours ============================ */
+
+//// added: ce que le membre veut savoir AVANT de s'inscrire, et ce qu'il aime
+//// relire après. On ouvre une feuille plutôt qu'un écran : le planning reste
+//// derrière, on referme et on est revenu à sa place — chercher un cours, c'est
+//// comparer, donc entrer et sortir dix fois.
+////
+//// Elle s'ouvre AUSSI sur un cours fermé ou complet. C'est même là qu'elle
+//// sert le plus : savoir ce qu'on a manqué, et à quelle heure il repasse.
+export const classSheet = (s, act) => ui().openSheet(close => <ClassSheet s={s} act={act} close={close} />)
+
+function ClassSheet({ s, act, close }) {
+  const start = s.start ? new Date(s.start) : null
+  const waiting = s.booking && s.booking.status === 'Waiting'
+  const dur = s.minutes ? t('{0} min', s.minutes) : null
+
+  const run = fn => { close(); act(fn, s.id) }
+
+  return <>
+    {/* //// L'image d'abord : c'est elle qui donne envie, et un cours sans
+         photo ne doit pas laisser un cadre vide à sa place. */}
+    {s.image && <img src={s.image} alt="" className="sheet-hero" />}
+
+    <h3 style={{ marginBottom: 2 }}>{s.title}</h3>
+    <div className="muted small" style={{ marginBottom: 14 }}>
+      {start ? start.toLocaleString(dateLocale(), {
+        weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
+      }) : ''}{dur ? ' · ' + dur : ''}
+    </div>
+
+    <div className="list" style={{ display: 'flex', flexDirection: 'column', marginBottom: 14 }}>
+      {s.coach && <Row2 icon="personCircle" label={t('With')} value={s.coach} />}
+      <Row2 icon="person" label={t('Taking part')}
+        value={t('{0} of {1}', s.seated ?? 0, s.capacity ?? 0)} />
+      {/* //// L'état vient du serveur, pas d'un calcul local : « il reste de la
+           place » et « on peut encore réserver » sont deux choses, et c'est la
+           seconde qui compte ici. */}
+      <Row2 icon={s.booked ? 'check' : s.bookable === false ? 'lock' : 'calendar'}
+        label={t('Status')}
+        value={s.booked ? (waiting ? t('on the waiting list') : t('you are in'))
+          : s.past ? t('done')
+          : s.full ? t('full — you can join the waiting list')
+          : s.bookable === false ? t('registration closed')
+          : t(s.free === 1 ? '{0} place left' : '{0} places left', s.free)} />
+    </div>
+
+    {s.about && <div className="small" style={{ lineHeight: 1.55, whiteSpace: 'pre-line', marginBottom: 16 }}>
+      {s.about}
+    </div>}
+
+    {!s.past && (s.booked
+      ? <Button variant="ghost" onClick={() => run(() => classCancel(s.booking.id))}>{t('Cancel')}</Button>
+      : s.bookable === false && !s.full
+        ? <div className="dim small" style={{ textAlign: 'center' }}>{t('registration closed')}</div>
+        : <Button variant="primary" onClick={() => run(() => classBook(s.id))}>
+            {s.full ? t('Waiting list') : t('Book')}
+          </Button>)}
+  </>
+}
+
+function Row2({ icon, label, value }) {
+  return <div className="item">
+    <span className="lrow-i"><Icon name={icon} /></span>
+    <div className="grow"><div className="ss">{label}</div><div className="tt">{value}</div></div>
+  </div>
 }
