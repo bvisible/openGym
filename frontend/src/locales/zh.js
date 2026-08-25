@@ -33,7 +33,15 @@ export default {
   'full — you can join the waiting list': '已满 — 你可以加入候补名单',
   '{0} places left': '剩余 {0} 个名额',
   '{0} place left': '剩余 {0} 个名额',
+  //// Neoffice — status text for a session that happens but the server
+  //// marks as no longer bookable (bookable=false: hours, buffers,
+  //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.
+  'registration closed': '预约已截止',
   'done': '已结束',
+  //// Neoffice — tag for the same bookable=false case (see 'registration
+  //// closed' above): replaces the Book button so the row stops inviting a
+  //// click the server would refuse.
+  'closed': '已截止',
   'Waiting list': '候补名单',
   'Book': '预约',
   'Plan': '计划',

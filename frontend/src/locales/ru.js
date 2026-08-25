@@ -33,7 +33,15 @@ export default {
   'full — you can join the waiting list': 'мест нет — можешь записаться в список ожидания',
   '{0} places left': 'осталось {0} мест',
   '{0} place left': 'осталось {0} место',
+  //// Neoffice — status text for a session that happens but the server
+  //// marks as no longer bookable (bookable=false: hours, buffers,
+  //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.
+  'registration closed': 'регистрация закрыта',
   'done': 'завершено',
+  //// Neoffice — tag for the same bookable=false case (see 'registration
+  //// closed' above): replaces the Book button so the row stops inviting a
+  //// click the server would refuse.
+  'closed': 'закрыто',
   'Waiting list': 'Список ожидания',
   'Book': 'Забронировать',
   'Plan': 'План',

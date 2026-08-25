@@ -766,10 +766,18 @@ export default {
   'No class published for the next {0} days.': 'Aucun cours publié pour les {0} prochains jours.',
   '{0} places left': '{0} places restantes',
   '{0} place left': '{0} place restante',
+  //// Neoffice — status text for a session that happens but the server
+  //// marks as no longer bookable (bookable=false: hours, buffers,
+  //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.
+  'registration closed': 'inscriptions closes',
   'full — you can join the waiting list': 'complet — liste d’attente disponible',
   'you are in': 'inscrit',
   'on the waiting list': 'sur liste d’attente',
   'done': 'terminé',
+  //// Neoffice — tag for the same bookable=false case (see 'registration
+  //// closed' above): replaces the Book button so the row stops inviting a
+  //// click the server would refuse.
+  'closed': 'fermé',
   'Book': 'S’inscrire',
   'Waiting list': 'Liste d’attente',
   'Your next classes': 'Vos prochains cours',

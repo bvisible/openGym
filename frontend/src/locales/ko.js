@@ -33,7 +33,15 @@ export default {
   'full — you can join the waiting list': '마감 — 대기 명단에 등록할 수 있어요',
   '{0} places left': '{0}자리 남음',
   '{0} place left': '{0}자리 남음',
+  //// Neoffice — status text for a session that happens but the server
+  //// marks as no longer bookable (bookable=false: hours, buffers,
+  //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.
+  'registration closed': '예약 마감',
   'done': '종료',
+  //// Neoffice — tag for the same bookable=false case (see 'registration
+  //// closed' above): replaces the Book button so the row stops inviting a
+  //// click the server would refuse.
+  'closed': '마감',
   'Waiting list': '대기 명단',
   'Book': '예약하기',
   'Plan': '계획',

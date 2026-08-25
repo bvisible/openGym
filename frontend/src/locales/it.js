@@ -33,7 +33,15 @@ export default {
   'full — you can join the waiting list': 'al completo — puoi iscriverti alla lista d’attesa',
   '{0} places left': '{0} posti rimasti',
   '{0} place left': '{0} posto rimasto',
+  //// Neoffice — status text for a session that happens but the server
+  //// marks as no longer bookable (bookable=false: hours, buffers,
+  //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.
+  'registration closed': 'iscrizioni chiuse',
   'done': 'concluso',
+  //// Neoffice — tag for the same bookable=false case (see 'registration
+  //// closed' above): replaces the Book button so the row stops inviting a
+  //// click the server would refuse.
+  'closed': 'chiuso',
   'Waiting list': 'Lista d’attesa',
   'Book': 'Prenota',
   'Plan': 'Piano',

@@ -33,7 +33,15 @@ export default {
   'full — you can join the waiting list': 'dolu — bekleme listesine katılabilirsin',
   '{0} places left': '{0} boş yer kaldı',
   '{0} place left': '{0} boş yer kaldı',
+  //// Neoffice — status text for a session that happens but the server
+  //// marks as no longer bookable (bookable=false: hours, buffers,
+  //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.
+  'registration closed': 'kayıtlar kapandı',
   'done': 'tamamlandı',
+  //// Neoffice — tag for the same bookable=false case (see 'registration
+  //// closed' above): replaces the Book button so the row stops inviting a
+  //// click the server would refuse.
+  'closed': 'kapalı',
   'Waiting list': 'Bekleme listesi',
   'Book': 'Rezerve et',
   'Plan': 'Plan',

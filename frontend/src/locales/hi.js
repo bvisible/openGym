@@ -33,7 +33,15 @@ export default {
   'full — you can join the waiting list': 'फुल — आप प्रतीक्षा सूची में शामिल हो सकते हैं',
   '{0} places left': '{0} सीटें बाकी हैं',
   '{0} place left': '{0} सीट बाकी है',
+  //// Neoffice — status text for a session that happens but the server
+  //// marks as no longer bookable (bookable=false: hours, buffers,
+  //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.
+  'registration closed': 'बुकिंग बंद है',
   'done': 'समाप्त',
+  //// Neoffice — tag for the same bookable=false case (see 'registration
+  //// closed' above): replaces the Book button so the row stops inviting a
+  //// click the server would refuse.
+  'closed': 'बंद',
   'Waiting list': 'प्रतीक्षा सूची',
   'Book': 'बुक करें',
   'Plan': 'योजना',
