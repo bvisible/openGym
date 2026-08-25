@@ -329,6 +329,19 @@ h4.sec{
 
 /* ------------------------------------------------------------ week strip -- */
 .week{display:flex;justify-content:space-between;gap:4px}
+/* //// Neoffice — le sélecteur de jour du planning des cours. Il DÉFILE au
+   lieu de se répartir : un club publie souvent deux semaines, et sept jours
+   compressés dans une largeur de téléphone donnent des colonnes de 45 px où
+   le numéro touche le libellé. Ici chaque jour garde sa taille et on fait
+   glisser — le geste est naturel sur un planning.
+   `scroll-snap` pour que le doigt s'arrête sur un jour, jamais entre deux. */
+.daypick{
+  display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x proximity;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;
+}
+.daypick::-webkit-scrollbar{display:none}
+.daypick .wday{flex:0 0 46px;scroll-snap-align:center;cursor:pointer}
+.daypick .wday .lbl{text-transform:capitalize}
 .wday{
   flex:1;text-align:center;padding:8px 2px 9px;border-radius:10px;
   background:none;border:none;transition:background var(--fast);

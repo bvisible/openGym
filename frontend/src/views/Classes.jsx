@@ -38,6 +38,9 @@ export default function Classes() {
   const [data, setData] = useState(null)
   const [busy, setBusy] = useState(null)
   const [error, setError] = useState(null)
+  //// Neoffice — le jour regardé. Vide au départ : on se cale sur le premier
+  //// jour du planning qui n'est pas passé, pas sur une date en dur.
+  const [picked, setPicked] = useState('')
 
   const load = () => {
     classesWeek()
@@ -77,28 +80,77 @@ export default function Classes() {
       </div></div>
   }
 
-  // Groupé par jour : un planning de salle se lit par journée, pas en liste
-  // continue — on cherche « qu'est-ce qu'il y a mardi », pas le 14e cours.
-  const days = []
+  //// Neoffice — groupé par jour, et on n'en montre QU'UN. Un planning de
+  //// salle se lit par journée : on cherche « qu'est-ce qu'il y a mardi », pas
+  //// le quatorzième cours d'une liste qui défile. Le sélecteur porte un point
+  //// sous chaque jour qui a des cours, donc on voit d'un coup d'œil où
+  //// chercher avant même de choisir.
+  const byDay = new Map()
   data.sessions.forEach(s => {
     const k = dayKey(s.start)
-    const last = days[days.length - 1]
-    if (last && last.key === k) last.items.push(s)
-    else days.push({ key: k, items: [s] })
+    if (!byDay.has(k)) byDay.set(k, [])
+    byDay.get(k).push(s)
   })
+  const days = [...byDay.keys()].sort()
+
+  //// Le jour retenu doit exister dans le planning, sinon un membre qui laisse
+  //// l'écran ouvert jusqu'à minuit se retrouve devant un jour vide.
+  const day = days.includes(picked) ? picked
+    : days.find(d => d >= todayKey()) || days[0]
+
+  const items = byDay.get(day) || []
+  const free = items.filter(s => s.bookable !== false && !s.booked && !s.past).length
 
   return <div className="narrow">
     <Hdr />
-    {days.map(d => <div key={d.key}>
-      <h4 className="sec">{new Date(d.key).toLocaleDateString(dateLocale(), {
-        weekday: 'long', day: 'numeric', month: 'long'
-      })}</h4>
-      <div className="list" style={{ display: 'flex', flexDirection: 'column' }}>
-        {d.items.map(s => <ClassRow key={s.id} s={s} busy={busy === s.id} act={act} />)}
+
+    <div className="card" style={{ padding: '10px 8px 8px' }}>
+      <DayPicker days={days} day={day} byDay={byDay} onPick={setPicked} />
+    </div>
+
+    {/* //// Le jour choisi, en grand. C'était un `h4 className="sec"` gris
+         perdu entre deux listes — sur un planning on veut d'abord savoir QUEL
+         jour on regarde. */}
+    <div className="hdr" style={{ marginTop: 18, marginBottom: 10, alignItems: 'baseline' }}>
+      <div>
+        <h2 style={{ margin: 0, textTransform: 'capitalize' }}>{longDay(day)}</h2>
+        <div className="sub" style={{ marginTop: 2 }}>
+          {free > 0
+            ? t(free === 1 ? '{0} class open' : '{0} classes open', free)
+            : t('nothing open that day')}
+        </div>
       </div>
-    </div>)}
+    </div>
+
+    <div className="list" style={{ display: 'flex', flexDirection: 'column' }}>
+      {items.map(s => <ClassRow key={s.id} s={s} busy={busy === s.id} act={act} />)}
+    </div>
   </div>
 }
+
+//// Neoffice — added: le sélecteur de jour.
+//// Il défile horizontalement plutôt que de paginer par semaine : le planning
+//// d'un club tient sur deux semaines, et une flèche « semaine suivante » fait
+//// perdre le fil de ce qu'on cherchait.
+function DayPicker({ days, day, byDay, onPick }) {
+  return <div className="daypick">
+    {days.map(d => {
+      const n = (byDay.get(d) || []).filter(s => s.bookable !== false && !s.booked && !s.past).length
+      const dt = new Date(d + 'T00:00:00')
+      return <button key={d} className={'wday' + (d === day ? ' today' : '')} onClick={() => onPick(d)}>
+        <div className="lbl">{dt.toLocaleDateString(dateLocale(), { weekday: 'short' })}</div>
+        <div className="num">{dt.getDate()}</div>
+        {/* Un point quand il reste quelque chose à prendre ce jour-là : c'est
+            ce qui évite d'ouvrir les jours un par un. */}
+        <div className={'dot' + (n ? ' plan' : '')} />
+      </button>
+    })}
+  </div>
+}
+
+const todayKey = () => new Date().toISOString().slice(0, 10)
+const longDay = k => new Date(k + 'T00:00:00').toLocaleDateString(dateLocale(),
+  { weekday: 'long', day: 'numeric', month: 'long' })
 
 function Hdr() {
   return <div className="hdr">
