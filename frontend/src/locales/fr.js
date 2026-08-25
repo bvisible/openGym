@@ -766,6 +766,14 @@ export default {
   'No class published for the next {0} days.': 'Aucun cours publié pour les {0} prochains jours.',
   '{0} places left': '{0} places restantes',
   '{0} place left': '{0} place restante',
+  //// Neoffice — subtitle under the day header on the new date picker
+  //// (group classes screen): how many sessions are still open for
+  //// registration that day. "open" means bookable, not merely scheduled
+  //// — a full or closed session doesn't count. New feature, not present
+  //// upstream.
+  '{0} class open': '{0} cours ouvert',
+  '{0} classes open': '{0} cours ouverts',
+  'nothing open that day': 'rien d’ouvert ce jour-là',
   //// Neoffice — status text for a session that happens but the server
   //// marks as no longer bookable (bookable=false: hours, buffers,
   //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.

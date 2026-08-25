@@ -33,6 +33,14 @@ export default {
   'full — you can join the waiting list': '마감 — 대기 명단에 등록할 수 있어요',
   '{0} places left': '{0}자리 남음',
   '{0} place left': '{0}자리 남음',
+  //// Neoffice — subtitle under the day header on the new date picker
+  //// (group classes screen): how many sessions are still open for
+  //// registration that day. "open" means bookable, not merely scheduled
+  //// — a full or closed session doesn't count. New feature, not present
+  //// upstream.
+  '{0} class open': '{0}개 수업 열림',
+  '{0} classes open': '{0}개 수업 열림',
+  'nothing open that day': '그날 열린 수업 없음',
   //// Neoffice — status text for a session that happens but the server
   //// marks as no longer bookable (bookable=false: hours, buffers,
   //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.

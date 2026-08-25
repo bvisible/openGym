@@ -33,6 +33,14 @@ export default {
   'full — you can join the waiting list': 'फुल — आप प्रतीक्षा सूची में शामिल हो सकते हैं',
   '{0} places left': '{0} सीटें बाकी हैं',
   '{0} place left': '{0} सीट बाकी है',
+  //// Neoffice — subtitle under the day header on the new date picker
+  //// (group classes screen): how many sessions are still open for
+  //// registration that day. "open" means bookable, not merely scheduled
+  //// — a full or closed session doesn't count. New feature, not present
+  //// upstream.
+  '{0} class open': '{0} कक्षा खुली है',
+  '{0} classes open': '{0} कक्षाएं खुली हैं',
+  'nothing open that day': 'उस दिन कुछ भी खुला नहीं है',
   //// Neoffice — status text for a session that happens but the server
   //// marks as no longer bookable (bookable=false: hours, buffers,
   //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.

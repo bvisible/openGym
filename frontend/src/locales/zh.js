@@ -33,6 +33,14 @@ export default {
   'full — you can join the waiting list': '已满 — 你可以加入候补名单',
   '{0} places left': '剩余 {0} 个名额',
   '{0} place left': '剩余 {0} 个名额',
+  //// Neoffice — subtitle under the day header on the new date picker
+  //// (group classes screen): how many sessions are still open for
+  //// registration that day. "open" means bookable, not merely scheduled
+  //// — a full or closed session doesn't count. New feature, not present
+  //// upstream.
+  '{0} class open': '{0} 节课开放报名',
+  '{0} classes open': '{0} 节课开放报名',
+  'nothing open that day': '当天没有课程开放报名',
   //// Neoffice — status text for a session that happens but the server
   //// marks as no longer bookable (bookable=false: hours, buffers,
   //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.

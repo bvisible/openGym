@@ -33,6 +33,14 @@ export default {
   'full — you can join the waiting list': 'esgotado — podes inscrever-te na lista de espera',
   '{0} places left': '{0} vagas disponíveis',
   '{0} place left': '{0} vaga disponível',
+  //// Neoffice — subtitle under the day header on the new date picker
+  //// (group classes screen): how many sessions are still open for
+  //// registration that day. "open" means bookable, not merely scheduled
+  //// — a full or closed session doesn't count. New feature, not present
+  //// upstream.
+  '{0} class open': '{0} aula aberta',
+  '{0} classes open': '{0} aulas abertas',
+  'nothing open that day': 'nada aberto nesse dia',
   //// Neoffice — status text for a session that happens but the server
   //// marks as no longer bookable (bookable=false: hours, buffers,
   //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.
