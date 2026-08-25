@@ -21,6 +21,20 @@ export default {
   //// classes), not present upstream.
   'Classes': '수업',
   'Group classes': '그룹 수업',
+  //// Neoffice — remaining strings for the classes screen above: loading and
+  //// error states, capacity/waitlist status per session, and the booking
+  //// actions. Same new feature, not present upstream.
+  'The class schedule could not be loaded. Try again once you are back online.': '수업 일정을 불러오지 못했어요. 다시 온라인 상태가 되면 시도해 주세요.',
+  'Loading…': '불러오는 중…',
+  'No class published for the next {0} days.': '앞으로 {0}일 동안 게시된 수업이 없어요.',
+  'Book in two taps — you are already signed in': '두 번 탭으로 예약하세요 — 이미 로그인되어 있어요',
+  'on the waiting list': '대기 중',
+  'you are in': '참석 확정',
+  'full — you can join the waiting list': '마감 — 대기 명단에 등록할 수 있어요',
+  '{0} places left': '{0}자리 남음',
+  'done': '종료',
+  'Waiting list': '대기 명단',
+  'Book': '예약하기',
   'Plan': '계획',
   'Today': '오늘',
   'Home': '홈',

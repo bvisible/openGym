@@ -21,6 +21,20 @@ export default {
   //// classes), not present upstream.
   'Classes': 'Clases',
   'Group classes': 'Clases grupales',
+  //// Neoffice — remaining strings for the classes screen above: loading and
+  //// error states, capacity/waitlist status per session, and the booking
+  //// actions. Same new feature, not present upstream.
+  'The class schedule could not be loaded. Try again once you are back online.': 'No se ha podido cargar el horario de clases. Vuelve a intentarlo cuando tengas conexión.',
+  'Loading…': 'Cargando…',
+  'No class published for the next {0} days.': 'No hay ninguna clase publicada para los próximos {0} días.',
+  'Book in two taps — you are already signed in': 'Reserva en dos toques — ya has iniciado sesión',
+  'on the waiting list': 'en lista de espera',
+  'you are in': 'estás dentro',
+  'full — you can join the waiting list': 'completo — puedes apuntarte a la lista de espera',
+  '{0} places left': '{0} plazas libres',
+  'done': 'finalizado',
+  'Waiting list': 'Lista de espera',
+  'Book': 'Reservar',
   'Plan': 'Plan',
   'Today': 'Hoy',
   'Home': 'Inicio',

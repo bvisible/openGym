@@ -21,6 +21,20 @@ export default {
   //// classes), not present upstream.
   'Classes': 'कक्षाएं',
   'Group classes': 'समूह कक्षाएं',
+  //// Neoffice — remaining strings for the classes screen above: loading and
+  //// error states, capacity/waitlist status per session, and the booking
+  //// actions. Same new feature, not present upstream.
+  'The class schedule could not be loaded. Try again once you are back online.': 'कक्षाओं की समय-सारणी लोड नहीं हो सकी। ऑनलाइन होने पर फिर से कोशिश करें।',
+  'Loading…': 'लोड हो रहा है…',
+  'No class published for the next {0} days.': 'अगले {0} दिनों के लिए कोई कक्षा प्रकाशित नहीं है।',
+  'Book in two taps — you are already signed in': 'दो टैप में बुक करें — आप पहले से साइन इन हैं।',
+  'on the waiting list': 'प्रतीक्षा सूची में',
+  'you are in': 'आप शामिल हैं',
+  'full — you can join the waiting list': 'फुल — आप प्रतीक्षा सूची में शामिल हो सकते हैं',
+  '{0} places left': '{0} सीटें बाकी हैं',
+  'done': 'समाप्त',
+  'Waiting list': 'प्रतीक्षा सूची',
+  'Book': 'बुक करें',
   'Plan': 'योजना',
   'Today': 'आज',
   'Home': 'होम',

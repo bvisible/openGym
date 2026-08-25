@@ -21,6 +21,20 @@ export default {
   //// classes), not present upstream.
   'Classes': 'Dersler',
   'Group classes': 'Grup dersleri',
+  //// Neoffice — remaining strings for the classes screen above: loading and
+  //// error states, capacity/waitlist status per session, and the booking
+  //// actions. Same new feature, not present upstream.
+  'The class schedule could not be loaded. Try again once you are back online.': 'Ders programı yüklenemedi. Tekrar çevrimiçi olduğunda yeniden dene.',
+  'Loading…': 'Yükleniyor…',
+  'No class published for the next {0} days.': 'Önümüzdeki {0} gün için yayınlanmış ders yok.',
+  'Book in two taps — you are already signed in': 'İki dokunuşla rezerve et — zaten oturum açtın',
+  'on the waiting list': 'bekleme listesinde',
+  'you are in': 'yerin ayrıldı',
+  'full — you can join the waiting list': 'dolu — bekleme listesine katılabilirsin',
+  '{0} places left': '{0} boş yer kaldı',
+  'done': 'tamamlandı',
+  'Waiting list': 'Bekleme listesi',
+  'Book': 'Rezerve et',
   'Plan': 'Plan',
   'Today': 'Bugün',
   'Home': 'Ana sayfa',

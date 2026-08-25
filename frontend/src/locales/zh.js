@@ -21,6 +21,20 @@ export default {
   //// classes), not present upstream.
   'Classes': '课程',
   'Group classes': '团体课程',
+  //// Neoffice — remaining strings for the classes screen above: loading and
+  //// error states, capacity/waitlist status per session, and the booking
+  //// actions. Same new feature, not present upstream.
+  'The class schedule could not be loaded. Try again once you are back online.': '无法加载课程安排。恢复网络连接后请重试。',
+  'Loading…': '加载中…',
+  'No class published for the next {0} days.': '未来 {0} 天内没有发布课程。',
+  'Book in two taps — you are already signed in': '两次点击即可预约 — 你已登录',
+  'on the waiting list': '候补中',
+  'you are in': '已确认',
+  'full — you can join the waiting list': '已满 — 你可以加入候补名单',
+  '{0} places left': '剩余 {0} 个名额',
+  'done': '已结束',
+  'Waiting list': '候补名单',
+  'Book': '预约',
   'Plan': '计划',
   'Today': '今天',
   'Home': '首页',
