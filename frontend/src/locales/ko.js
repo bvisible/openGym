@@ -598,6 +598,7 @@ export default {
   '{0} person taking part': '참가자 {0}명',
   '{0} people taking part': '참가자 {0}명',
   'You are {0} of {1}': '{1}명 중 {0}위예요',
+  'You are 1st of {0}': '{0}명 중 1위예요',
   'Starts {0}': '{0}에 시작해요',
   'Ranking': '순위',
   'Leave': '나가기',

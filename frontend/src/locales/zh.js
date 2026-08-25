@@ -598,6 +598,7 @@ export default {
   '{0} person taking part': '{0} 位参与者',
   '{0} people taking part': '{0} 位参与者',
   'You are {0} of {1}': '{1}人中排第{0}名',
+  'You are 1st of {0}': '{0}人中排第1名',
   'Starts {0}': '{0}开始',
   'Ranking': '排名',
   'Leave': '退出',

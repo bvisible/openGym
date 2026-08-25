@@ -598,6 +598,7 @@ export default {
   '{0} person taking part': '{0} участник',
   '{0} people taking part': '{0} участников',
   'You are {0} of {1}': 'Ты на {0}-м месте из {1}',
+  'You are 1st of {0}': 'Ты на 1-м месте из {0}',
   'Starts {0}': 'Начинается {0}',
   'Ranking': 'Рейтинг',
   'Leave': 'Покинуть',

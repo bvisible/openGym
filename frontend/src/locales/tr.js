@@ -598,6 +598,7 @@ export default {
   '{0} person taking part': '{0} katılımcı',
   '{0} people taking part': '{0} katılımcı',
   'You are {0} of {1}': '{1} kişi içinde {0}. sıradasın',
+  'You are 1st of {0}': '{0} kişi içinde 1. sıradasın',
   'Starts {0}': '{0} tarihinde başlıyor',
   'Ranking': 'Sıralama',
   'Leave': 'Ayrıl',

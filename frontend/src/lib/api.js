@@ -54,6 +54,9 @@ const M = {
   //// Neoffice — le panneau d'affichage du club. Rien n'est envoyé : le
   //// membre le lit quand il ouvre son carnet.
   announcements: '/api/method/neoffice_gym.api.challenges.announcements',
+  //// Neoffice — les routines que le club a explicitement ouvertes. Sa
+  //// bibliothèque reste fermée : il ouvre ce qu'il décide d'ouvrir.
+  openRoutines: '/api/method/neoffice_gym.api.challenges.open_routines',
 }
 
 /**
@@ -147,3 +150,4 @@ export const challengeLeave = (challenge) =>
 export const challengeBoard = (challenge) =>
   api(M.challengeBoard + '?challenge=' + encodeURIComponent(challenge))
 export const announcements = () => api(M.announcements)
+export const openRoutines = () => api(M.openRoutines)

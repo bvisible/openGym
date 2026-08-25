@@ -598,6 +598,7 @@ export default {
   '{0} person taking part': '{0} प्रतिभागी',
   '{0} people taking part': '{0} प्रतिभागी',
   'You are {0} of {1}': 'आप {1} में से {0}वें स्थान पर हैं',
+  'You are 1st of {0}': 'आप {0} में से पहले स्थान पर हैं',
   'Starts {0}': '{0} से शुरू होगा',
   'Ranking': 'रैंकिंग',
   'Leave': 'छोड़ें',

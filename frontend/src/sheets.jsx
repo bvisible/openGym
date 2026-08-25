@@ -20,7 +20,7 @@ import { buildPlanBundle, parsePlan, mergePlan, printPlan } from './lib/plan-sha
 //// Neoffice — l'offre d'un coach passe par le même mergePlan que l'import
 //// d'un ami, mais elle REMPLACE ce que la version précédente avait posé.
 import { applyCoachProgram, describeOffer, countProgramRoutines } from './lib/coach-program.js'
-import { programAccept, programDecline } from './lib/api.js'
+import { programAccept, programDecline, openRoutines } from './lib/api.js'
 import { estimate1RM, best1RM, is1RMRecord, REP_CAP } from './lib/onerm.js'
 import { nextPrescription, applyPrescription, policyFor, defaultIncrement, POLICIES_FOR, POLICY_NAME, POLICY_DESC, MAX_BW_SETS } from './lib/progression.js'
 import { MOBILE, shareExport } from './lib/mobile.js'
@@ -676,6 +676,52 @@ function PlanTools({ close }) {
     <h4 className="sec">{t('Got a plan from a friend?')}</h4>
     <Button variant="ghost" icon="folder" onClick={() => fileRef.current?.click()}>{t('Import a plan file')}</Button>
     <input ref={fileRef} type="file" accept="application/json,.json" onChange={pickFile} hidden />
+    {/* //// Neoffice — les routines que le club a mises à disposition. Le
+         bouton n'apparaît QUE s'il y en a : un club qui n'ouvre rien ne montre
+         pas une porte vide, et la bibliothèque reste fermée par défaut. */}
+    <ClubShelf close={close} />
+  </>
+}
+
+//// Neoffice — added: le libre-service du club.
+function ClubShelf({ close }) {
+  const [shelf, setShelf] = useState(null)
+  useEffect(() => {
+    let alive = true
+    openRoutines()
+      .then(r => { if (alive) setShelf(r.routines || []) })
+      .catch(() => { if (alive) setShelf([]) })
+    return () => { alive = false }
+  }, [])
+  if (!shelf || !shelf.length) return null
+
+  const load = (r) => {
+    //// Une COPIE : le membre repart avec sa routine, celle du club ne bouge
+    //// pas. mergePlan donne un identifiant neuf, donc charger deux fois ne
+    //// remplace pas — c'est voulu, il a peut-être adapté la première.
+    update(s => mergePlan(s, {
+      opengym_plan: 1, name: r.name, routines: [r], week: {}, customEx: []
+    }, { schedule: false }))
+    close()
+    toast(t('“{0}” added to your routines', r.name))
+    nav('/plan')
+  }
+
+  return <>
+    <h4 className="sec">{t('Offered by your club')}</h4>
+    <div className="dim small" style={{ margin: '0 2px 8px', lineHeight: 1.4 }}>
+      {t('Load one and it becomes yours — adapt it as you like, the club’s copy does not change.')}
+    </div>
+    <div className="list" style={{ display: 'flex', flexDirection: 'column' }}>
+      {shelf.map(r => <div key={r.id} className="item" onClick={() => load(r)}>
+        <span className="lrow-i"><Icon name={glyphOf(r.emoji)} /></span>
+        <div className="grow">
+          <div className="tt">{r.name}</div>
+          <div className="ss">{exCount((r.ex || []).length)}</div>
+        </div>
+        <Icon name="plus" className="chev" />
+      </div>)}
+    </div>
   </>
 }
 

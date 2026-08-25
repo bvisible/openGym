@@ -615,6 +615,7 @@ export default {
   '{0} person taking part': '{0} Teilnehmer',
   '{0} people taking part': '{0} Teilnehmer',
   'You are {0} of {1}': 'Du bist {0}. von {1}',
+  'You are 1st of {0}': 'Du bist 1. von {0}',
   'Starts {0}': 'Beginnt am {0}',
   'Ranking': 'Rangliste',
   'Leave': 'Verlassen',
