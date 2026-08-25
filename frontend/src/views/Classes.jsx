@@ -95,8 +95,17 @@ export default function Classes() {
 
   //// Le jour retenu doit exister dans le planning, sinon un membre qui laisse
   //// l'écran ouvert jusqu'à minuit se retrouve devant un jour vide.
+  ////
+  //// Et à l'ouverture on se pose sur le premier jour où il reste QUELQUE
+  //// CHOSE À PRENDRE, pas sur aujourd'hui : arriver sur une journée vide
+  //// oblige à chercher soi-même où sont les cours, ce qui est précisément la
+  //// corvée que ce sélecteur doit supprimer. À défaut, le premier jour à
+  //// venir — un planning entièrement complet reste un planning à consulter.
+  const openOn = d => (byDay.get(d) || []).some(x => x.bookable !== false && !x.booked && !x.past)
   const day = days.includes(picked) ? picked
-    : days.find(d => d >= todayKey()) || days[0]
+    : days.find(d => d >= todayKey() && openOn(d))
+      || days.find(d => d >= todayKey())
+      || days[0]
 
   const items = byDay.get(day) || []
   const free = items.filter(s => s.bookable !== false && !s.booked && !s.past).length
