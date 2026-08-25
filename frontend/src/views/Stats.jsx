@@ -18,6 +18,7 @@ import { e1rmSeries, best1RM } from '../lib/onerm.js'
 //// Neoffice — les évaluations physiques du coach. C'est ici qu'un membre
 //// vient chercher ses chiffres, donc c'est ici que la porte doit être.
 import { assessmentsMine } from '../lib/api.js'
+import { summaryOf } from './Assessments.jsx'
 import {
   hasEffort, displayScale, scaleName, toScale, avgRir, effortSummary, effortWeeks,
   effortHistogram, isHardSet, HARD_RIR
@@ -390,7 +391,7 @@ export default function Stats() {
         <div className="lbl2">{t('Last assessment')}</div>
         <span className="small dim">{fmtDate(lastAssessment.date)}</span>
       </div>
-      <div className="small dim" style={{ lineHeight: 1.45 }}>{lastAssessment.summary}</div>
+      <div className="small dim" style={{ lineHeight: 1.45 }}>{summaryOf(lastAssessment)}</div>
     </div>}
 
     <div className="tiles">

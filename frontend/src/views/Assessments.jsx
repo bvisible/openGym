@@ -14,6 +14,22 @@ import { t, dateLocale } from '../lib/i18n.js'
 import { assessmentsMine } from '../lib/api.js'
 import Icon from '../components/Icon.jsx'
 
+//// Neoffice — le résumé se compose ICI, pas au serveur.
+//// Il y était d'abord, et il sortait en anglais chez un membre francophone :
+//// une phrase écrite à la sauvegarde est figée dans la langue de qui a
+//// enregistré. Le serveur envoie les FAITS — quels tests ont le plus bougé,
+//// de combien, et si c'est un progrès — et le carnet écrit la phrase.
+//// (Même correctif qu'au lot 3 sur le résumé du programme d'un coach.)
+export function summaryOf(a) {
+  if (!a) return ''
+  if (!a.compared) return t('First assessment — nothing to compare yet.')
+  if (!a.highlights || !a.highlights.length) return t('No change since the previous assessment.')
+  const parts = a.highlights.map(h =>
+    `${h.improved ? '✓' : '·'} ${t(h.test)} ${h.delta > 0 ? '↑' : '↓'} ${Math.abs(h.delta)}${h.unit || ''}`
+  )
+  return parts.join(' · ') + ' — ' + t('{0} improved', a.improvedCount)
+}
+
 const fmtDate = iso => new Date(iso).toLocaleDateString(dateLocale(), {
   day: 'numeric', month: 'long', year: 'numeric'
 })
@@ -47,7 +63,7 @@ export default function Assessments() {
         <div className="row between">
           <div>
             <div className="tt">{fmtDate(a.date)}</div>
-            <div className="small dim">{a.summary}</div>
+            <div className="small dim">{summaryOf(a)}</div>
           </div>
           <Icon name={open === a.id ? 'chevronUp' : 'chevronRight'} className="chev" />
         </div>
@@ -75,7 +91,7 @@ function Assessment({ a }) {
       <div className="lbl2">{fmtDate(a.date)}</div>
       {a.coach ? <span className="small dim">{a.coach}</span> : null}
     </div>
-    {a.summary ? <div className="small dim" style={{ marginBottom: 12, lineHeight: 1.4 }}>{a.summary}</div> : null}
+    <div className="small dim" style={{ marginBottom: 12, lineHeight: 1.4 }}>{summaryOf(a)}</div>
     <Rows results={a.results} />
   </div>
 }
@@ -88,13 +104,17 @@ function Rows({ results }) {
       //// bonne nouvelle. Les deux ne coïncident pas : perdre 3 % de masse
       //// grasse descend et c'est un progrès, perdre 500 g de masse maigre
       //// descend aussi et ce n'en est pas un.
-      const arrow = r.delta == null ? null : r.delta > 0 ? '↑' : '↓'
-      const tone = r.delta == null ? 'dim' : r.improved ? 'acc' : 'warn'
+      //// Un écart NUL ne s'affiche pas. « ↓ 0 » se lit comme une baisse de
+      //// zéro, ce qui n'est pas une chose ; la mesure n'a simplement pas
+      //// bougé, et une colonne vide le dit mieux qu'un signe.
+      const moved = r.delta != null && r.delta !== 0
+      const arrow = moved ? (r.delta > 0 ? '↑' : '↓') : null
+      const tone = r.improved ? 'acc' : 'warn'
       return <div key={r.test} className="row between" style={{ padding: '7px 0', gap: 12, minWidth: 0 }}>
-        <div className="small" style={{ minWidth: 0, flex: 1 }}>{r.test}</div>
+        <div className="small" style={{ minWidth: 0, flex: 1 }}>{t(r.test)}</div>
         <div className="row" style={{ gap: 8, whiteSpace: 'nowrap' }}>
           <b>{r.value}<span className="small dim"> {r.unit}</span></b>
-          {r.delta != null && <span className={'small ' + tone}>
+          {moved && <span className={'small ' + tone}>
             {arrow} {Math.abs(r.delta)}
           </span>}
         </div>
