@@ -26,8 +26,8 @@ const day = iso => iso
 // la clé, pas la phrase : traduire côté serveur donnerait la langue du CRON à
 // qui n'a pas de langue, piège déjà payé deux fois sur ce module.
 const METRIC = {
-  'Sessions': () => t('Number of workouts'),
-  'Volume': () => t('Total weight moved'),
+  'Workout Count': () => t('Number of workouts'),
+  'Weight Moved': () => t('Total weight moved'),
   'Active Minutes': () => t('Minutes trained'),
   'Class Attendance': () => t('Classes attended'),
 }
@@ -98,7 +98,7 @@ function Hdr({ nav }) {
 }
 
 function Row({ c, busy, act, open }) {
-  const label = (METRIC[c.metric] || METRIC.Sessions)()
+  const label = (METRIC[c.metric] || METRIC['Workout Count'])()
   return <div className="item" style={{ alignItems: 'flex-start' }}>
     <span className="lrow-i"><Icon name="trophy" /></span>
     <div className="grow">
@@ -148,7 +148,7 @@ function Board({ board, close }) {
 // court. Le même nombre brut partout laisserait croire à « 1200 séances ».
 function fmtScore(metric, score) {
   const n = Math.round(score || 0)
-  if (metric === 'Volume') return t('{0} kg', n.toLocaleString(dateLocale()))
+  if (metric === 'Weight Moved') return t('{0} kg', n.toLocaleString(dateLocale()))
   if (metric === 'Active Minutes') return t('{0} min', n)
   return n
 }
