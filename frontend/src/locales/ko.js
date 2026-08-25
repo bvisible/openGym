@@ -801,4 +801,18 @@ export default {
   'source code': '소스 코드',
   '{0} exercise in this program isn’t in your library and was left out.': '이 프로그램의 운동 {0}개가 라이브러리에 없어 제외했습니다.',
   '{0} exercises in this program aren’t in your library and were left out.': '이 프로그램의 운동 {0}개가 라이브러리에 없어 제외했습니다.',
+  //// Neoffice — the journal's sign-in screen.
+  'Back to sign in': '로그인으로 복귀',
+  'Email address': '이메일 주소',
+  'Enter your address and we will send you a link to choose a new password.': '주소를 입력하세요. 새 비밀번호를 정할 수 있는 링크를 보내드릴게요.',
+  'Fitness': 'Fitness',
+  'Forgot your password?': '비밀번호를 잊으셨나요?',
+  'If an account exists for this address, a reset link is on its way.': '이 주소로 계정이 있다면 재설정 링크가 곧 도착해요.',
+  'Keep me signed in': '로그인 상태 유지',
+  'Password': '비밀번호',
+  'Send the link': '링크 전송',
+  'Sending…': '보내는 중…',
+  'Sign in': '로그인',
+  'Wrong address or password.': '주소 또는 비밀번호가 올바르지 않아요.',
+  'Your workouts. Your loads. Your journal.': '당신의 운동. 당신의 무게. 당신의 기록.',
 }

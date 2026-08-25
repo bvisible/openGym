@@ -801,4 +801,18 @@ export default {
   'source code': 'Исходный код',
   '{0} exercise in this program isn’t in your library and was left out.': '{0} упражнение из этой программы отсутствует в вашей библиотеке и было пропущено.',
   '{0} exercises in this program aren’t in your library and were left out.': '{0} упражнений из этой программы отсутствуют в вашей библиотеке и были пропущены.',
+  //// Neoffice — the journal's sign-in screen.
+  'Back to sign in': 'Вернуться к входу',
+  'Email address': 'Электронная почта',
+  'Enter your address and we will send you a link to choose a new password.': 'Введи свой адрес, и мы отправим тебе ссылку для выбора нового пароля.',
+  'Fitness': 'Fitness',
+  'Forgot your password?': 'Не помнишь пароль?',
+  'If an account exists for this address, a reset link is on its way.': 'Если для этого адреса есть аккаунт, ссылка для сброса пароля уже в пути.',
+  'Keep me signed in': 'Оставаться в аккаунте',
+  'Password': 'Пароль',
+  'Send the link': 'Отправить ссылку',
+  'Sending…': 'Отправка…',
+  'Sign in': 'Войти',
+  'Wrong address or password.': 'Неверный адрес или пароль.',
+  'Your workouts. Your loads. Your journal.': 'Твои тренировки. Твои веса. Твой дневник.',
 }

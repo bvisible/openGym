@@ -801,4 +801,18 @@ export default {
   'source code': '源代码',
   '{0} exercise in this program isn’t in your library and was left out.': '此方案中有 {0} 个动作不在你的动作库中，已略过。',
   '{0} exercises in this program aren’t in your library and were left out.': '此方案中有 {0} 个动作不在你的动作库中，已略过。',
+  //// Neoffice — the journal's sign-in screen.
+  'Back to sign in': '返回登录',
+  'Email address': '邮箱地址',
+  'Enter your address and we will send you a link to choose a new password.': '请输入你的邮箱地址，我们会发送一个链接，让你选择新密码。',
+  'Fitness': 'Fitness',
+  'Forgot your password?': '忘记密码了吗？',
+  'If an account exists for this address, a reset link is on its way.': '如果这个邮箱地址存在账户，重置链接已经在路上了。',
+  'Keep me signed in': '保持登录',
+  'Password': '密码',
+  'Send the link': '发送链接',
+  'Sending…': '正在发送…',
+  'Sign in': '登录',
+  'Wrong address or password.': '邮箱地址或密码错误。',
+  'Your workouts. Your loads. Your journal.': '你的训练。你的重量。你的记录。',
 }

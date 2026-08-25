@@ -801,4 +801,18 @@ export default {
   'source code': 'Kod źródłowy',
   '{0} exercise in this program isn’t in your library and was left out.': '{0} ćwiczenie z tego programu nie ma go w Twojej bibliotece i zostało pominięte.',
   '{0} exercises in this program aren’t in your library and were left out.': '{0} ćwiczeń z tego programu nie ma w Twojej bibliotece i zostały pominięte.',
+  //// Neoffice — the journal's sign-in screen.
+  'Back to sign in': 'Wróć do logowania',
+  'Email address': 'Adres e-mail',
+  'Enter your address and we will send you a link to choose a new password.': 'Podaj swój adres, a wyślemy ci link do wyboru nowego hasła.',
+  'Fitness': 'Fitness',
+  'Forgot your password?': 'Nie pamiętasz hasła?',
+  'If an account exists for this address, a reset link is on its way.': 'Jeśli dla tego adresu istnieje konto, link do zresetowania hasła jest już w drodze.',
+  'Keep me signed in': 'Nie wylogowuj mnie',
+  'Password': 'Hasło',
+  'Send the link': 'Wyślij link',
+  'Sending…': 'Wysyłanie…',
+  'Sign in': 'Zaloguj się',
+  'Wrong address or password.': 'Nieprawidłowy adres lub hasło.',
+  'Your workouts. Your loads. Your journal.': 'Twoje treningi. Twoje ciężary. Twój dziennik.',
 }

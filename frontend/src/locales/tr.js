@@ -801,4 +801,18 @@ export default {
   'source code': 'Kaynak kodu',
   '{0} exercise in this program isn’t in your library and was left out.': 'Bu programdaki {0} egzersiz kitaplığında yok ve atlandı.',
   '{0} exercises in this program aren’t in your library and were left out.': 'Bu programdaki {0} egzersiz kitaplığında yok ve atlandı.',
+  //// Neoffice — the journal's sign-in screen.
+  'Back to sign in': 'Girişe dön',
+  'Email address': 'E-posta adresi',
+  'Enter your address and we will send you a link to choose a new password.': 'Adresini gir, sana yeni bir şifre seçmen için bağlantı gönderelim.',
+  'Fitness': 'Fitness',
+  'Forgot your password?': 'Şifreni mi unuttun?',
+  'If an account exists for this address, a reset link is on its way.': 'Bu adrese ait bir hesap varsa, şifre sıfırlama bağlantısı yolda.',
+  'Keep me signed in': 'Oturumumu açık tut',
+  'Password': 'Şifre',
+  'Send the link': 'Bağlantıyı gönder',
+  'Sending…': 'Gönderiliyor…',
+  'Sign in': 'Giriş yap',
+  'Wrong address or password.': 'Adres veya şifre hatalı.',
+  'Your workouts. Your loads. Your journal.': 'Senin antrenmanların. Senin ağırlıkların. Senin günlüğün.',
 }

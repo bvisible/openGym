@@ -801,4 +801,18 @@ export default {
   'source code': 'सोर्स कोड',
   '{0} exercise in this program isn’t in your library and was left out.': 'इस प्रोग्राम का {0} व्यायाम आपकी लाइब्रेरी में नहीं है और छोड़ दिया गया।',
   '{0} exercises in this program aren’t in your library and were left out.': 'इस प्रोग्राम के {0} व्यायाम आपकी लाइब्रेरी में नहीं हैं और छोड़ दिए गए।',
+  //// Neoffice — the journal's sign-in screen.
+  'Back to sign in': 'साइन इन पर वापस',
+  'Email address': 'ईमेल पता',
+  'Enter your address and we will send you a link to choose a new password.': 'अपना पता दर्ज करें और हम आपको नया पासवर्ड चुनने के लिए एक लिंक भेजेंगे।',
+  'Fitness': 'Fitness',
+  'Forgot your password?': 'पासवर्ड याद नहीं?',
+  'If an account exists for this address, a reset link is on its way.': 'अगर इस पते के लिए कोई खाता मौजूद है, तो रीसेट लिंक रास्ते में है।',
+  'Keep me signed in': 'मुझे साइन इन रखें',
+  'Password': 'पासवर्ड',
+  'Send the link': 'लिंक भेजें',
+  'Sending…': 'भेजा जा रहा है…',
+  'Sign in': 'साइन इन करें',
+  'Wrong address or password.': 'पता या पासवर्ड ग़लत है।',
+  'Your workouts. Your loads. Your journal.': 'आपके वर्कआउट। आपके वज़न। आपकी जर्नल।',
 }
