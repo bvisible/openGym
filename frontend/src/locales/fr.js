@@ -886,4 +886,18 @@ export default {
   'Your club': 'Votre club',
   'Your coach': 'Votre coach',
   'valid until {0}': 'valable jusqu’au {0}',
+  //// Neoffice — l'écran de connexion du carnet.
+  'Back to sign in': 'Revenir à la connexion',
+  'Email address': 'Adresse e-mail',
+  'Enter your address and we will send you a link to choose a new password.': 'Indiquez votre adresse et nous vous enverrons un lien pour choisir un nouveau mot de passe.',
+  'Fitness': 'Fitness',
+  'Forgot your password?': 'Mot de passe oublié ?',
+  'If an account exists for this address, a reset link is on its way.': 'Si un compte existe pour cette adresse, un lien vient de partir.',
+  'Keep me signed in': 'Rester connecté',
+  'Password': 'Mot de passe',
+  'Send the link': 'Envoyer le lien',
+  'Sending…': 'Envoi…',
+  'Sign in': 'Se connecter',
+  'Wrong address or password.': 'Adresse ou mot de passe incorrect.',
+  'Your workouts. Your loads. Your journal.': 'Vos séances. Vos charges. Votre carnet.',
 }

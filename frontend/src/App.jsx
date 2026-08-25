@@ -49,7 +49,11 @@ function Shell() {
   const langV = useLang()   // re-renders the whole shell when the language (pack) changes
   useEffect(() => { setNav(navigate) }, [navigate])
   useEffect(() => { applyPrefs(S.theme, S.accent) }, [S.theme, S.accent])
-  useEffect(() => { setLang(S.lang || 'en') }, [S.lang])
+  //// Neoffice — `BOOT.lang` en repli : avant la connexion il n'y a AUCUN état
+  //// synchronisé, donc `S.lang` est vide et l'écran de connexion s'affichait
+  //// en anglais chez un club romand. Le serveur, lui, connaît la langue du
+  //// site — il la transmet dans le boot de l'invité.
+  useEffect(() => { setLang(S.lang || BOOT.lang || 'en') }, [S.lang])
   useEffect(() => { document.documentElement.lang = S.lang || 'en' }, [langV, S.lang])
   // every tab/route change starts at the top of the page
   useEffect(() => { window.scrollTo(0, 0) }, [loc.pathname])
