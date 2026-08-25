@@ -123,6 +123,12 @@ function ClassRow({ s, busy, act }) {
     //// « 1 places left » en anglais. Le carnet fait déjà ce partage ailleurs
     //// ({0} routine / {0} routines) — la dernière place d'un cours est
     //// précisément le moment où le membre lit cette ligne.
+    //// Neoffice — des places libres ne suffisent pas : le serveur croise avec
+    //// la disponibilité réelle (heures d'ouverture, battements, intervenant
+    //// pris ailleurs). Une séance qui a lieu mais qu'on ne peut plus réserver
+    //// reste AU PLANNING — le membre veut savoir qu'elle existe — mais elle
+    //// n'invite plus à s'inscrire.
+    : s.bookable === false ? t('registration closed')
     : t(s.free === 1 ? '{0} place left' : '{0} places left', s.free)
 
   return <div className="item">
@@ -137,9 +143,14 @@ function ClassRow({ s, busy, act }) {
       : s.booked
         ? <Button size="sm" variant="ghost" disabled={busy}
             onClick={() => act(() => classCancel(s.booking.id), s.id)}>{t('Cancel')}</Button>
-        : <Button size="sm" variant={s.full ? 'ghost' : 'tinted'} disabled={busy}
-            onClick={() => act(() => classBook(s.id), s.id)}>
-            {s.full ? t('Waiting list') : t('Book')}
-          </Button>}
+        : (s.bookable === false && !s.full)
+          //// Ni bouton ni faux espoir : la séance a lieu, elle n'est plus
+          //// ouverte. Proposer « s'inscrire » ici, c'était le clic qui ne
+          //// faisait rien.
+          ? <span className="tag">{t('closed')}</span>
+          : <Button size="sm" variant={s.full ? 'ghost' : 'tinted'} disabled={busy}
+              onClick={() => act(() => classBook(s.id), s.id)}>
+              {s.full ? t('Waiting list') : t('Book')}
+            </Button>}
   </div>
 }
