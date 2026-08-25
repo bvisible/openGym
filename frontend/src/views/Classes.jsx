@@ -24,6 +24,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
+import { useUI } from '../store/useUI.js'
 import { t, dateLocale } from '../lib/i18n.js'
 import { classesWeek, classBook, classCancel } from '../lib/api.js'
 import Icon from '../components/Icon.jsx'
@@ -51,9 +52,20 @@ export default function Classes() {
     if (S.perms && S.perms.classes === false) nav('/home', { replace: true })
   }, [S.perms])
 
+  //// Neoffice — le `catch` manquait, et c'est ce que le membre voyait :
+  //// RIEN. Une inscription refusée par le serveur laissait l'écran identique
+  //// — même bouton, même compteur — parce que la promesse rejetée sautait le
+  //// rechargement sans que personne ne l'annonce. Un refus doit se dire : le
+  //// serveur explique déjà pourquoi (cours passé, complet, service payant),
+  //// il suffit de porter son message à l'écran.
   const act = async (fn, id) => {
     setBusy(id)
-    try { await fn(); load() } finally { setBusy(null) }
+    try {
+      await fn()
+      load()
+    } catch (e) {
+      useUI.getState().toast(e?.message || t('That did not go through. Try again in a moment.'))
+    } finally { setBusy(null) }
   }
 
   if (error) return <div className="narrow"><Hdr /><div className="card">{error}</div></div>
