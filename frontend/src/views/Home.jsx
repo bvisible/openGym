@@ -9,7 +9,7 @@ import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadSta
 import { useEffect } from 'react'
 import { programInbox } from '../lib/api.js'
 import { describeOffer } from '../lib/coach-program.js'
-import { classesMine } from '../lib/api.js'
+import { classesMine, challengesMine } from '../lib/api.js'
 import LineChart from '../components/LineChart.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
@@ -71,6 +71,16 @@ export default function Home() {
   //// se bloquent pas l'un l'autre, et un club sans cours ne paie même pas
   //// l'aller-retour — perms.classes tranche avant de sortir sur le réseau.
   const [classes, setClasses] = useState([])
+  //// Neoffice — les défis en cours. Chargés à part des cours : un club peut
+  //// avoir l'un sans l'autre, et un échec ici ne doit pas vider le planning.
+  const [challenges, setChallenges] = useState([])
+  useEffect(() => {
+    let alive = true
+    challengesMine()
+      .then(r => { if (alive) setChallenges((r.challenges || []).filter(c => c.running).slice(0, 3)) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [])
   useEffect(() => {
     if (S.perms && S.perms.classes === false) return
     let alive = true
@@ -131,6 +141,26 @@ export default function Home() {
           <div className="small dim">{c.start
             ? new Date(c.start).toLocaleString(dateLocale(), { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
             : ''}{c.coach ? ' \u00b7 ' + c.coach : ''}</div>
+        </div>
+      </div>)}
+    </div>}
+
+    {/* //// Neoffice — les défis en cours. Après les cours : un cours est un
+         rendez-vous qui se rate, un défi court sur des semaines et attend.
+         On montre le RANG du membre, jamais celui des autres — leur score est
+         de la donnée de santé, il se demande dans l'écran des défis. */}
+    {challenges.length > 0 && <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/challenges')}>
+      <div className="row between" style={{ marginBottom: 8 }}>
+        <div className="lbl2">{t('Challenges')}</div>
+        <span className="small acc">{t('See all')}</span>
+      </div>
+      {challenges.map(c => <div key={c.name} className="row" style={{ gap: 9, padding: '4px 0', minWidth: 0 }}>
+        <span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="trophy" /></span>
+        <div style={{ minWidth: 0 }}>
+          <div className="ttl">{c.title}</div>
+          <div className="small dim">{c.joined
+            ? (c.rank ? t('You are {0} of {1}', c.rank, c.of) : t('You are taking part'))
+            : t('Take part if you want to')}</div>
         </div>
       </div>)}
     </div>}
