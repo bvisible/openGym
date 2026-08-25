@@ -7,10 +7,19 @@
 //// deux touches. Pas de compte à créer, pas de second mot de passe, pas de
 //// bascule vers un autre site.
 ////
-//// ÉCART ASSUMÉ AU CAHIER : ce n'est pas un sixième onglet de la barre du bas.
-//// Elle en porte déjà cinq plus le bouton central ; un de plus rend les
-//// libellés illisibles sur un téléphone. On y arrive par la carte de l'accueil,
-//// qui a l'avantage de montrer le prochain cours sans qu'on aille le chercher.
+//// ON Y ARRIVE PAR DEUX CHEMINS, et c'est voulu : la carte de l'accueil, qui
+//// montre le prochain cours sans qu'on aille le chercher, et un ONGLET de la
+//// barre du bas (2026-08-25, demande de Jérémy) — les cours à gauche, le
+//// compte tout à droite.
+////
+//// Ce commentaire disait l'inverse : « un sixième onglet rendrait les libellés
+//// illisibles ». Mesuré depuis, plutôt que supposé : à sept colonnes sur un
+//// iPhone SE (320 px, le plus étroit), chaque onglet reçoit 45 px et SEUL
+//// « Cours collectifs » débordait. D'où deux clés — l'onglet dit « Cours », le
+//// titre de l'écran dit « Cours collectifs ».
+////
+//// L'onglet tient à DEUX conditions : le club propose des cours, et le membre
+//// veut les voir (réglage `classesTab`, Réglages → Général).
 
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -81,7 +90,11 @@ export default function Classes() {
 
 function Hdr() {
   return <div className="hdr">
-    <div><h1>{t('Classes')}</h1><div className="sub">{t('Book in two taps — you are already signed in')}</div></div>
+    {/* //// Neoffice — le TITRE dit « cours collectifs », l'ONGLET dit
+         « cours » : sept colonnes ne laissent pas la place à deux mots, et
+         l'amont utilise la même clé pour les deux — il n'a que des titres
+         courts. Deux clés, donc, une par usage. */}
+    <div><h1>{t('Group classes')}</h1><div className="sub">{t('Book in two taps — you are already signed in')}</div></div>
   </div>
 }
 

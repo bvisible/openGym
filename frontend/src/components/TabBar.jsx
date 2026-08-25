@@ -4,6 +4,8 @@ import { effectiveRoutine } from '../lib/history.js'
 import { todayISO } from '../lib/format.js'
 import { t } from '../lib/i18n.js'
 import Icon from './Icon.jsx'
+import { MOBILE } from '../lib/mobile.js'
+import { DEMO } from '../lib/demo.js'
 
 export default function TabBar({ onStart }) {
   const nav = useNavigate()
@@ -15,13 +17,15 @@ export default function TabBar({ onStart }) {
   const cur = loc.pathname.split('/')[1] || 'home'
   const on = k => cur === k || (cur === 'history' && k === 'stats')
 
-  //// Neoffice — l'onglet des cours tient à DEUX conditions, et il faut les
-  //// deux : le club propose des cours (perms.classes), et ce membre veut les
-  //// voir (classesTab, son réglage). Un club sans cours ne montre rien à
+  //// Neoffice — l'onglet des cours tient à TROIS conditions, et il faut les
+  //// trois : il y a un club derrière (les versions mobile autonome et démo
+  //// n'ont AUCUN serveur — l'onglet y mènerait à un écran qui ne peut rien
+  //// charger), ce club propose des cours (perms.classes), et ce membre veut
+  //// les voir (classesTab, son réglage). Un club sans cours ne montre rien à
   //// personne ; un membre qui n'y va jamais s'en débarrasse pour lui seul.
   //// Par défaut à vrai : `!== false` plutôt que `=== true`, sinon l'onglet
   //// disparaîtrait le temps que l'état arrive du serveur.
-  const showClasses = S.perms?.classes !== false && S.classesTab !== false
+  const showClasses = !MOBILE && !DEMO && S.perms?.classes !== false && S.classesTab !== false
 
   const startWorkout = () => {
     if (!S.active) {

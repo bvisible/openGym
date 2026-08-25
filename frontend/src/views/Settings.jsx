@@ -106,7 +106,7 @@ export default function Settings() {
       {/* //// Neoffice — l'onglet des cours dans la barre du bas. N'apparaît
            que si le club PROPOSE des cours : proposer de masquer quelque chose
            qui n'existe pas laisse croire qu'on l'a perdu. */}
-      {S.perms?.classes !== false && (
+      {!MOBILE && !DEMO && S.perms?.classes !== false && (
         <Row icon="calendar" iconTint="var(--acc)" title={t('Classes tab')}
           subtitle={t('Shows your club’s classes in the bottom bar.')}>
           <Switch checked={S.classesTab !== false}
