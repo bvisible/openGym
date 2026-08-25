@@ -32,6 +32,13 @@ export default {
   'on the waiting list': 'auf der Warteliste',
   'you are in': 'du bist dabei',
   'full — you can join the waiting list': 'ausgebucht — du kannst dich auf die Warteliste setzen',
+  //// Neoffice — status text for a class that must be paid to book: the
+  //// price when the server sends one, a plain fallback otherwise. A paid
+  //// class isn't closed — the member must see the price before the tap,
+  //// not after. New feature, not present upstream; pairs with 'Book and
+  //// pay' below.
+  '{0} {1} — pay to book': '{0} {1} — zum Buchen bezahlen',
+  'paid class': 'Kurs kostenpflichtig',
   '{0} places left': 'noch {0} Plätze frei',
   '{0} place left': 'noch {0} Platz frei',
   //// Neoffice — subtitle under the day header on the new date picker
@@ -53,11 +60,19 @@ export default {
   'closed': 'geschlossen',
   'Waiting list': 'Warteliste',
   'Book': 'Buchen',
+  //// Neoffice — button for a paid class (see the price status text
+  //// above): sends the member to the club's shop to pay instead of
+  //// booking directly. New feature, not present upstream.
+  'Book and pay': 'Buchen und bezahlen',
   //// Neoffice — the three info rows on the class detail sheet (opens when
   //// tapping a session in the schedule): who is leading it, how many are
   //// registered, and its booking status. New feature, not present upstream.
   'With': 'Mit',
   'Taking part': 'Teilnehmer',
+  //// Neoffice — fourth row on the class detail sheet, shown only when
+  //// the class is paid and has a price (see '{0} {1} — pay to book'
+  //// above). New feature, not present upstream.
+  'Price': 'Preis',
   'Status': 'Status',
   '{0} of {1}': '{0} von {1}',
   'Plan': 'Plan',

@@ -31,6 +31,13 @@ export default {
   'on the waiting list': 'in lista d’attesa',
   'you are in': 'sei dentro',
   'full — you can join the waiting list': 'al completo — puoi iscriverti alla lista d’attesa',
+  //// Neoffice — status text for a class that must be paid to book: the
+  //// price when the server sends one, a plain fallback otherwise. A paid
+  //// class isn't closed — the member must see the price before the tap,
+  //// not after. New feature, not present upstream; pairs with 'Book and
+  //// pay' below.
+  '{0} {1} — pay to book': '{0} {1} — da pagare per prenotare',
+  'paid class': 'lezione a pagamento',
   '{0} places left': '{0} posti rimasti',
   '{0} place left': '{0} posto rimasto',
   //// Neoffice — subtitle under the day header on the new date picker
@@ -52,11 +59,19 @@ export default {
   'closed': 'chiuso',
   'Waiting list': 'Lista d’attesa',
   'Book': 'Prenota',
+  //// Neoffice — button for a paid class (see the price status text
+  //// above): sends the member to the club's shop to pay instead of
+  //// booking directly. New feature, not present upstream.
+  'Book and pay': 'Prenota e paga',
   //// Neoffice — the three info rows on the class detail sheet (opens when
   //// tapping a session in the schedule): who is leading it, how many are
   //// registered, and its booking status. New feature, not present upstream.
   'With': 'Con',
   'Taking part': 'Partecipanti',
+  //// Neoffice — fourth row on the class detail sheet, shown only when
+  //// the class is paid and has a price (see '{0} {1} — pay to book'
+  //// above). New feature, not present upstream.
+  'Price': 'Prezzo',
   'Status': 'Stato',
   '{0} of {1}': '{0} di {1}',
   'Plan': 'Piano',

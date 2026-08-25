@@ -31,6 +31,13 @@ export default {
   'on the waiting list': '候补中',
   'you are in': '已确认',
   'full — you can join the waiting list': '已满 — 你可以加入候补名单',
+  //// Neoffice — status text for a class that must be paid to book: the
+  //// price when the server sends one, a plain fallback otherwise. A paid
+  //// class isn't closed — the member must see the price before the tap,
+  //// not after. New feature, not present upstream; pairs with 'Book and
+  //// pay' below.
+  '{0} {1} — pay to book': '{0} {1} — 需付费预约',
+  'paid class': '付费课程',
   '{0} places left': '剩余 {0} 个名额',
   '{0} place left': '剩余 {0} 个名额',
   //// Neoffice — subtitle under the day header on the new date picker
@@ -52,11 +59,19 @@ export default {
   'closed': '已截止',
   'Waiting list': '候补名单',
   'Book': '预约',
+  //// Neoffice — button for a paid class (see the price status text
+  //// above): sends the member to the club's shop to pay instead of
+  //// booking directly. New feature, not present upstream.
+  'Book and pay': '预约并付款',
   //// Neoffice — the three info rows on the class detail sheet (opens when
   //// tapping a session in the schedule): who is leading it, how many are
   //// registered, and its booking status. New feature, not present upstream.
   'With': '教练',
   'Taking part': '参与者',
+  //// Neoffice — fourth row on the class detail sheet, shown only when
+  //// the class is paid and has a price (see '{0} {1} — pay to book'
+  //// above). New feature, not present upstream.
+  'Price': '价格',
   'Status': '状态',
   '{0} of {1}': '{0}/{1}',
   'Plan': '计划',

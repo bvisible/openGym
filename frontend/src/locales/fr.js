@@ -779,6 +779,13 @@ export default {
   //// instructor elsewhere). Pairs with the 'closed' tag near 'done' below.
   'registration closed': 'inscriptions closes',
   'full — you can join the waiting list': 'complet — liste d’attente disponible',
+  //// Neoffice — status text for a class that must be paid to book: the
+  //// price when the server sends one, a plain fallback otherwise. A paid
+  //// class isn't closed — the member must see the price before the tap,
+  //// not after. New feature, not present upstream; pairs with 'Book and
+  //// pay' below.
+  '{0} {1} — pay to book': '{0} {1} — à payer pour réserver',
+  'paid class': 'cours payant',
   'you are in': 'inscrit',
   'on the waiting list': 'sur liste d’attente',
   'done': 'terminé',
@@ -787,6 +794,10 @@ export default {
   //// click the server would refuse.
   'closed': 'fermé',
   'Book': 'S’inscrire',
+  //// Neoffice — button for a paid class (see the price status text
+  //// above): sends the member to the club's shop to pay instead of
+  //// booking directly. New feature, not present upstream.
+  'Book and pay': 'Réserver et payer',
   'Waiting list': 'Liste d’attente',
   'Your next classes': 'Vos prochains cours',
   'See the schedule': 'Voir le planning',
@@ -795,6 +806,10 @@ export default {
   //// registered, and its booking status. New feature, not present upstream.
   'With': 'Avec',
   'Taking part': 'Participants',
+  //// Neoffice — fourth row on the class detail sheet, shown only when
+  //// the class is paid and has a price (see '{0} {1} — pay to book'
+  //// above). New feature, not present upstream.
+  'Price': 'Prix',
   'Status': 'Statut',
   '{0} of {1}': '{0} sur {1}',
   'Your coach writes your plan. You can train it and log your sets — the routines themselves are theirs to change.': 'Votre coach écrit votre plan. Vous pouvez l’entraîner et journaliser vos séries — les routines, elles, lui appartiennent.',

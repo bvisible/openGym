@@ -31,6 +31,13 @@ export default {
   'on the waiting list': 'प्रतीक्षा सूची में',
   'you are in': 'आप शामिल हैं',
   'full — you can join the waiting list': 'फुल — आप प्रतीक्षा सूची में शामिल हो सकते हैं',
+  //// Neoffice — status text for a class that must be paid to book: the
+  //// price when the server sends one, a plain fallback otherwise. A paid
+  //// class isn't closed — the member must see the price before the tap,
+  //// not after. New feature, not present upstream; pairs with 'Book and
+  //// pay' below.
+  '{0} {1} — pay to book': '{0} {1} — बुक करने के लिए भुगतान करें',
+  'paid class': 'सशुल्क कक्षा',
   '{0} places left': '{0} सीटें बाकी हैं',
   '{0} place left': '{0} सीट बाकी है',
   //// Neoffice — subtitle under the day header on the new date picker
@@ -52,11 +59,19 @@ export default {
   'closed': 'बंद',
   'Waiting list': 'प्रतीक्षा सूची',
   'Book': 'बुक करें',
+  //// Neoffice — button for a paid class (see the price status text
+  //// above): sends the member to the club's shop to pay instead of
+  //// booking directly. New feature, not present upstream.
+  'Book and pay': 'बुक और भुगतान करें',
   //// Neoffice — the three info rows on the class detail sheet (opens when
   //// tapping a session in the schedule): who is leading it, how many are
   //// registered, and its booking status. New feature, not present upstream.
   'With': 'प्रशिक्षक',
   'Taking part': 'प्रतिभागी',
+  //// Neoffice — fourth row on the class detail sheet, shown only when
+  //// the class is paid and has a price (see '{0} {1} — pay to book'
+  //// above). New feature, not present upstream.
+  'Price': 'मूल्य',
   'Status': 'स्थिति',
   '{0} of {1}': '{1} में से {0}',
   'Plan': 'योजना',

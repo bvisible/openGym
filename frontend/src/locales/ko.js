@@ -31,6 +31,13 @@ export default {
   'on the waiting list': '대기 중',
   'you are in': '참석 확정',
   'full — you can join the waiting list': '마감 — 대기 명단에 등록할 수 있어요',
+  //// Neoffice — status text for a class that must be paid to book: the
+  //// price when the server sends one, a plain fallback otherwise. A paid
+  //// class isn't closed — the member must see the price before the tap,
+  //// not after. New feature, not present upstream; pairs with 'Book and
+  //// pay' below.
+  '{0} {1} — pay to book': '{0} {1} — 예약 시 결제 필요',
+  'paid class': '유료 수업',
   '{0} places left': '{0}자리 남음',
   '{0} place left': '{0}자리 남음',
   //// Neoffice — subtitle under the day header on the new date picker
@@ -52,11 +59,19 @@ export default {
   'closed': '마감',
   'Waiting list': '대기 명단',
   'Book': '예약하기',
+  //// Neoffice — button for a paid class (see the price status text
+  //// above): sends the member to the club's shop to pay instead of
+  //// booking directly. New feature, not present upstream.
+  'Book and pay': '예약 및 결제',
   //// Neoffice — the three info rows on the class detail sheet (opens when
   //// tapping a session in the schedule): who is leading it, how many are
   //// registered, and its booking status. New feature, not present upstream.
   'With': '강사',
   'Taking part': '참가자',
+  //// Neoffice — fourth row on the class detail sheet, shown only when
+  //// the class is paid and has a price (see '{0} {1} — pay to book'
+  //// above). New feature, not present upstream.
+  'Price': '가격',
   'Status': '상태',
   '{0} of {1}': '{0}/{1}',
   'Plan': '계획',
