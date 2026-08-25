@@ -1011,7 +1011,7 @@ h4.sec{
 .pay-amount {
   display: flex; align-items: baseline; justify-content: space-between;
   padding: 14px 16px; margin-bottom: 16px;
-  border: 1px solid var(--line); border-radius: 14px; background: var(--card);
+  border: 1px solid var(--sep); border-radius: 14px; background: var(--surface-2);
 }
 .pay-amount b { font-size: 26px; letter-spacing: -0.02em; }
 .pay-methods .pay-m {
@@ -1024,7 +1024,7 @@ h4.sec{
    ne sait pas lequel des cinq est en train de répondre. */
 .pay-m.waiting { opacity: 1 !important; }
 .pay-m.waiting .lrow-i {
-  border-radius: 50%; border: 2px solid var(--line); border-top-color: var(--accent);
+  border-radius: 50%; border: 2px solid var(--sep); border-top-color: var(--acc);
   animation: spin .7s linear infinite;
 }
 .pay-m.waiting .lrow-i > * { display: none; }
@@ -1042,19 +1042,19 @@ h4.sec{
 .pay-qr .pair b { font-size: 22px; letter-spacing: .14em; }
 .pay-wait {
   display: flex; align-items: center; justify-content: center; gap: 9px;
-  padding: 12px; color: var(--muted); font-size: 14px;
+  padding: 12px; color: var(--label-2); font-size: 14px;
 }
 .pay-wait .spin {
   width: 15px; height: 15px; border-radius: 50%;
-  border: 2px solid var(--line); border-top-color: var(--accent);
+  border: 2px solid var(--sep); border-top-color: var(--acc);
   animation: spin .7s linear infinite;
 }
 .pay-done { text-align: center; padding: 22px 0 26px; }
 .pay-done .ico {
   width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%;
   display: grid; place-items: center;
-  background: var(--ok-bg, rgba(52,168,96,.12)); color: var(--ok, #34a860);
+  background: var(--acc-soft); color: var(--acc);
 }
 .pay-done .ico svg { width: 28px; height: 28px; }
 .pay-done .tt { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
-.pay-done .ss { color: var(--muted); font-size: 14px; }
+.pay-done .ss { color: var(--label-2); font-size: 14px; }

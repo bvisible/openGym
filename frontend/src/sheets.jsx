@@ -1263,9 +1263,14 @@ function PaySheet({ s, close, onDone }) {
       {data.methods.map(m => (
         <button key={m.id} className={'item pay-m' + (busy === m.id ? ' waiting' : '')}
           disabled={!!busy} onClick={() => choisir(m)}>
+          {/* //// Le logo du prestataire quand il en fournit un, sinon une
+               icône qui dit le GESTE : une facture qu'on recevra, un code à
+               scanner, une page sécurisée. Le même pictogramme sur les cinq
+               n'aidait personne à choisir. */}
           <span className="lrow-i">{m.logo
             ? <img src={m.logo} alt="" />
-            : <Icon name={m.gateway_type === 'facture' ? 'clipboard' : 'scale'} />}</span>
+            : <Icon name={m.gateway_type === 'facture' ? 'clipboard'
+                : m.gateway_type === 'twint' ? 'bolt' : 'lock'} />}</span>
           <div className="grow">
             <div className="tt">{m.title}</div>
             {m.description && <div className="ss">{m.description}</div>}
@@ -1274,7 +1279,7 @@ function PaySheet({ s, close, onDone }) {
             {m.gateway_type === 'facture' && !m.description &&
               <div className="ss">{t('Book now, pay on the invoice')}</div>}
           </div>
-          <Icon name="chevron" />
+          <Icon name="chevronRight" />
         </button>
       ))}
     </div>
