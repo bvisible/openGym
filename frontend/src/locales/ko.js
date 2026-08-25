@@ -52,6 +52,13 @@ export default {
   'closed': '마감',
   'Waiting list': '대기 명단',
   'Book': '예약하기',
+  //// Neoffice — the three info rows on the class detail sheet (opens when
+  //// tapping a session in the schedule): who is leading it, how many are
+  //// registered, and its booking status. New feature, not present upstream.
+  'With': '강사',
+  'Taking part': '참가자',
+  'Status': '상태',
+  '{0} of {1}': '{0}/{1}',
   'Plan': '계획',
   'Today': '오늘',
   'Home': '홈',

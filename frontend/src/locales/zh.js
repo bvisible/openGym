@@ -52,6 +52,13 @@ export default {
   'closed': '已截止',
   'Waiting list': '候补名单',
   'Book': '预约',
+  //// Neoffice — the three info rows on the class detail sheet (opens when
+  //// tapping a session in the schedule): who is leading it, how many are
+  //// registered, and its booking status. New feature, not present upstream.
+  'With': '教练',
+  'Taking part': '参与者',
+  'Status': '状态',
+  '{0} of {1}': '{0}/{1}',
   'Plan': '计划',
   'Today': '今天',
   'Home': '首页',

@@ -790,6 +790,13 @@ export default {
   'Waiting list': 'Liste d’attente',
   'Your next classes': 'Vos prochains cours',
   'See the schedule': 'Voir le planning',
+  //// Neoffice — the three info rows on the class detail sheet (opens when
+  //// tapping a session in the schedule): who is leading it, how many are
+  //// registered, and its booking status. New feature, not present upstream.
+  'With': 'Avec',
+  'Taking part': 'Participants',
+  'Status': 'Statut',
+  '{0} of {1}': '{0} sur {1}',
   'Your coach writes your plan. You can train it and log your sets — the routines themselves are theirs to change.': 'Votre coach écrit votre plan. Vous pouvez l’entraîner et journaliser vos séries — les routines, elles, lui appartiennent.',
   'This replaces the routine you got from an earlier version of this program.': 'Ceci remplace la routine que vous avez reçue d’une version précédente de ce programme.',
   'This replaces the {0} routines you got from an earlier version of this program.': 'Ceci remplace les {0} routines que vous avez reçues d’une version précédente de ce programme.',

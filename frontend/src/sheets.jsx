@@ -1150,6 +1150,11 @@ function ClassSheet({ s, act, close }) {
       {/* //// L'état vient du serveur, pas d'un calcul local : « il reste de la
            place » et « on peut encore réserver » sont deux choses, et c'est la
            seconde qui compte ici. */}
+      {/* //// Neoffice — le prix, quand il y en a un. Sur la fiche il a sa
+           propre ligne : c'est là qu'on décide, et un montant glissé dans une
+           phrase d'état se lit mal. */}
+      {s.included === false && s.price ? <Row2 icon="scale" label={t('Price')}
+        value={`${Number(s.price) % 1 === 0 ? Number(s.price) : Number(s.price).toFixed(2)} ${s.currency || ''}`.trim()} /> : null}
       <Row2 icon={s.booked ? 'check' : s.bookable === false ? 'lock' : 'calendar'}
         label={t('Status')}
         value={s.booked ? (waiting ? t('on the waiting list') : t('you are in'))
@@ -1165,6 +1170,13 @@ function ClassSheet({ s, act, close }) {
 
     {!s.past && (s.booked
       ? <Button variant="ghost" onClick={() => run(() => classCancel(s.booking.id))}>{t('Cancel')}</Button>
+      //// Le paiement passe par la boutique du club : le carnet n'encaisse pas.
+      //// On y va dans le MÊME onglet — le membre est déjà connecté, il
+      //// retombe dans son panier et pas sur une page de connexion.
+      : s.included === false && s.payUrl
+        ? <Button variant="primary" onClick={() => { close(); window.location.href = s.payUrl }}>
+            {t('Book and pay')}
+          </Button>
       : s.bookable === false && !s.full
         ? <div className="dim small" style={{ textAlign: 'center' }}>{t('registration closed')}</div>
         : <Button variant="primary" onClick={() => run(() => classBook(s.id))}>

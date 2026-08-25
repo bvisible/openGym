@@ -53,6 +53,13 @@ export default {
   'closed': 'geschlossen',
   'Waiting list': 'Warteliste',
   'Book': 'Buchen',
+  //// Neoffice — the three info rows on the class detail sheet (opens when
+  //// tapping a session in the schedule): who is leading it, how many are
+  //// registered, and its booking status. New feature, not present upstream.
+  'With': 'Mit',
+  'Taking part': 'Teilnehmer',
+  'Status': 'Status',
+  '{0} of {1}': '{0} von {1}',
   'Plan': 'Plan',
   'Today': 'Heute',
   'Home': 'Start',

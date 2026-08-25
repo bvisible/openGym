@@ -33,6 +33,23 @@ import { Button } from '../components/ui.jsx'
 
 const dayKey = iso => (iso || '').slice(0, 10)
 
+//// Neoffice — un cours qu'on PEUT encore prendre. Payant compte comme
+//// ouvert : le membre a le choix, simplement il sortira sa carte. Ne compter
+//// que le gratuit ferait afficher « rien d'ouvert » à quelqu'un qui a trois
+//// cours devant lui.
+//// Au niveau module et non dans le composant : le sélecteur de jour s'en sert
+//// aussi pour ses points, et deux définitions divergeraient au premier
+//// changement.
+const takeable = x => !x.booked && !x.past
+  && (x.bookable !== false || (x.included === false && x.payUrl))
+
+//// Un prix se lit « 28.– », pas « 28 » ni « 28.00 ». Les décimales ne
+//// s'affichent que si elles existent : un cours à 28.50 les mérite, un cours
+//// à 28 non.
+const fmtPrice = n => Number(n) % 1 === 0
+  ? String(Number(n))
+  : Number(n).toFixed(2)
+
 export default function Classes() {
   const nav = useNavigate()
   const S = useStore(s => s.S)
@@ -102,14 +119,14 @@ export default function Classes() {
   //// oblige à chercher soi-même où sont les cours, ce qui est précisément la
   //// corvée que ce sélecteur doit supprimer. À défaut, le premier jour à
   //// venir — un planning entièrement complet reste un planning à consulter.
-  const openOn = d => (byDay.get(d) || []).some(x => x.bookable !== false && !x.booked && !x.past)
+  const openOn = d => (byDay.get(d) || []).some(takeable)
   const day = days.includes(picked) ? picked
     : days.find(d => d >= todayKey() && openOn(d))
       || days.find(d => d >= todayKey())
       || days[0]
 
   const items = byDay.get(day) || []
-  const free = items.filter(s => s.bookable !== false && !s.booked && !s.past).length
+  const free = items.filter(takeable).length
 
   return <div className="narrow">
     <Hdr />
@@ -184,7 +201,7 @@ function DayPicker({ days, day, byDay, onPick }) {
     </div>
     <div className="daypick" ref={strip} onScroll={refreshMonth}>
       {days.map(d => {
-        const n = (byDay.get(d) || []).filter(s => s.bookable !== false && !s.booked && !s.past).length
+        const n = (byDay.get(d) || []).filter(takeable).length
         const dt = new Date(d + 'T00:00:00')
         return <button key={d} data-day={d} className={'wday' + (d === day ? ' today' : '')} onClick={() => onPick(d)}>
           <div className="lbl">{dt.toLocaleDateString(dateLocale(), { weekday: 'short' })}</div>
@@ -233,6 +250,12 @@ function ClassRow({ s, busy, act }) {
     //// pris ailleurs). Une séance qui a lieu mais qu'on ne peut plus réserver
     //// reste AU PLANNING — le membre veut savoir qu'elle existe — mais elle
     //// n'invite plus à s'inscrire.
+    //// Neoffice — un cours PAYANT n'est pas un cours fermé. Le membre voyait
+    //// « inscriptions closes » sur un cours qu'il pouvait très bien prendre,
+    //// simplement en payant — et il ne savait ni que c'était payant, ni
+    //// combien. Le prix se dit avant le clic, pas après.
+    : s.included === false && s.payUrl
+      ? (s.price ? t('{0} {1} — pay to book', fmtPrice(s.price), s.currency || '') : t('paid class'))
     : s.bookable === false ? t('registration closed')
     : t(s.free === 1 ? '{0} place left' : '{0} places left', s.free)
 
@@ -254,6 +277,14 @@ function ClassRow({ s, busy, act }) {
         //// simplement grisé ne dit pas si l'application a compris le clic.
         ? <Button size="sm" variant="ghost" disabled={busy} className={busy ? 'waiting' : ''}
             onClick={e => { e.stopPropagation(); act(() => classCancel(s.booking.id), s.id) }}>{t('Cancel')}</Button>
+        : (s.included === false && s.payUrl && !s.past)
+          //// Le carnet n'encaisse pas : il emmène au guichet. Même onglet,
+          //// même session — le membre est déjà connecté, il retombe dans son
+          //// panier et pas sur une page de connexion.
+          ? <Button size="sm" variant="tinted"
+              onClick={e => { e.stopPropagation(); window.location.href = s.payUrl }}>
+              {t('Book and pay')}
+            </Button>
         : (s.bookable === false && !s.full)
           //// Ni bouton ni faux espoir : la séance a lieu, elle n'est plus
           //// ouverte. Proposer « s'inscrire » ici, c'était le clic qui ne
