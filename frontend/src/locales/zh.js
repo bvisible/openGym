@@ -677,9 +677,9 @@ export default {
   //// Neoffice — the in-app class payment screen.
   'Book now, pay on the invoice': '立即预约，通过账单付款',
   'Finish the payment in the window that just opened.': '请在刚打开的窗口中完成付款。',
-  'Holding your place…': '正在为您保留名额…',
-  'How would you like to pay?': '您希望如何付款？',
-  'No online payment is set up. Ask your club.': '尚未设置在线付款，请联系您的俱乐部。',
+  'Holding your place…': '正在为你保留名额…',
+  'How would you like to pay?': '你希望如何付款？',
+  'No online payment is set up. Ask your club.': '尚未设置在线付款，请联系你的俱乐部。',
   'Open the payment page again': '重新打开付款页面',
   'Pay later': '稍后付款',
   'Payment received': '已收到付款',
@@ -691,7 +691,7 @@ export default {
   'The invoice will follow — nothing to pay right now.': '账单稍后发送——目前无需付款。',
   'This screen updates on its own once it goes through.': '付款成功后，此屏幕会自动更新。',
   'To pay': '待付款',
-  'Waiting for your payment…': '正在等待您的付款…',
-  'Your place is booked': '您的名额已预约',
+  'Waiting for your payment…': '正在等待你的付款…',
+  'Your place is booked': '你的名额已预约',
   'or enter this code in the app': '或在应用中输入此代码',
 }
