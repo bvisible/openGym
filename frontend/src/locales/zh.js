@@ -579,5 +579,9 @@ export default {
   'secondary': '次要',
   'No exercises with an estimated 1RM yet.': '暂无估算1RM的动作。',
   'Tap a muscle to see its exercises.': '点击肌肉查看其动作。',
-  'Unpair': '取消组合'
+  'Unpair': '取消组合',
+
+  '{0}-week cycle': '{0} 周周期',
+  'Week {0} of {1} — {2}': '第 {0} 周（共 {1} 周）—{2}',
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': '你的安排逐周跟随这个计划：每周开始时自动变化，持续 {0} 周后重新开始。'
 }

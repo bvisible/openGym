@@ -579,5 +579,9 @@ export default {
   'secondary': '보조',
   'No exercises with an estimated 1RM yet.': '추정 1RM이 있는 운동이 아직 없습니다.',
   'Tap a muscle to see its exercises.': '근육을 눌러 해당 운동을 확인하세요.',
-  'Unpair': '분리'
+  'Unpair': '분리',
+
+  '{0}-week cycle': '{0}주 주기',
+  'Week {0} of {1} — {2}': '{1}주 중 {0}주차 — {2}',
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': '일정이 이 프로그램을 주별로 따라갑니다: 매주 시작할 때마다 저절로 바뀌고, {0}주 후에는 처음부터 다시 시작됩니다.'
 }

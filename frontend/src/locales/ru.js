@@ -579,5 +579,9 @@ export default {
   'secondary': 'вспомогательная',
   'No exercises with an estimated 1RM yet.': 'Пока нет упражнений с расчётным 1ПМ.',
   'Tap a muscle to see its exercises.': 'Нажмите на мышцу, чтобы увидеть её упражнения.',
-  'Unpair': 'Разъединить'
+  'Unpair': 'Разъединить',
+
+  '{0}-week cycle': '{0}-недельный цикл',
+  'Week {0} of {1} — {2}': 'Неделя {0} из {1} — {2}',
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'Твоё расписание следует этой программе неделя за неделей: оно меняется само в начале каждой недели, на протяжении {0} недель, а затем начинается заново.'
 }

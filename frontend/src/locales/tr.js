@@ -579,5 +579,9 @@ export default {
   'secondary': 'ikincil',
   'No exercises with an estimated 1RM yet.': 'Henüz tahmini 1RM olan egzersiz yok.',
   'Tap a muscle to see its exercises.': 'Egzersizlerini görmek için bir kas seçin.',
-  'Unpair': 'Ayır'
+  'Unpair': 'Ayır',
+
+  '{0}-week cycle': '{0} haftalık döngü',
+  'Week {0} of {1} — {2}': '{1} haftanın {0}. haftası — {2}',
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'Planın bu programı hafta hafta izliyor: her haftanın başında kendiliğinden değişiyor, {0} hafta boyunca, sonra baştan başlıyor.'
 }

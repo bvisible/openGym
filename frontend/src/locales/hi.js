@@ -579,5 +579,9 @@ export default {
   'secondary': 'द्वितीयक',
   'No exercises with an estimated 1RM yet.': 'अभी तक अनुमानित 1RM वाला कोई व्यायाम नहीं।',
   'Tap a muscle to see its exercises.': 'व्यायाम देखने के लिए किसी मांसपेशी पर टैप करें।',
-  'Unpair': 'अलग करें'
+  'Unpair': 'अलग करें',
+
+  '{0}-week cycle': '{0} सप्ताह का चक्र',
+  'Week {0} of {1} — {2}': '{1} सप्ताहों में से {0}वां — {2}',
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'आपका कार्यक्रम इस प्रोग्राम को सप्ताह दर सप्ताह फॉलो करता है: यह हर सप्ताह की शुरुआत में अपने आप बदल जाता है, {0} सप्ताह तक, फिर दोबारा शुरू हो जाता है।'
 }

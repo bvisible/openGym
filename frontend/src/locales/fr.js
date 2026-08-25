@@ -685,6 +685,9 @@ export default {
 
   //// Neoffice — le coaching : l'offre de programme d'un coach.
   'Week {0} of {1} of your program': 'Semaine {0} sur {1} de votre programme',
+  '{0}-week cycle': 'cycle de {0} semaines',
+  'Week {0} of {1} — {2}': 'Semaine {0} sur {1} — {2}',
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'Votre planning suit ce programme semaine par semaine : il change tout seul au début de chaque semaine, sur {0} semaines, puis recommence.',
 
   //// Neoffice — les tests physiques et la composition corporelle.
   'Your goals': 'Vos objectifs',

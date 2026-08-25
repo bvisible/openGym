@@ -579,5 +579,9 @@ export default {
   'secondary': 'secundario',
   'No exercises with an estimated 1RM yet.': 'Aún no hay ejercicios con 1RM estimado.',
   'Tap a muscle to see its exercises.': 'Toca un músculo para ver sus ejercicios.',
-  'Unpair': 'Desvincular'
+  'Unpair': 'Desvincular',
+
+  '{0}-week cycle': 'ciclo de {0} semanas',
+  'Week {0} of {1} — {2}': 'Semana {0} de {1} — {2}',
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'Tu horario sigue este programa semana a semana: cambia por sí solo al principio de cada semana, durante {0} semanas, y luego vuelve a empezar.'
 }
