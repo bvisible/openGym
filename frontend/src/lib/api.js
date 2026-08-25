@@ -173,7 +173,9 @@ export const wallet = () => api(M.wallet)
 //// le paiement, `payState` dit où il en est.
 export const payStart = (session) =>
   api(M.payStart, { method: 'POST', body: JSON.stringify({ session }) })
-export const payWith = (invoice, method) =>
-  api(M.payWith, { method: 'POST', body: JSON.stringify({ invoice, method }) })
+//// `payWith` prend la RÉSERVATION, pas une facture : il n'en existe pas
+//// encore. C'est le choix du moyen qui la lève — voir `wallet.pay_with`.
+export const payWith = (booking, method) =>
+  api(M.payWith, { method: 'POST', body: JSON.stringify({ booking, method }) })
 export const payState = ({ intent, invoice }) =>
   api(M.payState + '?' + new URLSearchParams(intent ? { intent } : { invoice }))

@@ -1141,14 +1141,16 @@ function doFinishWorkout() {
 
 function PaySheet({ s, close, onDone }) {
   const [step, setStep] = useState('loading')   // loading · choose · qr · waiting · done · error
-  const [data, setData] = useState(null)        // {booking, invoice, amount, currency, methods}
+  const [data, setData] = useState(null)        // {booking, amount, currency, methods}
   const [action, setAction] = useState(null)    // la réponse du prestataire
   const [err, setErr] = useState(null)
   const [busy, setBusy] = useState(null)
 
-  //// Le créneau est tenu DÈS l'ouverture de l'écran, avant même que le membre
-  //// ait choisi son moyen. Sinon il choisit, il paie, et sa place est partie
-  //// entre-temps — on aurait encaissé pour rien.
+  //// Le créneau est tenu DÈS l'ouverture, avant même le choix du moyen :
+  //// sinon le membre choisit, paie, et sa place est partie entre-temps — on
+  //// aurait encaissé pour rien. Mais c'est une TENUE seulement : aucune
+  //// facture n'existe tant qu'il n'a rien choisi, donc fermer cet écran ne
+  //// laisse ni réservation ferme ni montant dû.
   useEffect(() => {
     let vivant = true
     payStart(s.id)
@@ -1161,22 +1163,22 @@ function PaySheet({ s, close, onDone }) {
   //// répondu ; la facture dit ce que la maison a encaissé. Un refus de code PIN
   //// laisse une intention échouée sur une facture payée à la 2e tentative.
   useEffect(() => {
-    if (step !== 'qr' && step !== 'waiting') return
+    if ((step !== 'qr' && step !== 'waiting') || !action?.invoice) return
     let vivant = true
     const tic = setInterval(async () => {
       try {
-        const r = await payState({ invoice: data.invoice })
+        const r = await payState({ invoice: action.invoice })
         if (!vivant) return
         if (r.state === 'paid') { setStep('done'); onDone && onDone() }
       } catch { /* une interrogation ratée n'est pas un échec de paiement */ }
     }, 3000)
     return () => { vivant = false; clearInterval(tic) }
-  }, [step, data])
+  }, [step, action])
 
   const choisir = async (moy) => {
     setBusy(moy.id)
     try {
-      const r = await payWith(data.invoice, moy.id)
+      const r = await payWith(data.booking, moy.id)
       setAction({ ...r, title: moy.title })
       if (r.action === 'qr') setStep('qr')
       else if (r.action === 'redirect') {
