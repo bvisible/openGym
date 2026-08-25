@@ -1058,3 +1058,54 @@ h4.sec{
 .pay-done .ico svg { width: 28px; height: 28px; }
 .pay-done .tt { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
 .pay-done .ss { color: var(--label-2); font-size: 14px; }
+
+/* //// Neoffice — l'écran de connexion du carnet. Il doit ressembler à l'app,
+   pas à un formulaire d'administration : c'est la première chose qu'un membre
+   voit, et jusqu'ici c'était la page desk de l'ERP. */
+.signin {
+  max-width: 380px; margin: 0 auto;
+  padding: max(9vh, 48px) 22px calc(40px + var(--sab));
+  display: flex; flex-direction: column;
+}
+.signin-mark {
+  width: 62px; height: 62px; margin: 0 auto 20px; border-radius: 18px;
+  display: grid; place-items: center;
+  background: var(--acc-soft); color: var(--acc);
+}
+.signin-mark svg { width: 30px; height: 30px; }
+.signin h1 { text-align: center; font-size: 25px; margin: 0 0 6px; letter-spacing: -0.02em; }
+.signin .sub {
+  text-align: center; color: var(--label-2); font-size: 14.5px;
+  line-height: 1.5; margin: 0 0 26px;
+}
+.signin form { display: flex; flex-direction: column; gap: 13px; }
+.signin-f { display: flex; flex-direction: column; gap: 6px; }
+.signin-f > span { font-size: 13px; color: var(--label-2); }
+/* Le champ est haut de 46px : sur un téléphone, une cible plus petite se rate,
+   et un formulaire de connexion raté fait abandonner. */
+.signin-f > input {
+  height: 46px; padding: 0 14px; font-size: 16px;   /* 16px = iOS ne zoome pas */
+  border: 1px solid var(--sep); border-radius: 12px;
+  background: var(--surface-2); color: var(--label); font-family: inherit;
+  -webkit-appearance: none; appearance: none;
+}
+.signin-f > input:focus {
+  outline: none; border-color: var(--acc);
+  box-shadow: 0 0 0 3px var(--acc-soft);
+}
+.signin-check {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 14px; color: var(--label-2); padding: 2px 0 4px; cursor: pointer;
+}
+.signin-check input { width: 17px; height: 17px; accent-color: var(--acc); }
+.signin-err {
+  padding: 10px 13px; border-radius: 11px; font-size: 14px; line-height: 1.45;
+  background: color-mix(in srgb, var(--red, #e5484d) 12%, transparent);
+  color: var(--red, #e5484d);
+}
+.signin-link {
+  margin: 18px auto 0; background: none; border: 0; font: inherit;
+  font-size: 14px; color: var(--label-2); text-decoration: underline;
+  text-underline-offset: 3px; cursor: pointer; padding: 6px;
+}
+.signin-link:hover { color: var(--label); }

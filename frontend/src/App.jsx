@@ -10,6 +10,8 @@ import { initBackButton } from './lib/back.js'
 import { useWakeLock } from './lib/wakelock.js'
 import { startFlow } from './sheets.jsx'
 import Icon from './components/Icon.jsx'
+import SignIn from './views/SignIn.jsx'
+import { BOOT } from './lib/api.js'
 import TabBar from './components/TabBar.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Modals from './components/Modals.jsx'
@@ -54,9 +56,13 @@ function Shell() {
   // bound to the workout, not to the route — checking Stats mid-session keeps the screen on
   useWakeLock(!!S.active && S.keepAwake !== false)
 
-  //// Neoffice — il n'y a pas d'état non authentifié à rendre : /gym redirige
-  //// un visiteur anonyme vers /login avant que ce code ne charge, et le membre
-  //// revient déjà connecté. `authed` ne garde donc que l'écran de démarrage.
+  //// Neoffice — il Y A désormais un état non authentifié à rendre. `/gym` ne
+  //// renvoie plus l'anonyme sur la page de connexion du desk : il lui sert
+  //// l'app, qui affiche son propre écran de connexion. Ce que ça change est
+  //// l'apparence, pas l'authentification — le formulaire poste sur
+  //// `/api/method/login`. Voir `views/SignIn.jsx`.
+  if (BOOT.signed_in === false) return <div id="app"><SignIn /></div>
+
   const authed = user || isGuest
   if (!ready && !authed) return (
     <div id="app">

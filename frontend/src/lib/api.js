@@ -12,7 +12,7 @@
 
 // Boot data injected by neoffice_gym/www/gym.py — the page hands us who we are
 // and the CSRF token, so the app never has to ask for either.
-const BOOT = (typeof window !== 'undefined' && window.gym_boot) || {}
+export const BOOT = (typeof window !== 'undefined' && window.gym_boot) || {}
 
 export const IS_APPLE = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)
 export const IS_ANDROID = /Android/.test(navigator.userAgent)
@@ -39,6 +39,13 @@ const M = {
   payStart: '/api/method/neoffice_gym.api.wallet.start',
   payWith: '/api/method/neoffice_gym.api.wallet.pay_with',
   payState: '/api/method/neoffice_gym.api.wallet.state',
+  //// Neoffice — la connexion. `login` est l'endpoint de FRAPPE : verrouillage
+  //// après échecs, restriction d'IP, mot de passe expiré et double facteur y
+  //// vivent, et s'appliquent quel que soit l'appelant. Les deux autres sont à
+  //// nous et ne touchent jamais un mot de passe.
+  login: '/api/method/login',
+  rememberMe: '/api/method/neoffice_gym.api.session.remember_me',
+  forgotPassword: '/api/method/neoffice_gym.api.session.forgot_password',
   //// Neoffice — les évaluations physiques. Lecture seule côté membre : c'est
   //// le coach qui mesure, le carnet ne fait que montrer.
   assessmentsMine: '/api/method/neoffice_gym.api.assessment.mine',
@@ -166,6 +173,15 @@ export const myCoach = () => api(M.myCoach)
 export const openChat = () =>
   api(M.openChat, { method: 'POST', body: '{}' })
 export const wallet = () => api(M.wallet)
+
+//// Neoffice — se connecter SANS quitter le carnet. `signIn` poste les
+//// identifiants à Frappe, telle quelle : on n'en vérifie aucun ici.
+//// ⚠️ `usr`/`pwd` sont les noms que `LoginManager` attend — pas `email`.
+export const signIn = (usr, pwd) =>
+  api(M.login, { method: 'POST', body: JSON.stringify({ usr, pwd }) })
+export const rememberMe = () => api(M.rememberMe, { method: 'POST', body: '{}' })
+export const forgotPassword = (email) =>
+  api(M.forgotPassword, { method: 'POST', body: JSON.stringify({ email }) })
 
 //// Neoffice — payer un cours SANS quitter le carnet.
 //// `payStart` tient le créneau et lève la facture d'un coup : le membre voit
