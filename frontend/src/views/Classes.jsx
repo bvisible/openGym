@@ -278,14 +278,14 @@ function ClassRow({ s, busy, act }) {
         ? <Button size="sm" variant="ghost" disabled={busy} className={busy ? 'waiting' : ''}
             onClick={e => { e.stopPropagation(); act(() => classCancel(s.booking.id), s.id) }}>{t('Cancel')}</Button>
         : (s.included === false && s.bookable !== false && !s.past)
-          //// Le carnet n'encaisse pas : il emmène au guichet. Même onglet,
-          //// même session — le membre est déjà connecté, il retombe dans son
-          //// panier et pas sur une page de connexion.
           ? <Button size="sm" variant="tinted"
               //// Neoffice — la feuille de paiement, pas la boutique. Le
               //// `stopPropagation` reste : le clic sur la LIGNE ouvre la
               //// fiche du cours, celui sur le bouton va droit au paiement.
-              onClick={e => { e.stopPropagation(); paySheet(s, load) }}>
+              //// Le rechargement passe par `act` : c'est lui qui a `load()`
+              //// dans sa portée. Appeler `load` ici plantait la ligne —
+              //// `ReferenceError`, et le bouton ne faisait rien du tout.
+              onClick={e => { e.stopPropagation(); paySheet(s, () => act(() => Promise.resolve(), s.id)) }}>
               {t('Book and pay')}
             </Button>
         : (s.bookable === false && !s.full)
