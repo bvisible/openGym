@@ -13,7 +13,15 @@ export default function TabBar({ onStart }) {
   const isGuest = useStore(s => s.isGuest())
   if (!user && !isGuest) return null
   const cur = loc.pathname.split('/')[1] || 'home'
-  const on = k => cur === k || (cur === 'history' && k === 'stats') || (cur === 'settings' && k === 'home')
+  const on = k => cur === k || (cur === 'history' && k === 'stats')
+
+  //// Neoffice — l'onglet des cours tient à DEUX conditions, et il faut les
+  //// deux : le club propose des cours (perms.classes), et ce membre veut les
+  //// voir (classesTab, son réglage). Un club sans cours ne montre rien à
+  //// personne ; un membre qui n'y va jamais s'en débarrasse pour lui seul.
+  //// Par défaut à vrai : `!== false` plutôt que `=== true`, sinon l'onglet
+  //// disparaîtrait le temps que l'état arrive du serveur.
+  const showClasses = S.perms?.classes !== false && S.classesTab !== false
 
   const startWorkout = () => {
     if (!S.active) {
@@ -29,15 +37,25 @@ export default function TabBar({ onStart }) {
   )
 
   return (
-    <nav id="tabbar">
+    //// Neoffice — `data-tabs` porte le nombre de colonnes : à sept, les
+    //// libellés doivent rétrécir pour ne pas se couper au milieu d'un mot.
+    <nav id="tabbar" data-tabs={showClasses ? 7 : 6}>
+      {showClasses && <Tab k="classes" icon="calendar" to="/classes" label={t('Classes')} />}
       <Tab k="home" icon="house" to="/home" label={t('Home')} />
-      <Tab k="plan" icon="calendar" to="/plan" label={t('Plan')} />
+      {/* //// Neoffice — le plan passe de `calendar` à `clipboard` : les cours
+           SONT un calendrier, et deux onglets voisins portant la même icône se
+           confondent. C'est déjà l'icône de l'écran Plan quand il est vide. */}
+      <Tab k="plan" icon="clipboard" to="/plan" label={t('Plan')} />
       <button className={'start' + (S.active ? ' rec' : '')} onClick={startWorkout}>
         <span className="cir"><Icon name={S.active ? 'play' : 'dumbbell'} /></span>
         <span>{S.active ? t('Resume') : t('Start')}</span>
       </button>
       <Tab k="stats" icon="chart" to="/stats" label={t('Stats')} />
       <Tab k="library" icon="list" to="/library" label={t('Exercises')} />
+      {/* //// Neoffice — le compte, tout à droite. Les réglages étaient déjà
+           joignables par l'engrenage de l'accueil ; l'onglet leur donne une
+           place fixe, et équilibre la barre avec les cours à gauche. */}
+      <Tab k="settings" icon="personCircle" to="/settings" label={t('Account')} />
     </nav>
   )
 }

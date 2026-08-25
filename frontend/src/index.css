@@ -293,6 +293,16 @@ h4.sec{
    fades it as one shape — and it does that for every icon, not just this one. */
 #tabbar button .icn{font-size:25px;--icon-stroke:1.65;color:var(--label)}
 #tabbar button.on{color:var(--acc)}
+/* //// Neoffice — à sept colonnes (cours à gauche, compte à droite) un libellé
+   comme « Exercices » ne tient plus dans son huitième d'écran : il se coupait
+   au milieu d'un mot. On rétrécit le texte et on serre les côtés plutôt que de
+   laisser le mot passer à la ligne — une barre à deux hauteurs mange l'écran
+   utile sur un téléphone. Le compte reste fixe (les icônes ne bougent pas),
+   seul le texte suit. */
+#tabbar[data-tabs="7"]{padding-left:2px;padding-right:2px}
+#tabbar[data-tabs="7"] button{font-size:9px;gap:2px;min-width:0}
+#tabbar[data-tabs="7"] button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tabbar[data-tabs="7"] button .icn{font-size:23px}
 #tabbar button.on .icn{--icon-stroke:2;color:inherit;opacity:1}
 #tabbar button.start{margin-top:-24px}
 #tabbar button.start .cir{
