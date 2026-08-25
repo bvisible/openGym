@@ -4,6 +4,7 @@
 //// amont et testé amont — on ne le re-teste pas, on teste NOTRE couche.
 
 import { describe, it, expect } from 'vitest'
+import { readFileSync } from 'node:fs'
 import { applyCoachProgram, removeProgramRoutines, countProgramRoutines } from './coach-program.js'
 
 const bundle = (name, exIds, week) => ({
@@ -217,5 +218,26 @@ describe('la périodisation', () => {
     applyCoachProgram(s, { id: 'GPA-C', program: 'PROG-C', version: 2,
                            bundle: bundle('Simple', ['0001']), replaceSchedule: true })
     expect(s.coachCycle).toBeUndefined()
+  })
+})
+
+//// Le cycle avance dans syncCycleWeek — mais encore faut-il que QUELQU'UN
+//// l'appelle. Le défaut vécu : l'appel n'existait qu'au retour d'onglet, donc
+//// un membre qui ouvre son carnet le lundi matin (l'app était fermée, aucun
+//// visibilitychange ne se produit) restait sur la semaine passée. Ce test
+//// garde le point d'accroche, que le prochain merge amont réécrive boot() ou
+//// non : il tombe si l'appel disparaît, ce qu'aucun test de la fonction
+//// elle-même ne peut voir.
+describe('le point d’accroche du cycle', () => {
+  const store = readFileSync(new URL('../store/useStore.js', import.meta.url), 'utf8')
+
+  it('avance le cycle au DÉMARRAGE, pas seulement au retour d’onglet', () => {
+    const boot = store.slice(store.indexOf('async boot()'))
+    expect(boot.slice(0, boot.indexOf('async pullState()'))).toContain('advanceCycle()')
+  })
+
+  it('l’avance aussi au retour d’onglet', () => {
+    const vis = store.slice(store.indexOf("addEventListener('visibilitychange'"))
+    expect(vis.slice(0, 900)).toContain('advanceCycle()')
   })
 })

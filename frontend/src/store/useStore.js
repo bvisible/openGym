@@ -294,6 +294,11 @@ export const useStore = create((set, get) => {
         if (!me) { set({ ready: true }); return }
         get().setUser(me)
         await get().pullState()
+        //// Neoffice — et au DEMARRAGE, pas seulement au retour d'onglet.
+        //// Un membre ouvre son carnet le lundi matin : l'app n'etait pas
+        //// ouverte, donc aucun visibilitychange ne se produit et il resterait
+        //// sur la semaine passee jusqu'a ce qu'il change d'onglet et revienne.
+        get().advanceCycle()
         // Re-stamp the reminder's timezone on every load — keeps it correct if you're travelling,
         // without needing to revisit Settings.
         const tz = localTZ()
