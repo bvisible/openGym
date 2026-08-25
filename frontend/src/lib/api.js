@@ -172,8 +172,8 @@ export const wallet = () => api(M.wallet)
 //// le montant et les moyens sur le MÊME écran que le cours. `payWith` ouvre
 //// le paiement, `payState` dit où il en est.
 export const payStart = (session) =>
-  api(M.payStart, { method: 'POST', body: { session } })
+  api(M.payStart, { method: 'POST', body: JSON.stringify({ session }) })
 export const payWith = (invoice, method) =>
-  api(M.payWith, { method: 'POST', body: { invoice, method } })
+  api(M.payWith, { method: 'POST', body: JSON.stringify({ invoice, method }) })
 export const payState = ({ intent, invoice }) =>
   api(M.payState + '?' + new URLSearchParams(intent ? { intent } : { invoice }))
