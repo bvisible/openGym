@@ -686,6 +686,7 @@ export default {
   //// Neoffice — le coaching : l'offre de programme d'un coach.
 
   //// Neoffice — les tests physiques et la composition corporelle.
+  '{0} improved': '{0} en progrès',
   'Height': 'Taille',
   'Weight': 'Poids',
   'BMI': 'IMC',
