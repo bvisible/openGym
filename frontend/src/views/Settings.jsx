@@ -7,10 +7,10 @@ import { effortOf } from '../lib/history.js'
 //// Neoffice — passkeys are gone: the Frappe session is the sign-in, and the
 //// journal never had a user directory of its own here. IS_ANDROID stays (it
 //// only phrases a hint about the install prompt).
-import { IS_ANDROID, myCoach, openChat } from '../lib/api.js'
+import { IS_ANDROID, myCoach, openChat, wallet, classesMine } from '../lib/api.js'
 import { pushSupported, enablePush, disablePush, sendTestPush } from '../lib/push.js'
 import { wakeLockSupported } from '../lib/wakelock.js'
-import { t, LANGS, INSTR_LANGS } from '../lib/i18n.js'
+import { t, LANGS, INSTR_LANGS, dateLocale } from '../lib/i18n.js'
 import { DEMO, REPO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
 import { loadStarterPlan, confirmSheet, importFromApp } from '../sheets.jsx'
@@ -91,6 +91,11 @@ export default function Settings() {
          tourne déjà sur l'instance ; ce bloc est une porte, pas un second
          module. Il n'apparaît QUE si un coach suit ce membre — un club qui n'a
          pas attribué le suivi ne montre pas un bouton qui ne mène nulle part. */}
+    {/* //// Neoffice — added: ce que le membre a pris chez son club. Il vient
+         ici pour ça autant que pour ses réglages : « combien il me reste »,
+         « quand est mon prochain cours ». */}
+    <MyClub />
+
     <MyCoach />
 
     {/* ---------- general ---------- */}
@@ -376,5 +381,43 @@ function MyCoach() {
       subtitle={coach.reachable ? t('Follows your training') : t('Follows your training — no account for messages')} />
     {coach.reachable && <Row icon="bell" iconTint="var(--blue)" title={t('Write to your coach')}
       subtitle={t('Opens the club’s messaging')} accessory="chevron" onClick={busy ? undefined : write} />}
+  </Section>
+}
+
+
+//// Neoffice — added: la part « club » du compte.
+//// Le solde d'abord, les prochains cours ensuite : le premier répond à « est-ce
+//// que je peux encore réserver », le second à « qu'est-ce que j'ai prévu ».
+//// Le bloc entier disparaît quand il n'y a ni carnet ni cours — un membre dont
+//// le club ne fait pas de cours n'a pas à lire une section vide.
+function MyClub() {
+  const [bal, setBal] = useState(null)
+  const [next, setNext] = useState([])
+  const S = useStore(s => s.S)
+  const nav = useNavigate()
+
+  useEffect(() => {
+    if (MOBILE || DEMO) return
+    let alive = true
+    wallet().then(r => { if (alive) setBal(r) }).catch(() => {})
+    if (S.perms?.classes !== false) {
+      classesMine().then(l => { if (alive) setNext(Array.isArray(l) ? l.slice(0, 3) : []) }).catch(() => {})
+    }
+    return () => { alive = false }
+  }, [S.perms && S.perms.classes])
+
+  const hasPack = bal && bal.available && bal.sessionsLeft > 0
+  if (!hasPack && !next.length) return null
+
+  return <Section title={t('Your club')}>
+    {hasPack && <Row icon="trophy" iconTint="var(--acc)"
+      title={t(bal.sessionsLeft === 1 ? '{0} class left' : '{0} classes left', bal.sessionsLeft)}
+      subtitle={bal.expiresOn ? t('valid until {0}', bal.expiresOn) : null} />}
+    {next.map(c => <Row key={c.id} icon="calendar" iconTint="var(--blue)"
+      title={c.title}
+      subtitle={c.start ? new Date(c.start).toLocaleString(dateLocale(), {
+        weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
+      }) : null}
+      accessory="chevron" onClick={() => nav('/classes')} />)}
   </Section>
 }

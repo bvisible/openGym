@@ -61,6 +61,10 @@ const M = {
   //// endpoints ne font qu'aiguiller vers la bonne conversation.
   myCoach: '/api/method/neoffice_gym.api.contact.my_coach',
   openChat: '/api/method/neoffice_gym.api.contact.open_chat',
+  //// Neoffice — le carnet de séances du membre. Rend une réponse vide
+  //// tant que le club n'en vend pas : le carnet affiche « pas de
+  //// carnet » sans avoir à traiter un cas particulier.
+  wallet: '/api/method/neoffice_gym.api.wallet.balance',
 }
 
 /**
@@ -158,3 +162,4 @@ export const openRoutines = () => api(M.openRoutines)
 export const myCoach = () => api(M.myCoach)
 export const openChat = () =>
   api(M.openChat, { method: 'POST', body: '{}' })
+export const wallet = () => api(M.wallet)
