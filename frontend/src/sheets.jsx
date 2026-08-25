@@ -800,6 +800,8 @@ function CoachOffer({ offer, close }) {
       {info.scheduledDays > 0
         ? ' · ' + t(info.scheduledDays === 1 ? 'scheduled on {0} day' : 'scheduled on {0} days', info.scheduledDays)
         : ''}
+      {/* //// Neoffice — un cycle se dit avant d'accepter, pas après. */}
+      {info.cycleSpan > 1 ? ' · ' + t('{0}-week cycle', info.cycleSpan) : ''}
     </div>
     {replacing > 0 && <div className="small" style={{ color: 'var(--yellow)', marginBottom: 14, lineHeight: 1.4 }}>
       {t(replacing === 1
@@ -807,7 +809,13 @@ function CoachOffer({ offer, close }) {
         : 'This replaces the {0} routines you got from an earlier version of this program.', replacing)}
     </div>}
     {offer.replaceSchedule && info.scheduledDays > 0 && <div className="dim small" style={{ marginBottom: 14, lineHeight: 1.4 }}>
-      {t('Your Mon–Sun schedule will follow this program. Days it leaves empty become rest days.')}
+      {/* //// Neoffice — deux phrases, parce qu'un programme périodisé ne se
+           décrit pas comme une semaine type : dire « votre planning suivra ce
+           programme » à quelqu'un dont le planning va CHANGER chaque semaine,
+           c'est lui faire prendre le premier changement pour une panne. */}
+      {info.cycleSpan > 1
+        ? t('Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.', info.cycleSpan)
+        : t('Your Mon–Sun schedule will follow this program. Days it leaves empty become rest days.')}
     </div>}
     {info.dropped > 0 && <div className="small" style={{ color: 'var(--yellow)', marginBottom: 14, lineHeight: 1.4 }}>
       {t(info.dropped === 1

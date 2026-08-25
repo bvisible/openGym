@@ -42,7 +42,9 @@ export default function Plan() {
          pour un bug : le membre voit d'autres séances et ne sait pas pourquoi. */}
     {S.coachCycle && S.coachCycle.span > 1 && <div className="card" style={{ padding: '10px 13px', marginBottom: 12 }}>
       <div className="row between" style={{ gap: 10 }}>
-        <div className="small">{t('Week {0} of {1} of your program', cycleWeekOf(S.coachCycle), S.coachCycle.span)}</div>
+        <div className="small">{S.coachCycle.name
+          ? t('Week {0} of {1} — {2}', cycleWeekOf(S.coachCycle), S.coachCycle.span, S.coachCycle.name)
+          : t('Week {0} of {1} of your program', cycleWeekOf(S.coachCycle), S.coachCycle.span)}</div>
         <div className="cyclebar">
           {Array.from({ length: S.coachCycle.span }, (_, i) =>
             <i key={i} className={i + 1 === cycleWeekOf(S.coachCycle) ? 'on' : ''} />)}
@@ -68,7 +70,7 @@ export default function Plan() {
       </div>
       {S.routines.length ? <div className="list">{S.routines.map(r => <div key={r.id} className="item" onClick={() => nav('/plan/r/' + r.id)}>
         <span className="lrow-i"><Icon name={glyphOf(r.emoji)} /></span>
-        <div className="grow"><div className="tt">{r.name}</div><div className="ss">{exCount(r.ex.length)}</div></div>
+        <div className="grow"><div className="tt">{r.name}</div><div className="ss">{exCount(r.ex.length)}{r.coachProgramName ? ' · ' + r.coachProgramName : ''}</div></div>
         <Icon name="chevronRight" className="chev" /></div>)}</div> : <>
         <div className="empty"><div className="ico"><Icon name="clipboard" /></div>{t('No routines yet.')}<br />{t('Create one or load the starter plan.')}</div>
         <Button icon="sparkles" onClick={loadStarterPlan}>{t('Load starter plan (Push / Pull / Legs)')}</Button>

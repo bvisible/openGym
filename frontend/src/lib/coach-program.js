@@ -43,6 +43,11 @@ export function applyCoachProgram(s, offer) {
   added.forEach((r, i) => {
     r.coachProgram = offer.program
     r.coachVersion = offer.version
+    //// Le nom, pour que la liste des routines puisse dire d'où elles viennent
+    //// dès l'import — sans attendre le premier aller-retour serveur, qui le
+    //// renverra ensuite (c'est le serveur qui fait foi, un nom recopié serait
+    //// faux dès que le coach renomme son programme).
+    r.coachProgramName = bundle.name || undefined
     const source = bundle.routines[i]
     if (source) idMap[source.id] = r.id
   })
@@ -74,6 +79,10 @@ export function attachCycle(s, offer, bundle, idMap) {
   })
   s.coachCycle = {
     program: offer.program,
+    // Le nom du programme, pour que le bandeau dise LEQUEL. Un membre qui suit
+    // la force et le cardio en même temps a deux calendriers ; « votre
+    // programme » ne lui dit pas duquel on parle.
+    name: bundle.name || null,
     version: offer.version,
     span: raw.span || Object.keys(weeks).length,
     weeks,
@@ -161,7 +170,12 @@ export function describeOffer(offer) {
       exerciseCount: bundle.exerciseCount,
       scheduledDays: bundle.scheduledDays,
       dropped: bundle.dropped,
-      name: bundle.name
+      name: bundle.name,
+      // Le nombre de semaines, quand le programme en est un. Sans lui, un cycle
+      // de quatre semaines s'annonce « programmé sur 3 jours » — un membre
+      // accepte alors une semaine type et découvre plus tard que son planning
+      // change tout seul.
+      cycleSpan: (offer.bundle && offer.bundle.cycle && offer.bundle.cycle.span) || 0
     }
   } catch (e) {
     return { ok: false, error: e.message }

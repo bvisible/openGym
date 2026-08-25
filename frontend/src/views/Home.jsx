@@ -23,6 +23,9 @@ function offerSummary(o) {
   if (d.scheduledDays > 0) {
     parts.push(t(d.scheduledDays === 1 ? 'scheduled on {0} day' : 'scheduled on {0} days', d.scheduledDays))
   }
+  //// Un cycle se dit AVANT d'accepter : « sur 3 jours » décrit une semaine
+  //// type, et laisse croire que le planning ne bougera plus.
+  if (d.cycleSpan > 1) parts.push(t('{0}-week cycle', d.cycleSpan))
   return parts.join(' · ')
 }
 
