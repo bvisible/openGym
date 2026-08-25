@@ -6,6 +6,8 @@ import { dayAssignSheet, loadStarterPlan, planToolsSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 import { glyphOf, DEFAULT_GLYPH } from '../lib/glyphs.js'
+//// Neoffice — la semaine de cycle d'un programme périodisé.
+import { cycleWeekOf } from '../lib/coach-program.js'
 
 export default function Plan() {
   const nav = useNavigate()
@@ -34,6 +36,18 @@ export default function Plan() {
     </div>
     {!mayEdit && <div className="card" style={{ padding: '11px 13px', marginBottom: 14, lineHeight: 1.45 }}>
       <div className="small muted">{t('Your coach writes your plan. You can train it and log your sets — the routines themselves are theirs to change.')}</div>
+    </div>}
+    {/* //// Neoffice — où en est le membre dans le cycle de son coach.
+         Sans cette ligne, un plan qui change tout seul le lundi matin passe
+         pour un bug : le membre voit d'autres séances et ne sait pas pourquoi. */}
+    {S.coachCycle && S.coachCycle.span > 1 && <div className="card" style={{ padding: '10px 13px', marginBottom: 12 }}>
+      <div className="row between" style={{ gap: 10 }}>
+        <div className="small">{t('Week {0} of {1} of your program', cycleWeekOf(S.coachCycle), S.coachCycle.span)}</div>
+        <div className="cyclebar">
+          {Array.from({ length: S.coachCycle.span }, (_, i) =>
+            <i key={i} className={i + 1 === cycleWeekOf(S.coachCycle) ? 'on' : ''} />)}
+        </div>
+      </div>
     </div>}
     <div className="cols"><div>
       <h4 className="sec">{t('Week schedule')}</h4>

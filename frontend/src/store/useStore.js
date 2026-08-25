@@ -7,6 +7,8 @@ import { create } from 'zustand'
 import { getState, putState, logout, currentUser } from '../lib/api.js'
 //// Neoffice — les médias que le club a filmés lui-même.
 import { applyClubMedia } from '../lib/exercises.js'
+//// Neoffice — un programme périodisé avance tout seul de semaine en semaine.
+import { syncCycleWeek } from '../lib/coach-program.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
 import { LANGS } from '../lib/i18n.js'
@@ -87,7 +89,14 @@ export const useStore = create((set, get) => {
     //// throughout a dead-zone session gets its chance here, even when the
     //// `online` event never fired (a Wi-Fi that answers DHCP but not the
     //// internet does not raise it).
-    if (document.visibilityState === 'visible') { useStore.getState().retryPending(); return }
+    if (document.visibilityState === 'visible') {
+      //// Le cycle avance quand la semaine change, pas à chaque ouverture :
+      //// syncCycleWeek ne fait rien tant qu'on reste dans la même semaine, donc
+      //// l'appeler souvent ne coûte rien et garantit qu'un membre qui rouvre
+      //// son carnet le lundi voit sa nouvelle semaine sans rien faire.
+      useStore.getState().advanceCycle()
+      useStore.getState().retryPending(); return
+    }
     if (document.visibilityState !== 'hidden') return
     if (MOBILE && saveTm) {
       clearTimeout(saveTm)
@@ -190,6 +199,18 @@ export const useStore = create((set, get) => {
       if (localStorage.getItem('gym_dirty') !== '1') return
       await get().pushState()
     },
+    //// Neoffice — faire avancer un programme périodisé.
+    //// Sans effet quand il n'y a pas de cycle, ou quand la semaine n'a pas
+    //// changé : reposer le planning à chaque ouverture effacerait le jour
+    //// qu'un membre a déplacé en milieu de semaine.
+    advanceCycle() {
+      const S = get().S
+      if (!S.coachCycle) return
+      const before = S.coachCycle.appliedWeek
+      get().update(s => { syncCycleWeek(s) })
+      return get().S.coachCycle.appliedWeek !== before
+    },
+
     async pullState() {
       try {
         const { state } = await getState()

@@ -104,3 +104,118 @@ describe('removeProgramRoutines', () => {
     expect(s.routines).toHaveLength(1)
   })
 })
+
+//// Neoffice — la périodisation.
+//// Ce mécanisme peut se tromper SANS jamais lever d'erreur : une semaine 2 qui
+//// pointe sur les routines de la semaine 1, un cycle qui repart au mauvais
+//// moment, un planning reposé au milieu de la semaine et qui efface le jour
+//// qu'un membre venait de déplacer. Rien de tout cela ne plante.
+
+import { attachCycle, syncCycleWeek, cycleWeekOf } from './coach-program.js'
+
+const cycleBundle = () => ({
+  opengym_plan: 1,
+  name: 'Cycle',
+  routines: [
+    { id: 'r-A', name: 'Semaine A', ex: [{ id: '0001', sets: 3, reps: 8 }] },
+    { id: 'r-B', name: 'Semaine B', ex: [{ id: '0002', sets: 3, reps: 8 }] },
+  ],
+  week: { 1: 'r-A' },
+  customEx: [],
+  cycle: {
+    span: 4,
+    weeks: {
+      1: { 1: 'r-A' },
+      2: { 1: 'r-B' },
+      3: { 1: 'r-A', 4: 'r-B' },
+      4: { 1: 'r-B' },
+    },
+  },
+})
+
+const cycleOffer = (start) => ({
+  id: 'GPA-C', program: 'PROG-C', version: 1,
+  bundle: cycleBundle(), replaceSchedule: true, startDate: start,
+})
+
+describe('la périodisation', () => {
+  it('retient le cycle et pose la semaine 1', () => {
+    const s = { routines: [], week: {}, customEx: [] }
+    applyCoachProgram(s, cycleOffer('2026-08-24'))
+    expect(s.coachCycle).toBeTruthy()
+    expect(s.coachCycle.span).toBe(4)
+    expect(Object.keys(s.coachCycle.weeks)).toHaveLength(4)
+  })
+
+  it('la semaine 2 pointe sur les BONNES routines, pas sur celles du bundle', () => {
+    // mergePlan donne des identifiants neufs. Si la correspondance était
+    // perdue, la semaine 2 renverrait à « r-B », qui n'existe pas chez le membre.
+    const s = { routines: [], week: {}, customEx: [] }
+    applyCoachProgram(s, cycleOffer('2026-08-24'))
+    const ids = new Set(s.routines.map(r => r.id))
+    Object.values(s.coachCycle.weeks).forEach(w =>
+      Object.values(w).forEach(rid => expect(ids.has(rid)).toBe(true)))
+  })
+
+  it('avance de semaine en semaine, puis boucle', () => {
+    const c = { span: 4, startedOn: '2026-08-24', weeks: {} }
+    expect(cycleWeekOf(c, '2026-08-24')).toBe(1)
+    expect(cycleWeekOf(c, '2026-08-30')).toBe(1)
+    expect(cycleWeekOf(c, '2026-08-31')).toBe(2)
+    expect(cycleWeekOf(c, '2026-09-21')).toBe(5 % 4 || 4)
+    // Après quatre semaines, on repart à la première.
+    expect(cycleWeekOf(c, '2026-09-21')).toBe(1)
+  })
+
+  it('avant le début, on est en semaine 1', () => {
+    // Un programme daté de la semaine prochaine se prépare ; il ne doit pas
+    // renvoyer à la fin du cycle précédent.
+    const c = { span: 4, startedOn: '2026-09-01', weeks: {} }
+    expect(cycleWeekOf(c, '2026-08-25')).toBe(1)
+  })
+
+  it('repose le planning quand la semaine CHANGE', () => {
+    const s = { routines: [], week: {}, customEx: [] }
+    applyCoachProgram(s, cycleOffer('2026-08-24'))
+    const w1 = s.week['1']
+    syncCycleWeek(s, '2026-08-31')
+    expect(s.week['1']).not.toBe(w1)
+  })
+
+  it('ne repose RIEN tant qu’on reste dans la même semaine', () => {
+    // C'est le test qui compte : reposer à chaque ouverture effacerait le jour
+    // qu'un membre vient de déplacer, et il ne comprendrait pas pourquoi.
+    const s = { routines: [], week: {}, customEx: [] }
+    applyCoachProgram(s, cycleOffer('2026-08-24'))
+    s.week['3'] = s.routines[1].id      // le membre ajoute un mercredi
+    syncCycleWeek(s, '2026-08-26')       // même semaine
+    expect(s.week['3']).toBe(s.routines[1].id)
+  })
+
+  it('une semaine du cycle REMPLACE, elle ne complète pas', () => {
+    const s = { routines: [], week: {}, customEx: [] }
+    applyCoachProgram(s, cycleOffer('2026-08-24'))
+    syncCycleWeek(s, '2026-09-07')       // semaine 3 : lundi + jeudi
+    expect(Object.keys(s.week).sort()).toEqual(['1', '4'])
+    syncCycleWeek(s, '2026-09-14')       // semaine 4 : lundi seul
+    expect(Object.keys(s.week)).toEqual(['1'])
+  })
+
+  it('un programme SANS cycle n’en fabrique pas un', () => {
+    const s = { routines: [], week: {}, customEx: [] }
+    applyCoachProgram(s, offer('PROG-1', 1, bundle('Simple', ['0001'])))
+    expect(s.coachCycle).toBeUndefined()
+  })
+
+  it('une révision sans cycle efface celui de la version précédente', () => {
+    // Sinon le calendrier de la v1 continuerait de tourner sous une v2 qui ne
+    // demande qu'une semaine type — et le planning changerait tout seul sans
+    // que rien ne l'explique.
+    const s = { routines: [], week: {}, customEx: [] }
+    applyCoachProgram(s, cycleOffer('2026-08-24'))
+    expect(s.coachCycle).toBeTruthy()
+    applyCoachProgram(s, { id: 'GPA-C', program: 'PROG-C', version: 2,
+                           bundle: bundle('Simple', ['0001']), replaceSchedule: true })
+    expect(s.coachCycle).toBeUndefined()
+  })
+})

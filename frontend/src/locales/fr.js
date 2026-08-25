@@ -684,6 +684,7 @@ export default {
   'Unpair': 'Dissocier',
 
   //// Neoffice — le coaching : l'offre de programme d'un coach.
+  'Week {0} of {1} of your program': 'Semaine {0} sur {1} de votre programme',
 
   //// Neoffice — les tests physiques et la composition corporelle.
   'Your goals': 'Vos objectifs',
