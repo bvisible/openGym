@@ -70,8 +70,13 @@ export default function SignIn() {
     if (busy) return
     setBusy(true); setErr(null)
     try {
-      const r = await forgotPassword(email.trim())
-      setNote(r?.message || t('If an account exists for this address, a reset link is on its way.'))
+      await forgotPassword(email.trim())
+      //// La phrase vient d'ICI, pas du serveur. L'endpoint en renvoie une,
+      //// mais traduite côté serveur — donc dans la langue de la REQUÊTE, et
+      //// seulement si le msgid existe dans les PO de l'app. Le carnet, lui,
+      //// connaît la langue du membre et a la chaîne dans son paquet. Vu à
+      //// l'écran : « If an account exists… » au milieu d'un écran français.
+      setNote(t('If an account exists for this address, a reset link is on its way.'))
       setMode('sent')
     } catch (e) {
       //// Même en cas d'erreur, le message est le même : dire « ce compte
