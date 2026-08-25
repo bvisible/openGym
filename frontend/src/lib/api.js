@@ -57,6 +57,10 @@ const M = {
   //// Neoffice — les routines que le club a explicitement ouvertes. Sa
   //// bibliothèque reste fermée : il ouvre ce qu'il décide d'ouvrir.
   openRoutines: '/api/method/neoffice_gym.api.challenges.open_routines',
+  //// Neoffice — joindre son coach. La messagerie est Raven ; ces deux
+  //// endpoints ne font qu'aiguiller vers la bonne conversation.
+  myCoach: '/api/method/neoffice_gym.api.contact.my_coach',
+  openChat: '/api/method/neoffice_gym.api.contact.open_chat',
 }
 
 /**
@@ -151,3 +155,6 @@ export const challengeBoard = (challenge) =>
   api(M.challengeBoard + '?challenge=' + encodeURIComponent(challenge))
 export const announcements = () => api(M.announcements)
 export const openRoutines = () => api(M.openRoutines)
+export const myCoach = () => api(M.myCoach)
+export const openChat = () =>
+  api(M.openChat, { method: 'POST', body: '{}' })

@@ -7,7 +7,7 @@ import { effortOf } from '../lib/history.js'
 //// Neoffice — passkeys are gone: the Frappe session is the sign-in, and the
 //// journal never had a user directory of its own here. IS_ANDROID stays (it
 //// only phrases a hint about the install prompt).
-import { IS_ANDROID } from '../lib/api.js'
+import { IS_ANDROID, myCoach, openChat } from '../lib/api.js'
 import { pushSupported, enablePush, disablePush, sendTestPush } from '../lib/push.js'
 import { wakeLockSupported } from '../lib/wakelock.js'
 import { t, LANGS, INSTR_LANGS } from '../lib/i18n.js'
@@ -86,6 +86,12 @@ export default function Settings() {
       )}
     </Section>
     {!user && !DEMO && !MOBILE && <p className="sect-f" style={{ marginTop: -18, marginBottom: 22 }}>{t('Guest mode — data lives only in this browser.')}</p>}
+
+    {/* //// Neoffice — added: joindre son coach. La messagerie est Raven, qui
+         tourne déjà sur l'instance ; ce bloc est une porte, pas un second
+         module. Il n'apparaît QUE si un coach suit ce membre — un club qui n'a
+         pas attribué le suivi ne montre pas un bouton qui ne mène nulle part. */}
+    <MyCoach />
 
     {/* ---------- general ---------- */}
     <Section title={t('General')} footer={t('Note: switching units only changes the label — logged numbers are not converted.')}>
@@ -326,3 +332,39 @@ function PushCard({ S, update, toast }) {
 //// un code d'invitation. Les comptes sont des comptes Frappe : un membre
 //// existe parce que le club l'a créé, il n'y a rien à inscrire depuis le
 //// carnet.
+
+
+//// Neoffice — added: qui suit ce membre, et comment lui écrire.
+function MyCoach() {
+  const [coach, setCoach] = useState(null)
+  const [busy, setBusy] = useState(false)
+  useEffect(() => {
+    let alive = true
+    myCoach()
+      .then(r => { if (alive) setCoach(r.coach) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [])
+  if (!coach) return null
+
+  const write = async () => {
+    setBusy(true)
+    try {
+      const r = await openChat()
+      //// Raven est une autre application du même site : on y VA, on ne
+      //// l'embarque pas. Un onglet neuf garderait le carnet ouvert derrière,
+      //// avec deux fils de discussion possibles pour la même conversation.
+      window.location.href = r.url
+    } catch (e) {
+      toast(e.message || t('Could not open the conversation.'))
+      setBusy(false)
+    }
+  }
+
+  return <Section title={t('Your coach')}>
+    <Row icon="personCircle" iconTint="var(--acc)" title={coach.name}
+      subtitle={coach.reachable ? t('Follows your training') : t('Follows your training — no account for messages')} />
+    {coach.reachable && <Row icon="bell" iconTint="var(--blue)" title={t('Write to your coach')}
+      subtitle={t('Opens the club’s messaging')} accessory="chevron" onClick={busy ? undefined : write} />}
+  </Section>
+}
