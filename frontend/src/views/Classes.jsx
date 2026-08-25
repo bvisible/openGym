@@ -9,8 +9,8 @@
 ////
 //// ON Y ARRIVE PAR DEUX CHEMINS, et c'est voulu : la carte de l'accueil, qui
 //// montre le prochain cours sans qu'on aille le chercher, et un ONGLET de la
-//// barre du bas (2026-08-25, demande de Jérémy) — les cours à gauche, le
-//// compte tout à droite.
+//// barre du bas (2026-08-25, demande de Jérémy) — l'accueil d'abord, les
+//// cours juste après, et le compte tout à droite.
 ////
 //// Ce commentaire disait l'inverse : « un sixième onglet rendrait les libellés
 //// illisibles ». Mesuré depuis, plutôt que supposé : à sept colonnes sur un

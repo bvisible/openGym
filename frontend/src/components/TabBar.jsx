@@ -44,8 +44,8 @@ export default function TabBar({ onStart }) {
     //// Neoffice — `data-tabs` porte le nombre de colonnes : à sept, les
     //// libellés doivent rétrécir pour ne pas se couper au milieu d'un mot.
     <nav id="tabbar" data-tabs={showClasses ? 7 : 6}>
-      {showClasses && <Tab k="classes" icon="calendar" to="/classes" label={t('Classes')} />}
       <Tab k="home" icon="house" to="/home" label={t('Home')} />
+      {showClasses && <Tab k="classes" icon="calendar" to="/classes" label={t('Classes')} />}
       {/* //// Neoffice — le plan passe de `calendar` à `clipboard` : les cours
            SONT un calendrier, et deux onglets voisins portant la même icône se
            confondent. C'est déjà l'icône de l'écran Plan quand il est vide. */}
@@ -58,7 +58,9 @@ export default function TabBar({ onStart }) {
       <Tab k="library" icon="list" to="/library" label={t('Exercises')} />
       {/* //// Neoffice — le compte, tout à droite. Les réglages étaient déjà
            joignables par l'engrenage de l'accueil ; l'onglet leur donne une
-           place fixe, et équilibre la barre avec les cours à gauche. */}
+           place fixe, et équilibre la barre en fin de course.
+           L'accueil reste le PREMIER onglet (correction de Jérémy,
+           2026-08-25) : c'est le point de départ, les cours viennent après. */}
       <Tab k="settings" icon="personCircle" to="/settings" label={t('Account')} />
     </nav>
   )
