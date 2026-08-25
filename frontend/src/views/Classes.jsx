@@ -41,7 +41,7 @@ const dayKey = iso => (iso || '').slice(0, 10)
 //// aussi pour ses points, et deux définitions divergeraient au premier
 //// changement.
 const takeable = x => !x.booked && !x.past
-  && (x.bookable !== false || (x.included === false && x.payUrl))
+  && x.bookable !== false
 
 //// Un prix se lit « 28.– », pas « 28 » ni « 28.00 ». Les décimales ne
 //// s'affichent que si elles existent : un cours à 28.50 les mérite, un cours
@@ -254,7 +254,7 @@ function ClassRow({ s, busy, act }) {
     //// « inscriptions closes » sur un cours qu'il pouvait très bien prendre,
     //// simplement en payant — et il ne savait ni que c'était payant, ni
     //// combien. Le prix se dit avant le clic, pas après.
-    : s.included === false && s.payUrl
+    : s.included === false && s.bookable !== false
       ? (s.price ? t('{0} {1} — pay to book', fmtPrice(s.price), s.currency || '') : t('paid class'))
     : s.bookable === false ? t('registration closed')
     : t(s.free === 1 ? '{0} place left' : '{0} places left', s.free)
@@ -277,7 +277,7 @@ function ClassRow({ s, busy, act }) {
         //// simplement grisé ne dit pas si l'application a compris le clic.
         ? <Button size="sm" variant="ghost" disabled={busy} className={busy ? 'waiting' : ''}
             onClick={e => { e.stopPropagation(); act(() => classCancel(s.booking.id), s.id) }}>{t('Cancel')}</Button>
-        : (s.included === false && s.payUrl && !s.past)
+        : (s.included === false && s.bookable !== false && !s.past)
           //// Le carnet n'encaisse pas : il emmène au guichet. Même onglet,
           //// même session — le membre est déjà connecté, il retombe dans son
           //// panier et pas sur une page de connexion.

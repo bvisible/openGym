@@ -1351,7 +1351,7 @@ function ClassSheet({ s, act, close }) {
       //// revenait pas. On garde `payUrl` comme SEULE condition d'affichage
       //// (c'est lui qui atteste que l'article est vendable), mais on ne le
       //// suit plus.
-      : s.included === false
+      : s.included === false && s.bookable !== false
         ? <Button variant="primary" onClick={() => { close(); paySheet(s, () => act(() => Promise.resolve(), s.id)) }}>
             {t('Book and pay')}
           </Button>
