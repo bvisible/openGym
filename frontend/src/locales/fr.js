@@ -765,6 +765,7 @@ export default {
   'The class schedule could not be loaded. Try again once you are back online.': 'Le planning des cours n’a pas pu être chargé. Réessayez une fois la connexion rétablie.',
   'No class published for the next {0} days.': 'Aucun cours publié pour les {0} prochains jours.',
   '{0} places left': '{0} places restantes',
+  '{0} place left': '{0} place restante',
   'full — you can join the waiting list': 'complet — liste d’attente disponible',
   'you are in': 'inscrit',
   'on the waiting list': 'sur liste d’attente',

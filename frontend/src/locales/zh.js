@@ -32,6 +32,7 @@ export default {
   'you are in': '已确认',
   'full — you can join the waiting list': '已满 — 你可以加入候补名单',
   '{0} places left': '剩余 {0} 个名额',
+  '{0} place left': '剩余 {0} 个名额',
   'done': '已结束',
   'Waiting list': '候补名单',
   'Book': '预约',

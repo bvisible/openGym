@@ -32,6 +32,7 @@ export default {
   'you are in': '참석 확정',
   'full — you can join the waiting list': '마감 — 대기 명단에 등록할 수 있어요',
   '{0} places left': '{0}자리 남음',
+  '{0} place left': '{0}자리 남음',
   'done': '종료',
   'Waiting list': '대기 명단',
   'Book': '예약하기',

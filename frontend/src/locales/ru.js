@@ -32,6 +32,7 @@ export default {
   'you are in': 'участие подтверждено',
   'full — you can join the waiting list': 'мест нет — можешь записаться в список ожидания',
   '{0} places left': 'осталось {0} мест',
+  '{0} place left': 'осталось {0} место',
   'done': 'завершено',
   'Waiting list': 'Список ожидания',
   'Book': 'Забронировать',

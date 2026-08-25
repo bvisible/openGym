@@ -107,7 +107,11 @@ function ClassRow({ s, busy, act }) {
   const state = s.booked
     ? (waiting ? t('on the waiting list') : t('you are in'))
     : s.full ? t('full — you can join the waiting list')
-    : t('{0} places left', s.free)
+    //// Neoffice — une forme par nombre : « noch 1 Plätze frei » en allemand,
+    //// « 1 places left » en anglais. Le carnet fait déjà ce partage ailleurs
+    //// ({0} routine / {0} routines) — la dernière place d'un cours est
+    //// précisément le moment où le membre lit cette ligne.
+    : t(s.free === 1 ? '{0} place left' : '{0} places left', s.free)
 
   return <div className="item">
     <span className="lrow-i" style={{ background: s.booked ? 'var(--acc)' : 'var(--surface-3)' }}>

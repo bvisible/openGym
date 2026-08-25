@@ -32,6 +32,7 @@ export default {
   'you are in': 'estás inscrito',
   'full — you can join the waiting list': 'esgotado — podes inscrever-te na lista de espera',
   '{0} places left': '{0} vagas disponíveis',
+  '{0} place left': '{0} vaga disponível',
   'done': 'terminado',
   'Waiting list': 'Lista de espera',
   'Book': 'Reservar',

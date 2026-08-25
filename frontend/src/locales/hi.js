@@ -32,6 +32,7 @@ export default {
   'you are in': 'आप शामिल हैं',
   'full — you can join the waiting list': 'फुल — आप प्रतीक्षा सूची में शामिल हो सकते हैं',
   '{0} places left': '{0} सीटें बाकी हैं',
+  '{0} place left': '{0} सीट बाकी है',
   'done': 'समाप्त',
   'Waiting list': 'प्रतीक्षा सूची',
   'Book': 'बुक करें',

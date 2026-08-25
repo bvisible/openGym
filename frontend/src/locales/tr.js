@@ -32,6 +32,7 @@ export default {
   'you are in': 'yerin ayrıldı',
   'full — you can join the waiting list': 'dolu — bekleme listesine katılabilirsin',
   '{0} places left': '{0} boş yer kaldı',
+  '{0} place left': '{0} boş yer kaldı',
   'done': 'tamamlandı',
   'Waiting list': 'Bekleme listesi',
   'Book': 'Rezerve et',

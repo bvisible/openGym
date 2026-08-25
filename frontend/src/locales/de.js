@@ -33,6 +33,7 @@ export default {
   'you are in': 'du bist dabei',
   'full — you can join the waiting list': 'ausgebucht — du kannst dich auf die Warteliste setzen',
   '{0} places left': 'noch {0} Plätze frei',
+  '{0} place left': 'noch {0} Platz frei',
   'done': 'beendet',
   'Waiting list': 'Warteliste',
   'Book': 'Buchen',
