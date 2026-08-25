@@ -875,4 +875,15 @@ export default {
   'Waiting for your payment…': 'En attente de votre paiement…',
   'Your place is booked': 'Votre place est réservée',
   'or enter this code in the app': 'ou saisissez ce code dans l’application',
+  //// Neoffice — chaînes restées en anglais faute de traduction (relevé du 2026-08-25).
+  'Could not open the conversation.': 'Impossible d’ouvrir la conversation.',
+  'Follows your training': 'Suit votre entraînement',
+  'Follows your training — no account for messages': 'Suit votre entraînement — aucun compte pour les messages',
+  'Later': 'Plus tard',
+  'No exercises yet.': 'Aucun exercice pour l’instant.',
+  'Opens the club’s messaging': 'Ouvre la messagerie du club',
+  'Write to your coach': 'Écrire à votre coach',
+  'Your club': 'Votre club',
+  'Your coach': 'Votre coach',
+  'valid until {0}': 'valable jusqu’au {0}',
 }
