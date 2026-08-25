@@ -27,7 +27,7 @@ import { useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
 import { t, dateLocale } from '../lib/i18n.js'
 import { classesWeek, classBook, classCancel } from '../lib/api.js'
-import { classSheet } from '../sheets.jsx'
+import { classSheet, paySheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 
@@ -282,7 +282,10 @@ function ClassRow({ s, busy, act }) {
           //// même session — le membre est déjà connecté, il retombe dans son
           //// panier et pas sur une page de connexion.
           ? <Button size="sm" variant="tinted"
-              onClick={e => { e.stopPropagation(); window.location.href = s.payUrl }}>
+              //// Neoffice — la feuille de paiement, pas la boutique. Le
+              //// `stopPropagation` reste : le clic sur la LIGNE ouvre la
+              //// fiche du cours, celui sur le bouton va droit au paiement.
+              onClick={e => { e.stopPropagation(); paySheet(s, load) }}>
               {t('Book and pay')}
             </Button>
         : (s.bookable === false && !s.full)

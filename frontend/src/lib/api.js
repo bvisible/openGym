@@ -36,6 +36,9 @@ const M = {
   classesMine: '/api/method/neoffice_gym.api.classes.mine',
   classBook: '/api/method/neoffice_gym.api.classes.book',
   classCancel: '/api/method/neoffice_gym.api.classes.cancel',
+  payStart: '/api/method/neoffice_gym.api.wallet.start',
+  payWith: '/api/method/neoffice_gym.api.wallet.pay_with',
+  payState: '/api/method/neoffice_gym.api.wallet.state',
   //// Neoffice — les évaluations physiques. Lecture seule côté membre : c'est
   //// le coach qui mesure, le carnet ne fait que montrer.
   assessmentsMine: '/api/method/neoffice_gym.api.assessment.mine',
@@ -163,3 +166,14 @@ export const myCoach = () => api(M.myCoach)
 export const openChat = () =>
   api(M.openChat, { method: 'POST', body: '{}' })
 export const wallet = () => api(M.wallet)
+
+//// Neoffice — payer un cours SANS quitter le carnet.
+//// `payStart` tient le créneau et lève la facture d'un coup : le membre voit
+//// le montant et les moyens sur le MÊME écran que le cours. `payWith` ouvre
+//// le paiement, `payState` dit où il en est.
+export const payStart = (session) =>
+  api(M.payStart, { method: 'POST', body: { session } })
+export const payWith = (invoice, method) =>
+  api(M.payWith, { method: 'POST', body: { invoice, method } })
+export const payState = ({ intent, invoice }) =>
+  api(M.payState + '?' + new URLSearchParams(intent ? { intent } : { invoice }))

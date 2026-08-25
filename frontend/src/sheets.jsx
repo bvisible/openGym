@@ -20,7 +20,7 @@ import { buildPlanBundle, parsePlan, mergePlan, printPlan } from './lib/plan-sha
 //// Neoffice — l'offre d'un coach passe par le même mergePlan que l'import
 //// d'un ami, mais elle REMPLACE ce que la version précédente avait posé.
 import { applyCoachProgram, describeOffer, countProgramRoutines } from './lib/coach-program.js'
-import { programAccept, programDecline, openRoutines, classBook, classCancel } from './lib/api.js'
+import { programAccept, programDecline, openRoutines, classBook, classCancel, payStart, payWith, payState } from './lib/api.js'
 import { estimate1RM, best1RM, is1RMRecord, REP_CAP } from './lib/onerm.js'
 import { nextPrescription, applyPrescription, policyFor, defaultIncrement, POLICIES_FOR, POLICY_NAME, POLICY_DESC, MAX_BW_SETS } from './lib/progression.js'
 import { MOBILE, shareExport } from './lib/mobile.js'
@@ -1122,6 +1122,178 @@ function doFinishWorkout() {
 ////
 //// Elle s'ouvre AUSSI sur un cours fermé ou complet. C'est même là qu'elle
 //// sert le plus : savoir ce qu'on a manqué, et à quelle heure il repasse.
+//// Neoffice — added block (no upstream equivalent) : PAYER UN COURS ICI.
+////
+//// Ce que cet écran remplace : un bouton qui envoyait le membre sur la
+//// boutique. Une autre page, une autre mise en page, des coordonnées
+//// redemandées alors qu'on les a — et dont il ne revenait pas. Le club perdait
+//// l'inscription entre les deux.
+////
+//// Trois temps, sans jamais quitter le carnet :
+////   1. le montant et les moyens réellement branchés sur l'instance ;
+////   2. le paiement — le QR TWINT s'affiche ICI, la facture se confirme ICI ;
+////   3. le résultat, relu sur la FACTURE et pas sur l'intention.
+////
+//// ⚠️ Ce qu'on ne fera PAS, et ce n'est pas un manque : saisir un numéro de
+//// carte dans cet écran. Encaisser une carte soi-même engage la conformité
+//// PCI-DSS de tout le club. Pour ces moyens-là, la page du prestataire
+//// s'ouvre — mais le retour se fait dans l'app, qui relit l'état et conclut.
+
+function PaySheet({ s, close, onDone }) {
+  const [step, setStep] = useState('loading')   // loading · choose · qr · waiting · done · error
+  const [data, setData] = useState(null)        // {booking, invoice, amount, currency, methods}
+  const [action, setAction] = useState(null)    // la réponse du prestataire
+  const [err, setErr] = useState(null)
+  const [busy, setBusy] = useState(null)
+
+  //// Le créneau est tenu DÈS l'ouverture de l'écran, avant même que le membre
+  //// ait choisi son moyen. Sinon il choisit, il paie, et sa place est partie
+  //// entre-temps — on aurait encaissé pour rien.
+  useEffect(() => {
+    let vivant = true
+    payStart(s.id)
+      .then(r => { if (!vivant) return; setData(r); setStep('choose') })
+      .catch(e => { if (!vivant) return; setErr(e?.message || t('That slot could not be held. Try another time.')); setStep('error') })
+    return () => { vivant = false }
+  }, [s.id])
+
+  //// L'attente interroge la FACTURE. Une intention dit ce que la passerelle a
+  //// répondu ; la facture dit ce que la maison a encaissé. Un refus de code PIN
+  //// laisse une intention échouée sur une facture payée à la 2e tentative.
+  useEffect(() => {
+    if (step !== 'qr' && step !== 'waiting') return
+    let vivant = true
+    const tic = setInterval(async () => {
+      try {
+        const r = await payState({ invoice: data.invoice })
+        if (!vivant) return
+        if (r.state === 'paid') { setStep('done'); onDone && onDone() }
+      } catch { /* une interrogation ratée n'est pas un échec de paiement */ }
+    }, 3000)
+    return () => { vivant = false; clearInterval(tic) }
+  }, [step, data])
+
+  const choisir = async (moy) => {
+    setBusy(moy.id)
+    try {
+      const r = await payWith(data.invoice, moy.id)
+      setAction({ ...r, title: moy.title })
+      if (r.action === 'qr') setStep('qr')
+      else if (r.action === 'redirect') {
+        //// Un nouvel onglet, pas la page courante : le carnet reste ouvert
+        //// DERRIÈRE, il continue d'interroger la facture, et il annonce le
+        //// résultat dès qu'il tombe. Remplacer la page perdrait cet état.
+        window.open(r.url, '_blank', 'noopener')
+        setStep('waiting')
+      } else {
+        //// « none » = rien à encaisser en ligne : la facture suivra. La place
+        //// est acquise, et c'est ce qu'il faut dire — pas « payé ».
+        setStep('done')
+        onDone && onDone()
+      }
+    } catch (e) {
+      setErr(e?.message || t('That did not go through. Try again in a moment.'))
+      setStep('error')
+    } finally { setBusy(null) }
+  }
+
+  const debut = s.start ? new Date(s.start) : null
+  const quand = debut ? debut.toLocaleString(dateLocale(), {
+    weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
+
+  const Entete = () => <>
+    <h3 style={{ marginBottom: 2 }}>{s.title}</h3>
+    <div className="muted small" style={{ marginBottom: 16 }}>{quand}</div>
+  </>
+
+  if (step === 'loading') return <><Entete />
+    <div className="card muted" style={{ textAlign: 'center' }}>{t('Holding your place…')}</div></>
+
+  if (step === 'error') return <><Entete />
+    <div className="card" style={{ marginBottom: 14 }}>{err}</div>
+    <Button variant="ghost" onClick={close}>{t('Close')}</Button></>
+
+  if (step === 'done') return <><Entete />
+    <div className="pay-done">
+      <div className="ico"><Icon name="check" /></div>
+      <div className="tt">{action?.action === 'none' ? t('Your place is booked') : t('Payment received')}</div>
+      <div className="ss">{action?.action === 'none'
+        ? t('The invoice will follow — nothing to pay right now.')
+        : t('See you at the class.')}</div>
+    </div>
+    <Button variant="primary" onClick={close}>{t('Done')}</Button></>
+
+  if (step === 'qr') return <><Entete />
+    <div className="pay-qr">
+      {/* //// Le QR est un SVG rendu par le prestataire : on l'affiche tel
+           quel. Le regénérer côté app donnerait un code qui ne correspond à
+           aucune transaction. */}
+      {action?.payload?.qr_svg
+        ? <div className="qr" dangerouslySetInnerHTML={{ __html: action.payload.qr_svg }} />
+        : <div className="card muted">{t('The code could not be shown.')}</div>}
+      <div className="ss">{t('Scan this code with {0}', action?.title || 'TWINT')}</div>
+      {action?.payload?.pairing_token && <div className="pair">
+        <span className="ss">{t('or enter this code in the app')}</span>
+        <b>{action.payload.pairing_token}</b>
+      </div>}
+    </div>
+    <div className="pay-wait"><span className="spin" />{t('Waiting for your payment…')}</div>
+    <Button variant="ghost" onClick={close}>{t('Pay later')}</Button></>
+
+  if (step === 'waiting') return <><Entete />
+    <div className="pay-wait" style={{ marginBottom: 14 }}>
+      <span className="spin" />{t('Finish the payment in the window that just opened.')}
+    </div>
+    <div className="dim small" style={{ textAlign: 'center', marginBottom: 14 }}>
+      {t('This screen updates on its own once it goes through.')}
+    </div>
+    {action?.url && <Button variant="tinted" onClick={() => window.open(action.url, '_blank', 'noopener')}>
+      {t('Open the payment page again')}
+    </Button>}
+    <Button variant="ghost" onClick={close}>{t('Pay later')}</Button></>
+
+  // step === 'choose'
+  return <><Entete />
+    <div className="pay-amount">
+      <span className="ss">{t('To pay')}</span>
+      <b>{fmtMoney(data.amount)} {data.currency || ''}</b>
+    </div>
+    <div className="ss" style={{ margin: '0 0 8px' }}>{t('How would you like to pay?')}</div>
+    <div className="list pay-methods" style={{ display: 'flex', flexDirection: 'column' }}>
+      {data.methods.map(m => (
+        <button key={m.id} className={'item pay-m' + (busy === m.id ? ' waiting' : '')}
+          disabled={!!busy} onClick={() => choisir(m)}>
+          <span className="lrow-i">{m.logo
+            ? <img src={m.logo} alt="" />
+            : <Icon name={m.gateway_type === 'facture' ? 'clipboard' : 'scale'} />}</span>
+          <div className="grow">
+            <div className="tt">{m.title}</div>
+            {m.description && <div className="ss">{m.description}</div>}
+            {/* //// Dire ce que « Facture » veut dire : sans cette ligne, le
+                 membre croit devoir payer sur-le-champ et abandonne. */}
+            {m.gateway_type === 'facture' && !m.description &&
+              <div className="ss">{t('Book now, pay on the invoice')}</div>}
+          </div>
+          <Icon name="chevron" />
+        </button>
+      ))}
+    </div>
+    {!data.methods.length && <div className="card muted">
+      {t('No online payment is set up. Ask your club.')}
+    </div>}
+  </>
+}
+
+//// Le montant s'écrit sans décimale quand il n'en a pas : « 28 CHF » et non
+//// « 28.00 CHF », qui a l'air d'un total de caisse.
+function fmtMoney(n) {
+  const v = Number(n || 0)
+  return v % 1 === 0 ? String(v) : v.toFixed(2)
+}
+
+export const paySheet = (s, onDone) =>
+  ui().openSheet(close => <PaySheet s={s} close={close} onDone={onDone} />)
+
 export const classSheet = (s, act) => ui().openSheet(close => <ClassSheet s={s} act={act} close={close} />)
 
 function ClassSheet({ s, act, close }) {
@@ -1173,8 +1345,14 @@ function ClassSheet({ s, act, close }) {
       //// Le paiement passe par la boutique du club : le carnet n'encaisse pas.
       //// On y va dans le MÊME onglet — le membre est déjà connecté, il
       //// retombe dans son panier et pas sur une page de connexion.
-      : s.included === false && s.payUrl
-        ? <Button variant="primary" onClick={() => { close(); window.location.href = s.payUrl }}>
+      //// Neoffice — le paiement se fait ICI, dans une feuille du carnet.
+      //// Avant : `window.location.href = s.payUrl` envoyait sur la boutique —
+      //// une autre page, des coordonnées redemandées, et un membre qui ne
+      //// revenait pas. On garde `payUrl` comme SEULE condition d'affichage
+      //// (c'est lui qui atteste que l'article est vendable), mais on ne le
+      //// suit plus.
+      : s.included === false
+        ? <Button variant="primary" onClick={() => { close(); paySheet(s, () => act(() => Promise.resolve(), s.id)) }}>
             {t('Book and pay')}
           </Button>
       : s.bookable === false && !s.full
