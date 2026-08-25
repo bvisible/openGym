@@ -686,6 +686,9 @@ export default {
   //// Neoffice — le coaching : l'offre de programme d'un coach.
 
   //// Neoffice — les tests physiques et la composition corporelle.
+  'Your goals': 'Vos objectifs',
+  'reached': 'atteint',
+  'by {0}': 'pour le {0}',
   '{0} improved': '{0} en progrès',
   'Height': 'Taille',
   'Weight': 'Poids',

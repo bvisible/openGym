@@ -11,7 +11,7 @@
 
 import { useEffect, useState } from 'react'
 import { t, dateLocale } from '../lib/i18n.js'
-import { assessmentsMine } from '../lib/api.js'
+import { assessmentsMine, goalsMine } from '../lib/api.js'
 import Icon from '../components/Icon.jsx'
 
 //// Neoffice — le résumé se compose ICI, pas au serveur.
@@ -36,16 +36,21 @@ const fmtDate = iso => new Date(iso).toLocaleDateString(dateLocale(), {
 
 export default function Assessments() {
   const [list, setList] = useState(null)
+  const [goals, setGoals] = useState([])
   const [open, setOpen] = useState(null)
   const [error, setError] = useState(false)
 
   useEffect(() => {
     assessmentsMine().then(setList).catch(() => setError(true))
+    //// Les objectifs se chargent à part : ils ont leur propre sens même quand
+    //// aucune évaluation n'existe encore — un membre peut viser un poids dès
+    //// son inscription, avant que le coach ne l'ait mesuré.
+    goalsMine().then(g => setGoals(Array.isArray(g) ? g : [])).catch(() => {})
   }, [])
 
   if (error) return <Shell><div className="card">{t('Your assessments could not be loaded.')}</div></Shell>
   if (!list) return <Shell><div className="card muted">{t('Loading…')}</div></Shell>
-  if (!list.length) {
+  if (!list.length && !goals.length) {
     return <Shell>
       <div className="card muted" style={{ lineHeight: 1.5 }}>
         {t('No assessment yet. Your coach measures them — ask at your next session.')}
@@ -55,7 +60,8 @@ export default function Assessments() {
 
   const [latest, ...older] = list
   return <Shell>
-    <Assessment a={latest} expanded />
+    <Goals goals={goals} />
+    {latest && <Assessment a={latest} expanded />}
     {older.length > 0 && <>
       <h4 className="sec">{t('Earlier')}</h4>
       {older.map(a => <div key={a.id} className="card" style={{ cursor: 'pointer' }}
@@ -71,6 +77,38 @@ export default function Assessments() {
       </div>)}
     </>}
   </Shell>
+}
+
+//// Neoffice — ce que le membre vise.
+//// Au-dessus des mesures, parce qu'un objectif donne son sens à ce qui suit :
+//// « 23,4 % de masse grasse » ne dit rien seul, « 23,4 % sur un objectif à
+//// 20 % » dit où on en est.
+function Goals({ goals }) {
+  if (!goals || !goals.length) return null
+  return <div className="card">
+    <div className="lbl2" style={{ marginBottom: 10 }}>{t('Your goals')}</div>
+    {goals.map(g => {
+      const pct = Math.max(0, Math.min(100, Math.round(g.progress || 0)))
+      return <div key={g.id} style={{ padding: '6px 0' }}>
+        <div className="row between" style={{ gap: 12, minWidth: 0 }}>
+          <div className="small" style={{ minWidth: 0, flex: 1 }}>
+            {t(g.test)}
+            {g.reached ? <span className="tag acc" style={{ marginLeft: 7 }}>{t('reached')}</span> : null}
+          </div>
+          <div className="small" style={{ whiteSpace: 'nowrap' }}>
+            <b>{g.current != null ? g.current : '—'}</b>
+            <span className="dim"> / {g.target}{g.unit}</span>
+          </div>
+        </div>
+        {/* La barre est là pour se lire d'un coup d'œil : un pourcentage écrit
+            demande une soustraction mentale, une barre non. */}
+        <div className="goalbar"><i style={{ width: pct + '%' }} /></div>
+        {g.due && !g.reached
+          ? <div className="small dim" style={{ marginTop: 3 }}>{t('by {0}', fmtDate(g.due))}</div>
+          : null}
+      </div>
+    })}
+  </div>
 }
 
 function Shell({ children }) {

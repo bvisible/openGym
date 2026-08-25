@@ -932,3 +932,17 @@ h4.sec{
   .exmedia img{height:380px}
   .hm-wrap{display:flex;flex-direction:column;align-items:center}
 }
+
+/* //// Neoffice — la barre d'un objectif.
+   Une barre plutôt qu'un pourcentage écrit : « 62 % » demande une soustraction
+   mentale pour savoir ce qu'il reste, une barre non. Et elle garde sa piste
+   visible même à 0 %, sinon un objectif qui vient d'être posé ressemble à un
+   objectif cassé. */
+.goalbar {
+  height: 4px; border-radius: 3px; margin-top: 6px;
+  background: var(--surface-3); overflow: hidden;
+}
+.goalbar i {
+  display: block; height: 100%; background: var(--acc);
+  transition: width .3s ease; min-width: 2px;
+}

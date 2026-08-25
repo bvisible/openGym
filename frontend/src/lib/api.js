@@ -40,6 +40,9 @@ const M = {
   //// le coach qui mesure, le carnet ne fait que montrer.
   assessmentsMine: '/api/method/neoffice_gym.api.assessment.mine',
   assessmentTrend: '/api/method/neoffice_gym.api.assessment.trend',
+  //// Neoffice — les objectifs. Lecture seule : c'est le coach qui les pose,
+  //// et un membre qui déplacerait sa propre cible n'aurait plus d'objectif.
+  goalsMine: '/api/method/neoffice_gym.neoffice_gym.doctype.gym_goal.gym_goal.mine',
 }
 
 /**
@@ -119,3 +122,6 @@ export const classCancel = (booking, reason) =>
 export const assessmentsMine = () => api(M.assessmentsMine)
 export const assessmentTrend = (test) =>
   api(M.assessmentTrend + '?test=' + encodeURIComponent(test))
+
+//// Neoffice — ce que le membre vise, et où il en est.
+export const goalsMine = () => api(M.goalsMine)
