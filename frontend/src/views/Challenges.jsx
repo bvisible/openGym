@@ -111,7 +111,10 @@ function Row({ c, busy, act, open }) {
       </div>
       {c.description && <div className="ss" style={{ marginTop: 4 }}>{c.description}</div>}
       {c.joined && c.rank && <div className="ss" style={{ marginTop: 4 }}>
-        <b>{t('You are {0} of {1}', c.rank, c.of)}</b>
+        {/* Une clé à part pour la première place : « 1e » n'existe pas en
+            français, et l'ordinal ne se fabrique pas de la même façon d'une
+            langue à l'autre. Le choix appartient donc à la traduction. */}
+        <b>{c.rank === 1 ? t('You are 1st of {0}', c.of) : t('You are {0} of {1}', c.rank, c.of)}</b>
       </div>}
       {!c.running && <div className="ss" style={{ marginTop: 4 }}>{t('Starts {0}', day(c.starts_on))}</div>}
     </div>

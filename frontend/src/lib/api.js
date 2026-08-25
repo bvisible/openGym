@@ -51,6 +51,9 @@ const M = {
   challengeJoin: '/api/method/neoffice_gym.api.challenges.join',
   challengeLeave: '/api/method/neoffice_gym.api.challenges.leave',
   challengeBoard: '/api/method/neoffice_gym.api.challenges.leaderboard',
+  //// Neoffice — le panneau d'affichage du club. Rien n'est envoyé : le
+  //// membre le lit quand il ouvre son carnet.
+  announcements: '/api/method/neoffice_gym.api.challenges.announcements',
 }
 
 /**
@@ -143,3 +146,4 @@ export const challengeLeave = (challenge) =>
   api(M.challengeLeave, { method: 'POST', body: JSON.stringify({ challenge }) })
 export const challengeBoard = (challenge) =>
   api(M.challengeBoard + '?challenge=' + encodeURIComponent(challenge))
+export const announcements = () => api(M.announcements)

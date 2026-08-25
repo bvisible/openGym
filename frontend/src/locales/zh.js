@@ -583,5 +583,30 @@ export default {
 
   '{0}-week cycle': '{0} 周周期',
   'Week {0} of {1} — {2}': '第 {0} 周（共 {1} 周）—{2}',
-  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': '你的安排逐周跟随这个计划：每周开始时自动变化，持续 {0} 周后重新开始。'
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': '你的安排逐周跟随这个计划：每周开始时自动变化，持续 {0} 周后重新开始。',
+
+  //// Neoffice — Challenges feature: opt-in club challenges (workout count,
+  //// weight moved, training minutes, classes attended) with an optional
+  //// leaderboard. New feature added by Neoffice, not present upstream.
+  'Challenges': '挑战',
+  'Take part if you want to — you choose': '想参加就参加 — 由你决定。',
+  'No challenge running right now.': '现在没有进行中的挑战。',
+  'Number of workouts': '训练次数',
+  'Total weight moved': '举起的总重量',
+  'Minutes trained': '训练分钟数',
+  'Classes attended': '出席课程次数',
+  '{0} person taking part': '{0} 位参与者',
+  '{0} people taking part': '{0} 位参与者',
+  'You are {0} of {1}': '{1}人中排第{0}名',
+  'Starts {0}': '{0}开始',
+  'Ranking': '排名',
+  'Leave': '退出',
+  'Take part': '参加',
+  'Close': '关闭',
+  'The challenges could not be loaded. Try again once you are back online.': '无法加载挑战。恢复网络连接后请重试。',
+  'You are taking part': '你正在参加',
+  'Take part if you want to': '想参加就参加',
+  'See all': '查看全部',
+  '{0} kg': '{0} kg',
+  '{0} min': '{0} 分钟'
 }

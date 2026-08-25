@@ -583,5 +583,30 @@ export default {
 
   '{0}-week cycle': '{0}-недельный цикл',
   'Week {0} of {1} — {2}': 'Неделя {0} из {1} — {2}',
-  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'Твоё расписание следует этой программе неделя за неделей: оно меняется само в начале каждой недели, на протяжении {0} недель, а затем начинается заново.'
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'Твоё расписание следует этой программе неделя за неделей: оно меняется само в начале каждой недели, на протяжении {0} недель, а затем начинается заново.',
+
+  //// Neoffice — Challenges feature: opt-in club challenges (workout count,
+  //// weight moved, training minutes, classes attended) with an optional
+  //// leaderboard. New feature added by Neoffice, not present upstream.
+  'Challenges': 'Челленджи',
+  'Take part if you want to — you choose': 'Участвуй, если хочешь, — решаешь ты.',
+  'No challenge running right now.': 'Сейчас нет активных челленджей.',
+  'Number of workouts': 'Количество тренировок',
+  'Total weight moved': 'Общий поднятый вес',
+  'Minutes trained': 'Минуты тренировок',
+  'Classes attended': 'Посещённые занятия',
+  '{0} person taking part': '{0} участник',
+  '{0} people taking part': '{0} участников',
+  'You are {0} of {1}': 'Ты на {0}-м месте из {1}',
+  'Starts {0}': 'Начинается {0}',
+  'Ranking': 'Рейтинг',
+  'Leave': 'Покинуть',
+  'Take part': 'Участвовать',
+  'Close': 'Закрыть',
+  'The challenges could not be loaded. Try again once you are back online.': 'Не удалось загрузить челленджи. Попробуй ещё раз, когда снова будешь онлайн.',
+  'You are taking part': 'Ты участвуешь',
+  'Take part if you want to': 'Участвуй, если хочешь',
+  'See all': 'Смотреть все',
+  '{0} kg': '{0} кг',
+  '{0} min': '{0} мин'
 }

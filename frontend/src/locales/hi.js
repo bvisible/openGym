@@ -583,5 +583,30 @@ export default {
 
   '{0}-week cycle': '{0} सप्ताह का चक्र',
   'Week {0} of {1} — {2}': '{1} सप्ताहों में से {0}वां — {2}',
-  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'आपका कार्यक्रम इस प्रोग्राम को सप्ताह दर सप्ताह फॉलो करता है: यह हर सप्ताह की शुरुआत में अपने आप बदल जाता है, {0} सप्ताह तक, फिर दोबारा शुरू हो जाता है।'
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'आपका कार्यक्रम इस प्रोग्राम को सप्ताह दर सप्ताह फॉलो करता है: यह हर सप्ताह की शुरुआत में अपने आप बदल जाता है, {0} सप्ताह तक, फिर दोबारा शुरू हो जाता है।',
+
+  //// Neoffice — Challenges feature: opt-in club challenges (workout count,
+  //// weight moved, training minutes, classes attended) with an optional
+  //// leaderboard. New feature added by Neoffice, not present upstream.
+  'Challenges': 'चैलेंज',
+  'Take part if you want to — you choose': 'अगर आप चाहें तो भाग लें — फ़ैसला आपका है।',
+  'No challenge running right now.': 'अभी कोई चैलेंज चल नहीं रहा है।',
+  'Number of workouts': 'वर्कआउट की संख्या',
+  'Total weight moved': 'कुल उठाया गया वज़न',
+  'Minutes trained': 'वर्कआउट के मिनट',
+  'Classes attended': 'उपस्थित कक्षाएं',
+  '{0} person taking part': '{0} प्रतिभागी',
+  '{0} people taking part': '{0} प्रतिभागी',
+  'You are {0} of {1}': 'आप {1} में से {0}वें स्थान पर हैं',
+  'Starts {0}': '{0} से शुरू होगा',
+  'Ranking': 'रैंकिंग',
+  'Leave': 'छोड़ें',
+  'Take part': 'भाग लें',
+  'Close': 'बंद करें',
+  'The challenges could not be loaded. Try again once you are back online.': 'चैलेंज लोड नहीं हो सके। ऑनलाइन होने पर फिर से कोशिश करें।',
+  'You are taking part': 'आप भाग ले रहे हैं',
+  'Take part if you want to': 'अगर आप चाहें तो भाग लें',
+  'See all': 'सभी देखें',
+  '{0} kg': '{0} kg',
+  '{0} min': '{0} मिनट'
 }

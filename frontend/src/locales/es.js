@@ -583,5 +583,30 @@ export default {
 
   '{0}-week cycle': 'ciclo de {0} semanas',
   'Week {0} of {1} — {2}': 'Semana {0} de {1} — {2}',
-  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'Tu horario sigue este programa semana a semana: cambia por sí solo al principio de cada semana, durante {0} semanas, y luego vuelve a empezar.'
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'Tu horario sigue este programa semana a semana: cambia por sí solo al principio de cada semana, durante {0} semanas, y luego vuelve a empezar.',
+
+  //// Neoffice — Challenges feature: opt-in club challenges (workout count,
+  //// weight moved, training minutes, classes attended) with an optional
+  //// leaderboard. New feature added by Neoffice, not present upstream.
+  'Challenges': 'Desafíos',
+  'Take part if you want to — you choose': 'Participa si quieres — decides tú.',
+  'No challenge running right now.': 'No hay ningún desafío activo en este momento.',
+  'Number of workouts': 'Número de entrenamientos',
+  'Total weight moved': 'Peso total levantado',
+  'Minutes trained': 'Minutos de entrenamiento',
+  'Classes attended': 'Clases asistidas',
+  '{0} person taking part': '{0} participante',
+  '{0} people taking part': '{0} participantes',
+  'You are {0} of {1}': 'Estás en el puesto {0}.º de {1}',
+  'Starts {0}': 'Empieza el {0}',
+  'Ranking': 'Clasificación',
+  'Leave': 'Salir',
+  'Take part': 'Participar',
+  'Close': 'Cerrar',
+  'The challenges could not be loaded. Try again once you are back online.': 'No se han podido cargar los desafíos. Vuelve a intentarlo cuando tengas conexión.',
+  'You are taking part': 'Estás participando',
+  'Take part if you want to': 'Participa si quieres',
+  'See all': 'Ver todo',
+  '{0} kg': '{0} kg',
+  '{0} min': '{0} min'
 }

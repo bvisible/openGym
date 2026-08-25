@@ -583,5 +583,30 @@ export default {
 
   '{0}-week cycle': '{0} haftalık döngü',
   'Week {0} of {1} — {2}': '{1} haftanın {0}. haftası — {2}',
-  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'Planın bu programı hafta hafta izliyor: her haftanın başında kendiliğinden değişiyor, {0} hafta boyunca, sonra baştan başlıyor.'
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'Planın bu programı hafta hafta izliyor: her haftanın başında kendiliğinden değişiyor, {0} hafta boyunca, sonra baştan başlıyor.',
+
+  //// Neoffice — Challenges feature: opt-in club challenges (workout count,
+  //// weight moved, training minutes, classes attended) with an optional
+  //// leaderboard. New feature added by Neoffice, not present upstream.
+  'Challenges': 'Meydan Okumalar',
+  'Take part if you want to — you choose': 'İstersen katıl — karar senin.',
+  'No challenge running right now.': 'Şu anda devam eden bir meydan okuma yok.',
+  'Number of workouts': 'Antrenman sayısı',
+  'Total weight moved': 'Toplam kaldırılan ağırlık',
+  'Minutes trained': 'Antrenman dakikaları',
+  'Classes attended': 'Katılınan dersler',
+  '{0} person taking part': '{0} katılımcı',
+  '{0} people taking part': '{0} katılımcı',
+  'You are {0} of {1}': '{1} kişi içinde {0}. sıradasın',
+  'Starts {0}': '{0} tarihinde başlıyor',
+  'Ranking': 'Sıralama',
+  'Leave': 'Ayrıl',
+  'Take part': 'Katıl',
+  'Close': 'Kapat',
+  'The challenges could not be loaded. Try again once you are back online.': 'Meydan okumalar yüklenemedi. Tekrar çevrimiçi olduğunda yeniden dene.',
+  'You are taking part': 'Katılıyorsun',
+  'Take part if you want to': 'İstersen katıl',
+  'See all': 'Tümünü gör',
+  '{0} kg': '{0} kg',
+  '{0} min': '{0} dk'
 }

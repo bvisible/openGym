@@ -9,7 +9,7 @@ import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadSta
 import { useEffect } from 'react'
 import { programInbox } from '../lib/api.js'
 import { describeOffer } from '../lib/coach-program.js'
-import { classesMine, challengesMine } from '../lib/api.js'
+import { classesMine, challengesMine, announcements } from '../lib/api.js'
 import LineChart from '../components/LineChart.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
@@ -71,6 +71,31 @@ export default function Home() {
   //// se bloquent pas l'un l'autre, et un club sans cours ne paie même pas
   //// l'aller-retour — perms.classes tranche avant de sortir sur le réseau.
   const [classes, setClasses] = useState([])
+  //// Neoffice — le panneau d'affichage du club. Ce qu'un membre a fermé est
+  //// retenu par SON appareil : l'écrire en base coûterait une écriture par
+  //// membre et par avis pour un confort d'affichage, et donnerait au club la
+  //// liste de qui a lu quoi — ce qu'il n'a pas demandé.
+  //// La clé porte la date de MODIFICATION : un avis corrigé par le club se
+  //// rouvre chez ceux qui avaient lu la version fausse. Sans ça, une
+  //// correction d'horaire ne serait jamais lue par les premiers concernés.
+  const [notices, setNotices] = useState([])
+  const [seen, setSeen] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('gym_notices_seen') || '{}') } catch (e) { return {} }
+  })
+  useEffect(() => {
+    let alive = true
+    announcements()
+      .then(r => { if (alive) setNotices(r.announcements || []) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [])
+  const closeNotice = (n) => {
+    const next = { ...seen, [n.name]: n.modified }
+    setSeen(next)
+    try { localStorage.setItem('gym_notices_seen', JSON.stringify(next)) } catch (e) { /* mode privé */ }
+  }
+  const openNotices = notices.filter(n => seen[n.name] !== n.modified)
+
   //// Neoffice — les défis en cours. Chargés à part des cours : un club peut
   //// avoir l'un sans l'autre, et un échec ici ne doit pas vider le planning.
   const [challenges, setChallenges] = useState([])
@@ -127,6 +152,19 @@ export default function Home() {
       <button className="iconbtn" onClick={() => nav('/settings')} aria-label={t('Settings')}><Icon name="gear" /></button>
     </div>
 
+    {/* //// Neoffice — le panneau d'affichage, AVANT les cours : un avis peut
+         corriger le planning qu'on lit juste en dessous (« la salle est fermée
+         jeudi »), donc il se lit d'abord. */}
+    {openNotices.map(n => <div key={n.name} className="card" style={{ borderColor: 'var(--acc)' }}>
+      <div className="row between" style={{ marginBottom: 6, gap: 10 }}>
+        <div className="lbl2">{n.title}</div>
+        <button className="iconbtn" onClick={() => closeNotice(n)} aria-label={t('Close')}>
+          <Icon name="xmark" />
+        </button>
+      </div>
+      <div className="small" style={{ lineHeight: 1.5, whiteSpace: 'pre-line' }}>{n.body}</div>
+    </div>)}
+
     {/* //// Neoffice — les prochains cours. Sous les offres et au-dessus de la
          semaine : un cours est un RENDEZ-VOUS, donc il se lit avant le plan. */}
     {classes.length > 0 && <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/classes')}>
@@ -159,7 +197,7 @@ export default function Home() {
         <div style={{ minWidth: 0 }}>
           <div className="ttl">{c.title}</div>
           <div className="small dim">{c.joined
-            ? (c.rank ? t('You are {0} of {1}', c.rank, c.of) : t('You are taking part'))
+            ? (c.rank ? (c.rank === 1 ? t('You are 1st of {0}', c.of) : t('You are {0} of {1}', c.rank, c.of)) : t('You are taking part'))
             : t('Take part if you want to')}</div>
         </div>
       </div>)}

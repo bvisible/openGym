@@ -583,5 +583,30 @@ export default {
 
   '{0}-week cycle': '{0}주 주기',
   'Week {0} of {1} — {2}': '{1}주 중 {0}주차 — {2}',
-  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': '일정이 이 프로그램을 주별로 따라갑니다: 매주 시작할 때마다 저절로 바뀌고, {0}주 후에는 처음부터 다시 시작됩니다.'
+  'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': '일정이 이 프로그램을 주별로 따라갑니다: 매주 시작할 때마다 저절로 바뀌고, {0}주 후에는 처음부터 다시 시작됩니다.',
+
+  //// Neoffice — Challenges feature: opt-in club challenges (workout count,
+  //// weight moved, training minutes, classes attended) with an optional
+  //// leaderboard. New feature added by Neoffice, not present upstream.
+  'Challenges': '챌린지',
+  'Take part if you want to — you choose': '원하시면 참가하세요 — 선택은 자유예요.',
+  'No challenge running right now.': '지금 진행 중인 챌린지가 없어요.',
+  'Number of workouts': '운동 횟수',
+  'Total weight moved': '총 들어 올린 무게',
+  'Minutes trained': '운동 시간(분)',
+  'Classes attended': '참석한 수업',
+  '{0} person taking part': '참가자 {0}명',
+  '{0} people taking part': '참가자 {0}명',
+  'You are {0} of {1}': '{1}명 중 {0}위예요',
+  'Starts {0}': '{0}에 시작해요',
+  'Ranking': '순위',
+  'Leave': '나가기',
+  'Take part': '참가하기',
+  'Close': '닫기',
+  'The challenges could not be loaded. Try again once you are back online.': '챌린지를 불러오지 못했어요. 다시 온라인 상태가 되면 시도해 주세요.',
+  'You are taking part': '참가 중이에요',
+  'Take part if you want to': '원하시면 참가하세요',
+  'See all': '전체 보기',
+  '{0} kg': '{0} kg',
+  '{0} min': '{0}분'
 }

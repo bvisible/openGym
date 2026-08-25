@@ -781,4 +781,28 @@ export default {
   'Not now': 'Pas maintenant',
   '{0} sent you a program': '{0} vous a envoyé un programme',
   'Your coach sent you a program': 'Votre coach vous a envoyé un programme',
+
+  //// Neoffice — Challenges feature: opt-in club challenges (workout count,
+  //// weight moved, training minutes, classes attended) with an optional
+  //// leaderboard. New feature added by Neoffice, not present upstream.
+  'Challenges': 'Défis',
+  'Take part if you want to — you choose': 'Participez si vous le souhaitez — c’est vous qui décidez.',
+  'No challenge running right now.': 'Aucun défi en cours pour le moment.',
+  'Number of workouts': 'Nombre de séances',
+  'Total weight moved': 'Poids total soulevé',
+  'Minutes trained': 'Minutes d’entraînement',
+  'Classes attended': 'Cours suivis',
+  '{0} person taking part': '{0} participant',
+  '{0} people taking part': '{0} participants',
+  'You are {0} of {1}': 'Vous êtes {0}e sur {1}',
+  'Starts {0}': 'Commence le {0}',
+  'Ranking': 'Classement',
+  'Leave': 'Quitter',
+  'Take part': 'Participer',
+  'The challenges could not be loaded. Try again once you are back online.': 'Les défis n’ont pas pu être chargés. Réessayez une fois la connexion rétablie.',
+  'You are taking part': 'Vous participez',
+  'Take part if you want to': 'Participez si vous le souhaitez',
+  'See all': 'Voir tout',
+  '{0} kg': '{0} kg',
+  '{0} min': '{0} min',
 }
