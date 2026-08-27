@@ -195,3 +195,25 @@ export const payWith = (booking, method) =>
   api(M.payWith, { method: 'POST', body: JSON.stringify({ booking, method }) })
 export const payState = ({ intent, invoice }) =>
   api(M.payState + '?' + new URLSearchParams(intent ? { intent } : { invoice }))
+
+//// Neoffice — kept from upstream because other files import them, but INERT here.
+//// Upstream's mobile shell can pair with a Node server by code; our journal is
+//// served by the very instance it talks to (same origin, Frappe session), so
+//// there is no second server to point at. Exporting no-ops rather than deleting
+//// keeps `lib/remote.js` and `store/useStore.js` mergeable at the next upstream
+//// merge — the same choice already made for push (`pushSupported()` is false).
+export function setRemoteAuth() { /* no remote server here */ }
+export async function pairRedeem() {
+  throw new Error('Pairing is not available: this journal is served by your club instance.')
+}
+
+//// Neoffice — kept REAL: these only report what the browser supports, and
+//// Settings hides the whole passkey section anyway (the session is Frappe's).
+//// Upstream fixed a false negative on Chrome for iOS here; no reason to lose it.
+export const BIO = IS_APPLE ? 'Face ID / Touch ID' : IS_ANDROID ? 'fingerprint or face unlock' : 'your fingerprint, face or PIN'
+export const VAULT = IS_APPLE ? 'iCloud Keychain' : IS_ANDROID ? 'Google Password Manager' : 'your password manager'
+// PublicKeyCredential is the WebAuthn-specific capability signal. Do not also gate the UI on
+// navigator.credentials: some browsers expose WebAuthn while that generic Credential Management
+// API check produces a false negative (notably Chrome on iOS). The real create/get calls still run
+// only after the user chooses a passkey action and surface any genuine browser error there.
+export const webauthnOK = () => typeof window.PublicKeyCredential !== 'undefined'

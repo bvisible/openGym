@@ -5,21 +5,20 @@
 
 import { useSyncExternalStore } from 'react'
 import {
-  LANGS, INSTR_LANGS, DATE_LOCALES,
-  getLang, dateLocale, t, instrFor, getVersion, _setLangState
+  LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, DATE_LOCALES,
+  getLang, dateLocale, t, instrFor, exerciseNameFor, exerciseNameSearchText, getVersion, _setLangState
 } from './i18n-core.js'
-//// Neoffice — voir applyExerciseNames() : l'amont ne traduit pas les noms.
-import { applyExerciseNames } from './exercises.js'
 
-export { LANGS, INSTR_LANGS, DATE_LOCALES, getLang, dateLocale, t, instrFor }
+export {
+  LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, DATE_LOCALES,
+  getLang, dateLocale, t, instrFor, exerciseNameFor, exerciseNameSearchText
+}
 
-// Vite code-splits each locale pack into its own chunk via import.meta.glob; instructions use
-// the same mechanism in src/instr/. Both are lazy, so the production bundle ships English only.
+// Vite code-splits locale, instruction and exercise-name packs via import.meta.glob. They are
+// lazy, so the production bundle ships English only until another language is selected.
 const localePacks = import.meta.glob('../locales/*.js')
 const instrPacks = import.meta.glob('../instr/*.js')
-//// Neoffice — exercise names, loaded like the instructions: a separate chunk,
-//// so the default bundle stays English-only.
-const namePacks = import.meta.glob('../names/*.js')
+const exerciseNamePacks = import.meta.glob('../exercise-names/*.js')
 
 // React subscription bookkeeping — kept here, not in core, so core has zero React coupling.
 const subs = new Set()
@@ -28,20 +27,15 @@ const notify = () => { subs.forEach(f => f()) }
 export async function setLang(l) {
   if (!LANGS[l]) l = 'en'
   if (l === getLang() && getVersion() > 0) return
-  let dict = {}, instr = null, names = null
+  let dict = {}, instr = null, exerciseNames = null
+  try { dict = l === 'en' ? {} : (await localePacks['../locales/' + l + '.js']()).default } catch (e) { dict = {} }
+  try { instr = l === 'en' || !INSTR_LANGS.includes(l) ? null : (await instrPacks['../instr/' + l + '.js']()).default } catch (e) { instr = null }
   try {
-    dict = l === 'en' ? {} : (await localePacks['../locales/' + l + '.js']()).default
-    instr = l === 'en' || !INSTR_LANGS.includes(l) ? null : (await instrPacks['../instr/' + l + '.js']()).default
-  } catch (e) { dict = {}; instr = null }
-  //// Neoffice — le pack de noms a son propre try : toutes les langues n'en ont
-  //// pas, et une langue sans pack doit rendre l'anglais, pas casser le
-  //// changement de langue au complet.
-  try {
-    const loader = namePacks['../names/' + l + '.js']
-    names = l === 'en' || !loader ? null : (await loader()).default
-  } catch (e) { names = null }
-  applyExerciseNames(names)
-  _setLangState(l, dict, instr)
+    exerciseNames = l === 'en' || !EXERCISE_NAME_LANGS.includes(l)
+      ? null
+      : (await exerciseNamePacks['../exercise-names/' + l + '.js']()).default
+  } catch (e) { exerciseNames = null }
+  _setLangState(l, dict, instr, exerciseNames)
   notify()
 }
 

@@ -52,22 +52,44 @@ redistribution. C'est la raison du `.gitignore`, pas la taille.
 
 ## Procédure de merge amont
 
+Depuis le rebase du 2026-08-24, **les deux historiques ont un ancêtre commun** —
+`git merge-base version-15 upstream/main` rend un vrai commit présent des deux
+côtés. Un merge est donc devenu la bonne méthode, et la réapplication manuelle
+n'a plus lieu d'être.
+
 ```bash
-git fetch upstream
-git checkout -b rebase-<date> upstream/main     # partir de LEUR code
-# réappliquer nos modifications PAR-DESSUS, fichier par fichier :
-#   - repartir de LEUR version quand le fichier a bougé (App.jsx, exercises.js, Workout.jsx…)
-#   - garder LEURS ajouts (Umami, initBackButton, SECONDARY_ADDITIONS, notifications locales)
-#   - ne recopier notre ancienne version que pour ce qui est 100 % à nous (api.js, push.js, opengym/)
+git fetch upstream                                   # gitlab.com/DuarteSantos8/opengym
+git branch -f neoffice-pre-upstream-<date> version-15 && git push origin neoffice-pre-upstream-<date>
+git merge upstream/main                              # ← oui, un merge
+# résoudre : garder LEUR code, réappliquer NOS `//// Neoffice` par-dessus
 npm --prefix frontend ci && npm --prefix frontend test && npm --prefix frontend run build
-git branch -f version-15 rebase-<date> && git push --force-with-lease origin version-15
+git add -A && git commit && git push origin version-15
 ```
 
-**Toujours pousser une branche filet avant** (`neoffice-pre-<amont>-rebase`).
+**Toujours pousser la branche filet AVANT** (`neoffice-pre-upstream-<date>`).
 
-> Ne PAS faire `git merge upstream/main` : nos deux bases n'ont pas la même origine
-> historique, et un merge produit des conflits sur des fichiers qui n'ont rien en commun.
-> On réapplique, on ne fusionne pas.
+> **Historique de cette section.** Elle a longtemps dit « ne PAS faire
+> `git merge` : nos deux bases n'ont pas la même origine historique ». C'était
+> exact **avant** le rebase du 2026-08-24, quand le fork était parti d'une copie
+> GitHub sans historique. Le rebase a reconnecté les deux arbres ; le merge du
+> 2026-08-27 (50 commits amont) a coûté **37 blocs de conflit sur 24 fichiers**,
+> tous résolus. Vérifier avant d'agir :
+> `git merge-base --is-ancestor $(git merge-base version-15 upstream/main) upstream/main`.
+
+### Ce que la résolution demande, à chaque fois
+
+- **`lib/api.js`** — 100 % à nous (session Frappe). Prendre NOTRE version, et
+  ne réintégrer de l'amont que ce qui n'est pas de l'authentification.
+- **`vite.config.js`, `.gitignore`, `opengym/`** — notre coquille Frappe :
+  garder les nôtres, y ajouter leurs nouveautés.
+- **`locales/*.js`** — leurs nouvelles chaînes + nos surcharges. Les deux, jamais
+  l'un à la place de l'autre.
+- **`instr/fr.js`** — NOTRE version, toujours (7 710 consignes vouvoyées).
+- Partout ailleurs : **leur code**, avec nos `////` réappliqués par-dessus.
+
+> L'amont a son propre `CLAUDE.md`, qui décrit SON projet (docker, api, mcp,
+> website). Il est écrasé par celui-ci à chaque merge — le lire avec
+> `git show upstream/main:CLAUDE.md` quand on a besoin de leur carte.
 
 ## Le service worker vit à la racine, pas sous /gym/
 

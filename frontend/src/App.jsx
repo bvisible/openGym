@@ -33,9 +33,14 @@ import Settings from './views/Settings.jsx'
 
 bindUI(useUI)   // lets the shared controls open sheets without importing the store at module scope
 
+// theme === 'system' follows the OS/browser preference instead of a fixed choice.
+const resolveTheme = theme => theme === 'light' || theme === 'dark'
+  ? theme
+  : (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+
 function applyPrefs(theme, accent) {
   const de = document.documentElement
-  de.dataset.theme = theme === 'light' ? 'light' : 'dark'
+  de.dataset.theme = resolveTheme(theme)
   de.dataset.accent = ACCENTS[accent] ? accent : 'lime'
   const meta = document.querySelector('meta[name="theme-color"]')
   if (meta) meta.content = de.dataset.theme === 'light' ? '#f2f2f7' : '#000000'
@@ -49,6 +54,16 @@ function Shell() {
   const langV = useLang()   // re-renders the whole shell when the language (pack) changes
   useEffect(() => { setNav(navigate) }, [navigate])
   useEffect(() => { applyPrefs(S.theme, S.accent) }, [S.theme, S.accent])
+  // 'system' needs to react live if the OS theme flips while the app is open, not just on
+  // the next mount — a fixed 'dark'/'light' choice never re-fires this since matchMedia
+  // isn't consulted for those.
+  useEffect(() => {
+    if (S.theme !== 'system' || !window.matchMedia) return
+    const mql = window.matchMedia('(prefers-color-scheme: dark)')
+    const onChange = () => applyPrefs(S.theme, S.accent)
+    mql.addEventListener('change', onChange)
+    return () => mql.removeEventListener('change', onChange)
+  }, [S.theme, S.accent])
   //// Neoffice — `BOOT.lang` as a fallback: before signing in there is NO
   //// synced state at all, so `S.lang` is empty and the login screen used to
   //// show up in English at a French-speaking club. The server, on the other

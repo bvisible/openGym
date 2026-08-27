@@ -14,15 +14,17 @@ node_modules/
 *.log
 .DS_Store
 node_modules
+.claude/
+.agents/
 
-#//// Neoffice — LES MÉDIAS NE SONT JAMAIS COMMITÉS. Les 1 324 GIF et JPG du jeu
-#//// de données amont sont © Gym visual, redistribués avec permission DANS le
-#//// dépôt du dataset — pas dans le nôtre. Les commiter ici, dans un dépôt
-#//// PUBLIC, serait une redistribution caractérisée. L'instance les télécharge
-#//// (scripts/fetch-media.sh), exactement comme le `docker compose up` amont le
-#//// fait chez l'auto-hébergeur.
+#//// Neoffice — MEDIA IS NEVER COMMITTED. The dataset's 1,324 GIFs and JPEGs are
+#//// © Gym visual, redistributed with permission INSIDE the dataset repository —
+#//// not inside ours. Committing them here, in a PUBLIC repository, would be
+#//// redistribution plain and simple. The instance downloads them
+#//// (scripts/fetch-media.sh), exactly as upstream's `docker compose up` does for
+#//// a self-hoster.
 opengym/public/media/
 
-#//// Neoffice — le carnet compilé EST commité (opengym/public/frontend) : la
-#//// flotte ne recompile jamais une SPA sur une instance.
+#//// Neoffice — the COMPILED journal IS committed (opengym/public/frontend): the
+#//// fleet never rebuilds a SPA on an instance.
 frontend/dist/

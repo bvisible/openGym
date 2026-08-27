@@ -13,7 +13,8 @@ import { wakeLockSupported } from '../lib/wakelock.js'
 import { t, LANGS, INSTR_LANGS, dateLocale } from '../lib/i18n.js'
 import { DEMO, REPO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
-import { loadStarterPlan, confirmSheet, importFromApp } from '../sheets.jsx'
+import { ConnectSheet } from './MobileOnboarding.jsx'
+import { loadStarterPlan, confirmSheet, importFromApp, equipmentProfileSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
 
@@ -21,7 +22,7 @@ export default function Settings() {
   const nav = useNavigate()
   const S = useStore(s => s.S)
   const user = useStore(s => s.user)
-  const { update, replaceState, setUser, pullState, pushState, signOut, resetDemo } = useStore()
+  const { update, replaceState, setUser, pullState, pushState, signOut, signOutAll, resetDemo, disconnectServer } = useStore()
   const toast = useUI(s => s.toast)
   const fileRef = useRef(null)
   const importRef = useRef(null)
@@ -64,12 +65,21 @@ export default function Settings() {
     </div>
 
     {/* ---------- account (demo and mobile builds have nothing to sign in to) ---------- */}
-    <Section title={MOBILE ? t('Your data') : DEMO ? t('Demo') : t('Account')}>
-      {MOBILE ? <>
+    <Section title={MOBILE ? (user ? t('Your server') : t('Your data')) : DEMO ? t('Demo') : t('Account')}>
+      {MOBILE ? (user ? <>
+        <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Synced with your openGym server.')} />
+        {user.admin && <Row icon="wrench" iconTint="var(--indigo)" title={t('Admin dashboard')} accessory="chevron" onClick={() => nav('/admin')} />}
+        <Row icon="signOut" iconTint="var(--red)" title={t('Disconnect')} danger onClick={() => confirmSheet({
+          title: t('Disconnect from your server?'),
+          message: t('Your data is synced to your server first, then this device switches back to local-only.'),
+          confirmText: t('Disconnect'), danger: true,
+          onConfirm: async () => { await disconnectServer(); nav('/home'); toast(t('Disconnected — back to local-only')) },
+        })} />
+      </> : <>
         <Row icon="lock" iconTint="var(--acc)" title={t('All data stays on this phone')} subtitle={t('No account, no cloud — back it up anytime with Export below.')} />
-        <Row icon="rocket" iconTint="var(--indigo)" title={t('Self-host openGym')} subtitle={t('Passkey sign-in, sync across your devices, your own data.')} accessory="chevron"
-          onClick={() => window.open(REPO, '_blank', 'noopener')} />
-      </> : DEMO ? <>
+        <Row icon="link" iconTint="var(--indigo)" title={t('Connect to my server')} subtitle={t('Sync this device to your own self-hosted openGym instead.')} accessory="chevron"
+          onClick={() => useUI.getState().openSheet(close => <ConnectSheet close={close} />)} />
+      </>) : DEMO ? <>
         <Row icon="sparkles" iconTint="var(--acc)" title={t('You’re in the demo')} subtitle={t('Example data, stored only in this browser — change anything you like.')} />
         <Row icon="reset" iconTint="var(--blue)" title={t('Reset demo data')} accessory="chevron"
           onClick={() => confirmSheet({ title: t('Reset demo data?'), message: t('Puts the example plan, workouts and weigh-ins back the way they started.'), confirmText: t('Reset'), onConfirm: () => { resetDemo(); nav('/home'); toast(t('Demo data reset')) } })} />
@@ -129,7 +139,13 @@ export default function Settings() {
     <Section title={t('During a workout')} footer={wakeOK ? t('The screen stays on while a workout is running, so you don’t have to unlock your phone between sets.') : null}>
       <SelectRow icon="timer" iconTint="var(--orange)" title={t('Rest timer')}
         value={S.restSec} onChange={v => update(s => { s.restSec = v })}
-        options={[60, 90, 120, 150, 180].map(v => ({ value: v, label: v + 's' }))} />
+        options={[{ value: 0, label: t('Off') }, ...[60, 90, 120, 150, 180].map(v => ({ value: v, label: v + 's' }))]} />
+      {/* Default for a rest-pause burst added live on a plain set — a planned exercise's own
+          "Rest (s)" (in its Intensifier config) overrides this, same as the main rest timer
+          is the fallback whenever an exercise has no progression rule of its own. */}
+      <SelectRow icon="bolt" iconTint="var(--acc)" title={t('Rest-pause rest')}
+        value={S.restPauseSec} onChange={v => update(s => { s.restPauseSec = v })}
+        options={[10, 15, 20, 30].map(v => ({ value: v, label: v + 's' }))} />
       {(wakeOK || !MOBILE) && (
         <Row icon="sun" iconTint="var(--yellow)" title={t('Keep screen awake')}
           subtitle={wakeOK ? null : t('Not supported in this browser.')}>
@@ -152,13 +168,20 @@ export default function Settings() {
 
     {(user || MOBILE) && <NotificationsCard S={S} update={update} toast={toast} />}
 
+    {/* ---------- equipment ---------- */}
+    <EquipmentCard S={S} update={update} />
+
     {/* ---------- appearance ---------- */}
     <Section title={t('Appearance')} footer={DEMO || MOBILE ? undefined : t('synced with your profile')}>
       <Row icon="moon" iconTint="var(--indigo)" title={t('Theme')}>
         <Segmented
           className="seg-inline"
-          options={[{ value: 'dark', icon: 'moon', label: t('Dark') }, { value: 'light', icon: 'sun', label: t('Light') }]}
-          value={S.theme === 'light' ? 'light' : 'dark'}
+          options={[
+            { value: 'dark', icon: 'moon', label: t('Dark') },
+            { value: 'light', icon: 'sun', label: t('Light') },
+            { value: 'system', icon: 'gear', label: t('System') },
+          ]}
+          value={S.theme || 'dark'}
           onChange={v => update(s => { s.theme = v })}
         />
       </Row>
@@ -190,6 +213,10 @@ export default function Settings() {
         accessory="chevron" onClick={() => importRef.current.click()} />
       <Row icon="upload" iconTint="var(--blue)" title={t('Import backup')} accessory="chevron" onClick={() => fileRef.current.click()} />
       <Row icon="download" iconTint="var(--blue)" title={t('Export backup (JSON)')} accessory="chevron" onClick={doExport} />
+      {MOBILE && <Row icon="history" iconTint="var(--blue)" title={t('Auto-backup on changes')}
+        subtitle={t('Saves a dated copy to the Documents folder after finishing a workout or editing a routine — point a sync app at it, or copy it out by hand.')}>
+        <Switch checked={!!S.autoBackup} onChange={v => update(s => { s.autoBackup = v })} />
+      </Row>}
       <Row icon="trash" iconTint="var(--red)" title={t('Reset everything')} danger onClick={() => confirmSheet({ title: t('Reset everything?'), message: t('Deletes your plan, workouts and body weight on this device. This cannot be undone.'), confirmText: t('Delete everything'), danger: true, onConfirm: () => { replaceState(JSON.parse(JSON.stringify(DEF)), true); nav('/home'); toast(t('All data reset')) } })} />
     </Section>
     <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: 'none' }} onChange={doImport} />
@@ -205,11 +232,12 @@ export default function Settings() {
     </Section>}
 
     {/* //// Neoffice — the "source code" link points at OUR fork: AGPL §13 asks
-        for the source of THE running version. The rest of the footer is
-        upstream's, which corrected the dataset licence itself (MIT) and added
-        the © Gym visual attribution. */}
+        for the source of THE version that is running, and what runs here is the
+        fork. The version number is upstream's addition, kept: on the phone there
+        is no address bar, so this line is the only way to tell which build you
+        are on. */}
     <div className="dim small" style={{ textAlign: 'center', marginTop: 4, lineHeight: 1.6 }}>
-      openGym · {t('free & open source (AGPL v3)')}<br />
+      openGym v{__APP_VERSION__} · {t('free & open source (AGPL v3)')}<br />
       <a href="https://github.com/bvisible/openGym" target="_blank" rel="noopener">source code</a> · exercise data: hasaneyldrm/exercises-dataset (MIT)<br />
       exercise images and animations © <a href="https://gymvisual.com/" target="_blank" rel="noopener">Gym visual</a>
     </div>
@@ -342,11 +370,43 @@ function PushCard({ S, update, toast }) {
   </>
 }
 
+// Equipment profiles ("Home", "Gym", ...) — each an id/name/eq-list; the active one filters
+// the Library, exercise picker, and flags routine entries that need something outside it
+// (see lib/equipment.js). Purely local/synced state — no server changes needed.
+function EquipmentCard({ S, update }) {
+  const profiles = S.equipProfiles || []
+  const remove = p => confirmSheet({
+    title: t('Delete profile?'), message: t('"{0}" and its equipment list will be removed.', p.name),
+    confirmText: t('Delete'), danger: true,
+    onConfirm: () => update(s => {
+      s.equipProfiles = (s.equipProfiles || []).filter(x => x.id !== p.id)
+      if (s.activeEquipId === p.id) s.activeEquipId = (s.equipProfiles[0] && s.equipProfiles[0].id) || null
+    }),
+  })
+  return <Section title={t('Equipment')} footer={t('Filters the exercise library and picker, and flags routine exercises that need something you don’t have in the active profile.')}>
+    {profiles.length > 0 && <Row icon="dumbbell" iconTint="var(--acc)" title={t('Filter by equipment')}>
+      <Switch checked={!!S.equipFilterOn} onChange={v => update(s => { s.equipFilterOn = v })} />
+    </Row>}
+    {profiles.length > 0 && <SelectRow icon="list" iconTint="var(--blue)" title={t('Active profile')}
+      value={S.activeEquipId || ''} onChange={v => update(s => { s.activeEquipId = v })}
+      options={profiles.map(p => ({ value: p.id, label: p.name }))} />}
+    {profiles.map(p => (
+      <Row key={p.id} icon="dumbbell" iconTint="var(--teal)" title={p.name}
+        subtitle={t('{0} equipment types', p.equipment.length)} accessory="chevron"
+        onClick={() => equipmentProfileSheet(p)}>
+        <button className="iconbtn" aria-label={t('Delete')} onClick={ev => { ev.stopPropagation(); remove(p) }}><Icon name="trash" /></button>
+      </Row>
+    ))}
+    <Row icon="plus" iconTint="var(--acc)" title={t('Add equipment profile')} accessory="chevron" onClick={() => equipmentProfileSheet(null)} />
+  </Section>
+}
 
-//// Neoffice — RegisterInline removed. It created a passkey profile and asked
-//// for an invite code. Accounts here are Frappe accounts: a member exists
-//// because the club created them, there is nothing to sign up for from the
-//// logbook.
+//// Neoffice — RegisterInline and PairSheet removed. The first created a passkey
+//// profile and asked for an invite code; the second minted a code for upstream's
+//// mobile app to pair with a Node server. Accounts here are Frappe accounts — a
+//// member exists because the club created them — and the journal is served by
+//// the very instance it talks to, so there is nothing to sign up for and no
+//// second server to pair with.
 
 
 //// Neoffice — added: who follows this member, and how to write to them.
