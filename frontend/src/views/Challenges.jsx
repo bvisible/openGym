@@ -1,15 +1,15 @@
-//// Neoffice — added file (no upstream equivalent) : les défis du club.
+//// Neoffice — added file (no upstream equivalent): the club's challenges.
 ////
-//// LA RÈGLE QUI GOUVERNE CET ÉCRAN : un classement dit à quelle fréquence
-//// quelqu'un s'entraîne et combien il soulève. Ce sont des données de santé au
-//// sens de la LPD. Le membre y entre parce qu'il l'a CHOISI — jamais parce que
-//// le club l'a inscrit — et il ne voit le classement que d'un défi qu'il a
-//// rejoint. On ne charge donc pas le classement avec la liste : on le demande
-//// quand il l'ouvre, et le serveur refuse s'il n'y est pas.
+//// THE RULE THAT GOVERNS THIS SCREEN: a leaderboard tells how often somebody
+//// trains and how much they lift. That is health data under Swiss data
+//// protection law. A member joins because they CHOSE to — never because the
+//// club signed them up — and they only see the leaderboard of a challenge they
+//// joined. So we do not load the leaderboard with the list: we ask for it when
+//// they open it, and the server refuses if they are not in.
 ////
-//// Ce que cet écran ne fait PAS : montrer les scores de ceux qui n'ont rien
-//// signé, ni classer tout le club « pour voir ». Un défi sans participant est
-//// un défi vide, pas un défi qui classe tout le monde d'office.
+//// What this screen does NOT do: show the scores of people who never opted in,
+//// or rank the whole club "just to see". A challenge with no participant is an
+//// empty challenge, not a challenge that ranks everyone by default.
 
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -22,9 +22,9 @@ const day = iso => iso
   ? new Date(iso + 'T00:00:00').toLocaleDateString(dateLocale(), { day: 'numeric', month: 'short' })
   : ''
 
-// Ce que la métrique compte, dit dans la langue du membre. Le serveur envoie
-// la clé, pas la phrase : traduire côté serveur donnerait la langue du CRON à
-// qui n'a pas de langue, piège déjà payé deux fois sur ce module.
+// What the metric counts, said in the member's language. The server sends the
+// key, not the sentence: translating server-side would hand the CRON's language
+// to whoever has none — a trap this module has already paid for twice.
 const METRIC = {
   'Workout Count': () => t('Number of workouts'),
   'Weight Moved': () => t('Total weight moved'),
@@ -111,9 +111,9 @@ function Row({ c, busy, act, open }) {
       </div>
       {c.description && <div className="ss" style={{ marginTop: 4 }}>{c.description}</div>}
       {c.joined && c.rank && <div className="ss" style={{ marginTop: 4 }}>
-        {/* Une clé à part pour la première place : « 1e » n'existe pas en
-            français, et l'ordinal ne se fabrique pas de la même façon d'une
-            langue à l'autre. Le choix appartient donc à la traduction. */}
+        {/* A separate key for first place: French has no "1e", and ordinals
+            are not built the same way from one language to the next. The choice
+            therefore belongs to the translation. */}
         <b>{c.rank === 1 ? t('You are 1st of {0}', c.of) : t('You are {0} of {1}', c.rank, c.of)}</b>
       </div>}
       {!c.running && <div className="ss" style={{ marginTop: 4 }}>{t('Starts {0}', day(c.starts_on))}</div>}
@@ -147,8 +147,8 @@ function Board({ board, close }) {
   </div>
 }
 
-// Un volume s'écrit en kilos, des minutes en minutes, un nombre de séances tout
-// court. Le même nombre brut partout laisserait croire à « 1200 séances ».
+// A volume is written in kilos, minutes in minutes, a session count plain. The
+// same raw number everywhere would read as "1200 sessions".
 function fmtScore(metric, score) {
   const n = Math.round(score || 0)
   if (metric === 'Weight Moved') return t('{0} kg', n.toLocaleString(dateLocale()))

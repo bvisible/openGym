@@ -293,12 +293,11 @@ h4.sec{
    fades it as one shape — and it does that for every icon, not just this one. */
 #tabbar button .icn{font-size:25px;--icon-stroke:1.65;color:var(--label)}
 #tabbar button.on{color:var(--acc)}
-/* //// Neoffice — à sept colonnes (cours à gauche, compte à droite) un libellé
-   comme « Exercices » ne tient plus dans son huitième d'écran : il se coupait
-   au milieu d'un mot. On rétrécit le texte et on serre les côtés plutôt que de
-   laisser le mot passer à la ligne — une barre à deux hauteurs mange l'écran
-   utile sur un téléphone. Le compte reste fixe (les icônes ne bougent pas),
-   seul le texte suit. */
+/* //// Neoffice — at seven columns (Classes on the left, Account on the right)
+   a label like "Exercises" no longer fits in its eighth of the screen: it was
+   breaking mid-word. We shrink the text and tighten the sides rather than let
+   the word wrap — a two-row bar eats the usable screen on a phone. The layout
+   stays fixed (icons do not move), only the text follows. */
 #tabbar[data-tabs="7"]{padding-left:2px;padding-right:2px}
 #tabbar[data-tabs="7"] button{font-size:9px;gap:2px;min-width:0}
 #tabbar[data-tabs="7"] button span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -326,11 +325,10 @@ h4.sec{
   border:2px solid var(--orange);animation:ping 1.9s var(--ease) infinite;
 }
 @keyframes ping{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.45);opacity:0}}
-/* //// Neoffice — l'attente d'une inscription. Le bouton garde SA largeur et
-   son libellé disparaît : sans ça la ligne se réorganise sous le doigt au
-   moment précis où l'on vient d'appuyer. Un anneau qui tourne, rien de plus —
-   la réponse arrive en une seconde, une barre de progression mentirait sur la
-   durée. */
+/* //// Neoffice — waiting on a booking. The button keeps ITS width and loses
+   its label: without that the row reflows under the finger at the exact moment
+   it was pressed. A spinning ring, nothing more — the answer comes back within
+   a second, and a progress bar would lie about the duration. */
 .btn.waiting{position:relative;color:transparent!important;pointer-events:none}
 .btn.waiting::after{
   content:'';position:absolute;inset:0;margin:auto;width:14px;height:14px;
@@ -342,21 +340,20 @@ h4.sec{
 
 /* ------------------------------------------------------------ week strip -- */
 .week{display:flex;justify-content:space-between;gap:4px}
-/* //// Neoffice — le sélecteur de jour du planning des cours. Il DÉFILE au
-   lieu de se répartir : un club publie souvent deux semaines, et sept jours
-   compressés dans une largeur de téléphone donnent des colonnes de 45 px où
-   le numéro touche le libellé. Ici chaque jour garde sa taille et on fait
-   glisser — le geste est naturel sur un planning.
-   `scroll-snap` pour que le doigt s'arrête sur un jour, jamais entre deux. */
+/* //// Neoffice — the day picker of the class schedule. It SCROLLS instead of
+   spreading out: a club often publishes two weeks, and seven days squeezed into
+   a phone width give 45px columns where the number touches the label. Here each
+   day keeps its size and you swipe — the natural gesture on a schedule.
+   `scroll-snap` so the finger lands on a day, never between two. */
 .daypick{
   display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x proximity;
   -webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px;
 }
 .daypick::-webkit-scrollbar{display:none}
-/* `1 0 46px` et non `0 0 46px` : quand les jours tiennent tous dans la
-   largeur, ils s'étirent pour l'occuper au lieu de se tasser à gauche en
-   laissant un vide à droite. Au-delà, ils gardent leurs 46 px et la bande
-   défile. Une seule règle pour les deux cas. */
+/* `1 0 46px` rather than `0 0 46px`: when every day fits in the width, they
+   stretch to fill it instead of huddling on the left and leaving a gap on the
+   right. Beyond that they keep their 46px and the strip scrolls. One rule for
+   both cases. */
 .daypick .wday{flex:1 0 46px;scroll-snap-align:center;cursor:pointer}
 .daypick .wday .lbl{text-transform:capitalize}
 .wday{
@@ -700,9 +697,9 @@ h4.sec{
 }
 :root[data-theme="light"] .sheet{background:var(--bg)}
 @keyframes sheetup{from{transform:translateY(100%)}to{transform:none}}
-/* //// Neoffice — la photo d'un cours en tête de sa fiche. Hauteur fixe et
-   `cover` : les clubs enverront des images de toutes tailles, et une hauteur
-   qui suit l'image ferait sauter le contenu à chaque ouverture. */
+/* //// Neoffice — a class photo at the top of its sheet. Fixed height plus
+   `cover`: clubs will send images of every size, and a height that follows the
+   image would make the content jump on every open. */
 .sheet-hero{
   display:block;width:100%;height:150px;object-fit:cover;
   border-radius:12px;margin-bottom:14px;background:var(--surface-2);
@@ -980,11 +977,10 @@ h4.sec{
   .hm-wrap{display:flex;flex-direction:column;align-items:center}
 }
 
-/* //// Neoffice — la barre d'un objectif.
-   Une barre plutôt qu'un pourcentage écrit : « 62 % » demande une soustraction
-   mentale pour savoir ce qu'il reste, une barre non. Et elle garde sa piste
-   visible même à 0 %, sinon un objectif qui vient d'être posé ressemble à un
-   objectif cassé. */
+/* //// Neoffice — a goal bar.
+   A bar rather than a written percentage: "62%" asks for a mental subtraction
+   to know what is left, a bar does not. And it keeps its track visible even at
+   0%, otherwise a goal that was just set looks like a broken goal. */
 .goalbar {
   height: 4px; border-radius: 3px; margin-top: 6px;
   background: var(--surface-3); overflow: hidden;
@@ -994,9 +990,9 @@ h4.sec{
   transition: width .3s ease; min-width: 2px;
 }
 
-/* //// Neoffice — les semaines d'un cycle, en points.
-   Un « 2/4 » écrit se lit ; quatre points dont un allumé se VOIT, et c'est ce
-   qu'on veut d'un repère consulté d'un coup d'œil entre deux séries. */
+/* //// Neoffice — the weeks of a cycle, as dots.
+   A written "2/4" has to be read; four dots with one lit is SEEN, and that is
+   what you want from a marker glanced at between two sets. */
 .cyclebar { display: flex; gap: 4px; align-items: center; }
 .cyclebar i {
   display: block; width: 6px; height: 6px; border-radius: 50%;
@@ -1004,10 +1000,10 @@ h4.sec{
 }
 .cyclebar i.on { background: var(--acc); width: 14px; border-radius: 3px; }
 
-/* //// Neoffice — l'écran de paiement d'un cours. Il vit DANS le carnet : même
-   fond, même typographie, même feuille que le reste. Ce qui suit n'existe que
-   pour ça — le montant qui se lit d'un coup d'œil, les moyens en liste
-   touchable, et le QR assez grand pour être scanné à bout de bras. */
+/* //// Neoffice — the payment screen of a class. It lives INSIDE the logbook:
+   same ground, same typography, same sheet as the rest. What follows exists
+   only for that — an amount read at a glance, the methods as a touchable list,
+   and a QR large enough to be scanned at arm's length. */
 .pay-amount {
   display: flex; align-items: baseline; justify-content: space-between;
   padding: 14px 16px; margin-bottom: 16px;
@@ -1020,8 +1016,8 @@ h4.sec{
 }
 .pay-methods .pay-m:disabled { opacity: .5; cursor: default; }
 .pay-methods .pay-m .lrow-i img { width: 22px; height: 22px; object-fit: contain; }
-/* Le moyen qu'on vient de toucher tourne, les autres s'éteignent : sans ça, on
-   ne sait pas lequel des cinq est en train de répondre. */
+/* The method just tapped spins, the others dim: without that you cannot tell
+   which of the five is the one answering. */
 .pay-m.waiting { opacity: 1 !important; }
 .pay-m.waiting .lrow-i {
   border-radius: 50%; border: 2px solid var(--sep); border-top-color: var(--acc);
@@ -1029,8 +1025,8 @@ h4.sec{
 }
 .pay-m.waiting .lrow-i > * { display: none; }
 .pay-qr { text-align: center; margin-bottom: 14px; }
-/* Un QR doit rester CARRÉ et sur fond blanc, même en thème sombre : un code
-   scanné à travers un fond gris ne se lit pas. */
+/* A QR must stay SQUARE and on white, even in dark theme: a code scanned
+   through a grey ground does not read. */
 .pay-qr .qr {
   width: 232px; height: 232px; margin: 0 auto 12px; padding: 12px;
   background: #fff; border-radius: 14px;
@@ -1059,9 +1055,9 @@ h4.sec{
 .pay-done .tt { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
 .pay-done .ss { color: var(--label-2); font-size: 14px; }
 
-/* //// Neoffice — l'écran de connexion du carnet. Il doit ressembler à l'app,
-   pas à un formulaire d'administration : c'est la première chose qu'un membre
-   voit, et jusqu'ici c'était la page desk de l'ERP. */
+/* //// Neoffice — the logbook's sign-in screen. It has to look like the app,
+   not like an admin form: it is the first thing a member sees, and until now
+   that was the ERP's desk page. */
 .signin {
   max-width: 380px; margin: 0 auto;
   padding: max(9vh, 48px) 22px calc(40px + var(--sab));
@@ -1081,10 +1077,10 @@ h4.sec{
 .signin form { display: flex; flex-direction: column; gap: 13px; }
 .signin-f { display: flex; flex-direction: column; gap: 6px; }
 .signin-f > span { font-size: 13px; color: var(--label-2); }
-/* Le champ est haut de 46px : sur un téléphone, une cible plus petite se rate,
-   et un formulaire de connexion raté fait abandonner. */
+/* The field is 46px tall: on a phone a smaller target gets missed, and a
+   missed sign-in form is where people give up. */
 .signin-f > input {
-  height: 46px; padding: 0 14px; font-size: 16px;   /* 16px = iOS ne zoome pas */
+  height: 46px; padding: 0 14px; font-size: 16px;   /* 16px = iOS won't zoom */
   border: 1px solid var(--sep); border-radius: 12px;
   background: var(--surface-2); color: var(--label); font-family: inherit;
   -webkit-appearance: none; appearance: none;

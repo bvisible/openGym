@@ -1,8 +1,8 @@
 //// Neoffice — added file (no upstream equivalent).
-//// Ce que ces tests protègent : la traduction des noms MUTE les objets partagés
-//// de EXDB. C'est efficace et c'est risqué — un aller-retour de langue qui
-//// traduirait une traduction rendrait la bibliothèque illisible sans qu'aucune
-//// erreur ne se produise.
+//// What these tests protect: translating the names MUTATES the shared EXDB
+//// objects. That is efficient and it is risky — a language round trip that
+//// translated a translation would make the library unreadable without a single
+//// error being raised.
 
 import { describe, it, expect, beforeEach } from 'vitest'
 import { EXDB, EXIDX, applyExerciseNames, applyClubMedia, matchesExercise, imgSrc, gifSrc } from './exercises.js'
@@ -13,27 +13,27 @@ const EN = EXDB[0].n
 describe('applyExerciseNames', () => {
   beforeEach(() => applyExerciseNames(null))
 
-  it('traduit ce que le pack couvre et laisse l’anglais pour le reste', () => {
-    applyExerciseNames({ [ID]: 'Nom français' })
+  it('translates what the pack covers and leaves English for the rest', () => {
+    applyExerciseNames({ [ID]: 'Nom français' })   // a French name, on purpose
     expect(EXIDX[ID].n).toBe('Nom français')
     const other = EXDB.find(e => e.id !== ID)
     expect(other.n).toBe(other.en)
   })
 
-  it('ne traduit JAMAIS une traduction — deux passages restent stables', () => {
+  it('NEVER translates a translation — two passes stay stable', () => {
     applyExerciseNames({ [ID]: 'Premier' })
     applyExerciseNames({ [ID]: 'Second' })
     expect(EXIDX[ID].n).toBe('Second')
     expect(EXIDX[ID].en).toBe(EN)
   })
 
-  it('revient à l’anglais quand la langue n’a pas de pack', () => {
+  it('falls back to English when a language has no pack', () => {
     applyExerciseNames({ [ID]: 'Français' })
     applyExerciseNames(null)
     expect(EXIDX[ID].n).toBe(EN)
   })
 
-  it('garde le nom anglais accessible pour la recherche', () => {
+  it('keeps the English name reachable for the search', () => {
     applyExerciseNames({ [ID]: 'Développé couché à la barre' })
     expect(EXIDX[ID].en).toBe(EN)
   })
@@ -42,50 +42,49 @@ describe('applyExerciseNames', () => {
 describe('matchesExercise', () => {
   beforeEach(() => applyExerciseNames({ [ID]: 'Développé couché à la barre' }))
 
-  it('trouve par le nom français', () => {
+  it('finds by the translated name', () => {
     expect(matchesExercise(EXIDX[ID], 'développé')).toBe(true)
   })
 
-  it('trouve AUSSI par le nom anglais — un membre venu d’une autre app', () => {
+  it('finds by the English name TOO — a member coming from another app', () => {
     expect(matchesExercise(EXIDX[ID], EN.toLowerCase().slice(0, 6))).toBe(true)
   })
 
-  it('ne trouve pas n’importe quoi', () => {
+  it('does not match just anything', () => {
     expect(matchesExercise(EXIDX[ID], 'zzzznonexistent')).toBe(false)
   })
 
-  it('une recherche vide passe tout', () => {
+  it('an empty search lets everything through', () => {
     expect(matchesExercise(EXIDX[ID], '')).toBe(true)
   })
 })
 
-//// Neoffice — les médias du club. Le risque est le même que pour les noms :
-//// on mute des objets partagés, et une URL mal formée sortirait une image
-//// cassée sans erreur.
+//// Neoffice — the club's media. Same risk as with the names: we mutate shared
+//// objects, and a malformed URL would render a broken image with no error.
 describe('applyClubMedia', () => {
-  it('remplace l’image et l’animation d’un exercice de la bibliothèque', () => {
+  it('replaces the image and the animation of a library exercise', () => {
     applyClubMedia({ [ID]: { img: '/files/machine.jpg', gif: '/files/machine.gif' } })
     expect(EXIDX[ID].img).toBe('/files/machine.jpg')
     expect(imgSrc(EXIDX[ID])).toBe('/files/machine.jpg')
     expect(gifSrc(EXIDX[ID])).toBe('/files/machine.gif')
   })
 
-  it('ne touche à rien d’autre de la fiche', () => {
+  it('leaves everything else on the sheet alone', () => {
     const before = EXIDX[ID].n
     applyClubMedia({ [ID]: { img: '/files/x.jpg' } })
     expect(EXIDX[ID].n).toBe(before)
   })
 
-  it('ignore un id que la bibliothèque ne connaît pas', () => {
-    expect(() => applyClubMedia({ 'zzz-inconnu': { img: '/files/x.jpg' } })).not.toThrow()
+  it('ignores an id the library does not know', () => {
+    expect(() => applyClubMedia({ 'zzz-unknown': { img: '/files/x.jpg' } })).not.toThrow()
   })
 
-  it('un nom de fichier nu reste celui de la bibliothèque', () => {
+  it('a bare file name stays a library one', () => {
     const lib = EXDB.find(e => e.img && !e.img.startsWith('/'))
     expect(imgSrc(lib)).toContain('/assets/opengym/media/img/')
   })
 
-  it('null ne casse rien — une instance sans média du club', () => {
+  it('null breaks nothing — an instance with no club media', () => {
     expect(() => applyClubMedia(null)).not.toThrow()
   })
 })

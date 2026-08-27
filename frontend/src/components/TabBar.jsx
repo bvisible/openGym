@@ -17,14 +17,14 @@ export default function TabBar({ onStart }) {
   const cur = loc.pathname.split('/')[1] || 'home'
   const on = k => cur === k || (cur === 'history' && k === 'stats')
 
-  //// Neoffice — l'onglet des cours tient à TROIS conditions, et il faut les
-  //// trois : il y a un club derrière (les versions mobile autonome et démo
-  //// n'ont AUCUN serveur — l'onglet y mènerait à un écran qui ne peut rien
-  //// charger), ce club propose des cours (perms.classes), et ce membre veut
-  //// les voir (classesTab, son réglage). Un club sans cours ne montre rien à
-  //// personne ; un membre qui n'y va jamais s'en débarrasse pour lui seul.
-  //// Par défaut à vrai : `!== false` plutôt que `=== true`, sinon l'onglet
-  //// disparaîtrait le temps que l'état arrive du serveur.
+  //// Neoffice — the Classes tab rests on THREE conditions, and needs all
+  //// three: there is a club behind it (the standalone mobile and demo builds
+  //// have NO server at all — the tab would lead to a screen that cannot load
+  //// anything), that club runs classes (perms.classes), and this member wants
+  //// to see them (classesTab, their own setting). A club without classes shows
+  //// nothing to anyone; a member who never goes gets rid of it for themselves
+  //// alone. Defaults to true: `!== false` rather than `=== true`, otherwise the
+  //// tab would vanish for as long as the state takes to arrive from the server.
   const showClasses = !MOBILE && !DEMO && S.perms?.classes !== false && S.classesTab !== false
 
   const startWorkout = () => {
@@ -41,14 +41,14 @@ export default function TabBar({ onStart }) {
   )
 
   return (
-    //// Neoffice — `data-tabs` porte le nombre de colonnes : à sept, les
-    //// libellés doivent rétrécir pour ne pas se couper au milieu d'un mot.
+    //// Neoffice — `data-tabs` carries the column count: at seven, the labels
+    //// have to shrink so they don't break in the middle of a word.
     <nav id="tabbar" data-tabs={showClasses ? 7 : 6}>
       <Tab k="home" icon="house" to="/home" label={t('Home')} />
       {showClasses && <Tab k="classes" icon="calendar" to="/classes" label={t('Classes')} />}
-      {/* //// Neoffice — le plan passe de `calendar` à `clipboard` : les cours
-           SONT un calendrier, et deux onglets voisins portant la même icône se
-           confondent. C'est déjà l'icône de l'écran Plan quand il est vide. */}
+      {/* //// Neoffice — Plan moves from `calendar` to `clipboard`: classes ARE
+           a calendar, and two neighbouring tabs wearing the same icon blur into
+           one. It is already the icon the Plan screen shows when it is empty. */}
       <Tab k="plan" icon="clipboard" to="/plan" label={t('Plan')} />
       <button className={'start' + (S.active ? ' rec' : '')} onClick={startWorkout}>
         <span className="cir"><Icon name={S.active ? 'play' : 'dumbbell'} /></span>
@@ -56,11 +56,11 @@ export default function TabBar({ onStart }) {
       </button>
       <Tab k="stats" icon="chart" to="/stats" label={t('Stats')} />
       <Tab k="library" icon="list" to="/library" label={t('Exercises')} />
-      {/* //// Neoffice — le compte, tout à droite. Les réglages étaient déjà
-           joignables par l'engrenage de l'accueil ; l'onglet leur donne une
-           place fixe, et équilibre la barre en fin de course.
-           L'accueil reste le PREMIER onglet (correction de Jérémy,
-           2026-08-25) : c'est le point de départ, les cours viennent après. */}
+      {/* //// Neoffice — the account, far right. Settings were already reachable
+           through the cog on the home screen; the tab gives them a fixed place,
+           and balances the end of the bar.
+           Home stays the FIRST tab (correction from Jeremy, 2026-08-25): it is
+           the starting point, classes come after. */}
       <Tab k="settings" icon="personCircle" to="/settings" label={t('Account')} />
     </nav>
   )

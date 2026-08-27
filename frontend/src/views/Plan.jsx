@@ -6,7 +6,7 @@ import { dayAssignSheet, loadStarterPlan, planToolsSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 import { glyphOf, DEFAULT_GLYPH } from '../lib/glyphs.js'
-//// Neoffice — la semaine de cycle d'un programme périodisé.
+//// Neoffice — the cycle week of a periodized program.
 import { cycleWeekOf } from '../lib/coach-program.js'
 
 export default function Plan() {
@@ -20,13 +20,13 @@ export default function Plan() {
     nav('/plan/r/' + r.id)
   }
 
-  //// Neoffice — le club décide si ses membres touchent à leur plan.
-  //// Le réglage arrive du serveur avec l'état (S.perms.editPlan) ; le VERROU,
-  //// lui, est côté serveur — apply_state écarte les routines poussées par un
-  //// membre qui n'a pas le droit. Ici on masque, et surtout on DIT pourquoi :
-  //// un bouton qui disparaît sans explication se lit comme une panne.
-  //// Absent = permis, pour que la version hors ligne d'un état composé avant
-  //// ce champ ne verrouille pas le plan de quelqu'un par accident.
+  //// Neoffice — the club decides whether its members touch their own plan.
+  //// The setting arrives from the server with the state (S.perms.editPlan);
+  //// the LOCK itself is server-side — apply_state drops routines pushed by a
+  //// member who is not allowed. Here we hide, and above all we SAY why: a
+  //// button that vanishes without explanation reads as a breakage.
+  //// Absent = allowed, so that an offline state composed before this field
+  //// existed does not lock somebody's plan by accident.
   const mayEdit = S.perms ? S.perms.editPlan !== false : true
 
   return <>
@@ -37,9 +37,10 @@ export default function Plan() {
     {!mayEdit && <div className="card" style={{ padding: '11px 13px', marginBottom: 14, lineHeight: 1.45 }}>
       <div className="small muted">{t('Your coach writes your plan. You can train it and log your sets — the routines themselves are theirs to change.')}</div>
     </div>}
-    {/* //// Neoffice — où en est le membre dans le cycle de son coach.
-         Sans cette ligne, un plan qui change tout seul le lundi matin passe
-         pour un bug : le membre voit d'autres séances et ne sait pas pourquoi. */}
+    {/* //// Neoffice — where the member stands in their coach's cycle.
+         Without this line, a plan that changes by itself on Monday morning
+         reads as a bug: the member sees different sessions and cannot tell
+         why. */}
     {S.coachCycle && S.coachCycle.span > 1 && <div className="card" style={{ padding: '10px 13px', marginBottom: 12 }}>
       <div className="row between" style={{ gap: 10 }}>
         <div className="small">{S.coachCycle.name

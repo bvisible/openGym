@@ -1,16 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-//// Neoffice — le build vise une app Frappe, pas un nginx autonome.
-////   base    → /assets/opengym/frontend/, parce que Frappe sert le public/
-////             d'une app depuis /assets/<app>/ et que les noms hachés doivent
-////             résoudre depuis là quelle que soit la route de la SPA.
-////   outDir  → ../opengym/public/frontend, COMMITÉ : la flotte ne recompile
-////             JAMAIS une SPA sur une instance, elle sert des assets déjà faits.
-////   manifest → pour que gym.py lise les noms hachés au lieu qu'on les fige
-////             dans la coquille à chaque release.
-//// Le plugin Umami de l'amont est conservé tel quel : il ne s'injecte que si
-//// les deux variables sont posées, donc un build Neoffice reste sans télémétrie.
+//// Neoffice — this build targets a Frappe app, not a standalone nginx.
+////   base     -> /assets/opengym/frontend/, because Frappe serves an app's
+////              public/ under /assets/<app>/ and the hashed names must
+////              resolve from there whatever route the SPA is on.
+////   outDir   -> ../opengym/public/frontend, COMMITTED: the fleet NEVER
+////              rebuilds a SPA on an instance, it serves prebuilt assets.
+////   manifest -> so gym.py reads the hashed names instead of us freezing
+////              them into the shell at every release.
+//// Upstream's Umami plugin is kept as is: it only injects itself when both
+//// variables are set, so a Neoffice build stays telemetry-free.
 const backend = process.env.API_TARGET || 'http://127.0.0.1:8000'
 const media = process.env.MEDIA_TARGET || 'http://127.0.0.1:8888'
 

@@ -5,7 +5,7 @@ import { effectiveRoutine, effectiveRoutineId, streakWeeks, lastBW, setsDoneActi
 import { fmtNum, fmtDate, todayISO, isoOf, weekKey, DAYS, exCount } from '../lib/format.js'
 import { t, dateLocale } from '../lib/i18n.js'
 import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadStarterPlan, bwDeltaColor, coachOfferSheet } from '../sheets.jsx'
-//// Neoffice — le bandeau « votre coach vous a envoyé un programme ».
+//// Neoffice — the "your coach sent you a program" banner.
 import { useEffect } from 'react'
 import { programInbox } from '../lib/api.js'
 import { describeOffer } from '../lib/coach-program.js'
@@ -15,7 +15,7 @@ import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 import { glyphOf } from '../lib/glyphs.js'
 
-//// Neoffice — ce que l'offre contient, dit dans la langue du membre.
+//// Neoffice — what the offer contains, said in the member's language.
 function offerSummary(o) {
   const d = describeOffer(o)
   if (!d.ok) return t('This program could not be read: {0}', d.error)
@@ -23,8 +23,8 @@ function offerSummary(o) {
   if (d.scheduledDays > 0) {
     parts.push(t(d.scheduledDays === 1 ? 'scheduled on {0} day' : 'scheduled on {0} days', d.scheduledDays))
   }
-  //// Un cycle se dit AVANT d'accepter : « sur 3 jours » décrit une semaine
-  //// type, et laisse croire que le planning ne bougera plus.
+  //// A cycle is stated BEFORE accepting: "on 3 days" describes a typical
+  //// week, and lets the member believe the schedule will not move again.
   if (d.cycleSpan > 1) parts.push(t('{0}-week cycle', d.cycleSpan))
   return parts.join(' · ')
 }
@@ -36,13 +36,12 @@ export default function Home() {
   const user = useStore(s => s.user)
   const [weekOffset, setWeekOffset] = useState(0)
 
-  //// Neoffice — ce que le coach a envoyé.
+  //// Neoffice — what the coach has sent.
   ////
-  //// Interrogé au montage et à chaque retour d'onglet, pas par un intervalle :
-  //// un membre ouvre le carnet pour s'entraîner, et une offre qui apparaît en
-  //// pleine séance n'aide personne. L'échec est SILENCIEUX — hors ligne, il
-  //// n'y a pas d'offre à montrer et ce n'est pas une erreur à afficher à
-  //// quelqu'un qui s'apprête à soulever.
+  //// Polled on mount and whenever the tab comes back, not on an interval: a
+  //// member opens the logbook to train, and an offer appearing mid-session
+  //// helps nobody. Failure is SILENT — offline there is no offer to show, and
+  //// that is not an error to put in front of someone about to lift.
   const [offers, setOffers] = useState([])
   useEffect(() => {
     let alive = true
@@ -50,11 +49,11 @@ export default function Home() {
       programInbox().then(list => { if (alive) setOffers(Array.isArray(list) ? list : []) }).catch(() => {})
     }
     //// Neoffice — le premier chargement est INCONDITIONNEL.
-    //// Une première version sautait quand document.hidden était vrai. C'est
-    //// faux au montage : un onglet monté caché ne recevra jamais de
-    //// visibilitychange s'il était déjà dans cet état — plus aucune offre,
-    //// jamais. Le garde n'a de sens que sur les recharges suivantes, où il
-    //// évite un appel au moment où l'on QUITTE l'onglet.
+    //// An early version skipped it when document.hidden was true. That is
+    //// wrong on mount: a tab mounted hidden will never get a visibilitychange
+    //// if it was already in that state — no offers at all, ever. The guard
+    //// only makes sense on later reloads, where it avoids a call at the very
+    //// moment the tab is being LEFT.
     load()
     const onVisible = () => { if (!document.hidden) load() }
     document.addEventListener('visibilitychange', onVisible)
@@ -66,18 +65,18 @@ export default function Home() {
     }
   }, [])
 
-  //// Neoffice — les prochains cours, si le club en donne.
-  //// Chargés à part des offres de programme : deux appels indépendants qui ne
-  //// se bloquent pas l'un l'autre, et un club sans cours ne paie même pas
-  //// l'aller-retour — perms.classes tranche avant de sortir sur le réseau.
+  //// Neoffice — the next classes, if the club runs any.
+  //// Loaded separately from the program offers: two independent calls that do
+  //// not block one another, and a club without classes does not even pay for
+  //// the round trip — perms.classes decides before we hit the network.
   const [classes, setClasses] = useState([])
-  //// Neoffice — le panneau d'affichage du club. Ce qu'un membre a fermé est
-  //// retenu par SON appareil : l'écrire en base coûterait une écriture par
-  //// membre et par avis pour un confort d'affichage, et donnerait au club la
-  //// liste de qui a lu quoi — ce qu'il n'a pas demandé.
-  //// La clé porte la date de MODIFICATION : un avis corrigé par le club se
-  //// rouvre chez ceux qui avaient lu la version fausse. Sans ça, une
-  //// correction d'horaire ne serait jamais lue par les premiers concernés.
+  //// Neoffice — the club's notice board. What a member dismissed is
+  //// remembered by THEIR device: writing it to the database would cost one
+  //// write per member per notice for a display convenience, and would hand the
+  //// club the list of who read what — which it never asked for.
+  //// The key carries the MODIFIED date: a notice corrected by the club reopens
+  //// for those who had read the wrong version. Without that, a schedule
+  //// correction would never be read by the very people it concerns.
   const [notices, setNotices] = useState([])
   const [seen, setSeen] = useState(() => {
     try { return JSON.parse(localStorage.getItem('gym_notices_seen') || '{}') } catch (e) { return {} }
@@ -92,12 +91,13 @@ export default function Home() {
   const closeNotice = (n) => {
     const next = { ...seen, [n.name]: n.modified }
     setSeen(next)
-    try { localStorage.setItem('gym_notices_seen', JSON.stringify(next)) } catch (e) { /* mode privé */ }
+    try { localStorage.setItem('gym_notices_seen', JSON.stringify(next)) } catch (e) { /* private mode */ }
   }
   const openNotices = notices.filter(n => seen[n.name] !== n.modified)
 
-  //// Neoffice — les défis en cours. Chargés à part des cours : un club peut
-  //// avoir l'un sans l'autre, et un échec ici ne doit pas vider le planning.
+  //// Neoffice — the running challenges. Loaded separately from the classes: a
+  //// club may have one without the other, and a failure here must not empty
+  //// the schedule.
   const [challenges, setChallenges] = useState([])
   useEffect(() => {
     let alive = true
@@ -152,9 +152,9 @@ export default function Home() {
       <button className="iconbtn" onClick={() => nav('/settings')} aria-label={t('Settings')}><Icon name="gear" /></button>
     </div>
 
-    {/* //// Neoffice — le panneau d'affichage, AVANT les cours : un avis peut
-         corriger le planning qu'on lit juste en dessous (« la salle est fermée
-         jeudi »), donc il se lit d'abord. */}
+    {/* //// Neoffice — the notice board, BEFORE the classes: a notice can
+         correct the schedule read just below it ("the gym is closed on
+         Thursday"), so it has to be read first. */}
     {openNotices.map(n => <div key={n.name} className="card" style={{ borderColor: 'var(--acc)' }}>
       <div className="row between" style={{ marginBottom: 6, gap: 10 }}>
         <div className="lbl2">{n.title}</div>
@@ -183,10 +183,10 @@ export default function Home() {
       </div>)}
     </div>}
 
-    {/* //// Neoffice — les défis en cours. Après les cours : un cours est un
-         rendez-vous qui se rate, un défi court sur des semaines et attend.
-         On montre le RANG du membre, jamais celui des autres — leur score est
-         de la donnée de santé, il se demande dans l'écran des défis. */}
+    {/* //// Neoffice — the running challenges. After the classes: a class is an
+         appointment you can miss, a challenge runs over weeks and waits.
+         We show the member's OWN rank, never anyone else's — their score is
+         health data, and it is asked for on the challenges screen. */}
     {challenges.length > 0 && <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/challenges')}>
       <div className="row between" style={{ marginBottom: 8 }}>
         <div className="lbl2">{t('Challenges')}</div>
@@ -203,18 +203,18 @@ export default function Home() {
       </div>)}
     </div>}
 
-    {/* //// Neoffice — au-dessus de la semaine, jamais en pop-up : une offre de
-         programme n'interrompt pas, elle attend d'être vue. */}
+    {/* //// Neoffice — above the week, never as a pop-up: a program offer does
+         not interrupt, it waits to be seen. */}
     {offers.map(o => <div key={o.id} className="card" style={{ cursor: 'pointer', borderColor: 'var(--acc)' }} onClick={() => coachOfferSheet(o)}>
       <div className="row" style={{ gap: 10, minWidth: 0 }}>
         <span className="lrow-i" style={{ background: 'var(--acc)' }}><Icon name="clipboard" /></span>
         <div style={{ minWidth: 0, flex: 1 }}>
           <div className="lbl2">{o.coach ? t('{0} sent you a program', o.coach) : t('Your coach sent you a program')}</div>
-          {/* //// Neoffice — le résumé se compose ICI, pas côté serveur.
-              Le serveur rendrait la phrase dans la langue du COACH au moment
-              de l'envoi, et elle resterait figée : un membre francophone
-              lirait « 1 routine · 2 exercises ». Le bundle voyage avec
-              l'offre, donc le carnet compte lui-même, dans sa langue. */}
+          {/* //// Neoffice — the summary is composed HERE, not server-side.
+              The server would render the sentence in the COACH's language at
+              send time and it would stay frozen there: a French-speaking member
+              would read "1 routine · 2 exercises". The bundle travels with the
+              offer, so the logbook counts for itself, in its own language. */}
           <div className="ttl">{offerSummary(o)}</div>
         </div>
         <Icon name="chevronRight" className="chev" />

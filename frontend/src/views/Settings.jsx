@@ -76,9 +76,9 @@ export default function Settings() {
         <Row icon="rocket" iconTint="var(--indigo)" title={t('Self-host openGym')} subtitle={t('Passkey sign-in, sync across your devices, your own data.')} accessory="chevron"
           onClick={() => window.open(REPO, '_blank', 'noopener')} />
       </> : user ? <>
-        {/* //// Neoffice — le membre est connecté avec son compte Neoffice :
-            pas de passkey à créer, pas de profil à choisir. Se déconnecter met
-            fin à la session Frappe et part vers /login. */}
+        {/* //// Neoffice — the member is signed in with their Neoffice account:
+            no passkey to create, no profile to pick. Signing out ends the
+            Frappe session and leaves for /login. */}
         <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Signed in with your Neoffice account.')} />
         <Row icon="signOut" iconTint="var(--red)" title={t('Sign out')} danger onClick={() => confirmSheet({ title: t('Sign out?'), message: t('Your journal is saved first, then this device is signed out.'), confirmText: t('Sign out'), danger: true, onConfirm: () => signOut() })} />
       </> : (
@@ -87,13 +87,13 @@ export default function Settings() {
     </Section>
     {!user && !DEMO && !MOBILE && <p className="sect-f" style={{ marginTop: -18, marginBottom: 22 }}>{t('Guest mode — data lives only in this browser.')}</p>}
 
-    {/* //// Neoffice — added: joindre son coach. La messagerie est Raven, qui
-         tourne déjà sur l'instance ; ce bloc est une porte, pas un second
-         module. Il n'apparaît QUE si un coach suit ce membre — un club qui n'a
-         pas attribué le suivi ne montre pas un bouton qui ne mène nulle part. */}
-    {/* //// Neoffice — added: ce que le membre a pris chez son club. Il vient
-         ici pour ça autant que pour ses réglages : « combien il me reste »,
-         « quand est mon prochain cours ». */}
+    {/* //// Neoffice — added: reaching your coach. Messaging is Raven, which
+         already runs on the instance; this block is a door, not a second
+         module. It only shows up if a coach actually follows this member — a
+         club that assigned nobody shows no button leading nowhere. */}
+    {/* //// Neoffice — added: what the member bought from their club. They come
+         here for that as much as for their settings: "how much do I have left",
+         "when is my next class". */}
     <MyClub />
 
     <MyCoach />
@@ -108,9 +108,9 @@ export default function Settings() {
           subtitle: INSTR_LANGS.includes(k) ? null : t("Exercise instructions aren't available in this language yet — they stay in English."),
         }))}
       />
-      {/* //// Neoffice — l'onglet des cours dans la barre du bas. N'apparaît
-           que si le club PROPOSE des cours : proposer de masquer quelque chose
-           qui n'existe pas laisse croire qu'on l'a perdu. */}
+      {/* //// Neoffice — the Classes tab in the bottom bar. Only shows up if
+           the club actually RUNS classes: offering to hide something that does
+           not exist makes people think they lost it. */}
       {!MOBILE && !DEMO && S.perms?.classes !== false && (
         <Row icon="calendar" iconTint="var(--acc)" title={t('Classes tab')}
           subtitle={t('Shows your club’s classes in the bottom bar.')}>
@@ -204,10 +204,10 @@ export default function Settings() {
         subtitle={t('to install openGym as a full-screen app.') + ' ' + (user ? t('Your data syncs with your profile — sign in anywhere to see it.') : t('Guest data stays on this device — export a backup now and then!'))} />
     </Section>}
 
-    {/* //// Neoffice — le lien « source code » pointe sur NOTRE fork : l'AGPL §13
-        demande le source de LA version qui tourne. Le reste du pied de page est
-        celui de l'amont, qui a corrigé de lui-même la licence du jeu de données
-        (MIT) et ajouté l'attribution © Gym visual. */}
+    {/* //// Neoffice — the "source code" link points at OUR fork: AGPL §13 asks
+        for the source of THE running version. The rest of the footer is
+        upstream's, which corrected the dataset licence itself (MIT) and added
+        the © Gym visual attribution. */}
     <div className="dim small" style={{ textAlign: 'center', marginTop: 4, lineHeight: 1.6 }}>
       openGym · {t('free & open source (AGPL v3)')}<br />
       <a href="https://github.com/bvisible/openGym" target="_blank" rel="noopener">source code</a> · exercise data: hasaneyldrm/exercises-dataset (MIT)<br />
@@ -343,13 +343,13 @@ function PushCard({ S, update, toast }) {
 }
 
 
-//// Neoffice — RegisterInline retiré. Il créait un profil passkey et demandait
-//// un code d'invitation. Les comptes sont des comptes Frappe : un membre
-//// existe parce que le club l'a créé, il n'y a rien à inscrire depuis le
-//// carnet.
+//// Neoffice — RegisterInline removed. It created a passkey profile and asked
+//// for an invite code. Accounts here are Frappe accounts: a member exists
+//// because the club created them, there is nothing to sign up for from the
+//// logbook.
 
 
-//// Neoffice — added: qui suit ce membre, et comment lui écrire.
+//// Neoffice — added: who follows this member, and how to write to them.
 function MyCoach() {
   const [coach, setCoach] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -366,9 +366,9 @@ function MyCoach() {
     setBusy(true)
     try {
       const r = await openChat()
-      //// Raven est une autre application du même site : on y VA, on ne
-      //// l'embarque pas. Un onglet neuf garderait le carnet ouvert derrière,
-      //// avec deux fils de discussion possibles pour la même conversation.
+      //// Raven is another application on the same site: we GO there, we do
+      //// not embed it. A new tab would leave the logbook open behind, with two
+      //// possible threads for the same conversation.
       window.location.href = r.url
     } catch (e) {
       toast(e.message || t('Could not open the conversation.'))
@@ -385,11 +385,12 @@ function MyCoach() {
 }
 
 
-//// Neoffice — added: la part « club » du compte.
-//// Le solde d'abord, les prochains cours ensuite : le premier répond à « est-ce
-//// que je peux encore réserver », le second à « qu'est-ce que j'ai prévu ».
-//// Le bloc entier disparaît quand il n'y a ni carnet ni cours — un membre dont
-//// le club ne fait pas de cours n'a pas à lire une section vide.
+//// Neoffice — added: the "club" half of the account.
+//// The balance first, the coming classes after: the first answers "can I still
+//// book", the second "what have I got planned".
+//// The whole block disappears when there is neither a pass nor a class — a
+//// member whose club runs no classes should not have to read an empty
+//// section.
 function MyClub() {
   const [bal, setBal] = useState(null)
   const [next, setNext] = useState([])

@@ -17,8 +17,8 @@ export { LANGS, INSTR_LANGS, DATE_LOCALES, getLang, dateLocale, t, instrFor }
 // the same mechanism in src/instr/. Both are lazy, so the production bundle ships English only.
 const localePacks = import.meta.glob('../locales/*.js')
 const instrPacks = import.meta.glob('../instr/*.js')
-//// Neoffice — les noms d'exercices, chargés comme les consignes : un chunk
-//// séparé, donc le bundle par défaut reste en anglais seul.
+//// Neoffice — exercise names, loaded like the instructions: a separate chunk,
+//// so the default bundle stays English-only.
 const namePacks = import.meta.glob('../names/*.js')
 
 // React subscription bookkeeping — kept here, not in core, so core has zero React coupling.

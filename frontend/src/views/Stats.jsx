@@ -15,8 +15,8 @@ import { fatigueOf, strengthOf, STRENGTH_FLOOR, LB_TO_KG } from '../lib/recovery
 import { strengthExerciseRowsForMuscle } from '../lib/strength-exercises.js'
 import { fatigueStateOf } from '../lib/recovery-view.js'
 import { e1rmSeries, best1RM } from '../lib/onerm.js'
-//// Neoffice — les évaluations physiques du coach. C'est ici qu'un membre
-//// vient chercher ses chiffres, donc c'est ici que la porte doit être.
+//// Neoffice — the coach's physical assessments. This is where a member comes
+//// looking for their numbers, so this is where the door belongs.
 import { assessmentsMine } from '../lib/api.js'
 import { summaryOf } from './Assessments.jsx'
 import {
@@ -366,9 +366,9 @@ export default function Stats() {
   if (showE1) exOpts.push({ value: 'e1rm', label: t('Est. 1RM') })
   if (showEff) exOpts.push({ value: 'effort', label: t('Effort') })
 
-  //// Neoffice — chargée une fois, sans bloquer le reste de l'écran : les
-  //// statistiques du carnet se calculent en local et doivent s'afficher même
-  //// quand le serveur ne répond pas.
+  //// Neoffice — loaded once, without blocking the rest of the screen: the
+  //// logbook's statistics are computed locally and must render even when the
+  //// server does not answer.
   const [lastAssessment, setLastAssessment] = useState(null)
   useEffect(() => {
     let alive = true
@@ -382,10 +382,10 @@ export default function Stats() {
     <div className="hdr"><div><h1>{t('Stats')}</h1><div className="sub">{t('Progress & history')}</div></div>
       <button className="iconbtn" onClick={() => nav('/history')} aria-label={t('History')}><Icon name="history" /></button></div>
 
-    {/* //// Neoffice — la dernière évaluation du coach, en haut : c'est la
-         mesure la plus fiable qu'un membre possède, et elle vaut mieux qu'un
-         volume soulevé pour savoir où il en est. Rien ne s'affiche tant que le
-         coach n'a rien mesuré — un club sans évaluations ne voit pas la carte. */}
+    {/* //// Neoffice — the coach's latest assessment, at the top: it is the
+         most reliable measurement a member has, and it says where they stand
+         better than a lifted volume does. Nothing shows until the coach has
+         measured something — a club without assessments never sees the card. */}
     {lastAssessment && <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/assessments')}>
       <div className="row between" style={{ marginBottom: 6 }}>
         <div className="lbl2">{t('Last assessment')}</div>

@@ -1,19 +1,19 @@
-//// Neoffice — added file (no upstream equivalent) : l'écran de connexion du
-//// carnet.
+//// Neoffice — added file (no upstream equivalent): the journal's login
+//// screen.
 ////
-//// AVANT : `/gym` renvoyait un visiteur anonyme sur `/login?redirect-to=/gym`
-//// — 434 Ko de page desk, aux couleurs de l'ERP. Un membre qui tape l'icône
-//// sur son écran d'accueil tombait sur autre chose que son carnet.
+//// BEFORE: `/gym` sent an anonymous visitor to `/login?redirect-to=/gym`
+//// — 434 KB of desk page, in the ERP's colors. A member who tapped the
+//// icon on their home screen landed on something other than their journal.
 ////
-//// 🔴 CE QUI N'EST PAS FAIT ICI, ET NE DOIT JAMAIS L'ÊTRE : vérifier un mot de
-//// passe. Ce formulaire poste sur `/api/method/login`, l'endpoint de Frappe.
-//// Verrouillage après N échecs, restriction d'IP, mot de passe expiré et
-//// double facteur vivent dans `LoginManager`, côté serveur, et s'appliquent
-//// quel que soit l'appelant. Écrire notre propre vérification créerait une
-//// SECONDE porte d'entrée sur les mêmes comptes, qu'il faudrait redurcir à
-//// chaque fois — et le jour où on en oublie une, c'est un trou.
+//// 🔴 WHAT IS NOT DONE HERE, AND MUST NEVER BE: checking a password. This
+//// form posts to `/api/method/login`, Frappe's own endpoint. Lockout
+//// after N failures, IP restriction, expired password and two-factor live
+//// in `LoginManager`, server-side, and apply no matter who calls it.
+//// Writing our own check would create a SECOND front door onto the same
+//// accounts, which would need rehardening every time — and the day one
+//// gets forgotten, that's a hole.
 ////
-//// Ce fichier habille l'entrée. Il ne la refait pas.
+//// This file dresses up the entrance. It doesn't rebuild it.
 
 import { useState } from 'react'
 import { t } from '../lib/i18n.js'
@@ -37,27 +37,28 @@ export default function SignIn() {
     try {
       const r = await signIn(email.trim(), pwd)
 
-      //// Deux réponses de Frappe qui ne sont PAS des échecs et qu'on ne sait
-      //// pas traiter ici : le double facteur (il faut saisir un code) et le
-      //// mot de passe expiré (il faut en choisir un neuf). Dans les deux cas
-      //// on passe la main à la page de Frappe, qui sait le faire — plutôt que
-      //// d'en bricoler une version incomplète.
+      //// Two Frappe responses that are NOT failures and that we don't know
+      //// how to handle here: two-factor (a code must be entered) and an
+      //// expired password (a new one must be chosen). In both cases we
+      //// hand off to Frappe's own page, which knows how to do it — rather
+      //// than hacking together an incomplete version of our own.
       if (r?.redirect_to) { window.location.href = r.redirect_to; return }
       if (r?.verification || r?.tmp_id) {
         window.location.href = '/login?redirect-to=/gym'
         return
       }
 
-      //// La case est cochée par défaut : sur un carnet d'entraînement
-      //// personnel, se refaire éjecter entre deux séances est le défaut le
-      //// plus pénible. Le serveur, lui, refuse d'allonger la session d'un
-      //// compte qui a accès au desk — voir `api/session.py`.
-      if (souvenir) { try { await rememberMe() } catch (e) { /* la connexion a réussi, c'est l'essentiel */ } }
+      //// The box is checked by default: on a personal training journal,
+      //// getting kicked out between two sessions is the most annoying
+      //// default there is. The server, for its part, refuses to extend
+      //// the session of an account that has desk access — see
+      //// `api/session.py`.
+      if (souvenir) { try { await rememberMe() } catch (e) { /* the sign-in succeeded, that's what matters */ } }
 
-      //// Rechargement complet, pas un rendu React : la page porte un jeton
-      //// CSRF et le nom de l'utilisateur, tous deux posés par le serveur au
-      //// rendu. Continuer avec ceux de l'invité ferait échouer la première
-      //// écriture avec un 403 sur un écran qui a l'air connecté.
+      //// A full reload, not a React render: the page carries a CSRF token
+      //// and the user's name, both set by the server at render time.
+      //// Continuing with the guest's would make the first write fail with
+      //// a 403 on a screen that looks signed in.
       window.location.href = '/gym'
     } catch (e) {
       setErr(e?.message || t('Wrong address or password.'))
@@ -71,16 +72,17 @@ export default function SignIn() {
     setBusy(true); setErr(null)
     try {
       await forgotPassword(email.trim())
-      //// La phrase vient d'ICI, pas du serveur. L'endpoint en renvoie une,
-      //// mais traduite côté serveur — donc dans la langue de la REQUÊTE, et
-      //// seulement si le msgid existe dans les PO de l'app. Le carnet, lui,
-      //// connaît la langue du membre et a la chaîne dans son paquet. Vu à
-      //// l'écran : « If an account exists… » au milieu d'un écran français.
+      //// The sentence comes from HERE, not from the server. The endpoint
+      //// returns one too, but translated server-side — so in the language
+      //// of the REQUEST, and only if the msgid exists in the app's PO
+      //// files. The journal, on the other hand, knows the member's
+      //// language and has the string in its own bundle. Seen on screen:
+      //// "If an account exists…" in the middle of a French screen.
       setNote(t('If an account exists for this address, a reset link is on its way.'))
       setMode('sent')
     } catch (e) {
-      //// Même en cas d'erreur, le message est le même : dire « ce compte
-      //// n'existe pas » révélerait qui est inscrit dans ce club.
+      //// Even on error, the message is the same: saying "this account
+      //// doesn't exist" would reveal who is registered at this club.
       setNote(t('If an account exists for this address, a reset link is on its way.'))
       setMode('sent')
     } finally { setBusy(false) }
@@ -113,10 +115,10 @@ export default function SignIn() {
       <form onSubmit={entrer}>
         <label className="signin-f">
           <span>{t('Email address')}</span>
-          {/* //// `autoComplete` et `inputMode` sont ce qui fait qu'un
-               gestionnaire de mots de passe remplit ce formulaire et qu'un
-               téléphone ouvre le bon clavier. Sans eux, l'écran est correct et
-               pénible. */}
+          {/* //// `autoComplete` and `inputMode` are what makes a password
+               manager fill in this form and a phone open the right
+               keyboard. Without them, the screen is correct and
+               tedious. */}
           <input type="email" autoComplete="username" required inputMode="email"
             autoCapitalize="none" spellCheck="false"
             value={email} onChange={e => setEmail(e.target.value)} />

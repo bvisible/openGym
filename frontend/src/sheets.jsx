@@ -17,8 +17,8 @@ import BodyMap from './components/BodyMap.jsx'
 import { exerciseMuscleSnapshot, loadOfWorkouts } from './lib/muscles.js'
 import { parseImport, mergeImport } from './lib/import-csv.js'
 import { buildPlanBundle, parsePlan, mergePlan, printPlan } from './lib/plan-share.js'
-//// Neoffice — l'offre d'un coach passe par le même mergePlan que l'import
-//// d'un ami, mais elle REMPLACE ce que la version précédente avait posé.
+//// Neoffice — a coach's offer goes through the same mergePlan as importing
+//// a friend's, but it REPLACES what the previous version had set.
 import { applyCoachProgram, describeOffer, countProgramRoutines } from './lib/coach-program.js'
 import { programAccept, programDecline, openRoutines, classBook, classCancel, payStart, payWith, payState } from './lib/api.js'
 import { estimate1RM, best1RM, is1RMRecord, REP_CAP } from './lib/onerm.js'
@@ -430,7 +430,7 @@ function ExercisePicker({ onPick, close }) {
   const all = allExercises(st)
   let base = all.filter(e =>
     (bp === '★' ? usage[e.id] : (!bp || e.bp === bp)) &&
-    //// Neoffice — même correspondance que la bibliothèque, nom anglais compris.
+    //// Neoffice — same matching as the library, English name included.
     matchesExercise(e, ql))
   if (bp === '★') base = [...base].sort((a, b) => (usage[b.id] - usage[a.id]) || (a.n < b.n ? -1 : 1))
   const eqOpts = equipmentOf(base)
@@ -676,14 +676,15 @@ function PlanTools({ close }) {
     <h4 className="sec">{t('Got a plan from a friend?')}</h4>
     <Button variant="ghost" icon="folder" onClick={() => fileRef.current?.click()}>{t('Import a plan file')}</Button>
     <input ref={fileRef} type="file" accept="application/json,.json" onChange={pickFile} hidden />
-    {/* //// Neoffice — les routines que le club a mises à disposition. Le
-         bouton n'apparaît QUE s'il y en a : un club qui n'ouvre rien ne montre
-         pas une porte vide, et la bibliothèque reste fermée par défaut. */}
+    {/* //// Neoffice — the routines the club has made available. The
+         button only shows up if there ARE any: a club that hasn't opened
+         anything shouldn't display an empty door, and the library stays
+         closed by default. */}
     <ClubShelf close={close} />
   </>
 }
 
-//// Neoffice — added: le libre-service du club.
+//// Neoffice — added: the club's self-service shelf.
 function ClubShelf({ close }) {
   const [shelf, setShelf] = useState(null)
   useEffect(() => {
@@ -696,9 +697,9 @@ function ClubShelf({ close }) {
   if (!shelf || !shelf.length) return null
 
   const load = (r) => {
-    //// Une COPIE : le membre repart avec sa routine, celle du club ne bouge
-    //// pas. mergePlan donne un identifiant neuf, donc charger deux fois ne
-    //// remplace pas — c'est voulu, il a peut-être adapté la première.
+    //// A COPY: the member walks away with their own routine, the club's
+    //// doesn't move. mergePlan hands out a fresh id, so loading it twice
+    //// doesn't replace — that's intentional, they may have adapted the first.
     update(s => mergePlan(s, {
       opengym_plan: 1, name: r.name, routines: [r], week: {}, customEx: []
     }, { schedule: false }))
@@ -785,16 +786,16 @@ function DayOverride({ iso, close }) {
     </div>
   </>
 }
-//// Neoffice — added: l'offre de programme d'un coach.
+//// Neoffice — added: a coach's program offer.
 ////
-//// Volontairement PAS le même écran que l'import d'un ami, malgré la fusion
-//// identique dessous. Trois choses diffèrent, et chacune se voit :
-////   * le message du coach, en toutes lettres ;
-////   * la semaine n'est PAS un interrupteur — c'est le coach qui a décidé, et
-////     une semaine à moitié remplacée mélange silencieusement deux plans ;
-////   * une révision annonce combien de routines de la version précédente elle
-////     remplace. Détruire en silence ce qu'un membre entraînait depuis six
-////     semaines est la seule chose que cet écran ne doit jamais faire.
+//// Deliberately NOT the same screen as importing a friend's, despite the
+//// identical merge underneath. Three things differ, and each one shows:
+////   * the coach's message, spelled out in full;
+////   * the week is NOT a toggle — the coach made that decision, and a
+////     half-replaced week silently mixes two plans together;
+////   * a revision states how many routines from the previous version it
+////     replaces. Silently destroying what a member had been training with
+////     for six weeks is the one thing this screen must never do.
 export const coachOfferSheet = offer => ui().openSheet(close => <CoachOffer offer={offer} close={close} />)
 
 function CoachOffer({ offer, close }) {
@@ -846,7 +847,7 @@ function CoachOffer({ offer, close }) {
       {info.scheduledDays > 0
         ? ' · ' + t(info.scheduledDays === 1 ? 'scheduled on {0} day' : 'scheduled on {0} days', info.scheduledDays)
         : ''}
-      {/* //// Neoffice — un cycle se dit avant d'accepter, pas après. */}
+      {/* //// Neoffice — a cycle is stated before accepting, not after. */}
       {info.cycleSpan > 1 ? ' · ' + t('{0}-week cycle', info.cycleSpan) : ''}
     </div>
     {replacing > 0 && <div className="small" style={{ color: 'var(--yellow)', marginBottom: 14, lineHeight: 1.4 }}>
@@ -855,10 +856,10 @@ function CoachOffer({ offer, close }) {
         : 'This replaces the {0} routines you got from an earlier version of this program.', replacing)}
     </div>}
     {offer.replaceSchedule && info.scheduledDays > 0 && <div className="dim small" style={{ marginBottom: 14, lineHeight: 1.4 }}>
-      {/* //// Neoffice — deux phrases, parce qu'un programme périodisé ne se
-           décrit pas comme une semaine type : dire « votre planning suivra ce
-           programme » à quelqu'un dont le planning va CHANGER chaque semaine,
-           c'est lui faire prendre le premier changement pour une panne. */}
+      {/* //// Neoffice — two sentences, because a periodized program can't
+           be described like a typical week: telling someone whose schedule
+           will CHANGE every week that "your schedule will follow this
+           program" would make them mistake the first change for a glitch. */}
       {info.cycleSpan > 1
         ? t('Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.', info.cycleSpan)
         : t('Your Mon–Sun schedule will follow this program. Days it leaves empty become rest days.')}
@@ -1113,44 +1114,45 @@ function doFinishWorkout() {
 }
 
 
-/* ============================ Neoffice — la fiche d'un cours ============================ */
+/* ============================ Neoffice — a class's card ============================ */
 
-//// added: ce que le membre veut savoir AVANT de s'inscrire, et ce qu'il aime
-//// relire après. On ouvre une feuille plutôt qu'un écran : le planning reste
-//// derrière, on referme et on est revenu à sa place — chercher un cours, c'est
-//// comparer, donc entrer et sortir dix fois.
+//// added: what the member wants to know BEFORE signing up, and what they
+//// like to check again afterward. We open a sheet rather than a screen:
+//// the schedule stays behind it, closing it returns you right where you
+//// were — browsing classes means comparing, so opening and closing ten times.
 ////
-//// Elle s'ouvre AUSSI sur un cours fermé ou complet. C'est même là qu'elle
-//// sert le plus : savoir ce qu'on a manqué, et à quelle heure il repasse.
-//// Neoffice — added block (no upstream equivalent) : PAYER UN COURS ICI.
+//// It ALSO opens on a class that's closed or full. That's actually where
+//// it's most useful: knowing what you missed, and when it comes around again.
+//// Neoffice — added block (no upstream equivalent): PAY FOR A CLASS HERE.
 ////
-//// Ce que cet écran remplace : un bouton qui envoyait le membre sur la
-//// boutique. Une autre page, une autre mise en page, des coordonnées
-//// redemandées alors qu'on les a — et dont il ne revenait pas. Le club perdait
-//// l'inscription entre les deux.
+//// What this screen replaces: a button that sent the member off to the
+//// shop. A different page, a different layout, contact details asked for
+//// again when we already had them — and they wouldn't come back. The club
+//// was losing the sign-up between the two.
 ////
-//// Trois temps, sans jamais quitter le carnet :
-////   1. le montant et les moyens réellement branchés sur l'instance ;
-////   2. le paiement — le QR TWINT s'affiche ICI, la facture se confirme ICI ;
-////   3. le résultat, relu sur la FACTURE et pas sur l'intention.
+//// Three stages, without ever leaving the journal:
+////   1. the amount and the methods actually wired up on the instance;
+////   2. the payment — the TWINT QR code shows up HERE, the invoice is confirmed HERE;
+////   3. the result, read back from the INVOICE and not from the intent.
 ////
-//// ⚠️ Ce qu'on ne fera PAS, et ce n'est pas un manque : saisir un numéro de
-//// carte dans cet écran. Encaisser une carte soi-même engage la conformité
-//// PCI-DSS de tout le club. Pour ces moyens-là, la page du prestataire
-//// s'ouvre — mais le retour se fait dans l'app, qui relit l'état et conclut.
+//// ⚠️ What we will NOT do, and it isn't an oversight: entering a card
+//// number on this screen. Taking a card ourselves would put the whole
+//// club's PCI-DSS compliance on the line. For those methods, the
+//// provider's page opens — but the return trip lands back in the app,
+//// which reads the state back and concludes.
 
 function PaySheet({ s, close, onDone }) {
   const [step, setStep] = useState('loading')   // loading · choose · qr · waiting · done · error
   const [data, setData] = useState(null)        // {booking, amount, currency, methods}
-  const [action, setAction] = useState(null)    // la réponse du prestataire
+  const [action, setAction] = useState(null)    // the provider's response
   const [err, setErr] = useState(null)
   const [busy, setBusy] = useState(null)
 
-  //// Le créneau est tenu DÈS l'ouverture, avant même le choix du moyen :
-  //// sinon le membre choisit, paie, et sa place est partie entre-temps — on
-  //// aurait encaissé pour rien. Mais c'est une TENUE seulement : aucune
-  //// facture n'existe tant qu'il n'a rien choisi, donc fermer cet écran ne
-  //// laisse ni réservation ferme ni montant dû.
+  //// The slot is held AS SOON as this opens, even before the method is
+  //// chosen: otherwise the member picks one, pays, and their spot is gone
+  //// in the meantime — we'd have charged them for nothing. But it's only a
+  //// HOLD: no invoice exists until they've chosen something, so closing
+  //// this screen leaves neither a firm booking nor an amount owed.
   useEffect(() => {
     let vivant = true
     payStart(s.id)
@@ -1159,9 +1161,9 @@ function PaySheet({ s, close, onDone }) {
     return () => { vivant = false }
   }, [s.id])
 
-  //// L'attente interroge la FACTURE. Une intention dit ce que la passerelle a
-  //// répondu ; la facture dit ce que la maison a encaissé. Un refus de code PIN
-  //// laisse une intention échouée sur une facture payée à la 2e tentative.
+  //// The waiting screen polls the INVOICE. An intent says what the gateway
+  //// answered; the invoice says what the business actually collected. A
+  //// declined PIN leaves a failed intent on an invoice paid on the 2nd try.
   useEffect(() => {
     if ((step !== 'qr' && step !== 'waiting') || !action?.invoice) return
     let vivant = true
@@ -1170,7 +1172,7 @@ function PaySheet({ s, close, onDone }) {
         const r = await payState({ invoice: action.invoice })
         if (!vivant) return
         if (r.state === 'paid') { setStep('done'); onDone && onDone() }
-      } catch { /* une interrogation ratée n'est pas un échec de paiement */ }
+      } catch { /* a failed poll is not a payment failure */ }
     }, 3000)
     return () => { vivant = false; clearInterval(tic) }
   }, [step, action])
@@ -1182,14 +1184,14 @@ function PaySheet({ s, close, onDone }) {
       setAction({ ...r, title: moy.title })
       if (r.action === 'qr') setStep('qr')
       else if (r.action === 'redirect') {
-        //// Un nouvel onglet, pas la page courante : le carnet reste ouvert
-        //// DERRIÈRE, il continue d'interroger la facture, et il annonce le
-        //// résultat dès qu'il tombe. Remplacer la page perdrait cet état.
+        //// A new tab, not the current page: the journal stays open BEHIND
+        //// it, keeps polling the invoice, and announces the result as soon
+        //// as it lands. Replacing the page would lose that state.
         window.open(r.url, '_blank', 'noopener')
         setStep('waiting')
       } else {
-        //// « none » = rien à encaisser en ligne : la facture suivra. La place
-        //// est acquise, et c'est ce qu'il faut dire — pas « payé ».
+        //// "none" = nothing to charge online: the invoice will follow. The
+        //// spot is secured, and that's what needs to be said — not "paid".
         setStep('done')
         onDone && onDone()
       }
@@ -1227,9 +1229,9 @@ function PaySheet({ s, close, onDone }) {
 
   if (step === 'qr') return <><Entete />
     <div className="pay-qr">
-      {/* //// Le QR est un SVG rendu par le prestataire : on l'affiche tel
-           quel. Le regénérer côté app donnerait un code qui ne correspond à
-           aucune transaction. */}
+      {/* //// The QR code is an SVG rendered by the provider: we display it
+           as-is. Regenerating it on the app side would produce a code that
+           doesn't match any transaction. */}
       {action?.payload?.qr_svg
         ? <div className="qr" dangerouslySetInnerHTML={{ __html: action.payload.qr_svg }} />
         : <div className="card muted">{t('The code could not be shown.')}</div>}
@@ -1265,10 +1267,10 @@ function PaySheet({ s, close, onDone }) {
       {data.methods.map(m => (
         <button key={m.id} className={'item pay-m' + (busy === m.id ? ' waiting' : '')}
           disabled={!!busy} onClick={() => choisir(m)}>
-          {/* //// Le logo du prestataire quand il en fournit un, sinon une
-               icône qui dit le GESTE : une facture qu'on recevra, un code à
-               scanner, une page sécurisée. Le même pictogramme sur les cinq
-               n'aidait personne à choisir. */}
+          {/* //// The provider's logo when it supplies one, otherwise an
+               icon that names the ACTION: an invoice you'll receive, a code
+               to scan, a secure page. The same pictogram on all five wasn't
+               helping anyone choose. */}
           <span className="lrow-i">{m.logo
             ? <img src={m.logo} alt="" />
             : <Icon name={m.gateway_type === 'facture' ? 'clipboard'
@@ -1276,8 +1278,8 @@ function PaySheet({ s, close, onDone }) {
           <div className="grow">
             <div className="tt">{m.title}</div>
             {m.description && <div className="ss">{m.description}</div>}
-            {/* //// Dire ce que « Facture » veut dire : sans cette ligne, le
-                 membre croit devoir payer sur-le-champ et abandonne. */}
+            {/* //// Saying what "Invoice" means: without this line, the
+                 member thinks they must pay on the spot and gives up. */}
             {m.gateway_type === 'facture' && !m.description &&
               <div className="ss">{t('Book now, pay on the invoice')}</div>}
           </div>
@@ -1291,8 +1293,8 @@ function PaySheet({ s, close, onDone }) {
   </>
 }
 
-//// Le montant s'écrit sans décimale quand il n'en a pas : « 28 CHF » et non
-//// « 28.00 CHF », qui a l'air d'un total de caisse.
+//// The amount is written without decimals when it has none: "28 CHF" and
+//// not "28.00 CHF", which looks like a till receipt total.
 function fmtMoney(n) {
   const v = Number(n || 0)
   return v % 1 === 0 ? String(v) : v.toFixed(2)
@@ -1311,8 +1313,8 @@ function ClassSheet({ s, act, close }) {
   const run = fn => { close(); act(fn, s.id) }
 
   return <>
-    {/* //// L'image d'abord : c'est elle qui donne envie, et un cours sans
-         photo ne doit pas laisser un cadre vide à sa place. */}
+    {/* //// The image first: it's what makes you want to go, and a class
+         with no photo shouldn't leave an empty frame in its place. */}
     {s.image && <img src={s.image} alt="" className="sheet-hero" />}
 
     <h3 style={{ marginBottom: 2 }}>{s.title}</h3>
@@ -1326,12 +1328,12 @@ function ClassSheet({ s, act, close }) {
       {s.coach && <Row2 icon="personCircle" label={t('With')} value={s.coach} />}
       <Row2 icon="person" label={t('Taking part')}
         value={t('{0} of {1}', s.seated ?? 0, s.capacity ?? 0)} />
-      {/* //// L'état vient du serveur, pas d'un calcul local : « il reste de la
-           place » et « on peut encore réserver » sont deux choses, et c'est la
-           seconde qui compte ici. */}
-      {/* //// Neoffice — le prix, quand il y en a un. Sur la fiche il a sa
-           propre ligne : c'est là qu'on décide, et un montant glissé dans une
-           phrase d'état se lit mal. */}
+      {/* //// The state comes from the server, not from a local calculation:
+           "there's still room" and "you can still book" are two different
+           things, and it's the second one that matters here. */}
+      {/* //// Neoffice — the price, when there is one. On the card it gets
+           its own line: that's where you decide, and an amount slipped into
+           a status sentence reads poorly. */}
       {s.included === false && s.price ? <Row2 icon="scale" label={t('Price')}
         value={`${Number(s.price) % 1 === 0 ? Number(s.price) : Number(s.price).toFixed(2)} ${s.currency || ''}`.trim()} /> : null}
       <Row2 icon={s.booked ? 'check' : s.bookable === false ? 'lock' : 'calendar'}
@@ -1349,15 +1351,16 @@ function ClassSheet({ s, act, close }) {
 
     {!s.past && (s.booked
       ? <Button variant="ghost" onClick={() => run(() => classCancel(s.booking.id))}>{t('Cancel')}</Button>
-      //// Le paiement passe par la boutique du club : le carnet n'encaisse pas.
-      //// On y va dans le MÊME onglet — le membre est déjà connecté, il
-      //// retombe dans son panier et pas sur une page de connexion.
-      //// Neoffice — le paiement se fait ICI, dans une feuille du carnet.
-      //// Avant : `window.location.href = s.payUrl` envoyait sur la boutique —
-      //// une autre page, des coordonnées redemandées, et un membre qui ne
-      //// revenait pas. On garde `payUrl` comme SEULE condition d'affichage
-      //// (c'est lui qui atteste que l'article est vendable), mais on ne le
-      //// suit plus.
+      //// Payment goes through the club's shop: the journal doesn't take
+      //// payment itself. We go there in the SAME tab — the member is
+      //// already signed in, they land back in their cart and not on a
+      //// login page.
+      //// Neoffice — payment happens HERE now, in a journal sheet.
+      //// Before: `window.location.href = s.payUrl` sent them to the shop —
+      //// a different page, contact details asked for again, and a member
+      //// who wouldn't come back. We keep `payUrl` as the ONLY condition for
+      //// showing the button (it's what attests the item is sellable), but
+      //// we no longer follow it.
       : s.included === false && s.bookable !== false
         ? <Button variant="primary" onClick={() => { close(); paySheet(s, () => act(() => Promise.resolve(), s.id)) }}>
             {t('Book and pay')}

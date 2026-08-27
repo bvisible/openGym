@@ -24,14 +24,14 @@ const M = {
   stateGet: '/api/method/neoffice_gym.api.state.get',
   statePut: '/api/method/neoffice_gym.api.state.put',
   logout: '/api/method/logout',
-  //// Neoffice — programmes écrits par un coach. Le carnet demande ce qui
-  //// l'attend, fusionne LUI-MÊME (mergePlan est amont et testé amont, et
-  //// c'est le téléphone qui possède l'état hors ligne), puis répond.
+  //// Neoffice — programs written by a coach. The journal asks what's
+  //// waiting for it, merges it ITSELF (mergePlan is upstream and tested
+  //// upstream, and it's the phone that owns the offline state), then replies.
   programInbox: '/api/method/neoffice_gym.api.program.inbox',
   programAccept: '/api/method/neoffice_gym.api.program.accept',
   programDecline: '/api/method/neoffice_gym.api.program.decline',
-  //// Neoffice — les cours collectifs. Une façade sur Booking, pas un second
-  //// module : capacité, liste d'attente et frais d'annulation restent les siens.
+  //// Neoffice — group classes. A facade over Booking, not a second
+  //// module: capacity, waitlist and cancellation fees remain Booking's own.
   classesWeek: '/api/method/neoffice_gym.api.classes.week',
   classesMine: '/api/method/neoffice_gym.api.classes.mine',
   classBook: '/api/method/neoffice_gym.api.classes.book',
@@ -39,41 +39,41 @@ const M = {
   payStart: '/api/method/neoffice_gym.api.wallet.start',
   payWith: '/api/method/neoffice_gym.api.wallet.pay_with',
   payState: '/api/method/neoffice_gym.api.wallet.state',
-  //// Neoffice — la connexion. `login` est l'endpoint de FRAPPE : verrouillage
-  //// après échecs, restriction d'IP, mot de passe expiré et double facteur y
-  //// vivent, et s'appliquent quel que soit l'appelant. Les deux autres sont à
-  //// nous et ne touchent jamais un mot de passe.
+  //// Neoffice — signing in. `login` is FRAPPE's own endpoint: lockout
+  //// after failures, IP restriction, expired password and two-factor live
+  //// there, and apply no matter who calls it. The other two are ours and
+  //// never touch a password.
   login: '/api/method/login',
   rememberMe: '/api/method/neoffice_gym.api.session.remember_me',
   forgotPassword: '/api/method/neoffice_gym.api.session.forgot_password',
-  //// Neoffice — les évaluations physiques. Lecture seule côté membre : c'est
-  //// le coach qui mesure, le carnet ne fait que montrer.
+  //// Neoffice — physical assessments. Read-only on the member's side: it's
+  //// the coach who measures, the journal only displays.
   assessmentsMine: '/api/method/neoffice_gym.api.assessment.mine',
   assessmentTrend: '/api/method/neoffice_gym.api.assessment.trend',
-  //// Neoffice — les objectifs. Lecture seule : c'est le coach qui les pose,
-  //// et un membre qui déplacerait sa propre cible n'aurait plus d'objectif.
+  //// Neoffice — goals. Read-only: it's the coach who sets them, and a
+  //// member who could move their own target would no longer have a goal.
   goalsMine: '/api/method/neoffice_gym.neoffice_gym.doctype.gym_goal.gym_goal.mine',
-  //// Neoffice — les défis du club. Le classement se demande à part et
-  //// n'arrive JAMAIS dans la liste : il montre à quelle fréquence les
-  //// autres s'entraînent, ce qui est de la donnée de santé (LPD). On ne
-  //// le charge que pour un défi qu'on a rejoint.
+  //// Neoffice — the club's challenges. The leaderboard is requested
+  //// separately and NEVER comes with the list: it shows how often other
+  //// people train, which counts as health data under Swiss data
+  //// protection law (LPD). It's only loaded for a challenge you've joined.
   challengesMine: '/api/method/neoffice_gym.api.challenges.mine',
   challengeJoin: '/api/method/neoffice_gym.api.challenges.join',
   challengeLeave: '/api/method/neoffice_gym.api.challenges.leave',
   challengeBoard: '/api/method/neoffice_gym.api.challenges.leaderboard',
-  //// Neoffice — le panneau d'affichage du club. Rien n'est envoyé : le
-  //// membre le lit quand il ouvre son carnet.
+  //// Neoffice — the club's noticeboard. Nothing is pushed: the member
+  //// reads it when they open their journal.
   announcements: '/api/method/neoffice_gym.api.challenges.announcements',
-  //// Neoffice — les routines que le club a explicitement ouvertes. Sa
-  //// bibliothèque reste fermée : il ouvre ce qu'il décide d'ouvrir.
+  //// Neoffice — the routines the club has explicitly opened up. Its
+  //// library stays closed: it opens what it decides to open.
   openRoutines: '/api/method/neoffice_gym.api.challenges.open_routines',
-  //// Neoffice — joindre son coach. La messagerie est Raven ; ces deux
-  //// endpoints ne font qu'aiguiller vers la bonne conversation.
+  //// Neoffice — reaching your coach. The messaging is Raven; these two
+  //// endpoints only route to the right conversation.
   myCoach: '/api/method/neoffice_gym.api.contact.my_coach',
   openChat: '/api/method/neoffice_gym.api.contact.open_chat',
-  //// Neoffice — le carnet de séances du membre. Rend une réponse vide
-  //// tant que le club n'en vend pas : le carnet affiche « pas de
-  //// carnet » sans avoir à traiter un cas particulier.
+  //// Neoffice — the member's session pack. Returns an empty response as
+  //// long as the club doesn't sell any: the journal shows "no pack"
+  //// without having to handle a special case.
   wallet: '/api/method/neoffice_gym.api.wallet.balance',
 }
 
@@ -129,18 +129,18 @@ export function currentUser() {
   return { id: u.name, name: u.full_name || u.name, lang: u.language || null }
 }
 
-//// Neoffice — les trois appels du coaching. `accept` part APRÈS la fusion :
-//// si la fusion échoue sur le téléphone, l'offre doit encore être là au
-//// prochain lancement. Accepter d'abord perdrait un programme sur un plantage.
+//// Neoffice — the three coaching calls. `accept` fires AFTER the merge:
+//// if the merge fails on the phone, the offer must still be there on the
+//// next launch. Accepting first would lose a program on a crash.
 export const programInbox = () => api(M.programInbox)
 export const programAccept = (assignment) =>
   api(M.programAccept, { method: 'POST', body: JSON.stringify({ assignment }) })
 export const programDecline = (assignment, reason) =>
   api(M.programDecline, { method: 'POST', body: JSON.stringify({ assignment, reason }) })
 
-//// Neoffice — les cours. `book` gère lui-même le cas « complet » en inscrivant
-//// sur la liste d'attente : le carnet n'a pas à connaître la règle, il affiche
-//// ce que le serveur répond.
+//// Neoffice — classes. `book` handles the "full" case itself by signing
+//// up to the waitlist: the journal doesn't need to know the rule, it just
+//// displays what the server answers.
 export const classesWeek = () => api(M.classesWeek)
 export const classesMine = () => api(M.classesMine)
 export const classBook = (session) =>
@@ -148,18 +148,18 @@ export const classBook = (session) =>
 export const classCancel = (booking, reason) =>
   api(M.classCancel, { method: 'POST', body: JSON.stringify({ booking, reason }) })
 
-//// Neoffice — les évaluations. Aucun endpoint d'écriture : un membre ne se
-//// mesure pas lui-même dans ce module, et lui en donner le moyen créerait deux
-//// vérités sur la même composition corporelle.
+//// Neoffice — assessments. No write endpoint: a member doesn't measure
+//// themselves in this module, and giving them the means to would create
+//// two truths about the same body composition.
 export const assessmentsMine = () => api(M.assessmentsMine)
 export const assessmentTrend = (test) =>
   api(M.assessmentTrend + '?test=' + encodeURIComponent(test))
 
-//// Neoffice — ce que le membre vise, et où il en est.
+//// Neoffice — what the member is aiming for, and where they stand.
 export const goalsMine = () => api(M.goalsMine)
 
-//// Neoffice — les défis. `join` EST le consentement du membre à être
-//// classé : il n'existe pas d'endpoint qui inscrive quelqu'un d'autre.
+//// Neoffice — challenges. `join` IS the member's consent to be ranked:
+//// there is no endpoint that signs up someone else.
 export const challengesMine = () => api(M.challengesMine)
 export const challengeJoin = (challenge) =>
   api(M.challengeJoin, { method: 'POST', body: JSON.stringify({ challenge }) })
@@ -174,23 +174,23 @@ export const openChat = () =>
   api(M.openChat, { method: 'POST', body: '{}' })
 export const wallet = () => api(M.wallet)
 
-//// Neoffice — se connecter SANS quitter le carnet. `signIn` poste les
-//// identifiants à Frappe, telle quelle : on n'en vérifie aucun ici.
-//// ⚠️ `usr`/`pwd` sont les noms que `LoginManager` attend — pas `email`.
+//// Neoffice — signing in WITHOUT leaving the journal. `signIn` posts the
+//// credentials to Frappe, as-is: none of them are checked here.
+//// ⚠️ `usr`/`pwd` are the names `LoginManager` expects — not `email`.
 export const signIn = (usr, pwd) =>
   api(M.login, { method: 'POST', body: JSON.stringify({ usr, pwd }) })
 export const rememberMe = () => api(M.rememberMe, { method: 'POST', body: '{}' })
 export const forgotPassword = (email) =>
   api(M.forgotPassword, { method: 'POST', body: JSON.stringify({ email }) })
 
-//// Neoffice — payer un cours SANS quitter le carnet.
-//// `payStart` tient le créneau et lève la facture d'un coup : le membre voit
-//// le montant et les moyens sur le MÊME écran que le cours. `payWith` ouvre
-//// le paiement, `payState` dit où il en est.
+//// Neoffice — paying for a class WITHOUT leaving the journal.
+//// `payStart` holds the slot and raises the invoice in one go: the member
+//// sees the amount and the methods on the SAME screen as the class.
+//// `payWith` opens payment, `payState` says where it stands.
 export const payStart = (session) =>
   api(M.payStart, { method: 'POST', body: JSON.stringify({ session }) })
-//// `payWith` prend la RÉSERVATION, pas une facture : il n'en existe pas
-//// encore. C'est le choix du moyen qui la lève — voir `wallet.pay_with`.
+//// `payWith` takes the BOOKING, not an invoice: none exists yet. It's
+//// choosing the method that raises it — see `wallet.pay_with`.
 export const payWith = (booking, method) =>
   api(M.payWith, { method: 'POST', body: JSON.stringify({ booking, method }) })
 export const payState = ({ intent, invoice }) =>

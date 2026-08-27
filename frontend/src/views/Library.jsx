@@ -16,7 +16,7 @@ export default function Library() {
   const [eq, setEq] = useState('')
   const [shown, setShown] = useState(40)
   const ql = q.toLowerCase().trim()
-  //// Neoffice — matchesExercise() cherche aussi sur le nom anglais.
+  //// Neoffice — matchesExercise() also searches the English name.
   const base = allExercises(S).filter(e => (!bp || e.bp === bp) && matchesExercise(e, ql))
   const eqOpts = equipmentOf(base)
   // Drop the equipment filter if the search narrowed it away, so you never hit a dead end.

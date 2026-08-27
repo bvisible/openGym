@@ -28,25 +28,24 @@ export function applyCoachProgram(s, offer) {
   const before = new Set((s.routines || []).map(r => r.id))
   mergePlan(s, bundle, { schedule: offer.replaceSchedule })
 
-  //// mergePlan donne un identifiant NEUF à chaque routine importée, pour ne
-  //// jamais écraser celles du membre — et il garde sa table de correspondance
-  //// pour lui. Le cycle, lui, parle des identifiants du BUNDLE : sans la
-  //// refaire, la semaine 2 pointerait dans le vide.
+  //// mergePlan gives every imported routine a BRAND-NEW id so it never
+  //// overwrites the member's own — and it keeps its mapping table to itself.
+  //// The cycle, though, speaks in the BUNDLE's ids: without rebuilding that
+  //// map, week 2 would point at nothing.
   ////
-  //// Elle se reconstruit par l'ORDRE : mergePlan empile les routines du bundle
-  //// dans l'ordre du bundle. C'est ce que fait son code, et le test
-  //// « la semaine 2 pointe sur les bonnes routines » le vérifie — si l'amont
-  //// changeait d'ordre un jour, ce test tomberait avant que quiconque s'en
-  //// aperçoive à l'écran.
+  //// It is rebuilt from the ORDER: mergePlan appends the bundle's routines in
+  //// bundle order. That is what its code does, and the test "week 2 points at
+  //// the right routines" checks it — if upstream ever changed that order, the
+  //// test would fail before anyone noticed on screen.
   const added = (s.routines || []).filter(r => !before.has(r.id))
   const idMap = {}
   added.forEach((r, i) => {
     r.coachProgram = offer.program
     r.coachVersion = offer.version
-    //// Le nom, pour que la liste des routines puisse dire d'où elles viennent
-    //// dès l'import — sans attendre le premier aller-retour serveur, qui le
-    //// renverra ensuite (c'est le serveur qui fait foi, un nom recopié serait
-    //// faux dès que le coach renomme son programme).
+    //// The name, so the routine list can say where they came from as soon as
+    //// they are imported — without waiting for the first server round trip,
+    //// which sends it back afterwards (the server is authoritative; a copied
+    //// name would be wrong the moment the coach renames their program).
     r.coachProgramName = bundle.name || undefined
     const source = bundle.routines[i]
     if (source) idMap[source.id] = r.id
@@ -56,18 +55,18 @@ export function applyCoachProgram(s, offer) {
 }
 
 /**
- * Retenir le calendrier d'un programme périodisé.
+ * Keep the calendar of a periodized program.
  *
- * Le carnet n'a qu'UNE semaine type — c'est son modèle, et le changer toucherait
- * tout ce qui la lit. On garde donc le cycle à côté, et on REPOSE la semaine
- * quand le membre change de semaine de cycle. Le mécanisme du carnet reste
- * intact, il est simplement réalimenté.
+ * The logbook has only ONE typical week — that is its model, and changing it
+ * would touch everything that reads it. So we keep the cycle alongside, and
+ * LAY THE WEEK DOWN AGAIN whenever the member moves to another cycle week. The
+ * logbook's own mechanism stays intact, it is simply re-fed.
  */
 export function attachCycle(s, offer, bundle, idMap) {
   const raw = (offer.bundle && offer.bundle.cycle) || null
   if (!raw || !raw.weeks) {
-    // Un programme non périodisé efface le cycle du précédent : sinon la v2
-    // « une semaine type » laisserait tourner le calendrier de la v1.
+    // A non-periodized program clears the previous one's cycle: otherwise a
+    // "single typical week" v2 would leave v1's calendar running.
     if (s.coachCycle && s.coachCycle.program === offer.program) delete s.coachCycle
     return
   }
@@ -79,16 +78,16 @@ export function attachCycle(s, offer, bundle, idMap) {
   })
   s.coachCycle = {
     program: offer.program,
-    // Le nom du programme, pour que le bandeau dise LEQUEL. Un membre qui suit
-    // la force et le cardio en même temps a deux calendriers ; « votre
-    // programme » ne lui dit pas duquel on parle.
+    // The program's name, so the banner says WHICH one. A member following
+    // strength and cardio at once has two calendars; "your program" does not
+    // tell them which is meant.
     name: bundle.name || null,
     version: offer.version,
     span: raw.span || Object.keys(weeks).length,
     weeks,
-    // Le point de départ du compte. La date d'échéance du coach quand il en a
-    // posé une, sinon aujourd'hui — un membre qui accepte un mardi commence sa
-    // semaine 1 ce mardi-là, pas au lundi suivant.
+    // Where the count starts. The coach's own start date when they set one,
+    // otherwise today — a member who accepts on a Tuesday starts week 1 that
+    // Tuesday, not the following Monday.
     startedOn: offer.startDate || todayISO(),
     appliedWeek: null
   }
@@ -98,13 +97,13 @@ export function attachCycle(s, offer, bundle, idMap) {
 const todayISO = () => new Date().toISOString().slice(0, 10)
 
 /**
- * Poser la semaine du cycle qui correspond à aujourd'hui.
+ * Lay down the cycle week that matches today.
  *
- * Ne fait RIEN quand la semaine n'a pas changé : reposer le planning à chaque
- * ouverture effacerait le jour qu'un membre a déplacé en milieu de semaine, et
- * il ne comprendrait pas pourquoi son mardi revient tout seul.
+ * Does NOTHING when the week has not changed: re-laying the schedule on every
+ * open would wipe the day a member moved mid-week, and they would not
+ * understand why their Tuesday keeps coming back on its own.
  *
- * Retourne le numéro de semaine courant, ou null s'il n'y a pas de cycle.
+ * Returns the current week number, or null when there is no cycle.
  */
 export function syncCycleWeek(s, when) {
   const c = s.coachCycle
@@ -113,23 +112,23 @@ export function syncCycleWeek(s, when) {
   if (c.appliedWeek === n) return n
   const plan = c.weeks[String(n)]
   if (plan) {
-    // La semaine du cycle REMPLACE : les jours qu'elle laisse vides deviennent
-    // des jours de repos. Une semaine à moitié remplacée mélangerait deux
-    // semaines de programme, et c'est déjà la règle de l'import.
+    // The cycle week REPLACES: the days it leaves empty become rest days. A
+    // half-replaced week would mix two program weeks together, and this is
+    // already the rule the import follows.
     s.week = { ...plan }
   }
   c.appliedWeek = n
   return n
 }
 
-/** Où en est le membre dans son cycle — de 1 à `span`, et ça boucle. */
+/** Where the member stands in their cycle — 1 to `span`, and it wraps. */
 export function cycleWeekOf(cycle, when) {
   const span = Math.max(1, cycle.span || 1)
   const start = new Date(cycle.startedOn + 'T00:00:00')
   const now = when ? new Date(when + 'T00:00:00') : new Date()
   const days = Math.floor((now - start) / 86400000)
-  // Avant le début, on est en semaine 1 : un programme daté de la semaine
-  // prochaine se prépare, il ne renvoie pas à la fin du cycle précédent.
+  // Before the start date we are in week 1: a program dated next week is
+  // being prepared, it does not send you back to the end of a previous cycle.
   if (days < 0) return 1
   return (Math.floor(days / 7) % span) + 1
 }
@@ -171,10 +170,10 @@ export function describeOffer(offer) {
       scheduledDays: bundle.scheduledDays,
       dropped: bundle.dropped,
       name: bundle.name,
-      // Le nombre de semaines, quand le programme en est un. Sans lui, un cycle
-      // de quatre semaines s'annonce « programmé sur 3 jours » — un membre
-      // accepte alors une semaine type et découvre plus tard que son planning
-      // change tout seul.
+      // The number of weeks, when the program has them. Without it a
+      // four-week cycle announces itself as "scheduled over 3 days" — the
+      // member accepts what looks like a typical week and finds out later
+      // that their schedule changes on its own.
       cycleSpan: (offer.bundle && offer.bundle.cycle && offer.bundle.cycle.span) || 0
     }
   } catch (e) {

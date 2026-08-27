@@ -5,9 +5,9 @@ import { create } from 'zustand'
 //// than from a round-trip. Naming the calls instead of the URLs means moving
 //// an endpoint never reaches in here.
 import { getState, putState, logout, currentUser } from '../lib/api.js'
-//// Neoffice — les médias que le club a filmés lui-même.
+//// Neoffice — the media a club has filmed itself.
 import { applyClubMedia } from '../lib/exercises.js'
-//// Neoffice — un programme périodisé avance tout seul de semaine en semaine.
+//// Neoffice — a periodized program moves on from week to week by itself.
 import { syncCycleWeek } from '../lib/coach-program.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
@@ -90,10 +90,10 @@ export const useStore = create((set, get) => {
     //// `online` event never fired (a Wi-Fi that answers DHCP but not the
     //// internet does not raise it).
     if (document.visibilityState === 'visible') {
-      //// Le cycle avance quand la semaine change, pas à chaque ouverture :
-      //// syncCycleWeek ne fait rien tant qu'on reste dans la même semaine, donc
-      //// l'appeler souvent ne coûte rien et garantit qu'un membre qui rouvre
-      //// son carnet le lundi voit sa nouvelle semaine sans rien faire.
+      //// The cycle moves on when the week changes, not on every open:
+      //// syncCycleWeek does nothing while we stay inside the same week, so
+      //// calling it often costs nothing and guarantees that a member reopening
+      //// their logbook on Monday sees their new week without doing anything.
       useStore.getState().advanceCycle()
       useStore.getState().retryPending(); return
     }
@@ -199,10 +199,10 @@ export const useStore = create((set, get) => {
       if (localStorage.getItem('gym_dirty') !== '1') return
       await get().pushState()
     },
-    //// Neoffice — faire avancer un programme périodisé.
-    //// Sans effet quand il n'y a pas de cycle, ou quand la semaine n'a pas
-    //// changé : reposer le planning à chaque ouverture effacerait le jour
-    //// qu'un membre a déplacé en milieu de semaine.
+    //// Neoffice — move a periodized program on.
+    //// A no-op when there is no cycle, or when the week has not changed:
+    //// re-laying the schedule on every open would wipe the day a member moved
+    //// mid-week.
     advanceCycle() {
       const S = get().S
       if (!S.coachCycle) return
@@ -220,9 +220,9 @@ export const useStore = create((set, get) => {
           const active = S.active
           const next = Object.assign(clone(DEF), state)
           if (active) next.active = active
-          //// Neoffice — appliqué avant de persister, pour que le premier rendu
-          //// montre déjà la photo de la machine du club et non le dessin de la
-          //// bibliothèque. Après, l'écran aurait clignoté.
+          //// Neoffice — applied before persisting, so the very first render
+          //// already shows the photo of the club's machine and not the
+          //// library's drawing. Any later and the screen would flicker.
           applyClubMedia(next.clubMedia)
           persist(next, false)
         } else if (hasData(S)) { await get().pushState() }
@@ -294,10 +294,10 @@ export const useStore = create((set, get) => {
         if (!me) { set({ ready: true }); return }
         get().setUser(me)
         await get().pullState()
-        //// Neoffice — et au DEMARRAGE, pas seulement au retour d'onglet.
-        //// Un membre ouvre son carnet le lundi matin : l'app n'etait pas
-        //// ouverte, donc aucun visibilitychange ne se produit et il resterait
-        //// sur la semaine passee jusqu'a ce qu'il change d'onglet et revienne.
+        //// Neoffice — and on BOOT, not only on tab return.
+        //// A member opens their logbook on Monday morning: the app was not
+        //// open, so no visibilitychange happens and they would stay on last
+        //// week until they switched tabs and came back.
         get().advanceCycle()
         // Re-stamp the reminder's timezone on every load — keeps it correct if you're travelling,
         // without needing to revisit Settings.

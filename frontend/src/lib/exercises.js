@@ -25,30 +25,30 @@ export const smOf = ex => {
 export const EXIDX = {}
 EXDB.forEach(e => { EXIDX[e.id] = e })
 
-//// Neoffice — les noms d'exercices suivent la langue.
+//// Neoffice — exercise names follow the language.
 ////
-//// L'amont traduit les consignes mais pas les noms : la bibliothèque reste en
-//// anglais dans toutes les langues. On applique donc un pack de noms
-//// (src/names/<lang>.js) au changement de langue.
+//// Upstream translates the instructions but not the names: the library stays
+//// English in every language. So we apply a name pack (src/names/<lang>.js)
+//// whenever the language changes.
 ////
-//// La traduction MUTE `e.n` sur les objets de EXDB, au lieu d'ajouter un
-//// nameFor(ex) appelé partout. La raison est le nombre d'appelants : le nom est
-//// lu par la liste, la recherche, les filtres, la fiche, le minuteur, le PDF
-//// imprimable, l'export CSV et le fil de la séance. Un accesseur aurait été
-//// oublié à un endroit — et l'endroit oublié aurait été un écran en anglais au
-//// milieu d'une app française, sans erreur pour le signaler.
+//// The translation MUTATES `e.n` on the EXDB objects rather than adding a
+//// nameFor(ex) called everywhere. The reason is the number of callers: the
+//// name is read by the list, the search, the filters, the detail sheet, the
+//// timer, the printable PDF, the CSV export and the session feed. An accessor
+//// would have been forgotten in one place — and that place would have been an
+//// English screen in the middle of a French app, with no error to flag it.
 ////
-//// Le nom anglais reste disponible en `e.en`, ce qui rend la recherche
-//// BILINGUE : taper « bench press » trouve le développé couché. Un membre qui
-//// vient d'une autre app connaît les noms anglais.
+//// The English name stays available as `e.en`, which makes the search
+//// BILINGUAL: typing "bench press" finds "développé couché". A member coming
+//// from another app knows the English names.
 ////
-//// `buildPlanBundle` ne copie que l'id, jamais `n` — un plan partagé avec un
-//// ami reste donc neutre en langue, et c'est ce qu'on veut.
+//// `buildPlanBundle` copies only the id, never `n` — so a plan shared with a
+//// friend stays language-neutral, which is what we want.
 const ORIGINAL_NAMES = new Map()
 
 export function applyExerciseNames(pack) {
-  // Premier passage : mémoriser l'anglais avant de le remplacer. Sans ça, un
-  // second changement de langue traduirait une traduction.
+  // First pass: remember the English before replacing it. Without that, a
+  // second language change would translate a translation.
   if (!ORIGINAL_NAMES.size) EXDB.forEach(e => ORIGINAL_NAMES.set(e.id, e.n))
   EXDB.forEach(e => {
     const en = ORIGINAL_NAMES.get(e.id)
@@ -88,19 +88,19 @@ export const allExercises = st => [...(st.customEx || []), ...EXDB]
 // try_files, so it 404s rather than falling through to index.html, leaving a blank image
 // and nothing in the console.
 const ENV = import.meta.env || {}
-//// Neoffice — les médias sont servis par Frappe depuis l'app, pas depuis la
-//// racine du site : '/img/' ne mène nulle part sur une instance Frappe. Le
-//// dossier media/ N'EST PAS dans le dépôt (voir .gitignore) — l'instance le
-//// télécharge avec scripts/fetch-media.sh, comme le `docker compose up` amont
-//// le fait chez l'auto-hébergeur. Les variables d'environnement restent
-//// prioritaires : c'est ce qui permet au build mobile de pointer sur un CDN.
+//// Neoffice — media is served by Frappe from the app, not from the site root:
+//// '/img/' leads nowhere on a Frappe instance. The media/ folder is NOT in the
+//// repository (see .gitignore) — the instance downloads it with
+//// scripts/fetch-media.sh, the way upstream's `docker compose up` does for a
+//// self-hoster. Environment variables still win: that is what lets the mobile
+//// build point at a CDN.
 const IMG_BASE = ENV.VITE_IMG_BASE || '/assets/opengym/media/img/'
 const GIF_BASE = ENV.VITE_GIF_BASE || '/assets/opengym/media/gif/'
-//// Neoffice — la correspondance de recherche, en un seul endroit.
-//// Elle regarde AUSSI `e.en`, le nom anglais mémorisé par applyExerciseNames :
-//// taper « bench press » dans une app en français trouve le développé couché.
-//// Un membre qui arrive d'une autre application connaît les noms anglais, et
-//// les coachs mélangent les deux à l'oral.
+//// Neoffice — search matching, in a single place.
+//// It ALSO looks at `e.en`, the English name kept by applyExerciseNames:
+//// typing "bench press" in a French app finds "développé couché". A member
+//// arriving from another application knows the English names, and coaches mix
+//// the two when they speak.
 export function matchesExercise(e, q) {
   if (!q) return true
   return (
@@ -112,18 +112,18 @@ export function matchesExercise(e, q) {
   )
 }
 
-//// Neoffice — un club peut poser SON média sur un exercice.
-//// Une URL absolue (« /files/… », posée par le desk) est servie telle quelle ;
-//// un nom de fichier nu reste celui de la bibliothèque, préfixé du dossier.
-//// Le test porte sur la forme de la valeur et non sur un drapeau : le carnet
-//// n'a pas à savoir d'où vient un média, seulement où aller le chercher.
+//// Neoffice — a club can put ITS OWN media on an exercise.
+//// An absolute URL ("/files/…", set from the desk) is served as is; a bare
+//// file name stays a library one and gets the folder prefix.
+//// The test is on the shape of the value, not on a flag: the logbook has no
+//// business knowing where a media comes from, only where to fetch it.
 const isAbsolute = v => typeof v === 'string' && (v.startsWith('/') || v.startsWith('http'))
 export const imgSrc = ex => (isAbsolute(ex.img) ? ex.img : IMG_BASE + ex.img)
 export const gifSrc = ex => (isAbsolute(ex.gif) ? ex.gif : GIF_BASE + ex.gif)
 
-//// Neoffice — les médias que le club a posés sur des exercices de la
-//// bibliothèque, appliqués par id. Rien d'autre de la fiche ne bouge : le nom,
-//// les consignes et les muscles restent ceux de la bibliothèque.
+//// Neoffice — the media a club has attached to library exercises, applied by
+//// id. Nothing else on the sheet moves: the name, the instructions and the
+//// muscles stay the library's.
 export function applyClubMedia(media) {
   if (!media) return
   Object.keys(media).forEach(id => {

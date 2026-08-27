@@ -22,10 +22,10 @@ import Plan from './views/Plan.jsx'
 import RoutineEdit from './views/RoutineEdit.jsx'
 import Workout from './views/Workout.jsx'
 import Stats from './views/Stats.jsx'
-//// Neoffice — les cours collectifs, quand le club en donne.
+//// Neoffice — group classes, when the club offers them.
 import Classes from './views/Classes.jsx'
 import Challenges from './views/Challenges.jsx'
-//// Neoffice — les évaluations physiques du coach.
+//// Neoffice — the coach's physical assessments.
 import Assessments from './views/Assessments.jsx'
 import History from './views/History.jsx'
 import Library from './views/Library.jsx'
@@ -49,10 +49,10 @@ function Shell() {
   const langV = useLang()   // re-renders the whole shell when the language (pack) changes
   useEffect(() => { setNav(navigate) }, [navigate])
   useEffect(() => { applyPrefs(S.theme, S.accent) }, [S.theme, S.accent])
-  //// Neoffice — `BOOT.lang` en repli : avant la connexion il n'y a AUCUN état
-  //// synchronisé, donc `S.lang` est vide et l'écran de connexion s'affichait
-  //// en anglais chez un club romand. Le serveur, lui, connaît la langue du
-  //// site — il la transmet dans le boot de l'invité.
+  //// Neoffice — `BOOT.lang` as a fallback: before signing in there is NO
+  //// synced state at all, so `S.lang` is empty and the login screen used to
+  //// show up in English at a French-speaking club. The server, on the other
+  //// hand, knows the site's language — it passes it along in the guest boot.
   useEffect(() => { setLang(S.lang || BOOT.lang || 'en') }, [S.lang])
   useEffect(() => { document.documentElement.lang = S.lang || 'en' }, [langV, S.lang])
   // every tab/route change starts at the top of the page
@@ -60,11 +60,11 @@ function Shell() {
   // bound to the workout, not to the route — checking Stats mid-session keeps the screen on
   useWakeLock(!!S.active && S.keepAwake !== false)
 
-  //// Neoffice — il Y A désormais un état non authentifié à rendre. `/gym` ne
-  //// renvoie plus l'anonyme sur la page de connexion du desk : il lui sert
-  //// l'app, qui affiche son propre écran de connexion. Ce que ça change est
-  //// l'apparence, pas l'authentification — le formulaire poste sur
-  //// `/api/method/login`. Voir `views/SignIn.jsx`.
+  //// Neoffice — there IS now an unauthenticated state to render. `/gym` no
+  //// longer sends the anonymous visitor to the desk's login page: it serves
+  //// them the app, which shows its own login screen. What this changes is
+  //// the appearance, not the authentication — the form posts to
+  //// `/api/method/login`. See `views/SignIn.jsx`.
   if (BOOT.signed_in === false) return <div id="app"><SignIn /></div>
 
   const authed = user || isGuest
@@ -91,18 +91,18 @@ function Shell() {
               <Route path="/stats" element={<Stats />} />
               <Route path="/history" element={<History />} />
               <Route path="/library" element={<Library />} />
-          {/* //// Neoffice — cf. views/Classes.jsx */}
+          {/* //// Neoffice — see views/Classes.jsx */}
           <Route path="/classes" element={<Classes />} />
-        {/* //// Neoffice — les défis du club. Même porte que les cours :
-            on y arrive depuis l'accueil, pas par un sixième onglet. */}
+        {/* //// Neoffice — the club's challenges. Same door as classes:
+            reached from the home screen, not through a sixth tab. */}
         <Route path="/challenges" element={<Challenges />} />
-          {/* //// Neoffice — cf. views/Assessments.jsx */}
+          {/* //// Neoffice — see views/Assessments.jsx */}
           <Route path="/assessments" element={<Assessments />} />
               <Route path="/settings" element={<Settings />} />
-              {/* //// Neoffice — /admin retiré. Le tableau de bord d'openGym
-                  listait les profils et les codes d'invitation de son magasin
-                  d'utilisateurs Node ; le club gère ses membres, ses coachs et
-                  ses abonnements dans le desk Frappe. */}
+              {/* //// Neoffice — /admin removed. openGym's dashboard used to
+                  list the profiles and invite codes of its Node user store;
+                  the club manages its members, coaches and subscriptions in
+                  the Frappe desk instead. */}
               <Route path="*" element={<Navigate to="/home" replace />} />
             </Routes>
           )}

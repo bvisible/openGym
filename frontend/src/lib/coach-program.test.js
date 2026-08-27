@@ -1,7 +1,7 @@
 //// Neoffice — added file (no upstream equivalent).
-//// Ces tests couvrent la seule chose que le coaching peut casser sans bruit :
-//// une révision qui détruit des routines. Le reste (parsePlan/mergePlan) est
-//// amont et testé amont — on ne le re-teste pas, on teste NOTRE couche.
+//// These tests cover the one thing coaching can break silently: a revision
+//// that destroys routines. The rest (parsePlan/mergePlan) is upstream and
+//// tested upstream — we do not re-test it, we test OUR layer.
 
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
@@ -106,11 +106,11 @@ describe('removeProgramRoutines', () => {
   })
 })
 
-//// Neoffice — la périodisation.
-//// Ce mécanisme peut se tromper SANS jamais lever d'erreur : une semaine 2 qui
-//// pointe sur les routines de la semaine 1, un cycle qui repart au mauvais
-//// moment, un planning reposé au milieu de la semaine et qui efface le jour
-//// qu'un membre venait de déplacer. Rien de tout cela ne plante.
+//// Neoffice — periodization.
+//// This mechanism can get it wrong WITHOUT ever raising an error: a week 2
+//// pointing at week 1's routines, a cycle restarting at the wrong moment, a
+//// schedule laid down again mid-week wiping the day a member had just moved.
+//// None of that throws.
 
 import { attachCycle, syncCycleWeek, cycleWeekOf } from './coach-program.js'
 
@@ -139,8 +139,8 @@ const cycleOffer = (start) => ({
   bundle: cycleBundle(), replaceSchedule: true, startDate: start,
 })
 
-describe('la périodisation', () => {
-  it('retient le cycle et pose la semaine 1', () => {
+describe('periodization', () => {
+  it('keeps the cycle and lays down week 1', () => {
     const s = { routines: [], week: {}, customEx: [] }
     applyCoachProgram(s, cycleOffer('2026-08-24'))
     expect(s.coachCycle).toBeTruthy()
@@ -148,9 +148,9 @@ describe('la périodisation', () => {
     expect(Object.keys(s.coachCycle.weeks)).toHaveLength(4)
   })
 
-  it('la semaine 2 pointe sur les BONNES routines, pas sur celles du bundle', () => {
-    // mergePlan donne des identifiants neufs. Si la correspondance était
-    // perdue, la semaine 2 renverrait à « r-B », qui n'existe pas chez le membre.
+  it('week 2 points at the RIGHT routines, not at the bundle’s', () => {
+    // mergePlan hands out brand-new ids. If the mapping were lost, week 2
+    // would point at "r-B", which does not exist on the member's side.
     const s = { routines: [], week: {}, customEx: [] }
     applyCoachProgram(s, cycleOffer('2026-08-24'))
     const ids = new Set(s.routines.map(r => r.id))
@@ -158,24 +158,24 @@ describe('la périodisation', () => {
       Object.values(w).forEach(rid => expect(ids.has(rid)).toBe(true)))
   })
 
-  it('avance de semaine en semaine, puis boucle', () => {
+  it('moves on week by week, then wraps', () => {
     const c = { span: 4, startedOn: '2026-08-24', weeks: {} }
     expect(cycleWeekOf(c, '2026-08-24')).toBe(1)
     expect(cycleWeekOf(c, '2026-08-30')).toBe(1)
     expect(cycleWeekOf(c, '2026-08-31')).toBe(2)
     expect(cycleWeekOf(c, '2026-09-21')).toBe(5 % 4 || 4)
-    // Après quatre semaines, on repart à la première.
+    // After four weeks it starts over at the first.
     expect(cycleWeekOf(c, '2026-09-21')).toBe(1)
   })
 
-  it('avant le début, on est en semaine 1', () => {
-    // Un programme daté de la semaine prochaine se prépare ; il ne doit pas
-    // renvoyer à la fin du cycle précédent.
+  it('before the start date we are in week 1', () => {
+    // A program dated next week is being prepared; it must not send you back
+    // to the end of the previous cycle.
     const c = { span: 4, startedOn: '2026-09-01', weeks: {} }
     expect(cycleWeekOf(c, '2026-08-25')).toBe(1)
   })
 
-  it('repose le planning quand la semaine CHANGE', () => {
+  it('lays the schedule down again when the week CHANGES', () => {
     const s = { routines: [], week: {}, customEx: [] }
     applyCoachProgram(s, cycleOffer('2026-08-24'))
     const w1 = s.week['1']
@@ -183,35 +183,35 @@ describe('la périodisation', () => {
     expect(s.week['1']).not.toBe(w1)
   })
 
-  it('ne repose RIEN tant qu’on reste dans la même semaine', () => {
-    // C'est le test qui compte : reposer à chaque ouverture effacerait le jour
-    // qu'un membre vient de déplacer, et il ne comprendrait pas pourquoi.
+  it('lays down NOTHING while we stay inside the same week', () => {
+    // This is the test that matters: laying it down on every open would wipe
+    // the day a member has just moved, and they would not understand why.
     const s = { routines: [], week: {}, customEx: [] }
     applyCoachProgram(s, cycleOffer('2026-08-24'))
-    s.week['3'] = s.routines[1].id      // le membre ajoute un mercredi
-    syncCycleWeek(s, '2026-08-26')       // même semaine
+    s.week['3'] = s.routines[1].id      // the member adds a Wednesday
+    syncCycleWeek(s, '2026-08-26')       // same week
     expect(s.week['3']).toBe(s.routines[1].id)
   })
 
-  it('une semaine du cycle REMPLACE, elle ne complète pas', () => {
+  it('a cycle week REPLACES, it does not top up', () => {
     const s = { routines: [], week: {}, customEx: [] }
     applyCoachProgram(s, cycleOffer('2026-08-24'))
-    syncCycleWeek(s, '2026-09-07')       // semaine 3 : lundi + jeudi
+    syncCycleWeek(s, '2026-09-07')       // week 3: Monday + Thursday
     expect(Object.keys(s.week).sort()).toEqual(['1', '4'])
-    syncCycleWeek(s, '2026-09-14')       // semaine 4 : lundi seul
+    syncCycleWeek(s, '2026-09-14')       // week 4: Monday only
     expect(Object.keys(s.week)).toEqual(['1'])
   })
 
-  it('un programme SANS cycle n’en fabrique pas un', () => {
+  it('a program WITHOUT a cycle does not invent one', () => {
     const s = { routines: [], week: {}, customEx: [] }
     applyCoachProgram(s, offer('PROG-1', 1, bundle('Simple', ['0001'])))
     expect(s.coachCycle).toBeUndefined()
   })
 
-  it('une révision sans cycle efface celui de la version précédente', () => {
-    // Sinon le calendrier de la v1 continuerait de tourner sous une v2 qui ne
-    // demande qu'une semaine type — et le planning changerait tout seul sans
-    // que rien ne l'explique.
+  it('a revision without a cycle clears the previous version’s', () => {
+    // Otherwise v1's calendar would keep running under a v2 that asks only
+    // for a typical week — and the schedule would change by itself with
+    // nothing to explain it.
     const s = { routines: [], week: {}, customEx: [] }
     applyCoachProgram(s, cycleOffer('2026-08-24'))
     expect(s.coachCycle).toBeTruthy()
@@ -221,22 +221,21 @@ describe('la périodisation', () => {
   })
 })
 
-//// Le cycle avance dans syncCycleWeek — mais encore faut-il que QUELQU'UN
-//// l'appelle. Le défaut vécu : l'appel n'existait qu'au retour d'onglet, donc
-//// un membre qui ouvre son carnet le lundi matin (l'app était fermée, aucun
-//// visibilitychange ne se produit) restait sur la semaine passée. Ce test
-//// garde le point d'accroche, que le prochain merge amont réécrive boot() ou
-//// non : il tombe si l'appel disparaît, ce qu'aucun test de la fonction
-//// elle-même ne peut voir.
-describe('le point d’accroche du cycle', () => {
+//// The cycle moves on inside syncCycleWeek — but SOMEBODY still has to call
+//// it. The defect we lived through: the call only existed on tab return, so a
+//// member opening their logbook on Monday morning (the app was closed, no
+//// visibilitychange happens) stayed on last week. This test guards the call
+//// site, whether or not the next upstream merge rewrites boot(): it fails if
+//// the call disappears, which no test of the function itself can see.
+describe('the cycle’s call site', () => {
   const store = readFileSync(new URL('../store/useStore.js', import.meta.url), 'utf8')
 
-  it('avance le cycle au DÉMARRAGE, pas seulement au retour d’onglet', () => {
+  it('advances the cycle on BOOT, not only on tab return', () => {
     const boot = store.slice(store.indexOf('async boot()'))
     expect(boot.slice(0, boot.indexOf('async pullState()'))).toContain('advanceCycle()')
   })
 
-  it('l’avance aussi au retour d’onglet', () => {
+  it('advances it on tab return too', () => {
     const vis = store.slice(store.indexOf("addEventListener('visibilitychange'"))
     expect(vis.slice(0, 900)).toContain('advanceCycle()')
   })

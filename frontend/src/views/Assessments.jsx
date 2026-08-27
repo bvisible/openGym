@@ -1,25 +1,25 @@
-//// Neoffice — added file (no upstream equivalent) : les évaluations physiques.
+//// Neoffice — added file (no upstream equivalent): physical assessments.
 ////
-//// Le membre ne les saisit pas — c'est le coach qui mesure — mais il doit
-//// pouvoir les lire. Une évaluation qu'on ne montre pas est une évaluation que
-//// le membre oublie avoir passée, et le club perd la seule chose qui rende son
-//// suivi visible.
+//// The member does not enter these — the coach takes the measurements — but
+//// they must be able to read them. An assessment nobody shows is an assessment
+//// the member forgets having taken, and the club loses the one thing that
+//// makes its follow-up visible.
 ////
-//// L'écran montre la DERNIÈRE évaluation en grand, puis les précédentes
-//// repliées : ce qu'un membre veut savoir en ouvrant, c'est où il en est
-//// aujourd'hui, pas l'historique complet de ses plis cutanés.
+//// The screen shows the LATEST assessment large, then the previous ones
+//// folded away: what a member wants on opening is where they stand today, not
+//// the full history of their skinfolds.
 
 import { useEffect, useState } from 'react'
 import { t, dateLocale } from '../lib/i18n.js'
 import { assessmentsMine, goalsMine } from '../lib/api.js'
 import Icon from '../components/Icon.jsx'
 
-//// Neoffice — le résumé se compose ICI, pas au serveur.
-//// Il y était d'abord, et il sortait en anglais chez un membre francophone :
-//// une phrase écrite à la sauvegarde est figée dans la langue de qui a
-//// enregistré. Le serveur envoie les FAITS — quels tests ont le plus bougé,
-//// de combien, et si c'est un progrès — et le carnet écrit la phrase.
-//// (Même correctif qu'au lot 3 sur le résumé du programme d'un coach.)
+//// Neoffice — the summary is composed HERE, not on the server.
+//// It used to be built there, and came out in English for a French-speaking
+//// member: a sentence written at save time is frozen in the language of
+//// whoever saved. The server sends the FACTS — which tests moved most, by how
+//// much, and whether that is progress — and the logbook writes the sentence.
+//// (Same fix as batch 3 on the summary of a coach's program.)
 export function summaryOf(a) {
   if (!a) return ''
   if (!a.compared) return t('First assessment — nothing to compare yet.')
@@ -42,9 +42,9 @@ export default function Assessments() {
 
   useEffect(() => {
     assessmentsMine().then(setList).catch(() => setError(true))
-    //// Les objectifs se chargent à part : ils ont leur propre sens même quand
-    //// aucune évaluation n'existe encore — un membre peut viser un poids dès
-    //// son inscription, avant que le coach ne l'ait mesuré.
+    //// Goals load separately: they mean something on their own even when no
+    //// assessment exists yet — a member can aim at a weight from the day they
+    //// join, before the coach has measured them.
     goalsMine().then(g => setGoals(Array.isArray(g) ? g : [])).catch(() => {})
   }, [])
 
@@ -79,10 +79,10 @@ export default function Assessments() {
   </Shell>
 }
 
-//// Neoffice — ce que le membre vise.
-//// Au-dessus des mesures, parce qu'un objectif donne son sens à ce qui suit :
-//// « 23,4 % de masse grasse » ne dit rien seul, « 23,4 % sur un objectif à
-//// 20 % » dit où on en est.
+//// Neoffice — what the member is aiming at.
+//// Above the measurements, because a goal gives meaning to what follows:
+//// "23.4% body fat" says nothing on its own, "23.4% against a 20% goal" says
+//// where you stand.
 function Goals({ goals }) {
   if (!goals || !goals.length) return null
   return <div className="card">
@@ -100,8 +100,8 @@ function Goals({ goals }) {
             <span className="dim"> / {g.target}{g.unit}</span>
           </div>
         </div>
-        {/* La barre est là pour se lire d'un coup d'œil : un pourcentage écrit
-            demande une soustraction mentale, une barre non. */}
+        {/* The bar is there to be read at a glance: a written percentage asks
+            for a mental subtraction, a bar does not. */}
         <div className="goalbar"><i style={{ width: pct + '%' }} /></div>
         {g.due && !g.reached
           ? <div className="small dim" style={{ marginTop: 3 }}>{t('by {0}', fmtDate(g.due))}</div>
@@ -138,13 +138,13 @@ function Rows({ results }) {
   if (!results || !results.length) return <div className="small dim">{t('Nothing recorded.')}</div>
   return <div>
     {results.map(r => {
-      //// La flèche dit le SENS de la variation, la couleur dit si c'est une
-      //// bonne nouvelle. Les deux ne coïncident pas : perdre 3 % de masse
-      //// grasse descend et c'est un progrès, perdre 500 g de masse maigre
-      //// descend aussi et ce n'en est pas un.
-      //// Un écart NUL ne s'affiche pas. « ↓ 0 » se lit comme une baisse de
-      //// zéro, ce qui n'est pas une chose ; la mesure n'a simplement pas
-      //// bougé, et une colonne vide le dit mieux qu'un signe.
+      //// The arrow gives the DIRECTION of the change, the colour says whether
+      //// that is good news. The two do not coincide: losing 3% body fat goes
+      //// down and is progress, losing 500g of lean mass goes down too and is
+      //// not.
+      //// A ZERO difference is not displayed. "↓ 0" reads as a drop of zero,
+      //// which is not a thing; the measurement simply did not move, and an
+      //// empty column says that better than a sign.
       const moved = r.delta != null && r.delta !== 0
       const arrow = moved ? (r.delta > 0 ? '↑' : '↓') : null
       const tone = r.improved ? 'acc' : 'warn'
