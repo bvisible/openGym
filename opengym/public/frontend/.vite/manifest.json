@@ -4,7 +4,7 @@
     "name": "dist"
   },
   "index.html": {
-    "file": "assets/index-Cxd_b0cE.js",
+    "file": "assets/index-e7zFT8S8.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -45,7 +45,7 @@
     ]
   },
   "node_modules/@capacitor/app/dist/esm/index.js": {
-    "file": "assets/esm-CydAn43I.js",
+    "file": "assets/esm-B2se8ZuK.js",
     "name": "esm",
     "src": "node_modules/@capacitor/app/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -67,7 +67,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/index.js": {
-    "file": "assets/esm-C-mzeoX2.js",
+    "file": "assets/esm-Bgl_6oIu.js",
     "name": "esm",
     "src": "node_modules/@capacitor/filesystem/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -80,7 +80,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/web.js": {
-    "file": "assets/web-2kiWM5W-.js",
+    "file": "assets/web-D2oBVAIH.js",
     "name": "web",
     "src": "node_modules/@capacitor/filesystem/dist/esm/web.js",
     "isDynamicEntry": true,
@@ -90,7 +90,7 @@
     ]
   },
   "node_modules/@capacitor/local-notifications/dist/esm/index.js": {
-    "file": "assets/esm-DKst_ncN.js",
+    "file": "assets/esm-CrVcKK_r.js",
     "name": "esm",
     "src": "node_modules/@capacitor/local-notifications/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -112,7 +112,7 @@
     ]
   },
   "node_modules/@capacitor/share/dist/esm/index.js": {
-    "file": "assets/esm-B6j0CqTl.js",
+    "file": "assets/esm-DaW82nmf.js",
     "name": "esm",
     "src": "node_modules/@capacitor/share/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -212,7 +212,7 @@
     "isDynamicEntry": true
   },
   "src/lib/demoSeed.js": {
-    "file": "assets/demoSeed-CrZ7rwhS.js",
+    "file": "assets/demoSeed-Bk9ymOf1.js",
     "name": "demoSeed",
     "src": "src/lib/demoSeed.js",
     "isDynamicEntry": true,
@@ -233,7 +233,7 @@
     "isDynamicEntry": true
   },
   "src/locales/fr.js": {
-    "file": "assets/fr-DHU9tAtV.js",
+    "file": "assets/fr-BxFwJoYL.js",
     "name": "fr",
     "src": "src/locales/fr.js",
     "isDynamicEntry": true
