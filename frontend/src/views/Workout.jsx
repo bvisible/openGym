@@ -25,7 +25,16 @@ function StartChooser() {
   const todayOvr = S.dayPlan[todayISO()] !== undefined
   const others = S.routines.filter(r => r !== todayR)
   return <div className="narrow">
-    <div className="hdr"><div><h1>{t('Start workout')}</h1><div className="sub">{t(DAYN[new Date().getDay()])} — {todayR ? t('today is {0}', todayR.name) : t('rest day, but no one’s stopping you')}</div></div></div>
+    {/* //// Neoffice — a way OUT of this screen. It was the only one in the app
+         whose header carried no back button: upstream runs in a browser tab, so
+         the system's own back gesture always rescued you. Installed as a PWA on
+         a phone there is no address bar and no browser chrome — a member who
+         opened "Start" and did not want to train had nothing to press.
+         Reported by the club on 2026-08-31: "impossible à fermer". */}
+    <div className="hdr">
+      <button className="iconbtn" onClick={() => nav('/home')} aria-label={t('Home')}><Icon name="chevronLeft" /></button>
+      <div style={{ flex: 1, marginLeft: 10 }}><h1>{t('Start workout')}</h1><div className="sub">{t(DAYN[new Date().getDay()])} — {todayR ? t('today is {0}', todayR.name) : t('rest day, but no one’s stopping you')}</div></div>
+    </div>
     {todayR && <div className="card" style={{ borderColor: 'var(--acc)' }}>
       <h2 className="accent">{t("Today's plan")}{todayOvr ? ' · ' + t('rescheduled') : ''}</h2>
       <div className="row between" style={{ marginBottom: 12 }}>

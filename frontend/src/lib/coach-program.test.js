@@ -139,10 +139,24 @@ const cycleOffer = (start) => ({
   bundle: cycleBundle(), replaceSchedule: true, startDate: start,
 })
 
+//// Neoffice — dates ANCHORED ON TODAY, never written by hand.
+////
+//// applyCoachProgram() ends in attachCycle(), which calls syncCycleWeek() with
+//// no date — so it settles on `new Date()`, today. With a hand-written start
+//// date, which cycle week the test begins on depends on the day it is run: a
+//// start of 2026-08-24 was week 1 on the 27th and week 2 on the 31st, and the
+//// two tests that check "the week changed" stopped seeing a change. They passed
+//// for four days, then failed for a reason that had nothing to do with the code.
+//// Same family as the site-state trap already met in test_classes.py: a test
+//// that reads its own environment lies every other day.
+const isoLocal = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+const inDays = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return isoLocal(d) }
+const TODAY = inDays(0)
+
 describe('periodization', () => {
   it('keeps the cycle and lays down week 1', () => {
     const s = { routines: [], week: {}, customEx: [] }
-    applyCoachProgram(s, cycleOffer('2026-08-24'))
+    applyCoachProgram(s, cycleOffer(TODAY))
     expect(s.coachCycle).toBeTruthy()
     expect(s.coachCycle.span).toBe(4)
     expect(Object.keys(s.coachCycle.weeks)).toHaveLength(4)
@@ -152,7 +166,7 @@ describe('periodization', () => {
     // mergePlan hands out brand-new ids. If the mapping were lost, week 2
     // would point at "r-B", which does not exist on the member's side.
     const s = { routines: [], week: {}, customEx: [] }
-    applyCoachProgram(s, cycleOffer('2026-08-24'))
+    applyCoachProgram(s, cycleOffer(TODAY))
     const ids = new Set(s.routines.map(r => r.id))
     Object.values(s.coachCycle.weeks).forEach(w =>
       Object.values(w).forEach(rid => expect(ids.has(rid)).toBe(true)))
@@ -177,9 +191,9 @@ describe('periodization', () => {
 
   it('lays the schedule down again when the week CHANGES', () => {
     const s = { routines: [], week: {}, customEx: [] }
-    applyCoachProgram(s, cycleOffer('2026-08-24'))
+    applyCoachProgram(s, cycleOffer(TODAY))
     const w1 = s.week['1']
-    syncCycleWeek(s, '2026-08-31')
+    syncCycleWeek(s, inDays(7))       // week 2
     expect(s.week['1']).not.toBe(w1)
   })
 
@@ -187,18 +201,18 @@ describe('periodization', () => {
     // This is the test that matters: laying it down on every open would wipe
     // the day a member has just moved, and they would not understand why.
     const s = { routines: [], week: {}, customEx: [] }
-    applyCoachProgram(s, cycleOffer('2026-08-24'))
+    applyCoachProgram(s, cycleOffer(TODAY))
     s.week['3'] = s.routines[1].id      // the member adds a Wednesday
-    syncCycleWeek(s, '2026-08-26')       // same week
+    syncCycleWeek(s, inDays(2))       // same week
     expect(s.week['3']).toBe(s.routines[1].id)
   })
 
   it('a cycle week REPLACES, it does not top up', () => {
     const s = { routines: [], week: {}, customEx: [] }
-    applyCoachProgram(s, cycleOffer('2026-08-24'))
-    syncCycleWeek(s, '2026-09-07')       // week 3: Monday + Thursday
+    applyCoachProgram(s, cycleOffer(TODAY))
+    syncCycleWeek(s, inDays(14))      // week 3: Monday + Thursday
     expect(Object.keys(s.week).sort()).toEqual(['1', '4'])
-    syncCycleWeek(s, '2026-09-14')       // week 4: Monday only
+    syncCycleWeek(s, inDays(21))      // week 4: Monday only
     expect(Object.keys(s.week)).toEqual(['1'])
   })
 
@@ -213,7 +227,7 @@ describe('periodization', () => {
     // for a typical week — and the schedule would change by itself with
     // nothing to explain it.
     const s = { routines: [], week: {}, customEx: [] }
-    applyCoachProgram(s, cycleOffer('2026-08-24'))
+    applyCoachProgram(s, cycleOffer(TODAY))
     expect(s.coachCycle).toBeTruthy()
     applyCoachProgram(s, { id: 'GPA-C', program: 'PROG-C', version: 2,
                            bundle: bundle('Simple', ['0001']), replaceSchedule: true })
