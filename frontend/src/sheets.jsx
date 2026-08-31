@@ -146,13 +146,17 @@ function BwSheet({ required, onDone, close }) {
     <Button variant="primary" onClick={save}>{required ? t('Save & start workout') : t('Save')}</Button>
     {required && <>
       <div style={{ height: 8 }} /><Button variant="ghost" className="dim" onClick={() => { close(); onDone && onDone(null) }}>{t('Start without weighing in')}</Button>
-      {/* //// Neoffice — was "Choose a different workout", which is what the ✕
-          //// above already does (close() leaves you on the chooser) and which
-          //// did not say that it CLOSED. Reported by the club on 31.08: "il y a
-          //// un texte pour fermer mais ce n'est pas clair que ça ferme".
-          //// Two buttons start the workout, one closes — and the one that
-          //// closes now says so. */}
-      <div style={{ height: 2 }} /><Button variant="ghost" className="dim" icon="xmark" onClick={() => { close(); nav('/workout') }}>{t('Cancel — don’t start yet')}</Button>
+      {/* //// Neoffice — was "Choose a different workout", which did not say
+          //// that it CLOSED the sheet. Reported by the club on 31.08: *"il y a
+          //// un texte pour fermer mais ce n'est pas clair que ça ferme"*.
+          ////
+          //// It also NAVIGATED to the chooser, which is not what "cancel"
+          //// means: someone who tapped Start from Home and changes their mind
+          //// gets moved to another screen instead of being left where they
+          //// were. Plain close(), exactly like the ✕ above — the screen
+          //// underneath is untouched. Two buttons start the workout, one
+          //// closes, and the one that closes now both says so and does so. */}
+      <div style={{ height: 2 }} /><Button variant="ghost" className="dim" icon="xmark" onClick={() => close()}>{t('Cancel — don’t start yet')}</Button>
     </>}
     {!required && recent.length > 0 && <>
       <h4 className="sec">{t('Recent weigh-ins')}</h4>
