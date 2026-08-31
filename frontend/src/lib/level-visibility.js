@@ -55,3 +55,25 @@ export const showsEffortSetting = S => {
   const chosen = S && S.effort
   return atLeast(S, 'full') || chosen === 'rir' || chosen === 'rpe'
 }
+
+//// ─── the LIVE session screen ───────────────────────────────────────────────
+//// The rules above were written for the config sheet and for Settings, and I
+//// stopped there. Found on screen on 31.08, at the Normal level, on a workout
+//// whose exercises carried nothing at all: "+ Drop", "+ Burst" and "Add
+//// warm-up set" were sitting under every set. A member who asked for a
+//// simpler journal got the jargon back the moment they started training —
+//// which is precisely the screen they spend their time on.
+////
+//// Same shape as the others, and the same exception: a row that ALREADY
+//// carries drops or clusters keeps its chips, so nobody is trapped mid-set
+//// with an intensifier they cannot extend or match.
+
+/** The in-session "+ Drop" / "+ Burst" chips under a live set.
+ *  `intensified` = this row already carries drops or rest-pause clusters. */
+export const showsSetIntensifierChips = (S, intensified) =>
+  atLeast(S, 'full') || Boolean(intensified)
+
+/** The in-session "Add warm-up set" button.
+ *  `hasWarmups` = this exercise already has warm-up rows in the session. */
+export const showsInSessionWarmup = (S, hasWarmups) =>
+  atLeast(S, 'full') || Boolean(hasWarmups)

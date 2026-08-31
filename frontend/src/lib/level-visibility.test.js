@@ -12,6 +12,7 @@ import { describe, expect, it } from 'vitest'
 import {
   showsBodyMap, showsEffortHistogram, showsEquipmentProfiles, showsEstimated1RM,
   showsEffortSetting, showsIntensifier, showsSupersetControl, showsWarmupRamp,
+  showsSetIntensifierChips, showsInSessionWarmup,
 } from './level-visibility.js'
 
 const FULL = { level: 'full' }
@@ -115,5 +116,35 @@ describe('the middle level — where most members sit', () => {
     expect(showsIntensifier(NORMAL, { intensifier: { type: 'dropset' } })).toBe(true)
     expect(showsSupersetControl(NORMAL, true)).toBe(true)
     expect(showsWarmupRamp(SIMPLE, { warmupSets: 2 })).toBe(true)
+  })
+})
+
+//// Neoffice — the LIVE session screen, added after finding the leak on osiris.
+////
+//// The rules above cover the config sheet and Settings, and I had stopped
+//// there. On screen at the Normal level, on a workout whose exercises carried
+//// nothing, "+ Drop", "+ Burst" and "Add warm-up set" were under every set:
+//// the jargon came straight back on the screen a member spends their session
+//// on — the one that matters most. Nothing in the suite noticed, because
+//// nothing tested the rules WHERE THEY ARE APPLIED.
+describe('the live session screen follows the same rules', () => {
+  it('hides the in-session intensifier chips below the full level', () => {
+    expect(showsSetIntensifierChips(SIMPLE, false)).toBe(false)
+    expect(showsSetIntensifierChips(NORMAL, false)).toBe(false)
+    expect(showsSetIntensifierChips(FULL, false)).toBe(true)
+  })
+
+  it('hides the in-session warm-up button below the full level', () => {
+    expect(showsInSessionWarmup(SIMPLE, false)).toBe(false)
+    expect(showsInSessionWarmup(NORMAL, false)).toBe(false)
+    expect(showsInSessionWarmup(FULL, false)).toBe(true)
+  })
+
+  it('keeps both visible on a row that already carries them', () => {
+    // Same exception as everywhere else, and it matters more here than
+    // anywhere: this is mid-set. A member must never be left with drops they
+    // cannot match or warm-up rows they cannot extend.
+    expect(showsSetIntensifierChips(SIMPLE, true)).toBe(true)
+    expect(showsInSessionWarmup(NORMAL, true)).toBe(true)
   })
 })

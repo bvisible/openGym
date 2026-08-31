@@ -18,7 +18,7 @@ import { progressionGuidance } from '../lib/progression-copy.js'
 import { glyphOf } from '../lib/glyphs.js'
 import { isWarmupRow, isDropSet, isRestPauseSet, dropsOf, clustersOf, addDrop, addCluster, removeDropAt, removeClusterAt, setDropAt, setClusterAt, nextDropWeight, nextBurstReps } from '../lib/workout-model.js'
 import { canMoveActiveWorkoutUnit, moveActiveWorkoutUnit } from '../lib/active-workout-order.js'
-import { showsSupersetControl } from '../lib/level-visibility.js'
+import { showsSupersetControl, showsSetIntensifierChips, showsInSessionWarmup } from '../lib/level-visibility.js'
 
 const SWIPE_MIN_DISTANCE = 48
 const SWIPE_AXIS_RATIO = 1.25
@@ -259,16 +259,27 @@ function ExerciseBlock({ entryIdx, compact, onToggle, onField, onAddSet, onRemov
                 <button className="iconbtn" aria-label={t('Remove burst')} onClick={() => removeCluster(i, ci)}><Icon name="xmark" /></button>
               </div>
             ))}
-            <div className="setextra">
+            {/* //// Neoffice — gated on the detail level. A member on Simple or
+                //// Normal was still offered "+ Drop" and "+ Burst" under every
+                //// set: the technical vocabulary came straight back on the one
+                //// screen they actually spend their session on. A row that
+                //// already carries drops or clusters keeps its chips, so a
+                //// member is never trapped mid-set. */}
+            {showsSetIntensifierChips(S, dropsOf(s).length > 0 || clustersOf(s).length > 0) && <div className="setextra">
               {!isRestPauseSet(s) && <button className="chip add" onClick={() => addDropRow(i)}><Icon name="arrowDown" />{t('+ Drop')}</button>}
               {!isDropSet(s) && <button className="chip add" onClick={() => addBurstRow(i)}><Icon name="bolt" />{t('+ Burst')}</button>}
-            </div>
+            </div>}
           </>}
         </div>
       })}
       <div style={{ height: 8 }} />
       <div className="row" style={{ flexWrap: 'wrap' }}>
-        <Button size="sm" icon="flame" onClick={onAddWarmup}>{t('Add warm-up set')}</Button>
+        {/* //// Neoffice — same gate. Warm-up ramps are excluded from volume
+            //// and from records, a rule you have to be taught before the
+            //// button means anything. Kept visible once the exercise already
+            //// has warm-up rows, so they stay editable. */}
+        {showsInSessionWarmup(S, entry.sets.some(isWarmupRow)) &&
+          <Button size="sm" icon="flame" onClick={onAddWarmup}>{t('Add warm-up set')}</Button>}
         <Button size="sm" icon="minus" disabled={entry.sets.length <= 1} onClick={onRemoveSet}>{t('Remove set')}</Button>
         <Button size="sm" icon="plus" onClick={onAddSet}>{t('Add set')}</Button>
       </div>
