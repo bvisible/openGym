@@ -26,6 +26,7 @@ import {
 import { Button, Segmented, SelectRow } from '../components/ui.jsx'
 import { tappable } from '../lib/use-sheet-keyboard.js'
 import { isWarmupRow } from '../lib/workout-model.js'
+import { showsBodyMap, showsEffortHistogram, showsEstimated1RM } from '../lib/level-visibility.js'
 
 // Which muscles the training in a window actually hit — and, the point of the card,
 // which ones it keeps missing. Shading is relative within the window (lib/muscles.js).
@@ -427,8 +428,8 @@ export default function Stats() {
   //// itself (the heaviest set of each workout), and drops the two the client
   //// named: an estimated 1RM (an Epley extrapolation nobody asked for) and the
   //// effort scale. With one option left the segment hides itself — see below.
-  if (showE1 && !simple) exOpts.push({ value: 'e1rm', label: t('Est. 1RM') })
-  if (showEff && !simple) exOpts.push({ value: 'effort', label: t('Effort') })
+  if (showE1 && showsEstimated1RM(S)) exOpts.push({ value: 'e1rm', label: t('Est. 1RM') })
+  if (showEff && showsEffortHistogram(S)) exOpts.push({ value: 'effort', label: t('Effort') })
 
   //// Neoffice — loaded once, without blocking the rest of the screen: the
   //// logbook's statistics are computed locally and must render even when the
@@ -475,8 +476,8 @@ export default function Stats() {
          map (fatigue / retained strength / muscle balance) and the effort
          histogram (RIR/RPE, "how close to failure"). Both answer questions a
          beginner has not asked yet. */}
-    {!simple && workouts.length > 0 && <MuscleBalance S={S} />}
-    {!simple && hasEffort(S) && <EffortCard S={S} />}
+    {showsBodyMap(S) && workouts.length > 0 && <MuscleBalance S={S} />}
+    {showsEffortHistogram(S) && hasEffort(S) && <EffortCard S={S} />}
 
     <div className="cols">
       <div className="card">

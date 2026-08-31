@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useStore } from './store/useStore.js'
+import { useStore, isSimple} from './store/useStore.js'
 import { useUI } from './store/useUI.js'
 import { EXDB, EXIDX, BODYPARTS, isCardio, isBodyweightEq, allExercises, equipmentOf, smOf, matchExercise, exOr } from './lib/exercises.js'
 import { activeProfile, exAvailable, ALL_EQUIPMENT, newProfile } from './lib/equipment.js'
@@ -41,6 +41,7 @@ import { swapActiveExercise } from './lib/active-exercise-swap.js'
 import { useSheetKeyboard, useRevealActiveChip, tappable } from './lib/use-sheet-keyboard.js'
 import { buildSessionEntries } from './lib/session-start.js'
 import { workoutsOn, backfillStart, backfillEnd, completeBackfill } from './lib/backfill.js'
+import { showsIntensifier, showsWarmupRamp } from './lib/level-visibility.js'
 
 const S = () => useStore.getState().S
 const update = (...a) => useStore.getState().update(...a)
@@ -1066,7 +1067,10 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
     {/* Planned warm-ups: the session used to start at the work weight and you added every
         warm-up by hand, every time. Rest-pause is excluded because it builds its own warm-up
         row, and cardio because an interval plan has no load to ramp. */}
-    {!cardio && c.intensifier?.type !== 'restpause' && <>
+    {/* //// Neoffice — ramped warm-ups too: they are excluded from volume and
+        //// records, which is a rule you have to know before the setting means
+        //// anything. Shown anyway if this exercise already plans some. */}
+    {!cardio && c.intensifier?.type !== 'restpause' && showsWarmupRamp(S(), c) && <>
       <div className="row cfgrow" style={{ marginBottom: 6 }}>
         <Stepper label={t('Warm-up sets')} value={c.warmupSets || 0} step={1} decimal={false}
           onChange={v => setC(x => ({ ...x, warmupSets: Math.max(0, Math.min(MAX_PLANNED_WARMUPS, Math.round(v) || 0)) }))} />
@@ -1130,7 +1134,11 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
         ? t('Reps climb to {0}, then a set is added and the reps start over. At {1} sets it asks you to add weight instead.', c.repsMax, MAX_BW_SETS)
         : t('Reps climb by one whenever every set was clean. Set a ceiling to add sets instead of reps forever.')}
     </div>}
-    {mode === 'reps' && <>
+    {/* //// Neoffice — drop-set and rest-pause are hidden at the simple level:
+        //// they are intensity techniques, and naming them is already a lesson.
+        //// An exercise that ALREADY carries one keeps working — this hides the
+        //// control, never the data. Client, 31.08. */}
+    {mode === 'reps' && showsIntensifier(S(), c) && <>
       <h4 className="sec">{t('Drop-set / rest-pause')}</h4>
       <div className="sect-b" style={{ marginBottom: 8 }}>
         <SelectRow title={t('Intensifier')} sheetTitle={t('Intensifier')} value={c.intensifier?.type || ''}

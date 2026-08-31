@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useStore, DEF, hasData, levelOf} from '../store/useStore.js'
+import { useStore, DEF, hasData, levelOf, isSimple} from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
 import { ACCENTS, todayISO, localTZ } from '../lib/format.js'
 import { effortOf } from '../lib/history.js'
@@ -17,6 +17,7 @@ import { ConnectSheet } from './MobileOnboarding.jsx'
 import { loadStarterPlan, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
+import { showsEquipmentProfiles } from '../lib/level-visibility.js'
 
 export default function Settings() {
   const nav = useNavigate()
@@ -403,6 +404,12 @@ function PushCard({ S, update, toast }) {
 // (see lib/equipment.js). Purely local/synced state — no server changes needed.
 function EquipmentCard({ S, update }) {
   const profiles = S.equipProfiles || []
+  //// Neoffice — hidden at the simple level, unless this member already has a
+  //// profile: the whole section only makes sense once you own equipment you
+  //// want to filter by, and a beginner training at the club owns the club's.
+  //// A member who HAS profiles keeps the section — hiding it would silently
+  //// leave a filter active with no way to turn it off.
+  if (!showsEquipmentProfiles(S)) return null
   const remove = p => confirmSheet({
     title: t('Delete profile?'), message: t('"{0}" and its equipment list will be removed.', p.name),
     confirmText: t('Delete'), danger: true,
