@@ -49,7 +49,26 @@ export const DEF = {
   // Equipment profiles (issue: filter Library/picker/routines by what you actually own —
   // e.g. "Home" vs "Gym" — building on the session-only equipment filter from issue #6).
   equipProfiles: [], activeEquipId: null, equipFilterOn: false,
+  //// Neoffice — how much of the journal is shown. Asked for by Olympia on
+  //// 2026-08-31, and it was the most structurally important thing in the call:
+  //// *"on a des données qui sont très techniques, trop techniques. Un débutant,
+  //// ça peut lui faire peur […] ça a ce côté rédhibitoire."*
+  ////
+  //// It is NOT a permission and NOT a skill grade — it is DENSITY. The same
+  //// journal, shown at two depths; nothing is deleted and nothing is locked.
+  //// Same idea as the desk's Simple/Advanced mode, carried into the journal.
+  ////
+  //// null and not 'full' so a profile that never chose follows the CLUB's
+  //// default (levelOf below), and starts following it again if the club
+  //// changes its mind. An explicit choice by the member always wins.
+  level: null,
 }
+//// Neoffice — resolve the level: the member's own choice, else the club's
+//// default (sent in perms), else the full journal. `=== 'simple'` and never a
+//// truthiness test: a club that has set nothing must not silently simplify.
+export const levelOf = S => (S && S.level) || (S && S.perms && S.perms.defaultLevel) || 'full'
+export const isSimple = S => levelOf(S) === 'simple'
+
 const clone = o => JSON.parse(JSON.stringify(o))
 
 function loadState() {

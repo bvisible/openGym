@@ -972,4 +972,7 @@ export default {
   'Finish the current workout first.': 'Termina primero el entrenamiento actual.',
   'Logging a past workout — no rest timers.': 'Registrando un entrenamiento pasado — sin temporizadores de descanso.',
   'Enter a positive step to use this progression rule.': 'Introduce un incremento positivo para usar esta regla de progresión.',
+  'Level of detail': 'Nivel de detalle',
+  'Simple': 'Sencillo',
+  'Complete': 'Completo',
 }

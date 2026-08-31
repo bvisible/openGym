@@ -972,4 +972,7 @@ export default {
   'Finish the current workout first.': '먼저 진행 중인 운동을 마치세요.',
   'Logging a past workout — no rest timers.': '지난 운동 기록 중 — 휴식 타이머 없음.',
   'Enter a positive step to use this progression rule.': '이 증량 규칙을 사용하려면 양수 단위를 입력하세요.',
+  'Level of detail': '표시 수준',
+  'Simple': '간단',
+  'Complete': '전체',
 }

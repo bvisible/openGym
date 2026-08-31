@@ -972,4 +972,7 @@ export default {
   'Finish the current workout first.': 'Сначала заверши текущую тренировку.',
   'Logging a past workout — no rest timers.': 'Запись прошлой тренировки — без таймеров отдыха.',
   'Enter a positive step to use this progression rule.': 'Укажите положительный шаг, чтобы использовать это правило прогрессии.',
+  'Level of detail': 'Уровень детализации',
+  'Simple': 'Простой',
+  'Complete': 'Полный',
 }

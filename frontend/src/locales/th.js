@@ -947,4 +947,7 @@ export default {
   'Most used': 'ใช้บ่อยที่สุด',
   'No favorite yet — tap the heart on an exercise.': 'ยังไม่มีรายการโปรด — แตะรูปหัวใจที่ท่าออกกำลังกาย',
   'Enter a positive step to use this progression rule.': 'กรอกค่าเพิ่มที่เป็นบวกเพื่อใช้กฎการเพิ่มน้ำหนักนี้',
+  'Level of detail': 'ระดับรายละเอียด',
+  'Simple': 'เรียบง่าย',
+  'Complete': 'ครบถ้วน',
 }

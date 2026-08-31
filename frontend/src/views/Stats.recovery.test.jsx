@@ -27,6 +27,10 @@ const mocks = vi.hoisted(() => ({
 }))
 
 vi.mock('../store/useStore.js', () => ({
+  //// Neoffice — the level resolver the views now read. Absent from the
+  //// mock it comes back undefined and the screen throws before rendering.
+  isSimple: () => false,
+  levelOf: () => 'full',
   useStore: selector => selector({ S: mocks.S }),
 }))
 vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))

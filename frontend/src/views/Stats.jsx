@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useStore } from '../store/useStore.js'
+import { useStore, isSimple} from '../store/useStore.js'
 import { EXIDX, matchExercise } from '../lib/exercises.js'
 import { lastBW, streakWeeks, setLabel, modeOf, effortOf, metricModeForEntry, metricRowsForEntry, bestWeightForEntry } from '../lib/history.js'
 import { fmtNum, fmtDate, fmtVol, todayISO } from '../lib/format.js'
@@ -283,6 +283,10 @@ export default function Stats() {
   const [exId, setExId] = useState(null)
   const [exMetric, setExMetric] = useState('top')
   const now = Date.now()
+  //// Neoffice — the simple level hides what a beginner cannot read yet.
+  //// Nothing is deleted: switching back to the full journal brings every card
+  //// back, with all of its history.
+  const simple = isSimple(S)
   const kind = displayScale(S)
   const hd = scaleName(kind)
 
@@ -463,8 +467,12 @@ export default function Stats() {
       <Heatmap S={S} onDay={iso => { const ws = workouts.filter(w => w.d === iso); if (ws.length === 1) workoutDetailSheet(ws[0]); else if (ws.length) calendarSheet(iso) }} />
     </div>
 
-    {workouts.length > 0 && <MuscleBalance S={S} />}
-    {hasEffort(S) && <EffortCard S={S} />}
+    {/* //// Neoffice — the two cards the client named as off-putting: the body
+         map (fatigue / retained strength / muscle balance) and the effort
+         histogram (RIR/RPE, "how close to failure"). Both answer questions a
+         beginner has not asked yet. */}
+    {!simple && workouts.length > 0 && <MuscleBalance S={S} />}
+    {!simple && hasEffort(S) && <EffortCard S={S} />}
 
     <div className="cols">
       <div className="card">

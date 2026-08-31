@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useStore, DEF, hasData } from '../store/useStore.js'
+import { useStore, DEF, hasData, levelOf} from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
 import { ACCENTS, todayISO, localTZ } from '../lib/format.js'
 import { effortOf } from '../lib/history.js'
@@ -156,6 +156,19 @@ export default function Settings() {
       {/* 'full'/'mini' is also what the tap-toggle on the workout animation writes; 'off' hides
           workout media entirely (library, detail sheet and picker thumbs are unaffected).
           Legacy/unknown values read as 'full'. */}
+      {/* //// Neoffice — how much of the journal to show. The client's most
+           structural request (31.08): the data is "trop technique" for someone
+           starting out, to the point of putting them off.
+           A DENSITY control, not a permission and not a skill grade: Simple
+           hides the body map and the effort histogram, Complete brings them
+           back with all their history. Nothing is deleted, nothing is locked.
+           Placed first in this section — it decides what the rest even shows. */}
+      <Row icon="lightbulb" iconTint="var(--accent)" title={t('Level of detail')}>
+        <Segmented className="seg-inline"
+          options={[{ value: 'simple', label: t('Simple') }, { value: 'full', label: t('Complete') }]}
+          value={levelOf(S)}
+          onChange={v => update(s => { s.level = v })} />
+      </Row>
       <Row icon="figureRun" iconTint="var(--green)" title={t('Exercise animations')}>
         <Segmented className="seg-inline"
           options={[{ value: 'full', label: t('Full') }, { value: 'mini', label: t('Small') }, { value: 'off', label: t('Hidden') }]}

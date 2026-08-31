@@ -972,4 +972,7 @@ export default {
   'Finish the current workout first.': 'Önce mevcut antrenmanı bitir.',
   'Logging a past workout — no rest timers.': 'Geçmiş antrenman kaydediliyor — dinlenme zamanlayıcısı yok.',
   'Enter a positive step to use this progression rule.': 'Bu ilerleme kuralını kullanmak için pozitif bir artış girin.',
+  'Level of detail': 'Ayrıntı düzeyi',
+  'Simple': 'Basit',
+  'Complete': 'Tam',
 }

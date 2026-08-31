@@ -21,7 +21,7 @@ const mocks = vi.hoisted(() => {
 vi.mock('../store/useStore.js', () => {
   const useStore = selector => selector(mocks.snapshot())
   useStore.getState = mocks.snapshot
-  return { useStore }
+  return { useStore , isSimple: () => false, levelOf: () => 'full'}
 })
 
 const EX = { id: 'bench', n: 'bench press', gif: 'bench.gif', img: 'bench.jpg' }

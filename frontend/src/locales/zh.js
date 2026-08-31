@@ -972,4 +972,7 @@ export default {
   'Finish the current workout first.': '请先完成当前训练。',
   'Logging a past workout — no rest timers.': '正在补记过去的训练 — 没有休息计时器。',
   'Enter a positive step to use this progression rule.': '请输入正数增量以使用此进阶规则。',
+  'Level of detail': '信息详略',
+  'Simple': '简洁',
+  'Complete': '完整',
 }

@@ -939,4 +939,7 @@ export default {
   'Most used': 'Leggyakoribb',
   'No favorite yet — tap the heart on an exercise.': 'Még nincs kedvenc — koppintson a szívre egy gyakorlatnál.',
   'Enter a positive step to use this progression rule.': 'Adjon meg pozitív lépésközt ehhez a progressziós szabályhoz.',
+  'Level of detail': 'Részletesség',
+  'Simple': 'Egyszerű',
+  'Complete': 'Teljes',
 }

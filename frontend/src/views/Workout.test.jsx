@@ -48,7 +48,7 @@ const mocks = vi.hoisted(() => {
 vi.mock('../store/useStore.js', () => {
   const useStore = selector => selector(mocks.storeSnapshot())
   useStore.getState = mocks.storeSnapshot
-  return { useStore }
+  return { useStore , isSimple: () => false, levelOf: () => 'full'}
 })
 vi.mock('../store/useUI.js', () => {
   const useUI = selector => selector ? selector(mocks.uiSnapshot()) : mocks.uiSnapshot()

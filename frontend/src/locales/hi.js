@@ -972,4 +972,7 @@ export default {
   'Finish the current workout first.': 'पहले मौजूदा वर्कआउट पूरा करें।',
   'Logging a past workout — no rest timers.': 'पिछला वर्कआउट दर्ज हो रहा है — कोई रेस्ट टाइमर नहीं।',
   'Enter a positive step to use this progression rule.': 'इस प्रगति नियम का उपयोग करने के लिए धनात्मक चरण दर्ज करें।',
+  'Level of detail': 'विवरण का स्तर',
+  'Simple': 'सरल',
+  'Complete': 'पूर्ण',
 }
