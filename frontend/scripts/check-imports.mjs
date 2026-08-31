@@ -70,6 +70,19 @@ for (const file of files) {
     for (const part of m[1].split(',')) known.add(part.split(':').pop().trim())
   }
   for (const m of src.matchAll(/(?:^|\s)(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)/g)) known.add(m[1])
+  //// A FUNCTION PARAMETER is a local binding, not a missing import. Without
+  //// this, `export function initReminderSync(getState) { … getState() … }`
+  //// was reported because lib/api.js happens to export a `getState` too.
+  //// A guard that cries wolf is a guard someone switches off, so the false
+  //// positive matters as much as the miss it was written for.
+  for (const m of src.matchAll(/(?:function\s*[\w$]*|=>|\bcatch)\s*\(([^)]*)\)/g)) {
+    for (const part of m[1].split(',')) {
+      const name = part.trim().split(/[=:\s]/)[0].replace(/^\.{3}/, '')
+      if (/^[A-Za-z_$][\w$]*$/.test(name)) known.add(name)
+    }
+  }
+  // Bare single-parameter arrows: `x => …`
+  for (const m of src.matchAll(/(?:^|[^\w$.])([A-Za-z_$][\w$]*)\s*=>/g)) known.add(m[1])
 
   // Strip import lines and comments so a symbol merely MENTIONED in a comment
   // (`pushSupported()` is false) is not reported.

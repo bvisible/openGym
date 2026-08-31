@@ -14,7 +14,7 @@ import { t, LANGS, INSTR_LANGS, dateLocale } from '../lib/i18n.js'
 import { DEMO, REPO } from '../lib/demo.js'
 import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
 import { ConnectSheet } from './MobileOnboarding.jsx'
-import { loadStarterPlan, confirmSheet, importFromApp, equipmentProfileSheet } from '../sheets.jsx'
+import { loadStarterPlan, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
 
@@ -153,8 +153,20 @@ export default function Settings() {
             onChange={v => update(s => { s.keepAwake = v })} />
         </Row>
       )}
+      {/* 'full'/'mini' is also what the tap-toggle on the workout animation writes; 'off' hides
+          workout media entirely (library, detail sheet and picker thumbs are unaffected).
+          Legacy/unknown values read as 'full'. */}
+      <Row icon="figureRun" iconTint="var(--green)" title={t('Exercise animations')}>
+        <Segmented className="seg-inline"
+          options={[{ value: 'full', label: t('Full') }, { value: 'mini', label: t('Small') }, { value: 'off', label: t('Hidden') }]}
+          value={S.gifSize === 'mini' || S.gifSize === 'off' ? S.gifSize : 'full'}
+          onChange={v => update(s => { s.gifSize = v })} />
+      </Row>
       <Row icon="bell" iconTint="var(--pink)" title={t('Sounds')}>
         <Switch checked={!!S.sound} onChange={v => update(s => { s.sound = v })} />
+      </Row>
+      <Row icon="sun" iconTint="var(--yellow)" title={t('Flash screen when timer ends')}>
+        <Switch checked={!!S.timerFlash} onChange={v => update(s => { s.timerFlash = v })} />
       </Row>
       {/* Two names for the same judgement, so the column asks in the scale you already think in.
           The (i) sits before the control — you read it on the way to the choice, not after it. */}
@@ -211,6 +223,9 @@ export default function Settings() {
       <Row icon="shuffle" iconTint="var(--teal)" title={t('Import from another app')}
         subtitle={t('FitNotes, Strong, Hevy — or body weight from Apple Health')}
         accessory="chevron" onClick={() => importRef.current.click()} />
+      <Row icon="key" iconTint="var(--teal)" title={t('Import from Hevy')}
+        subtitle={t('Pull your history with a Hevy Pro API key')}
+        accessory="chevron" onClick={importFromHevy} />
       <Row icon="upload" iconTint="var(--blue)" title={t('Import backup')} accessory="chevron" onClick={() => fileRef.current.click()} />
       <Row icon="download" iconTint="var(--blue)" title={t('Export backup (JSON)')} accessory="chevron" onClick={doExport} />
       {MOBILE && <Row icon="history" iconTint="var(--blue)" title={t('Auto-backup on changes')}

@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useRef } from 'react'
+import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation, useNavigationType } from 'react-router-dom'
 import { useStore } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
 import { bindUI } from './components/ui.jsx'
@@ -17,6 +17,12 @@ import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Modals from './components/Modals.jsx'
 import Toast from './components/Toast.jsx'
 import RestTimer from './components/RestTimer.jsx'
+import TimerFlash from './components/TimerFlash.jsx'
+//// Neoffice — upstream's Login.jsx (passkeys) is not shipped here: the
+//// journal is served from Frappe and the Frappe session IS the login
+//// (see views/SignIn.jsx and commit 2a97a09b). Upstream's import came
+//// back with the merge and points at a file we do not have.
+import MobileOnboarding from './views/MobileOnboarding.jsx'
 import Home from './views/Home.jsx'
 import Plan from './views/Plan.jsx'
 import RoutineEdit from './views/RoutineEdit.jsx'
@@ -30,6 +36,9 @@ import Assessments from './views/Assessments.jsx'
 import History from './views/History.jsx'
 import Library from './views/Library.jsx'
 import Settings from './views/Settings.jsx'
+
+// last known scrollY per route, so back-navigation can put the page where it was
+const scrollPositions = new Map()
 
 bindUI(useUI)   // lets the shared controls open sheets without importing the store at module scope
 
@@ -49,6 +58,7 @@ function applyPrefs(theme, accent) {
 function Shell() {
   const navigate = useNavigate()
   const loc = useLocation()
+  const navType = useNavigationType()
   const { S, user, ready } = useStore()
   const isGuest = useStore(s => s.isGuest())
   const langV = useLang()   // re-renders the whole shell when the language (pack) changes
@@ -70,8 +80,27 @@ function Shell() {
   //// hand, knows the site's language — it passes it along in the guest boot.
   useEffect(() => { setLang(S.lang || BOOT.lang || 'en') }, [S.lang])
   useEffect(() => { document.documentElement.lang = S.lang || 'en' }, [langV, S.lang])
-  // every tab/route change starts at the top of the page
-  useEffect(() => { window.scrollTo(0, 0) }, [loc.pathname])
+  // Forward navigation starts at the top; going back lands where you left off.
+  // The position is recorded from scroll events rather than read at route
+  // change, because by then a shorter page may already have clamped it.
+  const pathRef = useRef(loc.pathname)
+  useEffect(() => {
+    const onScroll = () => {
+      // Modals pins the body while a sheet is open; scrollY is 0 then, not a position.
+      if (document.body.style.position === 'fixed') return
+      scrollPositions.set(pathRef.current, window.scrollY)
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+  useLayoutEffect(() => {
+    pathRef.current = loc.pathname
+    if (navType !== 'POP') { window.scrollTo(0, 0); return }
+    const y = scrollPositions.get(loc.pathname) || 0
+    // the restored view needs a layout pass before it is tall enough to scroll to y
+    const frame = window.requestAnimationFrame(() => window.scrollTo(0, y))
+    return () => window.cancelAnimationFrame(frame)
+  }, [loc.pathname, navType])
   // bound to the workout, not to the route — checking Stats mid-session keeps the screen on
   useWakeLock(!!S.active && S.keepAwake !== false)
 
@@ -127,6 +156,7 @@ function Shell() {
       <RestTimer />
       <Modals />
       <Toast />
+      <TimerFlash />
     </>
   )
 }

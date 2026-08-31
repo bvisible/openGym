@@ -27,17 +27,17 @@ describe('Brazilian Portuguese locale', () => {
       .sort(byCodeUnit)
     const fingerprint = createHash('sha256').update(JSON.stringify(inherited)).digest('hex')
 
-    //// Neoffice — upstream's numbers are 291 overrides / 449 inherited. Ours are
-    //// higher because our own strings live in pt.js like every other locale, and
-    //// pt-BR inherits them: +194 inherited, +6 overridden (the six that tripped
-    //// the European-Portuguese guard below). The guarantee this test exists for
-    //// is untouched — a pt-PT wording that changes without review still breaks
-    //// the hash. Recompute with: node scripts/pt-br-inheritance-fingerprint.mjs
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(298)
-    expect(inherited).toHaveLength(642)
+    //// Neoffice — our numbers are higher than upstream's because our own
+    //// strings live in pt.js like every other locale, and pt-BR inherits them.
+    //// The guarantee this test exists for is untouched: a pt-PT wording that
+    //// changes without review still breaks the hash. Recomputed after the
+    //// v1.2.14 merge, whose new strings land in the inherited set.
+    //// Recompute with: node scripts/pt-br-inheritance-fingerprint.mjs
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(345)
+    expect(inherited).toHaveLength(652)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('069ed0d8e7c1265f6fd492da320ed98974a727077461eaf8a4143a73e3f95163')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('fce152a3d49a5a45716d0ece639e785a2a326c16898a893ff086868c328f41c2')
   })
 
   test('does not leak European Portuguese UI terms', () => {
