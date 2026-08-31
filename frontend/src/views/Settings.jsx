@@ -17,7 +17,7 @@ import { ConnectSheet } from './MobileOnboarding.jsx'
 import { loadStarterPlan, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
-import { showsEquipmentProfiles } from '../lib/level-visibility.js'
+import { showsEffortSetting, showsEquipmentProfiles } from '../lib/level-visibility.js'
 
 export default function Settings() {
   const nav = useNavigate()
@@ -184,12 +184,12 @@ export default function Settings() {
       </Row>
       {/* Two names for the same judgement, so the column asks in the scale you already think in.
           The (i) sits before the control — you read it on the way to the choice, not after it. */}
-      <Row icon="target" iconTint="var(--purple)" title={t('Effort per set')}>
+      {showsEffortSetting(S) && <Row icon="target" iconTint="var(--purple)" title={t('Effort per set')}>
         <button className="helpbtn" aria-label={t('What are RIR and RPE?')} onClick={effortHelpSheet}><Icon name="info" /></button>
         <Segmented className="seg-inline"
           options={[{ value: 'none', label: t('Off') }, { value: 'rir', label: t('RIR') }, { value: 'rpe', label: t('RPE') }]}
           value={effortOf(S)} onChange={v => update(s => { s.effort = v; delete s.showRir })} />
-      </Row>
+      </Row>}
     </Section>
 
     {(user || MOBILE) && <NotificationsCard S={S} update={update} toast={toast} />}

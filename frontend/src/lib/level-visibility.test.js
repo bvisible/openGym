@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   showsBodyMap, showsEffortHistogram, showsEquipmentProfiles, showsEstimated1RM,
-  showsIntensifier, showsSupersetControl, showsWarmupRamp,
+  showsEffortSetting, showsIntensifier, showsSupersetControl, showsWarmupRamp,
 } from './level-visibility.js'
 
 const FULL = { level: 'full' }
@@ -29,6 +29,7 @@ describe('simple level — what is hidden', () => {
     expect(showsWarmupRamp(SIMPLE, {})).toBe(false)
     expect(showsSupersetControl(SIMPLE, false)).toBe(false)
     expect(showsEquipmentProfiles(SIMPLE)).toBe(false)
+    expect(showsEffortSetting(SIMPLE)).toBe(false)
   })
 
   it('shows everything at the full level', () => {
@@ -57,6 +58,14 @@ describe('simple level — hide the control, never the data', () => {
   it('keeps the superset button on a row that is already linked', () => {
     // Otherwise the member cannot UNLINK what the coach chained for them.
     expect(showsSupersetControl(SIMPLE, true)).toBe(true)
+  })
+
+  it('keeps the effort picker for a member who already logs RIR or RPE', () => {
+    // Hiding the setting while the column is still asked for on every set is
+    // the worst of both: the question stays, the way to stop it is gone.
+    expect(showsEffortSetting({ ...SIMPLE, effort: 'rir' })).toBe(true)
+    expect(showsEffortSetting({ ...SIMPLE, effort: 'rpe' })).toBe(true)
+    expect(showsEffortSetting({ ...SIMPLE, effort: 'none' })).toBe(false)
   })
 
   it('keeps the equipment section for a member who already has a profile', () => {

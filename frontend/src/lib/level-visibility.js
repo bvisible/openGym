@@ -41,3 +41,11 @@ export const showsEffortHistogram = S => !isSimple(S)
 
 /** Estimated 1RM curve — an Epley extrapolation, not a measurement. */
 export const showsEstimated1RM = S => !isSimple(S)
+
+/** The RIR/RPE scale picker in Settings. Hidden at the simple level unless the
+ *  member already logs one: turning the setting invisible while the column is
+ *  still asked for on every set is the worst of both. */
+export const showsEffortSetting = S => {
+  const chosen = S && S.effort
+  return !isSimple(S) || (chosen === 'rir' || chosen === 'rpe')
+}
