@@ -909,4 +909,6 @@ export default {
   'Sign in': 'साइन इन करें',
   'Wrong address or password.': 'पता या पासवर्ड ग़लत है।',
   'Your workouts. Your loads. Your journal.': 'आपके वर्कआउट। आपके वज़न। आपकी जर्नल।',
+  'Recommended': 'अनुशंसित',
+  'Your club hasn’t put any exercise forward yet.': 'आपके क्लब ने अभी तक कोई व्यायाम नहीं सुझाया है।',
 }

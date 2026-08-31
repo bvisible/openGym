@@ -909,4 +909,6 @@ export default {
   'Sign in': 'Giriş yap',
   'Wrong address or password.': 'Adres veya şifre hatalı.',
   'Your workouts. Your loads. Your journal.': 'Senin antrenmanların. Senin ağırlıkların. Senin günlüğün.',
+  'Recommended': 'Önerilenler',
+  'Your club hasn’t put any exercise forward yet.': 'Kulübünüz henüz hiçbir egzersizi öne çıkarmadı.',
 }

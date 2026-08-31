@@ -33,11 +33,11 @@ describe('Brazilian Portuguese locale', () => {
     //// the European-Portuguese guard below). The guarantee this test exists for
     //// is untouched — a pt-PT wording that changes without review still breaks
     //// the hash. Recompute with: node scripts/pt-br-inheritance-fingerprint.mjs
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(297)
-    expect(inherited).toHaveLength(637)
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(298)
+    expect(inherited).toHaveLength(638)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('0bfb4d540d9d4328bcc15516d85f70170d658e5f5a7322510c4a783f8b0b0a60')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('58dc92b853c842385999dad41f63a76bbb142de58d74498673b7f68696afa083')
   })
 
   test('does not leak European Portuguese UI terms', () => {

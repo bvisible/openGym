@@ -454,18 +454,27 @@ function usageMap(st) {
   st.workouts.forEach(w => w.entries.forEach(e => { u[e.id] = (u[e.id] || 0) + 1 }))
   return u
 }
+//// Neoffice — the club's own shortlist. Asked for on 2026-08-31: out of a
+//// 1325-exercise library, a member has no way of telling which movements are
+//// actually taught in the room they are standing in. The club ticks
+//// "Featured by the club" on an exercise and it lands here.
+//// Distinct from '★' on purpose: '★' is what THIS member already uses, this
+//// is what the CLUB puts forward. Conflating them would lose both meanings.
+const CLUB_PICKS = '@club'
+
 function ExercisePicker({ onPick, close }) {
   const st = useStore(s => s.S)
   const usage = usageMap(st)
+  const picks = new Set(st.clubPicks || [])
   const [q, setQ] = useState('')
-  const [bp, setBp] = useState('')          // '' = all, '★' = chosen, else a body part
+  const [bp, setBp] = useState('')          // '' = all, '★' = chosen, '@club' = the club's, else a body part
   const [eq, setEq] = useState('')          // '' = any equipment
   const [showAll, setShowAll] = useState(false)
   const [shown, setShown] = useState(50)
   const all = allExercises(st)
   const profile = activeProfile(st)
   let base = all.filter(e =>
-    (bp === '★' ? usage[e.id] : (!bp || e.bp === bp)) &&
+    (bp === '★' ? usage[e.id] : bp === CLUB_PICKS ? picks.has(e.id) : (!bp || e.bp === bp)) &&
     //// Neoffice — matchExercise() is upstream's, and it already searches the
     //// English name through exerciseNameSearchText(): typing "bench press" in a
     //// French app finds "développé couché". Our own matchesExercise() existed
@@ -490,6 +499,7 @@ function ExercisePicker({ onPick, close }) {
       </button>
     </div>}
     <div className="chips" style={{ margin: eqOpts.length > 1 ? '10px 0 6px' : '10px 0' }}>
+      {picks.size > 0 && <button className={'chip' + (bp === CLUB_PICKS ? ' on' : '')} onClick={() => { setBp(CLUB_PICKS); setEq(''); setShown(50) }}><Icon name="medal" style={{ fontSize: 12, display: 'inline-block', marginRight: 4, verticalAlign: '-1px' }} />{t('Recommended')} ({picks.size})</button>}
       {chosenCount > 0 && <button className={'chip' + (bp === '★' ? ' on' : '')} onClick={() => { setBp('★'); setEq(''); setShown(50) }}><Icon name="starFill" style={{ fontSize: 12, display: 'inline-block', marginRight: 4, verticalAlign: '-1px' }} />{t('Chosen')} ({chosenCount})</button>}
       <button className={'chip nocap' + (!bp ? ' on' : '')} onClick={() => { setBp(''); setEq(''); setShown(50) }}>{t('All')}</button>
       {BODYPARTS.map(b => <button key={b} className={'chip' + (bp === b ? ' on' : '')} onClick={() => { setBp(b); setEq(''); setShown(50) }}>{t(b)}</button>)}
@@ -499,15 +509,17 @@ function ExercisePicker({ onPick, close }) {
       {eqOpts.map(x => <button key={x} className={'chip' + (eqOn === x ? ' on' : '')} onClick={() => { setEq(x); setShown(50) }}>{t(x)}</button>)}
     </div>}
     <div className="list">
-      {bp !== '★' && <div className="item" onClick={() => customExSheet(null, ex => onPick(ex), q.trim())}>
+      {bp !== '★' && bp !== CLUB_PICKS && <div className="item" onClick={() => customExSheet(null, ex => onPick(ex), q.trim())}>
         <div className="thumb thumb-x"><Icon name="sparkles" /></div>
         <div className="grow"><div className="tt">{t('Create your own exercise')}</div><div className="ss">{t('name + body part, no animation')}</div></div><Icon name="plus" className="chev" />
       </div>}
       {f.slice(0, shown).map(e => <div key={e.id} className="item" onClick={() => onPick(e)}>
         <Thumb ex={e} /><div className="grow"><div className="tt capitalize">{exerciseNameFor(e)}</div><div className="ss capitalize">{t(e.tg || e.bp)} · {t(e.eq)}</div></div>
+        {picks.has(e.id) && <span className="tag"><Icon name="medal" /></span>}
         {usage[e.id] && <span className="tag acc"><Icon name="starFill" /></span>}<Icon name="plus" className="chev" />
       </div>)}
       {f.length === 0 && bp === '★' && <div className="empty">{t('Nothing chosen yet — add exercises and they’ll show up here.')}</div>}
+      {f.length === 0 && bp === CLUB_PICKS && <div className="empty">{t('Your club hasn’t put any exercise forward yet.')}</div>}
     </div>
     {f.length > shown && <><div style={{ height: 8 }} /><Button onClick={() => setShown(s => s + 50)}>{t('Show more')}</Button></>}
   </>

@@ -909,4 +909,6 @@ export default {
   'Sign in': 'Zaloguj się',
   'Wrong address or password.': 'Nieprawidłowy adres lub hasło.',
   'Your workouts. Your loads. Your journal.': 'Twoje treningi. Twoje ciężary. Twój dziennik.',
+  'Recommended': 'Polecane',
+  'Your club hasn’t put any exercise forward yet.': 'Twój klub nie wyróżnił jeszcze żadnego ćwiczenia.',
 }

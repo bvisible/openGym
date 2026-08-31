@@ -316,7 +316,10 @@ export const PT_BR_OVERRIDES = {
   'Nothing recorded.': 'Nada registrado.',
   'Hip circumference': 'Circunferência do quadril',
   'Hip flexion': 'Flexão do quadril',
-  'Waist hip ratio': 'Relação cintura-quadril'
+  'Waist hip ratio': 'Relação cintura-quadril',
+  //// Neoffice — Brazilian Portuguese drops the article before a
+  //// possessive: "Seu clube", not "O seu clube".
+  'Your club hasn’t put any exercise forward yet.': 'Seu clube ainda não destacou nenhum exercício.'
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

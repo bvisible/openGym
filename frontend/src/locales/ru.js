@@ -909,4 +909,6 @@ export default {
   'Sign in': 'Войти',
   'Wrong address or password.': 'Неверный адрес или пароль.',
   'Your workouts. Your loads. Your journal.': 'Твои тренировки. Твои веса. Твой дневник.',
+  'Recommended': 'Рекомендуемые',
+  'Your club hasn’t put any exercise forward yet.': 'Ваш клуб пока не выделил ни одного упражнения.',
 }

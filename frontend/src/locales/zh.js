@@ -909,4 +909,6 @@ export default {
   'Sign in': '登录',
   'Wrong address or password.': '邮箱地址或密码错误。',
   'Your workouts. Your loads. Your journal.': '你的训练。你的重量。你的记录。',
+  'Recommended': '推荐',
+  'Your club hasn’t put any exercise forward yet.': '您的俱乐部尚未推荐任何动作。',
 }

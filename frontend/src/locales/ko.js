@@ -909,4 +909,6 @@ export default {
   'Sign in': '로그인',
   'Wrong address or password.': '주소 또는 비밀번호가 올바르지 않아요.',
   'Your workouts. Your loads. Your journal.': '당신의 운동. 당신의 무게. 당신의 기록.',
+  'Recommended': '추천',
+  'Your club hasn’t put any exercise forward yet.': '클럽에서 아직 추천한 운동이 없습니다.',
 }
