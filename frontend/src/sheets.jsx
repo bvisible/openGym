@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useStore, isSimple} from './store/useStore.js'
+import { useStore, isSimple, shouldAskWeighIn} from './store/useStore.js'
 import { useUI } from './store/useUI.js'
 import { EXDB, EXIDX, BODYPARTS, isCardio, isBodyweightEq, allExercises, equipmentOf, smOf, matchExercise, exOr } from './lib/exercises.js'
 import { activeProfile, exAvailable, ALL_EQUIPMENT, newProfile } from './lib/equipment.js'
@@ -140,13 +140,19 @@ function BwSheet({ required, onDone, close }) {
           <button className="iconbtn" aria-label={t('Cancel')} onClick={() => close()}><Icon name="xmark" /></button>
         </div>
       : <h3>{t('Log body weight')}</h3>}
-    <div className="muted small">{required ? t('Slide or tap to set your weight — tracked before every workout so your curve stays honest.') : t('Today') + ', ' + fmtDate(todayISO(), true)}</div>
+    <div className="muted small">{required ? t('Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.') : t('Today') + ', ' + fmtDate(todayISO(), true)}</div>
     <WeightInput value={v} setValue={setV} unit={unit} />
     <div style={{ height: 14 }} />
     <Button variant="primary" onClick={save}>{required ? t('Save & start workout') : t('Save')}</Button>
     {required && <>
       <div style={{ height: 8 }} /><Button variant="ghost" className="dim" onClick={() => { close(); onDone && onDone(null) }}>{t('Start without weighing in')}</Button>
-      <div style={{ height: 2 }} /><Button variant="ghost" className="dim" icon="reset" onClick={() => { close(); nav('/workout') }}>{t('Choose a different workout')}</Button>
+      {/* //// Neoffice — was "Choose a different workout", which is what the ✕
+          //// above already does (close() leaves you on the chooser) and which
+          //// did not say that it CLOSED. Reported by the club on 31.08: "il y a
+          //// un texte pour fermer mais ce n'est pas clair que ça ferme".
+          //// Two buttons start the workout, one closes — and the one that
+          //// closes now says so. */}
+      <div style={{ height: 2 }} /><Button variant="ghost" className="dim" icon="xmark" onClick={() => { close(); nav('/workout') }}>{t('Cancel — don’t start yet')}</Button>
     </>}
     {!required && recent.length > 0 && <>
       <h4 className="sec">{t('Recent weigh-ins')}</h4>
@@ -1610,6 +1616,10 @@ export function WorkoutRow({ w, onClick }) {
 
 /* ============================ workout lifecycle ============================ */
 export function startFlow(routineId) {
+  //// Neoffice — the weigh-in is a question, not a toll gate. Asked only when
+  //// it is due (see shouldAskWeighIn); otherwise the workout starts on the tap
+  //// that asked for it, which is what the member pressed.
+  if (!shouldAskWeighIn(S())) return beginWorkout(routineId, null)
   bwSheet({ required: true, onDone: bw => beginWorkout(routineId, bw) })
 }
 export function beginWorkout(routineId, bw) {

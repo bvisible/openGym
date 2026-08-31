@@ -995,4 +995,12 @@ export default {
   'The image was saved to your device.': 'La imagen se guardó en tu dispositivo.',
   'The image could not be created. Try again.': 'No se pudo crear la imagen. Inténtalo de nuevo.',
   'Nothing to show from this session yet.': 'Todavía no hay nada que mostrar de esta sesión.',
+  'Ask me to weigh in': 'Pedirme que me pese',
+  'Never': 'Nunca',
+  'Weekly': 'Cada semana',
+  'Each session': 'Cada sesión',
+  'Cancel — don’t start yet': 'Cancelar — no empezar aún',
+  'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'Desliza o toca para ajustar tu peso. Una vez por semana basta para la curva — puedes cambiarlo en Ajustes.',
+  'Normal': 'Normal',
+  'Advanced': 'Avanzado',
 }

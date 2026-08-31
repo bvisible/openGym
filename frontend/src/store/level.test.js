@@ -7,7 +7,7 @@
 //// every member's journal, or a member's own choice would be ignored.
 
 import { describe, expect, it } from 'vitest'
-import { DEF, isSimple, levelOf } from './useStore.js'
+import { DEF, atLeast, isSimple, levelOf, shouldAskWeighIn } from './useStore.js'
 
 describe('level of detail', () => {
   it('shows the full journal when nobody has chosen', () => {
@@ -26,6 +26,16 @@ describe('level of detail', () => {
     expect(levelOf({ level: 'simple', perms: { defaultLevel: 'full' } })).toBe('simple')
   })
 
+  it('has three levels, ranked', () => {
+    // The client asked for simple / intermédiaire / avancé. Two was a
+    // misreading, and the middle one is where most members sit.
+    expect(levelOf({ level: 'normal' })).toBe('normal')
+    expect(atLeast({ level: 'normal' }, 'simple')).toBe(true)
+    expect(atLeast({ level: 'normal' }, 'normal')).toBe(true)
+    expect(atLeast({ level: 'normal' }, 'full')).toBe(false)
+    expect(atLeast({ level: 'full' }, 'normal')).toBe(true)
+  })
+
   it('never simplifies on a falsy or unknown value', () => {
     // The trap this guards: a truthiness test would read "" or 0 as a choice,
     // and an unknown string as "not full" if the comparison were inverted.
@@ -38,5 +48,34 @@ describe('level of detail', () => {
     // If DEF carried 'full', a member who never touched the setting would be
     // pinned to it and the club's default would never apply again.
     expect(DEF.level).toBeNull()
+  })
+})
+
+
+describe('being asked to weigh in', () => {
+  it('does not ask by default', () => {
+    // Body weight is a sensitive subject: nobody is made to look at a number
+    // before training. The Log button on Home still works.
+    expect(DEF.weighInEvery).toBe('never')
+    expect(shouldAskWeighIn({})).toBe(false)
+    expect(shouldAskWeighIn({ bodyweight: [] })).toBe(false)
+  })
+
+  it('asks every session only when the member chose that', () => {
+    expect(shouldAskWeighIn({ weighInEvery: 'workout', bodyweight: [{ d: '2026-08-31', t: Date.now() }] })).toBe(true)
+  })
+
+  it('on weekly, does not ask somebody who weighed in this morning', () => {
+    const today = { d: '2026-08-31', t: Date.now() - 3600000 }
+    expect(shouldAskWeighIn({ weighInEvery: 'week', bodyweight: [today] })).toBe(false)
+  })
+
+  it('on weekly, asks again once the last entry is old', () => {
+    const old = { d: '2026-08-01', t: Date.now() - 10 * 86400000 }
+    expect(shouldAskWeighIn({ weighInEvery: 'week', bodyweight: [old] })).toBe(true)
+  })
+
+  it('on weekly, asks once from somebody who never weighed in', () => {
+    expect(shouldAskWeighIn({ weighInEvery: 'week', bodyweight: [] })).toBe(true)
   })
 })

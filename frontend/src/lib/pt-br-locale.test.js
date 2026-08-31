@@ -33,11 +33,11 @@ describe('Brazilian Portuguese locale', () => {
     //// changes without review still breaks the hash. Recomputed after the
     //// v1.2.14 merge, whose new strings land in the inherited set.
     //// Recompute with: node scripts/pt-br-inheritance-fingerprint.mjs
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(345)
-    expect(inherited).toHaveLength(675)
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(346)
+    expect(inherited).toHaveLength(682)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('802a3445651c6fe9189073d4338a4d5844596aff973f667bfbb2c859bd7c2446')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('06902d591a6fb71b8d3dac2b1d4b69dc45e7c077450396368fec4728912a5ee5')
   })
 
   test('does not leak European Portuguese UI terms', () => {

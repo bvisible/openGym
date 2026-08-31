@@ -962,4 +962,12 @@ export default {
   'The image was saved to your device.': 'A kép mentve az eszközére.',
   'The image could not be created. Try again.': 'A kép nem hozható létre. Próbálja újra.',
   'Nothing to show from this session yet.': 'Ebből az edzésből még nincs mit megmutatni.',
+  'Ask me to weigh in': 'Kérdezzen a súlyomról',
+  'Never': 'Soha',
+  'Weekly': 'Hetente',
+  'Each session': 'Minden edzés',
+  'Cancel — don’t start yet': 'Mégse — még ne kezdje',
+  'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'Csúsztassa vagy koppintson a súly beállításához. Hetente egyszer elég a görbéhez — a beállításokban módosítható.',
+  'Normal': 'Normál',
+  'Advanced': 'Haladó',
 }

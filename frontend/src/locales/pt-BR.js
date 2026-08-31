@@ -369,6 +369,12 @@ export const PT_BR_OVERRIDES = {
   'Pick a day up to today': 'Escolha um dia até hoje',
   'Finish the current workout first.': 'Termine primeiro o treino atual.',
   'Logging a past workout — no rest timers.': 'Registrando um treino passado — sem temporizadores de descanso.',
+  //// Neoffice — pt-BR override: "definições" is the European word; Brazil
+  //// says "configurações". Caught by the European-Portuguese guard, which
+  //// is exactly what it is for — our strings live in pt.js and pt-BR
+  //// inherits them, so a pt-PT term reaches Brazilian members unless it is
+  //// overridden here.
+  'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'Deslize ou toque para definir seu peso. Uma vez por semana já basta para o gráfico — você pode mudar isso nas configurações.',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

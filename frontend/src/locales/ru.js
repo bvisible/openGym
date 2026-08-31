@@ -995,4 +995,12 @@ export default {
   'The image was saved to your device.': 'Изображение сохранено на устройстве.',
   'The image could not be created. Try again.': 'Не удалось создать изображение. Попробуйте ещё раз.',
   'Nothing to show from this session yet.': 'Пока нечего показать из этой тренировки.',
+  'Ask me to weigh in': 'Спрашивать про вес',
+  'Never': 'Никогда',
+  'Weekly': 'Раз в неделю',
+  'Each session': 'Каждую тренировку',
+  'Cancel — don’t start yet': 'Отмена — пока не начинать',
+  'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'Проведите или коснитесь, чтобы указать вес. Раза в неделю достаточно — это можно изменить в настройках.',
+  'Normal': 'Обычный',
+  'Advanced': 'Продвинутый',
 }

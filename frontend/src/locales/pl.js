@@ -995,4 +995,12 @@ export default {
   'The image was saved to your device.': 'Obraz zapisano na urządzeniu.',
   'The image could not be created. Try again.': 'Nie udało się utworzyć obrazu. Spróbuj ponownie.',
   'Nothing to show from this session yet.': 'Na razie nie ma czego pokazać z tego treningu.',
+  'Ask me to weigh in': 'Pytaj o ważenie',
+  'Never': 'Nigdy',
+  'Weekly': 'Co tydzień',
+  'Each session': 'Każdy trening',
+  'Cancel — don’t start yet': 'Anuluj — jeszcze nie zaczynaj',
+  'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'Przesuń lub dotknij, aby ustawić wagę. Raz w tygodniu wystarczy — możesz to zmienić w ustawieniach.',
+  'Normal': 'Normalny',
+  'Advanced': 'Zaawansowany',
 }

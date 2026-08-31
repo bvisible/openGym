@@ -30,6 +30,7 @@ vi.mock('../store/useStore.js', () => ({
   //// Neoffice — the level resolver the views now read. Absent from the
   //// mock it comes back undefined and the screen throws before rendering.
   isSimple: () => false,
+  atLeast: () => true,
   levelOf: () => 'full',
   useStore: selector => selector({ S: mocks.S }),
 }))

@@ -995,4 +995,12 @@ export default {
   'The image was saved to your device.': 'Görsel cihazınıza kaydedildi.',
   'The image could not be created. Try again.': 'Görsel oluşturulamadı. Tekrar deneyin.',
   'Nothing to show from this session yet.': 'Bu antrenmandan gösterecek bir şey yok.',
+  'Ask me to weigh in': 'Tartılmamı iste',
+  'Never': 'Asla',
+  'Weekly': 'Haftalık',
+  'Each session': 'Her antrenman',
+  'Cancel — don’t start yet': 'İptal — henüz başlama',
+  'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'Kilonuzu ayarlamak için kaydırın veya dokunun. Eğri için haftada bir yeter — ayarlardan değiştirebilirsiniz.',
+  'Normal': 'Normal',
+  'Advanced': 'Gelişmiş',
 }

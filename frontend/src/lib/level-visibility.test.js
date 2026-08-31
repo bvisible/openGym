@@ -15,6 +15,7 @@ import {
 } from './level-visibility.js'
 
 const FULL = { level: 'full' }
+const NORMAL = { level: 'normal' }
 const SIMPLE = { level: 'simple' }
 
 describe('simple level — what is hidden', () => {
@@ -88,5 +89,31 @@ describe('simple level — never simplifies by accident', () => {
     expect(showsBodyMap(clubSimple)).toBe(false)
     // …and the member can still override it.
     expect(showsBodyMap({ ...clubSimple, level: 'full' })).toBe(true)
+  })
+})
+
+
+describe('the middle level — where most members sit', () => {
+  it('gives back the readings you can use without a vocabulary lesson', () => {
+    // A body map is a picture; an estimated 1RM says "estimated".
+    expect(showsBodyMap(NORMAL)).toBe(true)
+    expect(showsEstimated1RM(NORMAL)).toBe(true)
+    expect(showsEquipmentProfiles(NORMAL)).toBe(true)
+  })
+
+  it('still hides what has to be taught before it means anything', () => {
+    // RIR/RPE is a scale you must be told about; drop-sets, ramps and supersets
+    // are techniques, not gestures.
+    expect(showsEffortHistogram(NORMAL)).toBe(false)
+    expect(showsEffortSetting(NORMAL)).toBe(false)
+    expect(showsIntensifier(NORMAL, {})).toBe(false)
+    expect(showsWarmupRamp(NORMAL, {})).toBe(false)
+    expect(showsSupersetControl(NORMAL, false)).toBe(false)
+  })
+
+  it('keeps the "already in use" exception at every level', () => {
+    expect(showsIntensifier(NORMAL, { intensifier: { type: 'dropset' } })).toBe(true)
+    expect(showsSupersetControl(NORMAL, true)).toBe(true)
+    expect(showsWarmupRamp(SIMPLE, { warmupSets: 2 })).toBe(true)
   })
 })

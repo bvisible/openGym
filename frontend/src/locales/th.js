@@ -970,4 +970,12 @@ export default {
   'The image was saved to your device.': 'บันทึกรูปลงอุปกรณ์แล้ว',
   'The image could not be created. Try again.': 'สร้างรูปไม่สำเร็จ ลองอีกครั้ง',
   'Nothing to show from this session yet.': 'ยังไม่มีอะไรจะแสดงจากการฝึกนี้',
+  'Ask me to weigh in': 'เตือนให้ชั่งน้ำหนัก',
+  'Never': 'ไม่เลย',
+  'Weekly': 'ทุกสัปดาห์',
+  'Each session': 'ทุกครั้ง',
+  'Cancel — don’t start yet': 'ยกเลิก — ยังไม่เริ่ม',
+  'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'เลื่อนหรือแตะเพื่อตั้งน้ำหนัก สัปดาห์ละครั้งก็พอสำหรับกราฟ — เปลี่ยนได้ในการตั้งค่า',
+  'Normal': 'ปกติ',
+  'Advanced': 'ขั้นสูง',
 }

@@ -166,9 +166,20 @@ export default function Settings() {
            Placed first in this section — it decides what the rest even shows. */}
       <Row icon="lightbulb" iconTint="var(--accent)" title={t('Level of detail')}>
         <Segmented className="seg-inline"
-          options={[{ value: 'simple', label: t('Simple') }, { value: 'full', label: t('Complete') }]}
+          options={[{ value: 'simple', label: t('Simple') }, { value: 'normal', label: t('Normal') }, { value: 'full', label: t('Advanced') }]}
           value={levelOf(S)}
           onChange={v => update(s => { s.level = v })} />
+      </Row>
+      {/* //// Neoffice — asking for a weigh-in is OFF by default (see DEF):
+           body weight is a sensitive subject, and being made to look at a
+           number before every session is not a neutral prompt. This is here
+           for whoever WANTS the reminder — the Log button on Home works
+           either way. */}
+      <Row icon="scale" iconTint="var(--teal)" title={t('Ask me to weigh in')}>
+        <Segmented className="seg-inline"
+          options={[{ value: 'never', label: t('Never') }, { value: 'week', label: t('Weekly') }, { value: 'workout', label: t('Each session') }]}
+          value={S.weighInEvery || 'never'}
+          onChange={v => update(s => { s.weighInEvery = v })} />
       </Row>
       <Row icon="figureRun" iconTint="var(--green)" title={t('Exercise animations')}>
         <Segmented className="seg-inline"

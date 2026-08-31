@@ -995,4 +995,12 @@ export default {
   'The image was saved to your device.': '图片已保存到您的设备。',
   'The image could not be created. Try again.': '无法生成图片，请重试。',
   'Nothing to show from this session yet.': '这次训练暂时没有可展示的内容。',
+  'Ask me to weigh in': '提醒我称重',
+  'Never': '从不',
+  'Weekly': '每周',
+  'Each session': '每次训练',
+  'Cancel — don’t start yet': '取消 — 暂不开始',
+  'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': '滑动或点按设置体重。每周一次就够了 — 可在设置中更改。',
+  'Normal': '标准',
+  'Advanced': '进阶',
 }

@@ -24,7 +24,8 @@ const mocks = vi.hoisted(() => {
 vi.mock('../store/useStore.js', () => {
   const useStore = selector => selector ? selector(mocks.snapshot()) : mocks.snapshot()
   useStore.getState = mocks.snapshot
-  return { useStore, DEF: { reminder: { time: '17:30' } }, hasData: () => false, isSimple: () => false, levelOf: () => 'full' }
+  return { useStore, DEF: { reminder: { time: '17:30' } }, hasData: () => false, isSimple: () => false,
+  atLeast: () => true, levelOf: () => 'full' }
 })
 vi.mock('../store/useUI.js', () => {
   const snap = () => ({ toast: vi.fn(), openSheet: vi.fn() })

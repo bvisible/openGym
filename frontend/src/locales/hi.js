@@ -995,4 +995,12 @@ export default {
   'The image was saved to your device.': 'छवि आपके डिवाइस पर सहेजी गई।',
   'The image could not be created. Try again.': 'छवि नहीं बनाई जा सकी। पुनः प्रयास करें।',
   'Nothing to show from this session yet.': 'इस सत्र से दिखाने को अभी कुछ नहीं है।',
+  'Ask me to weigh in': 'वजन दर्ज करने को कहें',
+  'Never': 'कभी नहीं',
+  'Weekly': 'साप्ताहिक',
+  'Each session': 'हर सत्र',
+  'Cancel — don’t start yet': 'रद्द करें — अभी शुरू न करें',
+  'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'अपना वजन सेट करने के लिए स्लाइड करें या टैप करें। सप्ताह में एक बार पर्याप्त है — सेटिंग्स में बदलें।',
+  'Normal': 'सामान्य',
+  'Advanced': 'उन्नत',
 }

@@ -23,6 +23,7 @@ const mocks = vi.hoisted(() => ({ simple: false, S: {} }))
 vi.mock('../store/useStore.js', () => ({
   useStore: selector => selector({ S: mocks.S }),
   isSimple: () => mocks.simple,
+  atLeast: (_S, lvl) => (mocks.simple ? lvl === 'simple' : true),
   levelOf: () => (mocks.simple ? 'simple' : 'full'),
 }))
 vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))

@@ -62,12 +62,71 @@ export const DEF = {
   //// default (levelOf below), and starts following it again if the club
   //// changes its mind. An explicit choice by the member always wins.
   level: null,
+  //// Neoffice — how often the journal ASKS for a weigh-in before a workout.
+  ////
+  //// 'never' by default, and that is a deliberate reversal of upstream, which
+  //// asked every single time. Two reasons, the second one decisive:
+  ////
+  ////   1. it turned a measurement into a toll gate paid to start training;
+  ////   2. body weight is a SENSITIVE subject. For somebody who does not want
+  ////      to think about their weight — and a gym has those members — being
+  ////      made to look at a number before every session is not a neutral
+  ////      prompt. Jérémy, 31.08: *"le poids ça peut être un problème pour les
+  ////      gens, donc mettre ça au second plan et pas au premier"*.
+  ////
+  //// Nothing is removed: the Log button on Home and on Stats is there, the
+  //// curve keeps working, and a member who WANTS the reminder switches this to
+  //// 'week' or 'workout'. The setting is about being ASKED, never about being
+  //// able to.
+  weighInEvery: 'never',
 }
 //// Neoffice — resolve the level: the member's own choice, else the club's
 //// default (sent in perms), else the full journal. `=== 'simple'` and never a
 //// truthiness test: a club that has set nothing must not silently simplify.
-export const levelOf = S => (S && S.level) || (S && S.perms && S.perms.defaultLevel) || 'full'
+//// Neoffice — should the journal ask for a weigh-in before this workout?
+//// Answers on the LAST ENTRY, not on a counter: somebody who weighed in this
+//// morning from the Home screen must not be asked again on their way in.
+export function shouldAskWeighIn(S) {
+  //// `|| 'never'` and not `|| 'week'`: an unset value must follow the default
+  //// above, and the default is to leave people alone.
+  const how = (S && S.weighInEvery) || 'never'
+  if (how === 'never') return false
+  if (how === 'workout') return true
+  const last = S && S.bodyweight && S.bodyweight.length
+    ? S.bodyweight[S.bodyweight.length - 1]
+    : null
+  if (!last) return true                       // never weighed: ask once
+  const when = last.t || new Date(last.d).getTime()
+  //// 6 days and not 7: asked on a Monday, a weekly rhythm would otherwise slip
+  //// an hour later every week and eventually skip one.
+  return (Date.now() - when) > 6 * 86400000
+}
+
+//// THREE levels, not two. The client asked for "simple / intermédiaire /
+//// avancé" and two was a misreading on my side: the middle one is where most
+//// members actually sit — past the first weeks, not counting RIR.
+////
+////   simple  : what you did. No body map, no effort scale, no 1RM, no
+////             intensity techniques, no equipment profiles.
+////   normal  : + the body map and the estimated 1RM. The readings you can use
+////             without a vocabulary lesson.
+////   full    : everything, including RIR/RPE, drop-sets, warm-up ramps and
+////             supersets.
+////
+//// 'full' is kept as the top level's name rather than renamed to 'advanced':
+//// it is already stored on profiles and in club settings, and renaming it
+//// would silently reset every member who had chosen it.
+export const LEVELS = ['simple', 'normal', 'full']
+
+export const levelOf = S => {
+  const chosen = (S && S.level) || (S && S.perms && S.perms.defaultLevel)
+  return LEVELS.includes(chosen) ? chosen : 'full'
+}
 export const isSimple = S => levelOf(S) === 'simple'
+//// "at least this much": a check for the full level must not accidentally pass
+//// at normal, and a check for normal must pass at full. Comparing rank rather
+//// than string equality is what keeps that true when a level is added.
+export const atLeast = (S, level) => LEVELS.indexOf(levelOf(S)) >= LEVELS.indexOf(level)
 
 const clone = o => JSON.parse(JSON.stringify(o))
 

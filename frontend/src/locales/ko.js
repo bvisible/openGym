@@ -995,4 +995,12 @@ export default {
   'The image was saved to your device.': '이미지가 기기에 저장되었습니다.',
   'The image could not be created. Try again.': '이미지를 만들지 못했습니다. 다시 시도하세요.',
   'Nothing to show from this session yet.': '아직 이 운동에서 보여줄 것이 없습니다.',
+  'Ask me to weigh in': '체중 입력 요청',
+  'Never': '안 함',
+  'Weekly': '주 1회',
+  'Each session': '매 운동',
+  'Cancel — don’t start yet': '취소 — 아직 시작 안 함',
+  'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': '밀거나 눌러 체중을 설정하세요. 그래프에는 주 1회면 충분합니다 — 설정에서 변경할 수 있습니다.',
+  'Normal': '보통',
+  'Advanced': '고급',
 }
