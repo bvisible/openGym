@@ -1003,4 +1003,13 @@ export default {
   'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'Scorri o tocca per impostare il peso. Una volta a settimana basta per la curva — modificabile nelle impostazioni.',
   'Normal': 'Normale',
   'Advanced': 'Avanzato',
+  //// Neoffice — accessibility labels. Upstream hard-codes these aria-labels
+  //// in English, so a screen reader announced them untranslated mid-set.
+  'Increase': 'Aumenta',
+  'Decrease': 'Diminuisci',
+  'Clear': 'Cancella',
+  'Previous week': 'Settimana precedente',
+  'Next week': 'Settimana successiva',
+  'Previous month': 'Mese precedente',
+  'Next month': 'Mese successivo',
 }

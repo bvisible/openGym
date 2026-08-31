@@ -1003,4 +1003,13 @@ export default {
   'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'Kilonuzu ayarlamak için kaydırın veya dokunun. Eğri için haftada bir yeter — ayarlardan değiştirebilirsiniz.',
   'Normal': 'Normal',
   'Advanced': 'Gelişmiş',
+  //// Neoffice — accessibility labels. Upstream hard-codes these aria-labels
+  //// in English, so a screen reader announced them untranslated mid-set.
+  'Increase': 'Artır',
+  'Decrease': 'Azalt',
+  'Clear': 'Temizle',
+  'Previous week': 'Önceki hafta',
+  'Next week': 'Sonraki hafta',
+  'Previous month': 'Önceki ay',
+  'Next month': 'Sonraki ay',
 }

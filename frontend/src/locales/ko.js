@@ -1003,4 +1003,13 @@ export default {
   'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': '밀거나 눌러 체중을 설정하세요. 그래프에는 주 1회면 충분합니다 — 설정에서 변경할 수 있습니다.',
   'Normal': '보통',
   'Advanced': '고급',
+  //// Neoffice — accessibility labels. Upstream hard-codes these aria-labels
+  //// in English, so a screen reader announced them untranslated mid-set.
+  'Increase': '늘리기',
+  'Decrease': '줄이기',
+  'Clear': '지우기',
+  'Previous week': '지난주',
+  'Next week': '다음 주',
+  'Previous month': '지난달',
+  'Next month': '다음 달',
 }

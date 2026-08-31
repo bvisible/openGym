@@ -1003,4 +1003,13 @@ export default {
   'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': '滑动或点按设置体重。每周一次就够了 — 可在设置中更改。',
   'Normal': '标准',
   'Advanced': '进阶',
+  //// Neoffice — accessibility labels. Upstream hard-codes these aria-labels
+  //// in English, so a screen reader announced them untranslated mid-set.
+  'Increase': '增加',
+  'Decrease': '减少',
+  'Clear': '清除',
+  'Previous week': '上一周',
+  'Next week': '下一周',
+  'Previous month': '上个月',
+  'Next month': '下个月',
 }

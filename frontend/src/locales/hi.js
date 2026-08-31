@@ -1003,4 +1003,13 @@ export default {
   'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'अपना वजन सेट करने के लिए स्लाइड करें या टैप करें। सप्ताह में एक बार पर्याप्त है — सेटिंग्स में बदलें।',
   'Normal': 'सामान्य',
   'Advanced': 'उन्नत',
+  //// Neoffice — accessibility labels. Upstream hard-codes these aria-labels
+  //// in English, so a screen reader announced them untranslated mid-set.
+  'Increase': 'बढ़ाएँ',
+  'Decrease': 'घटाएँ',
+  'Clear': 'साफ़ करें',
+  'Previous week': 'पिछला सप्ताह',
+  'Next week': 'अगला सप्ताह',
+  'Previous month': 'पिछला महीना',
+  'Next month': 'अगला महीना',
 }

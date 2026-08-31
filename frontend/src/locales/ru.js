@@ -1003,4 +1003,13 @@ export default {
   'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'Проведите или коснитесь, чтобы указать вес. Раза в неделю достаточно — это можно изменить в настройках.',
   'Normal': 'Обычный',
   'Advanced': 'Продвинутый',
+  //// Neoffice — accessibility labels. Upstream hard-codes these aria-labels
+  //// in English, so a screen reader announced them untranslated mid-set.
+  'Increase': 'Увеличить',
+  'Decrease': 'Уменьшить',
+  'Clear': 'Очистить',
+  'Previous week': 'Предыдущая неделя',
+  'Next week': 'Следующая неделя',
+  'Previous month': 'Предыдущий месяц',
+  'Next month': 'Следующий месяц',
 }

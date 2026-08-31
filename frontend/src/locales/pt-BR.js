@@ -4,6 +4,13 @@
 import pt from './pt.js'
 
 export const PT_BR_OVERRIDES = {
+  //// Neoffice — accessibility labels, reviewed for Brazil. "Aumentar",
+  //// "Diminuir", "Limpar", "Semana anterior" and "Mês anterior" are the
+  //// same on both sides of the Atlantic and stay inherited. These two are
+  //// not: pt-PT's "seguinte" is understood in Brazil but "próxima/próximo"
+  //// is what a Brazilian actually says.
+  'Next week': 'Próxima semana',
+  'Next month': 'Próximo mês',
   'Press back again to exit': 'Pressione voltar novamente para sair',
   'Reps up to': 'Reps até',
   'Delete': 'Excluir',

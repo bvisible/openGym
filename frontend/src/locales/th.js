@@ -978,4 +978,13 @@ export default {
   'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'เลื่อนหรือแตะเพื่อตั้งน้ำหนัก สัปดาห์ละครั้งก็พอสำหรับกราฟ — เปลี่ยนได้ในการตั้งค่า',
   'Normal': 'ปกติ',
   'Advanced': 'ขั้นสูง',
+  //// Neoffice — accessibility labels. Upstream hard-codes these aria-labels
+  //// in English, so a screen reader announced them untranslated mid-set.
+  'Increase': 'เพิ่ม',
+  'Decrease': 'ลด',
+  'Clear': 'ล้าง',
+  'Previous week': 'สัปดาห์ก่อน',
+  'Next week': 'สัปดาห์ถัดไป',
+  'Previous month': 'เดือนก่อน',
+  'Next month': 'เดือนถัดไป',
 }

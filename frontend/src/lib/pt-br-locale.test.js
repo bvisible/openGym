@@ -33,11 +33,14 @@ describe('Brazilian Portuguese locale', () => {
     //// changes without review still breaks the hash. Recomputed after the
     //// v1.2.14 merge, whose new strings land in the inherited set.
     //// Recompute with: node scripts/pt-br-inheritance-fingerprint.mjs
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(346)
-    expect(inherited).toHaveLength(682)
+//// Recomputed 31.08 for the seven accessibility labels: five are identical
+//// on both sides and stay inherited, "Next week"/"Next month" became
+//// pt-BR overrides ("próxima/próximo" rather than pt-PT's "seguinte").
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(348)
+    expect(inherited).toHaveLength(687)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('06902d591a6fb71b8d3dac2b1d4b69dc45e7c077450396368fec4728912a5ee5')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('1dab7a10c87c7b00b951b1b448b459b5f6c8938704504c5dc88483e1bebef858')
   })
 
   test('does not leak European Portuguese UI terms', () => {

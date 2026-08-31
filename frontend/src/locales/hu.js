@@ -970,4 +970,13 @@ export default {
   'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'Csúsztassa vagy koppintson a súly beállításához. Hetente egyszer elég a görbéhez — a beállításokban módosítható.',
   'Normal': 'Normál',
   'Advanced': 'Haladó',
+  //// Neoffice — accessibility labels. Upstream hard-codes these aria-labels
+  //// in English, so a screen reader announced them untranslated mid-set.
+  'Increase': 'Növelés',
+  'Decrease': 'Csökkentés',
+  'Clear': 'Törlés',
+  'Previous week': 'Előző hét',
+  'Next week': 'Következő hét',
+  'Previous month': 'Előző hónap',
+  'Next month': 'Következő hónap',
 }
