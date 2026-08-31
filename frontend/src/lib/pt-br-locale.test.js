@@ -34,10 +34,10 @@ describe('Brazilian Portuguese locale', () => {
     //// v1.2.14 merge, whose new strings land in the inherited set.
     //// Recompute with: node scripts/pt-br-inheritance-fingerprint.mjs
     expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(345)
-    expect(inherited).toHaveLength(664)
+    expect(inherited).toHaveLength(675)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('2b3ffb17b76ee7519a475b7c2e71e386ea2702f986b3491eda3e93e24664f9f4')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('802a3445651c6fe9189073d4338a4d5844596aff973f667bfbb2c859bd7c2446')
   })
 
   test('does not leak European Portuguese UI terms', () => {

@@ -43,6 +43,7 @@ import { buildSessionEntries } from './lib/session-start.js'
 import { workoutsOn, backfillStart, backfillEnd, completeBackfill } from './lib/backfill.js'
 import { showsIntensifier, showsWarmupRamp } from './lib/level-visibility.js'
 import FloorPlanFor from './components/FloorPlan.jsx'
+import ShareWorkout from './components/ShareWorkout.jsx'
 
 const S = () => useStore.getState().S
 const update = (...a) => useStore.getState().update(...a)
@@ -1509,6 +1510,20 @@ function WorkoutDetail({ w, close }) {
       if (text) rec.note = text; else delete rec.note
     })
   }, [])
+  //// Neoffice — what this session can put on a card. Computed here because
+  //// the sheet must not have to know how a workout is shaped; and each value
+  //// is left EMPTY when there is none, so the share screen never offers a
+  //// checkbox that can only disappoint.
+  const shareable = {
+    name: w.name,
+    date: fmtDate(w.d),
+    duration: w.dur ? fmtDur(w.dur) : '',
+    exercises: (w.entries || []).length || '',
+    sets: (w.entries || []).reduce((n, e) => n + (e.sets || []).filter(x => x.done).length, 0) || '',
+    volume: Math.round(workoutVolume(w)) || '',
+    records: '',
+  }
+
   return <>
     <h3>{w.name}</h3>
     <div className="muted small" style={{ marginBottom: 12 }}>{[fmtDate(w.d, true), ...durPart(w.end - w.start), fmtVol(w.vol, st.unit), ...(w.bw ? [fmtNum(w.bw) + ' ' + st.unit] : [])].join(' · ')}</div>
@@ -1528,6 +1543,11 @@ function WorkoutDetail({ w, close }) {
       placeholder={t('How the session went as a whole.')}
       onFocus={onNoteFocus} onChange={e => setNote(e.target.value)} onBlur={saveNote} />
     <div style={{ height: 14 }} />
+    {/* //// Neoffice — sharing sits ABOVE deleting and looks nothing like it:
+        //// the two are one tap apart on a phone, and only one of them can be
+        //// undone. Client's request of 31.08 — the member advertises the club. */}
+    <Button icon="link" onClick={() => shareWorkoutSheet(shareable, st.club, st.unit)}>{t('Share this session')}</Button>
+    <div style={{ height: 8 }} />
     <Button variant="danger" onClick={() => confirmSheet({ title: t('Delete workout?'), message: t('This removes it from your history for good.'), confirmText: t('Delete'), danger: true, onConfirm: () => { update(s => { s.workouts = s.workouts.filter(x => x.id !== w.id) }); close(); toast(t('Workout deleted')) } })}>{t('Delete workout')}</Button>
   </>
 }
@@ -2183,3 +2203,11 @@ function Row2({ icon, label, value }) {
     <div className="grow"><div className="ss">{label}</div><div className="tt">{value}</div></div>
   </div>
 }
+
+
+//// Neoffice — added below: sharing a finished session as an image.
+//// Opened from the workout detail rather than forced at the end of a session:
+//// somebody who just finished wants to sit down, not to be asked to publish.
+//// The button waits for them where they go to look at what they did.
+export const shareWorkoutSheet = (workout, club, unit) =>
+	ui().openSheet(close => <ShareWorkout workout={workout} club={club} unit={unit} close={close} />)
