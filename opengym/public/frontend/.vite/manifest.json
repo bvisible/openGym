@@ -4,11 +4,7 @@
     "name": "dist"
   },
   "index.html": {
-<<<<<<< HEAD
-    "file": "assets/index-Dl94GNC1.js",
-=======
     "file": "assets/index-C0_Ggk05.js",
->>>>>>> 5f6e6cc6 (feat(level): supersets, intensificateurs, echauffements, materiel -- et les regles dans UN module)
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -53,11 +49,7 @@
     ]
   },
   "node_modules/@capacitor/app/dist/esm/index.js": {
-<<<<<<< HEAD
-    "file": "assets/esm-DtiKInrh.js",
-=======
     "file": "assets/esm-CTU7WX1k.js",
->>>>>>> 5f6e6cc6 (feat(level): supersets, intensificateurs, echauffements, materiel -- et les regles dans UN module)
     "name": "esm",
     "src": "node_modules/@capacitor/app/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -79,11 +71,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/index.js": {
-<<<<<<< HEAD
-    "file": "assets/esm-BK8yL0gm.js",
-=======
     "file": "assets/esm-CBtunpZf.js",
->>>>>>> 5f6e6cc6 (feat(level): supersets, intensificateurs, echauffements, materiel -- et les regles dans UN module)
     "name": "esm",
     "src": "node_modules/@capacitor/filesystem/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -96,11 +84,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/web.js": {
-<<<<<<< HEAD
-    "file": "assets/web-Ct4wM11v.js",
-=======
     "file": "assets/web-C3vLaA_o.js",
->>>>>>> 5f6e6cc6 (feat(level): supersets, intensificateurs, echauffements, materiel -- et les regles dans UN module)
     "name": "web",
     "src": "node_modules/@capacitor/filesystem/dist/esm/web.js",
     "isDynamicEntry": true,
@@ -110,11 +94,7 @@
     ]
   },
   "node_modules/@capacitor/local-notifications/dist/esm/index.js": {
-<<<<<<< HEAD
-    "file": "assets/esm-CU6bmtF5.js",
-=======
     "file": "assets/esm-CG2f7_3t.js",
->>>>>>> 5f6e6cc6 (feat(level): supersets, intensificateurs, echauffements, materiel -- et les regles dans UN module)
     "name": "esm",
     "src": "node_modules/@capacitor/local-notifications/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -136,11 +116,7 @@
     ]
   },
   "node_modules/@capacitor/share/dist/esm/index.js": {
-<<<<<<< HEAD
-    "file": "assets/esm-BrGszE0Z.js",
-=======
     "file": "assets/esm-Dpm5yzXm.js",
->>>>>>> 5f6e6cc6 (feat(level): supersets, intensificateurs, echauffements, materiel -- et les regles dans UN module)
     "name": "esm",
     "src": "node_modules/@capacitor/share/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -252,11 +228,7 @@
     "isDynamicEntry": true
   },
   "src/lib/demoSeed.js": {
-<<<<<<< HEAD
-    "file": "assets/demoSeed-C_GmzH-b.js",
-=======
     "file": "assets/demoSeed-fSiKC3DT.js",
->>>>>>> 5f6e6cc6 (feat(level): supersets, intensificateurs, echauffements, materiel -- et les regles dans UN module)
     "name": "demoSeed",
     "src": "src/lib/demoSeed.js",
     "isDynamicEntry": true,
