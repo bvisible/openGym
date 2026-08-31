@@ -462,10 +462,26 @@ function usageMap(st) {
 //// is what the CLUB puts forward. Conflating them would lose both meanings.
 const CLUB_PICKS = '@club'
 
+//// Neoffice — the member's OWN shortlist, asked for on 2026-08-31. There were
+//// already exercises behind a star, but that star is computed from the logs
+//// (what you use often) and was labelled "Chosen", which reads as a choice
+//// somebody made. Nobody had ever chosen anything — hence the request. So:
+//// this list is what the member actually picks, the star keeps its meaning
+//// under an honest label ("Most used"), and the medal is the club's.
+const FAVORITES = '@fav'
+
+const toggleFavorite = (id) => update(s => {
+  const list = s.favEx || (s.favEx = [])
+  const at = list.indexOf(id)
+  if (at >= 0) list.splice(at, 1)
+  else list.push(id)
+})
+
 function ExercisePicker({ onPick, close }) {
   const st = useStore(s => s.S)
   const usage = usageMap(st)
   const picks = new Set(st.clubPicks || [])
+  const favorites = new Set(st.favEx || [])
   const [q, setQ] = useState('')
   const [bp, setBp] = useState('')          // '' = all, '★' = chosen, '@club' = the club's, else a body part
   const [eq, setEq] = useState('')          // '' = any equipment
@@ -474,7 +490,10 @@ function ExercisePicker({ onPick, close }) {
   const all = allExercises(st)
   const profile = activeProfile(st)
   let base = all.filter(e =>
-    (bp === '★' ? usage[e.id] : bp === CLUB_PICKS ? picks.has(e.id) : (!bp || e.bp === bp)) &&
+    (bp === '★' ? usage[e.id]
+      : bp === CLUB_PICKS ? picks.has(e.id)
+      : bp === FAVORITES ? favorites.has(e.id)
+      : (!bp || e.bp === bp)) &&
     //// Neoffice — matchExercise() is upstream's, and it already searches the
     //// English name through exerciseNameSearchText(): typing "bench press" in a
     //// French app finds "développé couché". Our own matchesExercise() existed
@@ -499,8 +518,9 @@ function ExercisePicker({ onPick, close }) {
       </button>
     </div>}
     <div className="chips" style={{ margin: eqOpts.length > 1 ? '10px 0 6px' : '10px 0' }}>
+      {favorites.size > 0 && <button className={'chip' + (bp === FAVORITES ? ' on' : '')} onClick={() => { setBp(FAVORITES); setEq(''); setShown(50) }}><Icon name="heart" style={{ fontSize: 12, display: 'inline-block', marginRight: 4, verticalAlign: '-1px' }} />{t('Favorites')} ({favorites.size})</button>}
       {picks.size > 0 && <button className={'chip' + (bp === CLUB_PICKS ? ' on' : '')} onClick={() => { setBp(CLUB_PICKS); setEq(''); setShown(50) }}><Icon name="medal" style={{ fontSize: 12, display: 'inline-block', marginRight: 4, verticalAlign: '-1px' }} />{t('Recommended')} ({picks.size})</button>}
-      {chosenCount > 0 && <button className={'chip' + (bp === '★' ? ' on' : '')} onClick={() => { setBp('★'); setEq(''); setShown(50) }}><Icon name="starFill" style={{ fontSize: 12, display: 'inline-block', marginRight: 4, verticalAlign: '-1px' }} />{t('Chosen')} ({chosenCount})</button>}
+      {chosenCount > 0 && <button className={'chip' + (bp === '★' ? ' on' : '')} onClick={() => { setBp('★'); setEq(''); setShown(50) }}><Icon name="starFill" style={{ fontSize: 12, display: 'inline-block', marginRight: 4, verticalAlign: '-1px' }} />{t('Most used')} ({chosenCount})</button>}
       <button className={'chip nocap' + (!bp ? ' on' : '')} onClick={() => { setBp(''); setEq(''); setShown(50) }}>{t('All')}</button>
       {BODYPARTS.map(b => <button key={b} className={'chip' + (bp === b ? ' on' : '')} onClick={() => { setBp(b); setEq(''); setShown(50) }}>{t(b)}</button>)}
     </div>
@@ -509,17 +529,24 @@ function ExercisePicker({ onPick, close }) {
       {eqOpts.map(x => <button key={x} className={'chip' + (eqOn === x ? ' on' : '')} onClick={() => { setEq(x); setShown(50) }}>{t(x)}</button>)}
     </div>}
     <div className="list">
-      {bp !== '★' && bp !== CLUB_PICKS && <div className="item" onClick={() => customExSheet(null, ex => onPick(ex), q.trim())}>
+      {bp !== '★' && bp !== CLUB_PICKS && bp !== FAVORITES && <div className="item" onClick={() => customExSheet(null, ex => onPick(ex), q.trim())}>
         <div className="thumb thumb-x"><Icon name="sparkles" /></div>
         <div className="grow"><div className="tt">{t('Create your own exercise')}</div><div className="ss">{t('name + body part, no animation')}</div></div><Icon name="plus" className="chev" />
       </div>}
       {f.slice(0, shown).map(e => <div key={e.id} className="item" onClick={() => onPick(e)}>
         <Thumb ex={e} /><div className="grow"><div className="tt capitalize">{exerciseNameFor(e)}</div><div className="ss capitalize">{t(e.tg || e.bp)} · {t(e.eq)}</div></div>
         {picks.has(e.id) && <span className="tag"><Icon name="medal" /></span>}
-        {usage[e.id] && <span className="tag acc"><Icon name="starFill" /></span>}<Icon name="plus" className="chev" />
+        {usage[e.id] && <span className="tag acc"><Icon name="starFill" /></span>}
+        <button className="chip" aria-label={t('Favorite')} title={t('Favorite')}
+          style={{ padding: '4px 8px', marginRight: 4, opacity: favorites.has(e.id) ? 1 : .45 }}
+          onClick={ev => { ev.stopPropagation(); toggleFavorite(e.id) }}>
+          <Icon name="heart" style={{ fontSize: 13, display: 'block' }} />
+        </button>
+        <Icon name="plus" className="chev" />
       </div>)}
       {f.length === 0 && bp === '★' && <div className="empty">{t('Nothing chosen yet — add exercises and they’ll show up here.')}</div>}
       {f.length === 0 && bp === CLUB_PICKS && <div className="empty">{t('Your club hasn’t put any exercise forward yet.')}</div>}
+      {f.length === 0 && bp === FAVORITES && <div className="empty">{t('No favorite yet — tap the heart on an exercise.')}</div>}
     </div>
     {f.length > shown && <><div style={{ height: 8 }} /><Button onClick={() => setShown(s => s + 50)}>{t('Show more')}</Button></>}
   </>

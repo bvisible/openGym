@@ -911,4 +911,8 @@ export default {
   'Your workouts. Your loads. Your journal.': 'आपके वर्कआउट। आपके वज़न। आपकी जर्नल।',
   'Recommended': 'अनुशंसित',
   'Your club hasn’t put any exercise forward yet.': 'आपके क्लब ने अभी तक कोई व्यायाम नहीं सुझाया है।',
+  'Favorites': 'पसंदीदा',
+  'Favorite': 'पसंदीदा',
+  'Most used': 'सर्वाधिक प्रयुक्त',
+  'No favorite yet — tap the heart on an exercise.': 'अभी कोई पसंदीदा नहीं — किसी व्यायाम पर दिल दबाएँ।',
 }

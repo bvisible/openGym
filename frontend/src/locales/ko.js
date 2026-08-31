@@ -911,4 +911,8 @@ export default {
   'Your workouts. Your loads. Your journal.': '당신의 운동. 당신의 무게. 당신의 기록.',
   'Recommended': '추천',
   'Your club hasn’t put any exercise forward yet.': '클럽에서 아직 추천한 운동이 없습니다.',
+  'Favorites': '즐겨찾기',
+  'Favorite': '즐겨찾기',
+  'Most used': '자주 사용',
+  'No favorite yet — tap the heart on an exercise.': '즐겨찾기가 없습니다 — 운동의 하트를 누르세요.',
 }

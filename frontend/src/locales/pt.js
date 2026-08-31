@@ -911,4 +911,8 @@ export default {
   'Your workouts. Your loads. Your journal.': 'Os teus treinos. As tuas cargas. O teu diário.',
   'Recommended': 'Recomendados',
   'Your club hasn’t put any exercise forward yet.': 'O seu clube ainda não destacou nenhum exercício.',
+  'Favorites': 'Favoritos',
+  'Favorite': 'Favorito',
+  'Most used': 'Mais usados',
+  'No favorite yet — tap the heart on an exercise.': 'Ainda sem favoritos — toque no coração de um exercício.',
 }

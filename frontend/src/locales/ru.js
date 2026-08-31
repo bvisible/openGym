@@ -911,4 +911,8 @@ export default {
   'Your workouts. Your loads. Your journal.': 'Твои тренировки. Твои веса. Твой дневник.',
   'Recommended': 'Рекомендуемые',
   'Your club hasn’t put any exercise forward yet.': 'Ваш клуб пока не выделил ни одного упражнения.',
+  'Favorites': 'Избранное',
+  'Favorite': 'В избранное',
+  'Most used': 'Часто используемые',
+  'No favorite yet — tap the heart on an exercise.': 'Избранного пока нет — коснитесь сердечка у упражнения.',
 }

@@ -911,4 +911,8 @@ export default {
   'Your workouts. Your loads. Your journal.': 'Senin antrenmanların. Senin ağırlıkların. Senin günlüğün.',
   'Recommended': 'Önerilenler',
   'Your club hasn’t put any exercise forward yet.': 'Kulübünüz henüz hiçbir egzersizi öne çıkarmadı.',
+  'Favorites': 'Favoriler',
+  'Favorite': 'Favori',
+  'Most used': 'En çok kullanılan',
+  'No favorite yet — tap the heart on an exercise.': 'Henüz favori yok — bir egzersizdeki kalbe dokunun.',
 }

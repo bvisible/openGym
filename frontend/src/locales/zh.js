@@ -911,4 +911,8 @@ export default {
   'Your workouts. Your loads. Your journal.': '你的训练。你的重量。你的记录。',
   'Recommended': '推荐',
   'Your club hasn’t put any exercise forward yet.': '您的俱乐部尚未推荐任何动作。',
+  'Favorites': '收藏',
+  'Favorite': '收藏',
+  'Most used': '最常用',
+  'No favorite yet — tap the heart on an exercise.': '还没有收藏 — 点按动作上的心形图标。',
 }
