@@ -6,7 +6,14 @@ import { activeProfile, exAvailable, ALL_EQUIPMENT, newProfile } from './lib/equ
 import { fmtDate, fmtNum, fmtVol, fmtDur, durPart, todayISO, uid, exCount, DAYN, MONTHS_LONG, ACCENTS } from './lib/format.js'
 import { lastEntryFor, bestWeightFor, buildSets, effectiveRoutineId, workoutVolume, setsDone, setsDoneActive, lastBW, supersetUnits, unitOf, setLabel, defaultConfig, cleanupSg, modeOf, effortOf, isBw, isPerSide, sideReps, workSetsDone, applyIntensifierPlan, MAX_PLANNED_WARMUPS, NOTE_MAX } from './lib/history.js'
 import { beep, vibrate } from './lib/sound.js'
-import { t, instrFor, exerciseNameFor, getLang, INSTR_LANGS } from './lib/i18n.js'
+//// Neoffice — `dateLocale` is ours: the class sheet renders a date and a time
+//// in the member's locale. It was dropped by mistake in the 2026-08-27 upstream
+//// merge — I took upstream's version of this import line, which of course does
+//// not carry it, and the class sheet went to a BLACK SCREEN on open
+//// (ReferenceError, nothing rendered). Neither the build nor the tests catch a
+//// missing import: Vite does no scope analysis, and no test mounts this sheet.
+//// scripts/check-imports.mjs now does.
+import { t, instrFor, exerciseNameFor, getLang, INSTR_LANGS, dateLocale } from './lib/i18n.js'
 import { nav } from './lib/nav.js'
 import { starterRoutines } from './lib/starter.js'
 import Media, { Thumb } from './components/Media.jsx'
