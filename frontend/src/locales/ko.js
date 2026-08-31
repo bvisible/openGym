@@ -975,4 +975,6 @@ export default {
   'Level of detail': '표시 수준',
   'Simple': '간단',
   'Complete': '전체',
+  'Where to find it': '위치',
+  'out of order': '고장',
 }

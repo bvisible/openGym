@@ -975,4 +975,6 @@ export default {
   'Level of detail': 'विवरण का स्तर',
   'Simple': 'सरल',
   'Complete': 'पूर्ण',
+  'Where to find it': 'इसे कहाँ पाएँ',
+  'out of order': 'खराब',
 }

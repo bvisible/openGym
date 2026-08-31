@@ -975,4 +975,6 @@ export default {
   'Level of detail': 'Ayrıntı düzeyi',
   'Simple': 'Basit',
   'Complete': 'Tam',
+  'Where to find it': 'Nerede bulunur',
+  'out of order': 'arızalı',
 }

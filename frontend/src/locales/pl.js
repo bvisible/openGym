@@ -975,4 +975,6 @@ export default {
   'Level of detail': 'Poziom szczegółowości',
   'Simple': 'Prosty',
   'Complete': 'Pełny',
+  'Where to find it': 'Gdzie to znaleźć',
+  'out of order': 'nieczynne',
 }

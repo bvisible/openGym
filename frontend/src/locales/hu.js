@@ -942,4 +942,6 @@ export default {
   'Level of detail': 'Részletesség',
   'Simple': 'Egyszerű',
   'Complete': 'Teljes',
+  'Where to find it': 'Hol találja',
+  'out of order': 'üzemen kívül',
 }

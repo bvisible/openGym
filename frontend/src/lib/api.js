@@ -75,6 +75,12 @@ const M = {
   //// long as the club doesn't sell any: the journal shows "no pack"
   //// without having to handle a special case.
   wallet: '/api/method/neoffice_gym.api.wallet.balance',
+  //// Neoffice — the club's floor plan. `floorWhereIs` answers "where do I do
+  //// this exercise": the club maps its machines once, and a member stops
+  //// wandering the room looking for one. Both return an empty answer when the
+  //// club has drawn nothing, so the journal simply shows no plan.
+  floorPlan: '/api/method/neoffice_gym.api.floor.for_member',
+  floorWhereIs: '/api/method/neoffice_gym.api.floor.where_is',
 }
 
 /**
@@ -173,6 +179,8 @@ export const myCoach = () => api(M.myCoach)
 export const openChat = () =>
   api(M.openChat, { method: 'POST', body: '{}' })
 export const wallet = () => api(M.wallet)
+export const floorPlan = () => api(M.floorPlan)
+export const floorWhereIs = exercise => api(M.floorWhereIs + '?exercise=' + encodeURIComponent(exercise))
 
 //// Neoffice — signing in WITHOUT leaving the journal. `signIn` posts the
 //// credentials to Frappe, as-is: none of them are checked here.

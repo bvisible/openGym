@@ -42,6 +42,7 @@ import { useSheetKeyboard, useRevealActiveChip, tappable } from './lib/use-sheet
 import { buildSessionEntries } from './lib/session-start.js'
 import { workoutsOn, backfillStart, backfillEnd, completeBackfill } from './lib/backfill.js'
 import { showsIntensifier, showsWarmupRamp } from './lib/level-visibility.js'
+import FloorPlanFor from './components/FloorPlan.jsx'
 
 const S = () => useStore.getState().S
 const update = (...a) => useStore.getState().update(...a)
@@ -532,6 +533,14 @@ function ExerciseDetail({ ex, close }) {
       <Button variant="danger" icon="trash" style={{ flex: 1 }} onClick={() => deleteCustomEx(ex, close)}>{t('Delete')}</Button>
     </div>}
     {!isCardio(ex) && <OneRM ex={ex} />}
+    {/* //// Neoffice — "where do I do this", under the exercise. The client's
+        //// own words (31.08): the member taps an exercise, sees the room's
+        //// plan with the number blinking, and knows where to walk.
+        //// Placed AFTER the how-to-lift blocks and before the instructions:
+        //// it answers a question you have once you have decided to do the
+        //// exercise, not while you are choosing it. Renders nothing at all
+        //// when the club has not mapped its room. */}
+    <FloorPlanFor exerciseId={ex.id} />
     {instrFor(ex).length > 0 &&<><h4 className="sec">{t('How to')}{!INSTR_LANGS.includes(getLang()) && <span className="dim" style={{ textTransform: 'none', letterSpacing: 0 }}> · {t('instructions in English')}</span>}</h4><ol className="steps-list">{instrFor(ex).map((s, i) => <li key={i}>{s}</li>)}</ol></>}
   </>
 }

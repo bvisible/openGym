@@ -975,4 +975,6 @@ export default {
   'Level of detail': 'Уровень детализации',
   'Simple': 'Простой',
   'Complete': 'Полный',
+  'Where to find it': 'Где это найти',
+  'out of order': 'не работает',
 }

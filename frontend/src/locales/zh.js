@@ -975,4 +975,6 @@ export default {
   'Level of detail': '信息详略',
   'Simple': '简洁',
   'Complete': '完整',
+  'Where to find it': '在哪里',
+  'out of order': '故障',
 }

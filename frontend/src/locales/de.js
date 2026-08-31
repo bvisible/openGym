@@ -992,4 +992,6 @@ export default {
   'Level of detail': 'Detailgrad',
   'Simple': 'Einfach',
   'Complete': 'Vollständig',
+  'Where to find it': 'Wo Sie es finden',
+  'out of order': 'außer Betrieb',
 }

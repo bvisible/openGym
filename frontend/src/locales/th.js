@@ -950,4 +950,6 @@ export default {
   'Level of detail': 'ระดับรายละเอียด',
   'Simple': 'เรียบง่าย',
   'Complete': 'ครบถ้วน',
+  'Where to find it': 'อยู่ตรงไหน',
+  'out of order': 'ชำรุด',
 }
