@@ -952,4 +952,11 @@ export default {
   'Complete': 'ครบถ้วน',
   'Where to find it': 'อยู่ตรงไหน',
   'out of order': 'ชำรุด',
+  'Badges': 'เหรียญตรา',
+  '{0} points': '{0} คะแนน',
+  'Earned': 'ได้รับแล้ว',
+  'What your points give you': 'คะแนนแลกอะไรได้บ้าง',
+  'Available': 'พร้อมแลก',
+  '{0} points to go': 'อีก {0} คะแนน',
+  'Ask at the desk to claim a reward.': 'สอบถามที่เคาน์เตอร์เพื่อรับรางวัล',
 }

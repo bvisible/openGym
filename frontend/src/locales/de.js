@@ -994,4 +994,11 @@ export default {
   'Complete': 'Vollständig',
   'Where to find it': 'Wo Sie es finden',
   'out of order': 'außer Betrieb',
+  'Badges': 'Abzeichen',
+  '{0} points': '{0} Punkte',
+  'Earned': 'Erhalten',
+  'What your points give you': 'Was Ihre Punkte Ihnen bringen',
+  'Available': 'Verfügbar',
+  '{0} points to go': 'noch {0} Punkte',
+  'Ask at the desk to claim a reward.': 'Fragen Sie an der Rezeption, um eine Prämie einzulösen.',
 }

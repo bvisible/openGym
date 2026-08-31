@@ -977,4 +977,11 @@ export default {
   'Complete': '전체',
   'Where to find it': '위치',
   'out of order': '고장',
+  'Badges': '배지',
+  '{0} points': '{0}점',
+  'Earned': '획득',
+  'What your points give you': '포인트로 받을 수 있는 것',
+  'Available': '교환 가능',
+  '{0} points to go': '{0}점 남음',
+  'Ask at the desk to claim a reward.': '보상을 사용하려면 프런트에 문의하세요.',
 }

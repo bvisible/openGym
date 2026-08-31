@@ -944,4 +944,11 @@ export default {
   'Complete': 'Teljes',
   'Where to find it': 'Hol találja',
   'out of order': 'üzemen kívül',
+  'Badges': 'Jelvények',
+  '{0} points': '{0} pont',
+  'Earned': 'Megszerezve',
+  'What your points give you': 'Mit ér a pontja',
+  'Available': 'Elérhető',
+  '{0} points to go': 'még {0} pont',
+  'Ask at the desk to claim a reward.': 'A jutalom beváltásához kérdezzen a recepción.',
 }

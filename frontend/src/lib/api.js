@@ -81,6 +81,10 @@ const M = {
   //// club has drawn nothing, so the journal simply shows no plan.
   floorPlan: '/api/method/neoffice_gym.api.floor.for_member',
   floorWhereIs: '/api/method/neoffice_gym.api.floor.where_is',
+  //// Neoffice — badges, points and what they buy. Answers
+  //// `{enabled: false}` for a club that has not turned them on, so the
+  //// journal shows nothing rather than an empty trophy case.
+  badges: '/api/method/neoffice_gym.api.badges.mine',
 }
 
 /**
@@ -181,6 +185,7 @@ export const openChat = () =>
 export const wallet = () => api(M.wallet)
 export const floorPlan = () => api(M.floorPlan)
 export const floorWhereIs = exercise => api(M.floorWhereIs + '?exercise=' + encodeURIComponent(exercise))
+export const myBadges = () => api(M.badges)
 
 //// Neoffice — signing in WITHOUT leaving the journal. `signIn` posts the
 //// credentials to Frappe, as-is: none of them are checked here.

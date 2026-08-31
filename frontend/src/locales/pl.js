@@ -977,4 +977,11 @@ export default {
   'Complete': 'Pełny',
   'Where to find it': 'Gdzie to znaleźć',
   'out of order': 'nieczynne',
+  'Badges': 'Odznaki',
+  '{0} points': '{0} punktów',
+  'Earned': 'Zdobyta',
+  'What your points give you': 'Co dają twoje punkty',
+  'Available': 'Dostępne',
+  '{0} points to go': 'jeszcze {0} punktów',
+  'Ask at the desk to claim a reward.': 'Zapytaj w recepcji, aby odebrać nagrodę.',
 }

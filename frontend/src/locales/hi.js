@@ -977,4 +977,11 @@ export default {
   'Complete': 'पूर्ण',
   'Where to find it': 'इसे कहाँ पाएँ',
   'out of order': 'खराब',
+  'Badges': 'बैज',
+  '{0} points': '{0} अंक',
+  'Earned': 'प्राप्त',
+  'What your points give you': 'आपके अंक क्या दिलाते हैं',
+  'Available': 'उपलब्ध',
+  '{0} points to go': '{0} अंक और',
+  'Ask at the desk to claim a reward.': 'इनाम पाने के लिए रिसेप्शन पर पूछें।',
 }

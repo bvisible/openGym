@@ -1068,4 +1068,11 @@ export default {
   'Complete': 'Complet',
   'Where to find it': 'Où le trouver',
   'out of order': 'hors service',
+  'Badges': 'Badges',
+  '{0} points': '{0} points',
+  'Earned': 'Obtenu',
+  'What your points give you': 'Ce que vos points vous donnent',
+  'Available': 'Disponible',
+  '{0} points to go': 'encore {0} points',
+  'Ask at the desk to claim a reward.': 'Demandez à l’accueil pour utiliser un avantage.',
 }

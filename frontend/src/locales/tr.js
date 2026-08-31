@@ -977,4 +977,11 @@ export default {
   'Complete': 'Tam',
   'Where to find it': 'Nerede bulunur',
   'out of order': 'arızalı',
+  'Badges': 'Rozetler',
+  '{0} points': '{0} puan',
+  'Earned': 'Kazanıldı',
+  'What your points give you': 'Puanlarınız ne kazandırır',
+  'Available': 'Kullanılabilir',
+  '{0} points to go': '{0} puan kaldı',
+  'Ask at the desk to claim a reward.': 'Bir ödülü kullanmak için resepsiyona sorun.',
 }

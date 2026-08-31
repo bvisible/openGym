@@ -27,6 +27,7 @@ import { Button, Segmented, SelectRow } from '../components/ui.jsx'
 import { tappable } from '../lib/use-sheet-keyboard.js'
 import { isWarmupRow } from '../lib/workout-model.js'
 import { showsBodyMap, showsEffortHistogram, showsEstimated1RM } from '../lib/level-visibility.js'
+import Badges from '../components/Badges.jsx'
 
 // Which muscles the training in a window actually hit — and, the point of the card,
 // which ones it keeps missing. Shading is relative within the window (lib/muscles.js).
@@ -471,6 +472,12 @@ export default function Stats() {
       <h2>{t('Activity — last 12 months')} <span className="dim" style={{ textTransform: 'none', letterSpacing: 0 }}>· {t('by time trained')}</span></h2>
       <Heatmap S={S} onDay={iso => { const ws = workouts.filter(w => w.d === iso); if (ws.length === 1) workoutDetailSheet(ws[0]); else if (ws.length) calendarSheet(iso) }} />
     </div>
+
+    {/* //// Neoffice — badges at EVERY level of detail, and above the technical
+        cards: this is encouragement, not a reading. It is exactly what a
+        beginner can use, and hiding it in "Complete" would put it out of reach
+        of the people it was asked for. */}
+    <Badges />
 
     {/* //// Neoffice — the two cards the client named as off-putting: the body
          map (fatigue / retained strength / muscle balance) and the effort

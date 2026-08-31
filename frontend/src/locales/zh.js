@@ -977,4 +977,11 @@ export default {
   'Complete': '完整',
   'Where to find it': '在哪里',
   'out of order': '故障',
+  'Badges': '徽章',
+  '{0} points': '{0} 积分',
+  'Earned': '已获得',
+  'What your points give you': '积分可以换什么',
+  'Available': '可兑换',
+  '{0} points to go': '还差 {0} 积分',
+  'Ask at the desk to claim a reward.': '到前台兑换奖励。',
 }

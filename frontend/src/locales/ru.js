@@ -977,4 +977,11 @@ export default {
   'Complete': 'Полный',
   'Where to find it': 'Где это найти',
   'out of order': 'не работает',
+  'Badges': 'Значки',
+  '{0} points': '{0} очков',
+  'Earned': 'Получен',
+  'What your points give you': 'Что дают ваши очки',
+  'Available': 'Доступно',
+  '{0} points to go': 'ещё {0} очков',
+  'Ask at the desk to claim a reward.': 'Обратитесь на стойку, чтобы получить награду.',
 }
