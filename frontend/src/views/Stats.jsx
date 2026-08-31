@@ -423,8 +423,12 @@ export default function Stats() {
     note: exRir[i] == null ? undefined : hd + ' ' + fmtNum(toScale(kind, exRir[i]))
   }))
   const exOpts = [{ value: 'top', label: t('Top set') }]
-  if (showE1) exOpts.push({ value: 'e1rm', label: t('Est. 1RM') })
-  if (showEff) exOpts.push({ value: 'effort', label: t('Effort') })
+  //// Neoffice — the simple level keeps the "top set" curve, which reads by
+  //// itself (the heaviest set of each workout), and drops the two the client
+  //// named: an estimated 1RM (an Epley extrapolation nobody asked for) and the
+  //// effort scale. With one option left the segment hides itself — see below.
+  if (showE1 && !simple) exOpts.push({ value: 'e1rm', label: t('Est. 1RM') })
+  if (showEff && !simple) exOpts.push({ value: 'effort', label: t('Effort') })
 
   //// Neoffice — loaded once, without blocking the rest of the screen: the
   //// logbook's statistics are computed locally and must render even when the
