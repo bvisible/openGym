@@ -44,7 +44,10 @@ export default function FloorPlanFor({ exerciseId }) {
     let alive = true
     if (!exerciseId) { setItems([]); return }
     floorWhereIs(exerciseId)
-      .then(r => { if (alive) setItems((r && r.message && r.message.items) || []) })
+      //// Neoffice — api() already unwraps Frappe's {message: …}, so what comes
+      //// back is {items}. Reading r.message.items here was silently empty: the
+      //// panel rendered nothing on a room that WAS mapped, and no error said so.
+      .then(r => { if (alive) setItems((r && r.items) || []) })
       //// Offline, or a club that has never installed the plan: silence, not an
       //// error. This panel is a convenience — failing loudly about it would
       //// interrupt someone mid-workout for something they never asked for.

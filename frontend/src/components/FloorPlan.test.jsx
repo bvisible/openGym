@@ -13,7 +13,11 @@ import { createRoot } from 'react-dom/client'
 import { Window } from 'happy-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-const mocks = vi.hoisted(() => ({ answer: { message: { items: [] } }, fail: false, calls: [] }))
+//// The shape api() really returns: it has ALREADY unwrapped Frappe's
+//// {message: …}. Mocking the wrapped shape is what let a bug through — the
+//// component read r.message.items, the test agreed, and the panel stayed
+//// blank against a real server that had answers.
+const mocks = vi.hoisted(() => ({ answer: { items: [] }, fail: false, calls: [] }))
 
 vi.mock('../lib/api.js', () => ({
   floorWhereIs: (id) => {
@@ -44,7 +48,7 @@ beforeEach(() => {
   container = global.document.createElement('div')
   global.document.body.appendChild(container)
   root = createRoot(container)
-  mocks.answer = { message: { items: [] } }
+  mocks.answer = { items: [] }
   mocks.fail = false
   mocks.calls = []
 })
@@ -70,7 +74,7 @@ describe('where-to-find-it panel', () => {
   })
 
   it('shows the number and the zone once the club has mapped it', async () => {
-    mocks.answer = { message: { items: [item()] } }
+    mocks.answer = { items: [item()] }
     const el = await render({ exerciseId: 'bench-press' })
     expect(el.textContent).toContain('Ground floor')
     expect(el.textContent).toContain('3')
@@ -79,9 +83,9 @@ describe('where-to-find-it panel', () => {
   })
 
   it('groups by zone — a club on two floors must say WHICH floor', async () => {
-    mocks.answer = { message: { items: [
+    mocks.answer = { items: [
       item(), item({ name: 'itm-2', zone: 'z2', zone_name: 'Mezzanine', number: '12' }),
-    ] } }
+    ] }
     const el = await render({ exerciseId: 'bench-press' })
     expect(el.querySelectorAll('.floor-map').length).toBe(2)
     expect(el.textContent).toContain('Ground floor')
@@ -90,14 +94,14 @@ describe('where-to-find-it panel', () => {
 
   it('marks a machine that is out of order rather than hiding it', async () => {
     // Someone looking for it needs to know it is out — not to wonder where it went.
-    mocks.answer = { message: { items: [item({ enabled: 0 })] } }
+    mocks.answer = { items: [item({ enabled: 0 })] }
     const el = await render({ exerciseId: 'bench-press' })
     expect(el.querySelector('.floor-item.out')).not.toBeNull()
     expect(el.textContent).toContain('out of order')
   })
 
   it('positions items as percentages, so one plan fits every screen', async () => {
-    mocks.answer = { message: { items: [item({ pos_x: 42, pos_y: 17, width: 25, height: 9 })] } }
+    mocks.answer = { items: [item({ pos_x: 42, pos_y: 17, width: 25, height: 9 })] }
     const el = await render({ exerciseId: 'bench-press' })
     const box = el.querySelector('.floor-item')
     expect(box.style.left).toBe('42%')
