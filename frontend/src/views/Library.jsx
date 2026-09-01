@@ -3,6 +3,11 @@ import { useStore } from '../store/useStore.js'
 import { EXDB, BODYPARTS, allExercises, equipmentOf, matchExercise } from '../lib/exercises.js'
 import { activeProfile, exAvailable } from '../lib/equipment.js'
 import { bestWeightFor } from '../lib/history.js'
+//// Neoffice — same level filter as the exercise picker. The library is
+//// where the 1324 movements are most intimidating — it is the screen the
+//// club described — so the rule has to hold here too, with the same three
+//// holes: never on a search, never on something already used, one tap out.
+import { suitsLevel, levelFiltersExercises } from '../lib/exercise-level.js'
 import { fmtNum } from '../lib/format.js'
 import { t, exerciseNameFor } from '../lib/i18n.js'
 import { Thumb } from '../components/Media.jsx'
@@ -17,6 +22,7 @@ export default function Library() {
   const [bp, setBp] = useState('')
   const [eq, setEq] = useState('')
   const [showAll, setShowAll] = useState(false)   // ignore the active equipment profile for this session
+  const [showEveryLevel, setShowEveryLevel] = useState(false)
   const [shown, setShown] = useState(40)
   const bpStrip = useRef(null), eqStrip = useRef(null)
   const profile = activeProfile(S)
@@ -28,7 +34,16 @@ export default function Library() {
   const eqOpts = equipmentOf(eqFiltered)
   // Drop the equipment filter if the search narrowed it away, so you never hit a dead end.
   const eqOn = eqOpts.includes(eq) ? eq : ''
-  const f = eqOn ? eqFiltered.filter(e => e.eq === eqOn) : eqFiltered
+  const eqPicked = eqOn ? eqFiltered.filter(e => e.eq === eqOn) : eqFiltered
+  //// Neoffice — offer what suits the member's level while BROWSING. A search is
+  //// never filtered, and an exercise they have already lifted is never hidden:
+  //// bestWeightFor is already computed per row below, and a member who trained
+  //// a movement must keep finding it.
+  const levelOn = levelFiltersExercises(S) && !showEveryLevel && !q.trim()
+  const f = levelOn
+    ? eqPicked.filter(e => suitsLevel(S, e, bestWeightFor(S, e.id) > 0))
+    : eqPicked
+  const hiddenByLevel = levelOn ? eqPicked.length - f.length : 0
   useRevealActiveChip(bpStrip, bp)
   useRevealActiveChip(eqStrip, eqOn)
 
@@ -43,6 +58,17 @@ export default function Library() {
         {showAll ? t('Filter by "{0}"', profile.name) : t('Show all equipment')}
       </button>
     </div>}
+    {/* //// Neoffice — the filter says itself, and lifts in one tap. A catalogue
+        //// that quietly holds things back is indistinguishable from one that is
+        //// missing them. */}
+    {(hiddenByLevel > 0 || showEveryLevel) && levelFiltersExercises(S) && !q.trim() &&
+      <div className="small dim row" style={{ margin: '-4px 2px 10px', gap: 6, alignItems: 'center' }}>
+        <Icon name="sparkles" style={{ fontSize: 13 }} />
+        {showEveryLevel ? t('Showing every exercise') : t('{0} more advanced exercises hidden', hiddenByLevel)}
+        <button className="chip nocap" style={{ marginLeft: 'auto', padding: '3px 10px', fontSize: 12 }} onClick={() => { setShowEveryLevel(v => !v); setShown(40) }}>
+          {showEveryLevel ? t('Show what suits me') : t('Show every exercise')}
+        </button>
+      </div>}
     <div className="chips" ref={bpStrip} style={{ marginBottom: eqOpts.length > 1 ? 8 : 12 }}>
       <button className={'chip nocap' + (!bp ? ' on' : '')} onClick={() => { setBp(''); setEq(''); setShown(40) }}>{t('All')}</button>
       {BODYPARTS.map(b => <button key={b} className={'chip' + (bp === b ? ' on' : '')} onClick={() => { setBp(b); setEq(''); setShown(40) }}>{t(b)}</button>)}
