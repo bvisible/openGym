@@ -4,7 +4,7 @@
     "name": "dist"
   },
   "index.html": {
-    "file": "assets/index-B7eR9G8s.js",
+    "file": "assets/index-B0VH03F7.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -49,7 +49,7 @@
     ]
   },
   "node_modules/@capacitor/app/dist/esm/index.js": {
-    "file": "assets/esm-COxurNAB.js",
+    "file": "assets/esm-B1fDCvD2.js",
     "name": "esm",
     "src": "node_modules/@capacitor/app/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -71,7 +71,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/index.js": {
-    "file": "assets/esm-EO9gk4fa.js",
+    "file": "assets/esm-B29lTL1G.js",
     "name": "esm",
     "src": "node_modules/@capacitor/filesystem/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -84,7 +84,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/web.js": {
-    "file": "assets/web-Db4oxrz0.js",
+    "file": "assets/web-B1wyxG4A.js",
     "name": "web",
     "src": "node_modules/@capacitor/filesystem/dist/esm/web.js",
     "isDynamicEntry": true,
@@ -94,7 +94,7 @@
     ]
   },
   "node_modules/@capacitor/local-notifications/dist/esm/index.js": {
-    "file": "assets/esm-DBgaA5MP.js",
+    "file": "assets/esm-CyoLLsTb.js",
     "name": "esm",
     "src": "node_modules/@capacitor/local-notifications/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -116,7 +116,7 @@
     ]
   },
   "node_modules/@capacitor/share/dist/esm/index.js": {
-    "file": "assets/esm-BS9IXyCa.js",
+    "file": "assets/esm-DObFdE_D.js",
     "name": "esm",
     "src": "node_modules/@capacitor/share/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -228,7 +228,7 @@
     "isDynamicEntry": true
   },
   "src/lib/demoSeed.js": {
-    "file": "assets/demoSeed-C5GeOq2I.js",
+    "file": "assets/demoSeed-8f8X-EfB.js",
     "name": "demoSeed",
     "src": "src/lib/demoSeed.js",
     "isDynamicEntry": true,
@@ -237,55 +237,55 @@
     ]
   },
   "src/locales/de.js": {
-    "file": "assets/de-D5o-IRms.js",
+    "file": "assets/de-91YyWKuc.js",
     "name": "de",
     "src": "src/locales/de.js",
     "isDynamicEntry": true
   },
   "src/locales/es.js": {
-    "file": "assets/es-ddJHTjEp.js",
+    "file": "assets/es-CovUR3Me.js",
     "name": "es",
     "src": "src/locales/es.js",
     "isDynamicEntry": true
   },
   "src/locales/fr.js": {
-    "file": "assets/fr-Cz-n1k8_.js",
+    "file": "assets/fr-DtPbair8.js",
     "name": "fr",
     "src": "src/locales/fr.js",
     "isDynamicEntry": true
   },
   "src/locales/hi.js": {
-    "file": "assets/hi-D6VpwVoB.js",
+    "file": "assets/hi-5v7dnqJf.js",
     "name": "hi",
     "src": "src/locales/hi.js",
     "isDynamicEntry": true
   },
   "src/locales/hu.js": {
-    "file": "assets/hu-B7Wsywqr.js",
+    "file": "assets/hu-BQmsbtWa.js",
     "name": "hu",
     "src": "src/locales/hu.js",
     "isDynamicEntry": true
   },
   "src/locales/it.js": {
-    "file": "assets/it-DsYVQLAR.js",
+    "file": "assets/it-pmoEFGhb.js",
     "name": "it",
     "src": "src/locales/it.js",
     "isDynamicEntry": true
   },
   "src/locales/ko.js": {
-    "file": "assets/ko-BbkoQJsf.js",
+    "file": "assets/ko-CEpOV4cT.js",
     "name": "ko",
     "src": "src/locales/ko.js",
     "isDynamicEntry": true
   },
   "src/locales/pl.js": {
-    "file": "assets/pl-Cfwijjw5.js",
+    "file": "assets/pl-CzLO7W8M.js",
     "name": "pl",
     "src": "src/locales/pl.js",
     "isDynamicEntry": true
   },
   "src/locales/pt-BR.js": {
-    "file": "assets/pt-BR-FjXm6kt0.js",
+    "file": "assets/pt-BR-C5Ug4_Mi.js",
     "name": "pt-BR",
     "src": "src/locales/pt-BR.js",
     "isDynamicEntry": true,
@@ -294,31 +294,31 @@
     ]
   },
   "src/locales/pt.js": {
-    "file": "assets/pt-BvK1w8mA.js",
+    "file": "assets/pt-GnDAy4Ty.js",
     "name": "pt",
     "src": "src/locales/pt.js",
     "isDynamicEntry": true
   },
   "src/locales/ru.js": {
-    "file": "assets/ru-C4-9EEUc.js",
+    "file": "assets/ru-DxMC362_.js",
     "name": "ru",
     "src": "src/locales/ru.js",
     "isDynamicEntry": true
   },
   "src/locales/th.js": {
-    "file": "assets/th-CqtExIUD.js",
+    "file": "assets/th-D8LOkBDV.js",
     "name": "th",
     "src": "src/locales/th.js",
     "isDynamicEntry": true
   },
   "src/locales/tr.js": {
-    "file": "assets/tr-lG72fWyc.js",
+    "file": "assets/tr-BWG6nuUc.js",
     "name": "tr",
     "src": "src/locales/tr.js",
     "isDynamicEntry": true
   },
   "src/locales/zh.js": {
-    "file": "assets/zh-hJ2SnLlI.js",
+    "file": "assets/zh-Bk1IOFvm.js",
     "name": "zh",
     "src": "src/locales/zh.js",
     "isDynamicEntry": true
