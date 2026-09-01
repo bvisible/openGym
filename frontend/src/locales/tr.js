@@ -1020,4 +1020,9 @@ export default {
   'To start: {0} {1}, from your {2}': 'Başlangıç için: {0} {1}, {2} hareketinize göre',
   'Use it': 'Kullan',
   '{0} more advanced exercises hidden': '{0} daha ileri egzersiz gizlendi',
+  //// Neoffice — the session outline: what is done, what is left.
+  'This workout': 'Bu antrenman',
+  'in progress': 'devam ediyor',
+  '{0} of {1} exercises done': '{1} egzersizden {0} tanesi tamamlandı',
+  '{0} of {1} sets': '{1} setten {0} tanesi',
 }

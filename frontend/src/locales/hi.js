@@ -1020,4 +1020,9 @@ export default {
   'To start: {0} {1}, from your {2}': 'शुरुआत: {0} {1}, आपके {2} के आधार पर',
   'Use it': 'उपयोग करें',
   '{0} more advanced exercises hidden': '{0} अधिक उन्नत व्यायाम छिपाए गए',
+  //// Neoffice — the session outline: what is done, what is left.
+  'This workout': 'यह सत्र',
+  'in progress': 'चल रहा है',
+  '{0} of {1} exercises done': '{1} में से {0} व्यायाम पूर्ण',
+  '{0} of {1} sets': '{1} में से {0} सेट',
 }

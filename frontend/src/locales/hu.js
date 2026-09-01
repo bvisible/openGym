@@ -987,4 +987,9 @@ export default {
   'To start: {0} {1}, from your {2}': 'Kezdésnek: {0} {1}, a(z) {2} alapján',
   'Use it': 'Használom',
   '{0} more advanced exercises hidden': '{0} haladóbb gyakorlat elrejtve',
+  //// Neoffice — the session outline: what is done, what is left.
+  'This workout': 'Ez az edzés',
+  'in progress': 'folyamatban',
+  '{0} of {1} exercises done': '{0}/{1} gyakorlat kész',
+  '{0} of {1} sets': '{0}/{1} sorozat',
 }

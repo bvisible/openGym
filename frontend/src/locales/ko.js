@@ -1020,4 +1020,9 @@ export default {
   'To start: {0} {1}, from your {2}': '시작 무게: {0} {1}, {2} 기준',
   'Use it': '사용',
   '{0} more advanced exercises hidden': '고급 운동 {0}개 숨김',
+  //// Neoffice — the session outline: what is done, what is left.
+  'This workout': '이번 운동',
+  'in progress': '진행 중',
+  '{0} of {1} exercises done': '운동 {1}개 중 {0}개 완료',
+  '{0} of {1} sets': '{1}세트 중 {0}세트',
 }

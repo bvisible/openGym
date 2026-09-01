@@ -10,7 +10,7 @@ import { t, exerciseNameFor } from '../lib/i18n.js'
 import { api } from '../lib/api.js'
 import { insertionIndexAfterCurrentUnit, nextUnfinishedUnit, setProgressHighWater, supersetFlowStep, restAfterSet, restOnRecheck, restSecFor } from '../lib/supersetFlow.js'
 import Media from '../components/Media.jsx'
-import { startFlow, exercisePicker, exConfigSheet, exerciseDetailSheet, topWeightSheet, finishWorkout, workoutCompleteSheet, confirmSheet, exerciseNoteSheet, sessionNoteSheet, swapActiveWorkoutExercise } from '../sheets.jsx'
+import { workoutOutlineSheet, startFlow, exercisePicker, exConfigSheet, exerciseDetailSheet, topWeightSheet, finishWorkout, workoutCompleteSheet, confirmSheet, exerciseNoteSheet, sessionNoteSheet, swapActiveWorkoutExercise } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button, Check, NumberField } from '../components/ui.jsx'
 import { nextPrescription, applyPrescription, defaultIncrement } from '../lib/progression.js'
@@ -629,7 +629,15 @@ function ActiveWorkout() {
     {A.backfill && <div className="muted small" style={{ marginBottom: 8 }}>{t('Logging a past workout — no rest timers.')}</div>}
 
     {A.entries.length ? <>
-      <div className="muted small" style={{ marginBottom: 6 }}>{isSuperset ? t('Superset {0} / {1}', unitIdx + 1, units.length) : t('Exercise {0} / {1}', unitIdx + 1, units.length)}</div>
+      {/* //// Neoffice — the position line opens the session outline. It already
+          //// said WHERE you are ("Exercice 2 / 3"); tapping it now says WHICH
+          //// ones are done and which are waiting, without walking Prev/Next
+          //// through the whole workout. Asked for on 01.09. */}
+      <button className="muted small" style={{ marginBottom: 6, background: 'none', border: 0, padding: 0, font: 'inherit', color: 'inherit', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}
+        onClick={() => workoutOutlineSheet(idx => update(s => { s.active.cur = idx }, true))}>
+        {isSuperset ? t('Superset {0} / {1}', unitIdx + 1, units.length) : t('Exercise {0} / {1}', unitIdx + 1, units.length)}
+        <Icon name="chevronDown" style={{ fontSize: 11 }} />
+      </button>
       <div className="workout-swipe-surface" data-testid="workout-swipe-surface"
         onPointerDown={onSwipePointerDown}
         onPointerUp={event => finishSwipe(event, true)}

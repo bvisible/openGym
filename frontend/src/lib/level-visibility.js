@@ -77,3 +77,17 @@ export const showsSetIntensifierChips = (S, intensified) =>
  *  `hasWarmups` = this exercise already has warm-up rows in the session. */
 export const showsInSessionWarmup = (S, hasWarmups) =>
   atLeast(S, 'full') || Boolean(hasWarmups)
+
+/** The "Rest-pause rest" row in Settings.
+ *
+ *  Found by views/jargon.level.test.jsx: it was drawn unconditionally, so a
+ *  beginner's Settings screen carried the words "rest-pause" for a technique
+ *  they will never see offered anywhere else at their level. Hiding a control
+ *  while the term it names sits in Settings is the worst of both.
+ *
+ *  Kept once the member has moved it off the default: they changed it, so they
+ *  know what it is, and taking it away would be the trap this whole module
+ *  exists to avoid.
+ */
+export const showsRestPauseSetting = (S, defaultSec = 15) =>
+  atLeast(S, 'full') || Number((S && S.restPauseSec) ?? defaultSec) !== defaultSec

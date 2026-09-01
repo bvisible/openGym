@@ -12,7 +12,7 @@ import { describe, expect, it } from 'vitest'
 import {
   showsBodyMap, showsEffortHistogram, showsEquipmentProfiles, showsEstimated1RM,
   showsEffortSetting, showsIntensifier, showsSupersetControl, showsWarmupRamp,
-  showsSetIntensifierChips, showsInSessionWarmup,
+  showsSetIntensifierChips, showsInSessionWarmup, showsRestPauseSetting,
 } from './level-visibility.js'
 
 const FULL = { level: 'full' }
@@ -146,5 +146,21 @@ describe('the live session screen follows the same rules', () => {
     // cannot match or warm-up rows they cannot extend.
     expect(showsSetIntensifierChips(SIMPLE, true)).toBe(true)
     expect(showsInSessionWarmup(NORMAL, true)).toBe(true)
+  })
+})
+
+describe('the rest-pause setting', () => {
+  it('is hidden below the full level', () => {
+    // It carried the words "rest-pause" onto a beginner's Settings screen for
+    // a technique nothing else at their level offers.
+    expect(showsRestPauseSetting(SIMPLE)).toBe(false)
+    expect(showsRestPauseSetting(NORMAL)).toBe(false)
+    expect(showsRestPauseSetting(FULL)).toBe(true)
+  })
+
+  it('stays once the member has moved it off the default', () => {
+    // Same exception as everywhere: they changed it, so they know what it is.
+    expect(showsRestPauseSetting({ ...SIMPLE, restPauseSec: 30 })).toBe(true)
+    expect(showsRestPauseSetting({ ...SIMPLE, restPauseSec: 15 })).toBe(false)
   })
 })

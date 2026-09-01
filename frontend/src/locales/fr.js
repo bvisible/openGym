@@ -1111,4 +1111,9 @@ export default {
   'To start: {0} {1}, from your {2}': 'Pour commencer : {0} {1}, d’après votre {2}',
   'Use it': 'Utiliser',
   '{0} more advanced exercises hidden': '{0} exercices plus avancés masqués',
+  //// Neoffice — the session outline: what is done, what is left.
+  'This workout': 'Cette séance',
+  'in progress': 'en cours',
+  '{0} of {1} exercises done': '{0} exercices terminés sur {1}',
+  '{0} of {1} sets': '{0} séries sur {1}',
 }

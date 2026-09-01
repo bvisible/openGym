@@ -39,11 +39,13 @@ describe('Brazilian Portuguese locale', () => {
 //// Recomputed again for the exercise level filter: four inherited, two
 //// overridden — "A mostrar" is the European progressive (Brazil uses the
 //// gerund) and "convém" is stiff there next to "combina comigo".
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(350)
-    expect(inherited).toHaveLength(691)
+//// Recomputed for the session outline: three inherited, "em curso" became
+//// an override ("em andamento" is what Brazil says of something running).
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(351)
+    expect(inherited).toHaveLength(694)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('c8299b88ffe6a451c303b2c01bc862c53002bd27f8c4e86a3d60f8bb4bf5d59e')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('9e36124d55afd5f548de2cff27beef6cea5063fbc298ebdb3fefadd582198e45')
   })
 
   test('does not leak European Portuguese UI terms', () => {

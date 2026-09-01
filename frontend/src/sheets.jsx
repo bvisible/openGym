@@ -181,6 +181,67 @@ export function bwSheet(opts = {}) {
   return h
 }
 
+/* ============================ where am I in this workout ============================ */
+//// Neoffice — added: the session at a glance.
+////
+//// Asked for by Jérémy, 01.09: *"avoir un peu cette vue générale de qu'est-ce
+//// que j'ai fait, qu'est-ce qui me reste à faire"*.
+////
+//// The workout screen already counts — "1/6 séries", "Exercice 2 / 2", a
+//// progress bar. What it could not answer is WHICH ones are left: exercises
+//// are shown one at a time, so finding out meant tapping Prev/Next through the
+//// whole session. Fine for three exercises, not for eight.
+////
+//// Deliberately a list and not a second workout screen: it says what is done,
+//// what is running and what is waiting, and a tap goes there. Editing stays
+//// where editing already works.
+////
+//// No level gate: counting your own sets is not a technique, and a beginner
+//// needs this more than anyone.
+function WorkoutOutline({ onPick, close }) {
+  const st = useStore(s => s.S)
+  const A = st.active
+  if (!A) return null
+
+  const rows = (A.entries || []).map((e, idx) => {
+    const sets = e.sets || []
+    //// Warm-up rows are excluded on purpose: they are excluded from volume and
+    //// from records everywhere else, and counting them here would tell a member
+    //// they have "4 of 6" when they have done one working set.
+    const work = sets.filter(x => !isWarmupRow(x))
+    const done = work.filter(x => x.done).length
+    return { idx, e, done, total: work.length, ex: exOr(st, e.id) }
+  })
+
+  return <>
+    <h3>{t('This workout')}</h3>
+    <div className="muted small" style={{ marginBottom: 10 }}>
+      {t('{0} of {1} exercises done', rows.filter(r => r.total && r.done >= r.total).length, rows.length)}
+    </div>
+    <div className="list">
+      {rows.map(r => {
+        const finished = r.total > 0 && r.done >= r.total
+        const current = r.idx === A.cur
+        return <div key={r.e.id + r.idx} className="item" {...tappable(() => { close(); onPick(r.idx) })}>
+          <div className="thumb thumb-x" style={{ color: finished ? 'var(--green)' : current ? 'var(--acc)' : undefined }}>
+            <Icon name={finished ? 'check' : current ? 'play' : 'circle'} />
+          </div>
+          <div className="grow">
+            <div className="tt">{r.ex ? exerciseNameFor(r.ex) : r.e.id}</div>
+            {/* The count in the member's terms — "2 séries sur 3", not "2/3". */}
+            <div className="ss">{t('{0} of {1} sets', r.done, r.total)}
+              {current && !finished ? ' · ' + t('in progress') : ''}</div>
+          </div>
+          <Icon name="chev" className="chev" />
+        </div>
+      })}
+    </div>
+  </>
+}
+
+export const workoutOutlineSheet = onPick =>
+  ui().openSheet(close => <WorkoutOutline onPick={onPick} close={close} />)
+
 /* ============================ import from another app ============================ */
 // Shows what a parsed export would actually do before anything is written. An import is
 // the one action where "just try it" is expensive — it's someone's entire training

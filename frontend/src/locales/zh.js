@@ -1020,4 +1020,9 @@ export default {
   'To start: {0} {1}, from your {2}': '建议起始：{0} {1}，参考您的{2}',
   'Use it': '使用',
   '{0} more advanced exercises hidden': '已隐藏 {0} 个进阶动作',
+  //// Neoffice — the session outline: what is done, what is left.
+  'This workout': '本次训练',
+  'in progress': '进行中',
+  '{0} of {1} exercises done': '已完成 {0}/{1} 个动作',
+  '{0} of {1} sets': '{0}/{1} 组',
 }

@@ -4,6 +4,11 @@
 import pt from './pt.js'
 
 export const PT_BR_OVERRIDES = {
+  //// Neoffice — session outline, reviewed for Brazil. Three of the four are
+  //// identical on both sides and stay inherited. "em curso" is understood
+  //// in Brazil but "em andamento" is what is actually said of something
+  //// running right now.
+  'in progress': 'em andamento',
   //// Neoffice — exercise level filter, reviewed for Brazil. Four of the six
   //// new strings are identical on both sides and stay inherited. These two
   //// are not:

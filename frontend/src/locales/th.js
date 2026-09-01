@@ -995,4 +995,9 @@ export default {
   'To start: {0} {1}, from your {2}': 'เริ่มที่: {0} {1} อ้างอิงจาก {2} ของคุณ',
   'Use it': 'ใช้ค่านี้',
   '{0} more advanced exercises hidden': 'ซ่อนท่าขั้นสูงไว้ {0} ท่า',
+  //// Neoffice — the session outline: what is done, what is left.
+  'This workout': 'การฝึกครั้งนี้',
+  'in progress': 'กำลังทำ',
+  '{0} of {1} exercises done': 'ทำครบ {0} จาก {1} ท่า',
+  '{0} of {1} sets': '{0} จาก {1} เซต',
 }
