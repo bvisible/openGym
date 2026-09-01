@@ -235,7 +235,7 @@ export default {
   'Rest (s)': 'Odpoczynek (s)',
   'Rest after each set of this exercise. Leave at 0 to use your default rest timer.': 'Odpoczynek po każdej serii tego ćwiczenia. Zostaw 0, żeby użyć domyślnego minutnika przerwy.',
   'Drop-set / rest-pause': 'Seria zniżkująca / rest-pause',
-  'Intensifier': 'Technika intensyfikująca',
+  'Intensifier': 'Metoda intensyfikacji',
   'None': 'Brak',
   'Drop-set': 'Seria zniżkująca',
   'Rest-pause': 'Rest-pause',

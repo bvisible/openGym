@@ -235,7 +235,7 @@ export default {
   'Rest (s)': 'Dinlenme (sn)',
   'Rest after each set of this exercise. Leave at 0 to use your default rest timer.': 'Bu egzersizin her setinden sonraki dinlenme. Varsayılan dinlenme sayacını kullanmak için 0 bırak.',
   'Drop-set / rest-pause': 'Düşüş seti / rest-pause',
-  'Intensifier': 'Yoğunlaştırıcı',
+  'Intensifier': 'Yoğunlaştırma yöntemi',
   'None': 'Yok',
   'Drop-set': 'Düşüş seti',
   'Rest-pause': 'Rest-pause',

@@ -235,7 +235,7 @@ export default {
   'Rest (s)': 'आराम (सेकंड)',
   'Rest after each set of this exercise. Leave at 0 to use your default rest timer.': 'इस एक्सरसाइज़ के हर सेट के बाद आराम। अपना डिफ़ॉल्ट आराम टाइमर इस्तेमाल करने के लिए इसे 0 रहने दें।',
   'Drop-set / rest-pause': 'ड्रॉप सेट / रेस्ट-पॉज़',
-  'Intensifier': 'इंटेंसिफायर',
+  'Intensifier': 'तीव्रता विधि',
   'None': 'कोई नहीं',
   'Drop-set': 'ड्रॉप सेट',
   'Rest-pause': 'रेस्ट-पॉज़',

@@ -176,7 +176,7 @@ export default {
   'Remove burst': 'ลบเบิร์สต์',
   'Rest (s)': 'พัก (วินาที)',
   'Drop-set / rest-pause': 'ดรอปเซ็ต / เรสต์-พอส',
-  'Intensifier': 'เทคนิคเพิ่มความหนัก',
+  'Intensifier': 'วิธีเพิ่มความเข้ม',
   'None': 'ไม่มี',
   'Drop-set': 'ดรอปเซ็ต',
   'Rest-pause': 'เรสต์-พอส',

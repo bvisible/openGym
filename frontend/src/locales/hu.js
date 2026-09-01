@@ -177,7 +177,7 @@ export default {
   'Rest-pause': 'Rest-pause',
   'Drop-set': 'Dropszett',
   'None': 'Nincs',
-  'Intensifier': 'Intenzitásnövelő',
+  'Intensifier': 'Intenzitásnövelő módszer',
   'Drop-set / rest-pause': 'Dropszett / rest-pause',
   'Rest (s)': 'Pihenő (másodperc)',
   'Remove burst': 'Burst eltávolítása',

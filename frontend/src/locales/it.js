@@ -235,7 +235,7 @@ export default {
   'Rest (s)': 'Recupero (s)',
   'Rest after each set of this exercise. Leave at 0 to use your default rest timer.': 'Recupero dopo ogni serie di questo esercizio. Lascialo a 0 per usare il timer di riposo predefinito.',
   'Drop-set / rest-pause': 'Drop-set / rest-pause',
-  'Intensifier': 'Intensificatore',
+  'Intensifier': 'Metodo di intensificazione',
   'None': 'Nessuno',
   'Drop-set': 'Drop-set',
   'Rest-pause': 'Rest-pause',
