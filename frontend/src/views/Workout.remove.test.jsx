@@ -42,10 +42,6 @@ function renderWorkout(entries) {
   act(() => root.render(<MemoryRouter><Workout /></MemoryRouter>))
 }
 
-function removeButton() {
-  return [...container.querySelectorAll('button')].find(button => button.textContent.includes('Remove exercise'))
-}
-
 function renderTopSheet() {
   if (sheetRoot) act(() => sheetRoot.unmount())
   if (sheetContainer) sheetContainer.remove()
@@ -56,6 +52,57 @@ function renderTopSheet() {
   sheetRoot = createRoot(sheetContainer)
   act(() => sheetRoot.render(sheet.render(() => useUI.getState().closeSheet(sheet.id))))
   return sheetContainer
+}
+
+//// Neoffice — the editing actions moved off the workout screen and behind the
+//// ⋯ button on the exercise (01.09: five editing buttons were stacked under
+//// the sets of a session somebody came to PERFORM). The behaviour under test
+//// is unchanged; only where you reach it is. Opening the sheet here rather
+//// than weakening the assertions keeps the test on the real path a member
+//// takes.
+////
+//// Mounted into its OWN container rather than through renderTopSheet(): that
+//// helper unmounts and remounts in one flow, and the editing sheet came back
+//// empty from it. The confirm dialog that removal opens is still read through
+//// renderTopSheet, which is what that helper is for.
+let editRoot = null
+let editContainer = null
+
+function openEditSheet() {
+  const more = container.querySelector('button[aria-label="Edit the session"]')
+  //: No ⋯ at all — an empty freestyle session has no exercise header, and
+  //: "hides the remove control" is a test of its own, so answer rather than throw.
+  if (!more) return null
+  act(() => more.click())
+  const sheet = useUI.getState().sheets.at(-1)
+  expect(sheet, 'the ⋯ button opened no sheet').toBeTruthy()
+  if (editRoot) act(() => editRoot.unmount())
+  editContainer?.remove()
+  editContainer = document.createElement('div')
+  document.body.appendChild(editContainer)
+  editRoot = createRoot(editContainer)
+  act(() => editRoot.render(sheet.render(() => useUI.getState().closeSheet(sheet.id))))
+  //: This file runs on fake timers, and React 18 schedules its first paint
+  //: through the timer queue. Without draining it, a root mounted mid-test
+  //: renders NOTHING and every lookup below silently returns undefined —
+  //: which reads as "the button is gone" rather than "the root never painted".
+  act(() => { vi.advanceTimersByTime(0) })
+  return editContainer
+}
+
+//: removeButton() MOUNTS a root (the editing sheet), and mounting inside an
+//: act() callback leaves React with nothing painted — every lookup then returns
+//: undefined, which reads as "the button is gone". Find first, click after.
+function clickRemove() {
+  const button = removeButton()
+  act(() => button.click())
+}
+
+function removeButton() {
+  const sheet = openEditSheet()
+  if (!sheet) return undefined
+  return [...sheet.querySelectorAll('button, .item')]
+    .find(el => el.textContent.includes('Remove exercise'))
 }
 
 beforeEach(() => {
@@ -151,7 +198,7 @@ describe('active-session exercise removal', () => {
   it('does not mutate before confirmation, leaves state unchanged on Cancel, and removes on Confirm', () => {
     renderWorkout([entry('1001'), entry('1002')])
 
-    act(() => removeButton().click())
+    clickRemove()
     expect(useStore.getState().S.active.entries.map(e => e.id)).toEqual(['1001', '1002'])
 
     let dialog = renderTopSheet()
@@ -159,7 +206,7 @@ describe('active-session exercise removal', () => {
     act(() => cancel.click())
     expect(useStore.getState().S.active.entries.map(e => e.id)).toEqual(['1001', '1002'])
 
-    act(() => removeButton().click())
+    clickRemove()
     dialog = renderTopSheet()
     const confirm = [...dialog.querySelectorAll('button')].find(button => button.textContent === 'Remove')
     act(() => confirm.click())
@@ -173,7 +220,7 @@ describe('active-session exercise removal', () => {
       s.active.entries[1].target.marker = 'remove-second'
     }, false)
 
-    act(() => removeButton().click())
+    clickRemove()
     const chooser = renderTopSheet()
     const choices = [...chooser.querySelectorAll('.item')]
     expect(choices).toHaveLength(2)

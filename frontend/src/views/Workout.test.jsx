@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { parseHTML } from 'linkedom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Workout from './Workout.jsx'
+import { useUI } from '../store/useUI.js'
 
 const mocks = vi.hoisted(() => {
   const state = {
@@ -32,6 +33,19 @@ const mocks = vi.hoisted(() => {
       state.S = next
     },
   })
+  //// Neoffice — sheets/openSheet/closeSheet, because the editing controls
+  //// (move, swap, remove) now live in a sheet rather than under the sets. A
+  //// mock that omits what the code calls does not fail loudly here: openSheet
+  //// would simply be undefined and the ⋯ button would throw on click.
+  state.sheets = []
+  state.openSheet = render => {
+    const sheet = { id: 's' + state.sheets.length, render }
+    state.sheets = [...state.sheets, sheet]
+    return sheet
+  }
+  state.closeSheet = id => { state.sheets = state.sheets.filter(x => x.id !== id) }
+  state.editOpts = null
+  state.workoutEditSheet = vi.fn(opts => { state.editOpts = opts })
   state.uiSnapshot = () => ({
     timer: state.timer,
     work: state.work,
@@ -41,6 +55,9 @@ const mocks = vi.hoisted(() => {
     shiftRestOwner: vi.fn(),
     startWork: vi.fn(),
     toast: state.toast,
+    sheets: state.sheets,
+    openSheet: state.openSheet,
+    closeSheet: state.closeSheet,
   })
   return state
 })
@@ -58,6 +75,14 @@ vi.mock('../store/useUI.js', () => {
 })
 vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))
 vi.mock('../sheets.jsx', () => ({
+  //// Neoffice — the editing controls (add / move / swap / remove) moved into a
+  //// sheet behind the ⋯ button. This mock CAPTURES the options the screen
+  //// hands it, which is what these tests are about: they assert the LOGIC of
+  //// moving and inserting, and the sheet's own rendering is covered by
+  //// sheets.outline.test.jsx and the level tests. A missing export here is a
+  //// render crash, exactly as the note below says.
+  workoutEditSheet: mocks.workoutEditSheet,
+  workoutOutlineSheet: vi.fn(),
   startFlow: vi.fn(),
   exercisePicker: mocks.exercisePicker,
   exConfigSheet: mocks.exConfigSheet,
@@ -156,10 +181,14 @@ async function rerender() {
 }
 
 async function addExerciseThroughSheets(ex = { id: 'added-exercise' }, cfg = { mode: 'reps', sets: 1, reps: 5, weight: 0 }) {
-  const addButton = [...container.querySelectorAll('button')]
-    .find(button => button.textContent.trim() === 'Add exercise')
-  expect(addButton).toBeTruthy()
-  await act(async () => { addButton.dispatchEvent(new dom.Event('click', { bubbles: true })) })
+  //// "Add exercise" moved into the editing sheet behind the ⋯ button, with the
+  //// rest of the editing actions. The flow it starts — picker, then config —
+  //// is unchanged, and that is what the rest of this helper asserts.
+  const more = container.querySelector('button[aria-label="Edit the session"]')
+  expect(more, 'the ⋯ button is missing from the exercise header').toBeTruthy()
+  act(() => { more.dispatchEvent(new dom.Event('click', { bubbles: true })) })
+  expect(mocks.editOpts, 'the ⋯ button opened no sheet').toBeTruthy()
+  await act(async () => { mocks.editOpts.onAdd() })
 
   const pickerCall = mocks.exercisePicker.mock.calls.at(-1)
   expect(pickerCall?.[0]).toEqual(expect.any(Function))
@@ -179,6 +208,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mocks.timer = null
   mocks.work = null
+  mocks.sheets = []
   mocks.scrollCalls.length = 0
 })
 
@@ -629,7 +659,30 @@ describe('superset actionable-set centring', () => {
 })
 
 describe('active workout whole-unit move controls', () => {
-  const action = label => container.querySelector(`button[aria-label="${label}"]`)
+  //// Neoffice — the move / swap / remove controls moved off the workout screen
+  //// and behind the ⋯ button on the exercise (01.09: five editing buttons were
+  //// stacked under the sets of a session somebody came to PERFORM). What these
+  //// tests assert — which unit moves, and when a move is refused — is
+  //// unchanged; only the path to it is. The screen hands the sheet its
+  //// options, and reading those is the same contract as reading the buttons
+  //// was, without duplicating the sheet's own rendering test.
+  const openEdit = () => {
+    const more = container.querySelector('button[aria-label="Edit the session"]')
+    expect(more, 'the ⋯ button is missing from the exercise header').toBeTruthy()
+    act(() => { more.dispatchEvent(new dom.Event('click', { bubbles: true })) })
+    expect(mocks.editOpts, 'the ⋯ button opened no sheet').toBeTruthy()
+    return mocks.editOpts
+  }
+
+  //: Mirrors what the sheet draws for each control, so the assertions below read
+  //: the same way they did when these were buttons on the screen.
+  const action = label => {
+    const opts = openEdit()
+    if (label === 'Move up') return { disabled: opts.busy || !opts.canUp, run: () => opts.onMove(-1) }
+    if (label === 'Move down') return { disabled: opts.busy || !opts.canDown, run: () => opts.onMove(1) }
+    if (label === 'Swap exercise') return { disabled: opts.busy, run: opts.onSwap }
+    return null
+  }
 
   it('shows labelled controls and moves the selected standalone exercise one unit', async () => {
     const selected = exercise('duplicate', [false], {
@@ -643,9 +696,16 @@ describe('active workout whole-unit move controls', () => {
       selected,
     ], 2)
 
-    expect(action('Move up')?.textContent.trim()).toBe('Move up')
-    expect(action('Move down')?.textContent.trim()).toBe('Move down')
-    await act(async () => { action('Move up').dispatchEvent(new dom.Event('click', { bubbles: true })) })
+    //// The visible label is short inside the sheet ("Up"/"Down") because the
+    //// row above it already says what is being moved. The identity a test —
+    //// and a screen reader — relies on is the aria-label.
+    //// The selected exercise is the LAST of three, so the sheet offers the
+    //// move up and refuses the move down — which is the state itself, not just
+    //// the presence of two controls.
+    expect(action('Move up').disabled).toBe(false)
+    expect(action('Move down').disabled).toBe(true)
+    const moveup = action('Move up')
+    await act(async () => { moveup.run() })
 
     expect(mocks.S.active.entries.map(entry => entry.occurrenceId || entry.id)).toEqual(['duplicate#1', 'duplicate#2', 'middle'])
     expect(mocks.S.active.entries[1]).toEqual(selected)
@@ -668,7 +728,8 @@ describe('active workout whole-unit move controls', () => {
     ], 2)
     mocks.S.active.groupMeta = groupMeta
 
-    await act(async () => { action('Move up').dispatchEvent(new dom.Event('click', { bubbles: true })) })
+    const moveup = action('Move up')
+    await act(async () => { moveup.run() })
 
     expect(mocks.S.active.entries.map(entry => entry.id)).toEqual(['group-a', 'group-b', 'before', 'after'])
     expect(mocks.S.active.entries.slice(0, 2)).toEqual([first, selected])
@@ -690,9 +751,11 @@ describe('active exercise swap control', () => {
   it('opens the swap flow for the selected duplicate occurrence', async () => {
     await mount([exercise('bench', [false]), exercise('bench', [false]), exercise('row', [false])], 1)
 
-    const swap = container.querySelector('button[aria-label="Swap exercise"]')
-    expect(swap).toBeTruthy()
-    await act(async () => { swap.dispatchEvent(new dom.Event('click', { bubbles: true })) })
+    //// Swap moved into the editing sheet with the rest of the editing actions.
+    const more = container.querySelector('button[aria-label="Edit the session"]')
+    expect(more).toBeTruthy()
+    act(() => { more.dispatchEvent(new dom.Event('click', { bubbles: true })) })
+    await act(async () => { mocks.editOpts.onSwap() })
 
     expect(mocks.swapActiveWorkoutExercise).toHaveBeenCalledOnce()
     expect(mocks.swapActiveWorkoutExercise).toHaveBeenCalledWith(1)

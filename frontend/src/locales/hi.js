@@ -1025,4 +1025,10 @@ export default {
   'in progress': 'चल रहा है',
   '{0} of {1} exercises done': '{1} में से {0} व्यायाम पूर्ण',
   '{0} / {1} sets': '{0} / {1} सेट',
+  //// Neoffice — the editing actions, moved off the workout screen.
+  'Down': 'नीचे',
+  'Edit the session': 'सत्र संपादित करें',
+  'Keep the sets, change the movement': 'सेट रखें, व्यायाम बदलें',
+  'Move in the session': 'सत्र में ले जाएँ',
+  'Up': 'ऊपर',
 }

@@ -253,6 +253,61 @@ function WorkoutOutline({ onPick, close }) {
 export const workoutOutlineSheet = onPick =>
   ui().openSheet(close => <WorkoutOutline onPick={onPick} close={close} />)
 
+/* ============================ edit the session ============================ */
+//// Neoffice — added: the editing actions, off the workout screen.
+////
+//// Jérémy, 01.09, looking at the screen: *"ça a l'air drôlement compliqué,
+//// non ? […] l'application doit être la plus simple à utiliser au monde"*.
+////
+//// He was right, and the count says so: under the sets there were SEVEN
+//// stacked blocks — Prev/Next, Add exercise, Move up/Move down, Swap
+//// exercise, Remove exercise, Add session note, Finish. Five of those seven
+//// are EDITING the session, offered permanently to somebody who came to do
+//// their sets.
+////
+//// They are not removed — a member mid-session does swap an exercise when a
+//// machine is taken, and does drop one when their shoulder complains. They
+//// are one tap away instead of five buttons deep in the page, which is the
+//// difference between a journal and a form.
+function WorkoutEdit({ onAdd, onMove, onSwap, onRemove, canUp, canDown, busy, close }) {
+  const act = fn => () => { close(); fn() }
+  return <>
+    <h3>{t('Edit the session')}</h3>
+    <div className="list">
+      {/* //// Real <button> elements and not tappable divs: these three can be
+          //// DISABLED (a timed hold is running and the indexes must not shift),
+          //// and `disabled` on a div means nothing — to the browser, to a
+          //// screen reader, or to a test. */}
+      <button type="button" className="item" onClick={act(onAdd)}>
+        <div className="thumb thumb-x"><Icon name="plus" /></div>
+        <div className="grow"><div className="tt">{t('Add exercise')}</div></div>
+      </button>
+      {/* Move up/down read as one thing — where this exercise sits — so they
+          share a row rather than being two more entries in a list. */}
+      <div className="item" style={{ gap: 8 }}>
+        <div className="thumb thumb-x"><Icon name="chevronUp" /></div>
+        <div className="grow"><div className="tt">{t('Move in the session')}</div></div>
+        <Button size="sm" icon="chevronUp" aria-label={t('Move up')} disabled={busy || !canUp}
+          onClick={act(() => onMove(-1))}>{t('Up')}</Button>
+        <Button size="sm" icon="chevronDown" aria-label={t('Move down')} disabled={busy || !canDown}
+          onClick={act(() => onMove(1))}>{t('Down')}</Button>
+      </div>
+      <button type="button" className="item" disabled={busy} onClick={act(onSwap)}>
+        <div className="thumb thumb-x"><Icon name="shuffle" /></div>
+        <div className="grow"><div className="tt">{t('Swap exercise')}</div>
+          <div className="ss">{t('Keep the sets, change the movement')}</div></div>
+      </button>
+      <button type="button" className="item" disabled={busy} onClick={act(onRemove)}>
+        <div className="thumb thumb-x" style={{ color: 'var(--red)' }}><Icon name="minus" /></div>
+        <div className="grow"><div className="tt" style={{ color: 'var(--red)' }}>{t('Remove exercise')}</div></div>
+      </button>
+    </div>
+  </>
+}
+
+export const workoutEditSheet = opts =>
+  ui().openSheet(close => <WorkoutEdit {...opts} close={close} />)
+
 /* ============================ import from another app ============================ */
 // Shows what a parsed export would actually do before anything is written. An import is
 // the one action where "just try it" is expensive — it's someone's entire training

@@ -1025,4 +1025,10 @@ export default {
   'in progress': 'devam ediyor',
   '{0} of {1} exercises done': '{1} egzersizden {0} tanesi tamamlandı',
   '{0} / {1} sets': '{0} / {1} set',
+  //// Neoffice — the editing actions, moved off the workout screen.
+  'Down': 'Aşağı',
+  'Edit the session': 'Antrenmanı düzenle',
+  'Keep the sets, change the movement': 'Setleri koru, hareketi değiştir',
+  'Move in the session': 'Antrenmanda taşı',
+  'Up': 'Yukarı',
 }

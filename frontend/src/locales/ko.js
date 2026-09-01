@@ -1025,4 +1025,10 @@ export default {
   'in progress': '진행 중',
   '{0} of {1} exercises done': '운동 {1}개 중 {0}개 완료',
   '{0} / {1} sets': '{0} / {1} 세트',
+  //// Neoffice — the editing actions, moved off the workout screen.
+  'Down': '아래로',
+  'Edit the session': '운동 편집',
+  'Keep the sets, change the movement': '세트는 그대로, 동작만 변경',
+  'Move in the session': '운동 내에서 이동',
+  'Up': '위로',
 }

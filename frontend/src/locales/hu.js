@@ -992,4 +992,10 @@ export default {
   'in progress': 'folyamatban',
   '{0} of {1} exercises done': '{0}/{1} gyakorlat kész',
   '{0} / {1} sets': '{0} / {1} sorozat',
+  //// Neoffice — the editing actions, moved off the workout screen.
+  'Down': 'Le',
+  'Edit the session': 'Edzés szerkesztése',
+  'Keep the sets, change the movement': 'Sorozatok megtartása, gyakorlat cseréje',
+  'Move in the session': 'Mozgatás az edzésben',
+  'Up': 'Fel',
 }

@@ -1000,4 +1000,10 @@ export default {
   'in progress': 'กำลังทำ',
   '{0} of {1} exercises done': 'ทำครบ {0} จาก {1} ท่า',
   '{0} / {1} sets': '{0} / {1} เซต',
+  //// Neoffice — the editing actions, moved off the workout screen.
+  'Down': 'ลง',
+  'Edit the session': 'แก้ไขการฝึก',
+  'Keep the sets, change the movement': 'คงเซตไว้ เปลี่ยนท่า',
+  'Move in the session': 'ย้ายในการฝึก',
+  'Up': 'ขึ้น',
 }

@@ -1042,4 +1042,10 @@ export default {
   'in progress': 'läuft',
   '{0} of {1} exercises done': '{0} von {1} Übungen erledigt',
   '{0} / {1} sets': '{0} / {1} Sätze',
+  //// Neoffice — the editing actions, moved off the workout screen.
+  'Down': 'Runter',
+  'Edit the session': 'Training bearbeiten',
+  'Keep the sets, change the movement': 'Sätze behalten, Übung wechseln',
+  'Move in the session': 'Im Training verschieben',
+  'Up': 'Hoch',
 }
