@@ -1,6 +1,10 @@
 /* openGym service worker — runtime caching (works with Vite's hashed asset names).
    Media (img/gif) cache-first; everything else network-first with offline fallback. */
-const CACHE = 'opengym-rt-v1'
+//// Neoffice — bumped to v2 to DROP what is already out there. The activate
+//// handler deletes every cache whose name is not the current one, so the
+//// rename is what evicts the signed-out shells already sitting on members'
+//// phones. Without it the fix ships and the symptom stays.
+const CACHE = 'opengym-rt-v2'
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', e => {
@@ -49,6 +53,23 @@ self.addEventListener('notificationclick', e => {
 //// worse than no answer.
 const SHELL = '/gym'
 
+//// Neoffice — added. Caches a response, unless it is an app shell rendered for
+//// a signed-out visitor. Reads the clone as text rather than trusting the URL:
+//// the shell is served at /gym, but also at /gym/ and with query strings, and
+//// a check on the path alone has already been wrong here.
+async function cacheIfUsable(request, response) {
+  const type = response.headers.get('content-type') || ''
+  if (type.includes('text/html')) {
+    const body = await response.clone().text()
+    //// The boot payload prints `"user": null` for a guest. Anything else —
+    //// including a page with no boot at all — is cached as before.
+    if (/"user":\s*null/.test(body)) return
+  }
+  const c = await caches.open(CACHE)
+  return c.put(request, response)
+}
+
+
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url)
   if (e.request.method !== 'GET' || url.origin !== location.origin) return
@@ -68,7 +89,26 @@ self.addEventListener('fetch', e => {
       if (res.ok) {
         //// Neoffice — same fix, and waitUntil so the write outlives the response.
         const copy = res.clone()
-        e.waitUntil(caches.open(CACHE).then(c => c.put(e.request, copy)))
+        //// 🔴 …but NEVER cache a SIGNED-OUT shell.
+        ////
+        //// /gym is rendered by Frappe and carries the session: the boot payload
+        //// holds the member's name and the CSRF token, or `"user": null` when
+        //// nobody is signed in. Cached as an ordinary page, a signed-out shell
+        //// becomes the offline fallback — and the next launch that starts
+        //// before the network is up (a phone waking on Wi-Fi, every morning)
+        //// is served it, showing the app SIGNED OUT while the cookie is still
+        //// perfectly valid.
+        ////
+        //// Reported 2026-09-01: "ce matin j'ai relancé l'application et j'étais
+        //// à nouveau déconnecté". The session itself was never the problem —
+        //// measured 30 days on the cookie, surviving clear-cache, session purge,
+        //// concurrent logins and a bench restart.
+        ////
+        //// So the shell is cached only when it carries a signed-in boot. Worst
+        //// case there is simply no offline shell until the member opens the app
+        //// online once, which is the honest failure: no fallback beats a
+        //// fallback that signs people out.
+        e.waitUntil(cacheIfUsable(e.request, copy))
       }
       return res
     }).catch(() =>
