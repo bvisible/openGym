@@ -38,7 +38,17 @@ export const DEF = {
   //// English and switching a beat later is a flash of the wrong language on
   //// every cold start. `timerFlash` is upstream's, added in v1.2.14.
   unit: 'kg', restSec: 90, restPauseSec: 15, sound: true, timerFlash: false, keepAwake: true, lang: bootLang(),
-  theme: 'dark', accent: 'lime', body: 'male', targetW: null,
+  //// Neoffice — 'system' and not 'dark'. Upstream ships a dark journal, and the
+  //// three-way control (Sombre / Clair / Système) has always been there — only
+  //// the default was a fixed choice, so a phone in light mode opened a black
+  //// app for no reason it could explain. Asked for on 01.09: *"est-ce qu'on
+  //// peut se synchroniser avec le thème du téléphone"*.
+  ////
+  //// Only NEW journals are affected: a member who already has a state keeps
+  //// whatever it holds, including a 'dark' they never actively picked. Changing
+  //// the appearance of an app under somebody who did not ask is worse than a
+  //// default that was wrong for a while.
+  theme: 'system', accent: 'lime', body: 'male', targetW: null,
   bodyweight: [], routines: [], week: {}, dayPlan: {},
   exWeights: {}, workouts: [], active: null, customEx: [], gifSize: 'full',
   // effort: which per-set effort scale is logged — 'none' | 'rir' | 'rpe'. null, not 'none', so
