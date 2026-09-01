@@ -4,6 +4,16 @@
 import pt from './pt.js'
 
 export const PT_BR_OVERRIDES = {
+  //// Neoffice — exercise level filter, reviewed for Brazil. Four of the six
+  //// new strings are identical on both sides and stay inherited. These two
+  //// are not:
+  ////   * pt-PT's "A mostrar…" is the European progressive; Brazil uses the
+  ////     gerund. "A mostrar todos os exercícios" reads as foreign there —
+  ////     it is the single most recognisable pt-PT/pt-BR tell in UI copy.
+  ////   * "convém" is understood but stiff in Brazil; "combina comigo" is
+  ////     what somebody would actually say about a training programme.
+  'Showing every exercise': 'Mostrando todos os exercícios',
+  'Show what suits me': 'Mostrar o que combina comigo',
   //// Neoffice — accessibility labels, reviewed for Brazil. "Aumentar",
   //// "Diminuir", "Limpar", "Semana anterior" and "Mês anterior" are the
   //// same on both sides of the Atlantic and stay inherited. These two are

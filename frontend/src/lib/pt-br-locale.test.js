@@ -36,11 +36,14 @@ describe('Brazilian Portuguese locale', () => {
 //// Recomputed 31.08 for the seven accessibility labels: five are identical
 //// on both sides and stay inherited, "Next week"/"Next month" became
 //// pt-BR overrides ("próxima/próximo" rather than pt-PT's "seguinte").
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(348)
-    expect(inherited).toHaveLength(687)
+//// Recomputed again for the exercise level filter: four inherited, two
+//// overridden — "A mostrar" is the European progressive (Brazil uses the
+//// gerund) and "convém" is stiff there next to "combina comigo".
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(350)
+    expect(inherited).toHaveLength(691)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('1dab7a10c87c7b00b951b1b448b459b5f6c8938704504c5dc88483e1bebef858')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('c8299b88ffe6a451c303b2c01bc862c53002bd27f8c4e86a3d60f8bb4bf5d59e')
   })
 
   test('does not leak European Portuguese UI terms', () => {

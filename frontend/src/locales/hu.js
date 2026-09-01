@@ -979,4 +979,12 @@ export default {
   'Next week': 'Következő hét',
   'Previous month': 'Előző hónap',
   'Next month': 'Következő hónap',
+  //// Neoffice — the level filter on the exercise catalogue, and the starting
+  //// load derived from what the member already lifts.
+  'Show every exercise': 'Összes gyakorlat mutatása',
+  'Show what suits me': 'Nekem valók mutatása',
+  'Showing every exercise': 'Minden gyakorlat látható',
+  'To start: {0} {1}, from your {2}': 'Kezdésnek: {0} {1}, a(z) {2} alapján',
+  'Use it': 'Használom',
+  '{0} more advanced exercises hidden': '{0} haladóbb gyakorlat elrejtve',
 }

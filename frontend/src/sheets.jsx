@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useStore, isSimple, shouldAskWeighIn} from './store/useStore.js'
+//// Neoffice — which exercises are OFFERED at this level. Search is never
+//// filtered and nothing in use is ever hidden; see the module header.
+import { suitsLevel, levelFiltersExercises } from './lib/exercise-level.js'
+//// Neoffice — a first load for a movement never done, derived only from what
+//// this member already lifts. Null when there is nothing honest to say.
+import { suggestStartingLoad } from './lib/starting-load.js'
 import { useUI } from './store/useUI.js'
 import { EXDB, EXIDX, BODYPARTS, isCardio, isBodyweightEq, allExercises, equipmentOf, smOf, matchExercise, exOr } from './lib/exercises.js'
 import { activeProfile, exAvailable, ALL_EQUIPMENT, newProfile } from './lib/equipment.js'
@@ -725,6 +731,9 @@ function ExercisePicker({ onPick, close }) {
   const [bp, setBp] = useState('')          // '' = all, '★' = chosen, '@club' = the club's, else a body part
   const [eq, setEq] = useState('')          // '' = any equipment
   const [showAll, setShowAll] = useState(false)
+  //// Neoffice — the level filter, separate from showAll (equipment): a member
+  //// lifting the level filter has not asked to see equipment they do not own.
+  const [showEveryLevel, setShowEveryLevel] = useState(false)
   const [shown, setShown] = useState(50)
   const searchRef = useRef(null)
   const bpStrip = useRef(null), eqStrip = useRef(null)
@@ -746,7 +755,23 @@ function ExercisePicker({ onPick, close }) {
   const eqOpts = equipmentOf(eqFiltered)
   // Drop the equipment filter if the search narrowed it away, so you never hit a dead end.
   const eqOn = eqOpts.includes(eq) ? eq : ''
-  const f = eqOn ? eqFiltered.filter(e => e.eq === eqOn) : eqFiltered
+  const eqPicked = eqOn ? eqFiltered.filter(e => e.eq === eqOn) : eqFiltered
+  //// Neoffice — offer the movements that match the member's level, and only
+  //// while they are BROWSING. Three deliberate holes in this filter, each one
+  //// the difference between a simpler catalogue and a smaller product:
+  ////
+  ////   * `!q.trim()` — a search is never filtered. Type "snatch" and you get
+  ////     snatches at every level: a member whose coach prescribed one has to
+  ////     be able to log it, and an exercise you cannot find is
+  ////     indistinguishable from one that does not exist.
+  ////   * usage / favourites / club picks are never hidden (passed as `inUse`),
+  ////     so nothing disappears from under a running programme.
+  ////   * `showEveryLevel` is one tap and is written on screen below.
+  const levelOn = levelFiltersExercises(st) && !showEveryLevel && !q.trim()
+  const f = levelOn
+    ? eqPicked.filter(e => suitsLevel(st, e, usage[e.id] || favorites.has(e.id) || picks.has(e.id)))
+    : eqPicked
+  const hiddenByLevel = levelOn ? eqPicked.length - f.length : 0
   const chosenCount = Object.keys(usage).length
   useRevealActiveChip(bpStrip, bp)
   useRevealActiveChip(eqStrip, eqOn)
@@ -763,6 +788,19 @@ function ExercisePicker({ onPick, close }) {
         {showAll ? t('Filter by "{0}"', profile.name) : t('Show all equipment')}
       </button>
     </div>}
+    {/* //// Neoffice — the level filter, said out loud. A filter nobody can see
+        //// is indistinguishable from a catalogue that is simply missing things,
+        //// and the member would go looking for a bug. Drawn only when it is
+        //// actually removing something: an explanation for an invisible rule is
+        //// noise, and it must not appear on the full level at all. */}
+    {(hiddenByLevel > 0 || showEveryLevel) && levelFiltersExercises(st) && !q.trim() &&
+      <div className="small dim row" style={{ margin: '8px 0 2px', gap: 6, alignItems: 'center' }}>
+        <Icon name="sparkles" style={{ fontSize: 13 }} />
+        {showEveryLevel ? t('Showing every exercise') : t('{0} more advanced exercises hidden', hiddenByLevel)}
+        <button className="chip nocap" style={{ marginLeft: 'auto', padding: '3px 10px', fontSize: 12 }} onClick={() => { setShowEveryLevel(v => !v); setShown(50) }}>
+          {showEveryLevel ? t('Show what suits me') : t('Show every exercise')}
+        </button>
+      </div>}
     {/* //// Neoffice — our three chips (favourites, the club's picks, most used)
         //// with upstream's bpStrip ref (v1.2.14: the chip row owns the
         //// horizontal axis so a sideways swipe scrolls it instead of the page).
@@ -982,6 +1020,14 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
   const perSide = isPerSide(c)
   const progressionPolicy = policyFor({ ...c, id: ex.id }, routine, mode)
   const progressionStepInvalid = !progressionStepIsValid(progressionStepOf(c, mode, ex, st.unit), progressionPolicy)
+  //// Neoffice — a starting load for an exercise never done before. Offered
+  //// only while the weight is still 0: the moment the member types a number,
+  //// it is theirs and we have nothing to add. Derived from what THEY already
+  //// lift on a comparable movement, never from a table of norms — see
+  //// lib/starting-load.js for why that distinction is the whole module.
+  const startHint = (!cardio && !bw && !c.weight && mode !== 'cardio')
+    ? suggestStartingLoad(st, ex.id)
+    : null
   const activePolicy = policyFor({ ...c, id: ex.id }, routine, mode)
   const double = mode === 'reps' && activePolicy === 'double'
   // Keep whatever the other mode already had (sets, weight) and fill only what is missing.
@@ -1081,6 +1127,18 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
         {!bw && <Stepper label={t('Weight ({0})', st.unit)} value={c.weight} step={2.5} onChange={v => setC(x => ({ ...x, weight: v }))} />}
       </>}
     </div>
+    {/* //// Neoffice — the suggestion SAYS WHERE IT COMES FROM, and is applied by
+        //// a tap rather than pre-filled. A number that appears on its own reads
+        //// as the app knowing something about the member's strength that it
+        //// does not; naming the exercise it was derived from lets them judge
+        //// the reasoning — and disagree with it, which on a first attempt at a
+        //// new movement is the safe direction. */}
+    {startHint && <div className="small dim row" style={{ marginTop: -10, marginBottom: 18, gap: 8, alignItems: 'center' }}>
+      <Icon name="sparkles" style={{ fontSize: 13 }} />
+      {t('To start: {0} {1}, from your {2}', fmtNum(startHint.weight), st.unit, exerciseNameFor(EXIDX[startHint.fromId]) || startHint.fromName)}
+      <button className="chip nocap" style={{ marginLeft: 'auto', padding: '3px 10px', fontSize: 12 }}
+        onClick={() => setC(x => ({ ...x, weight: startHint.weight }))}>{t('Use it')}</button>
+    </div>}
     {c.intensifier?.type === 'restpause' && <div className="small dim" style={{ marginTop: -10, marginBottom: 18 }}>
       {t('Rest-pause always trains as one warm-up set at this rep count, then one rest-pause work set — "Sets" is not used.')}
     </div>}

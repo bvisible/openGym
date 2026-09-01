@@ -1012,4 +1012,12 @@ export default {
   'Next week': 'Следующая неделя',
   'Previous month': 'Предыдущий месяц',
   'Next month': 'Следующий месяц',
+  //// Neoffice — the level filter on the exercise catalogue, and the starting
+  //// load derived from what the member already lifts.
+  'Show every exercise': 'Показать все упражнения',
+  'Show what suits me': 'Показать подходящие',
+  'Showing every exercise': 'Показаны все упражнения',
+  'To start: {0} {1}, from your {2}': 'Для начала: {0} {1}, исходя из вашего {2}',
+  'Use it': 'Применить',
+  '{0} more advanced exercises hidden': 'Скрыто более сложных упражнений: {0}',
 }

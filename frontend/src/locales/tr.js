@@ -1012,4 +1012,12 @@ export default {
   'Next week': 'Sonraki hafta',
   'Previous month': 'Önceki ay',
   'Next month': 'Sonraki ay',
+  //// Neoffice — the level filter on the exercise catalogue, and the starting
+  //// load derived from what the member already lifts.
+  'Show every exercise': 'Tüm egzersizleri göster',
+  'Show what suits me': 'Bana uygun olanları göster',
+  'Showing every exercise': 'Tüm egzersizler gösteriliyor',
+  'To start: {0} {1}, from your {2}': 'Başlangıç için: {0} {1}, {2} hareketinize göre',
+  'Use it': 'Kullan',
+  '{0} more advanced exercises hidden': '{0} daha ileri egzersiz gizlendi',
 }

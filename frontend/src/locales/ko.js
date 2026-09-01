@@ -1012,4 +1012,12 @@ export default {
   'Next week': '다음 주',
   'Previous month': '지난달',
   'Next month': '다음 달',
+  //// Neoffice — the level filter on the exercise catalogue, and the starting
+  //// load derived from what the member already lifts.
+  'Show every exercise': '모든 운동 보기',
+  'Show what suits me': '나에게 맞는 것 보기',
+  'Showing every exercise': '모든 운동을 표시 중',
+  'To start: {0} {1}, from your {2}': '시작 무게: {0} {1}, {2} 기준',
+  'Use it': '사용',
+  '{0} more advanced exercises hidden': '고급 운동 {0}개 숨김',
 }

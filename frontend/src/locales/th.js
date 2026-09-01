@@ -987,4 +987,12 @@ export default {
   'Next week': 'สัปดาห์ถัดไป',
   'Previous month': 'เดือนก่อน',
   'Next month': 'เดือนถัดไป',
+  //// Neoffice — the level filter on the exercise catalogue, and the starting
+  //// load derived from what the member already lifts.
+  'Show every exercise': 'แสดงท่าออกกำลังกายทั้งหมด',
+  'Show what suits me': 'แสดงท่าที่เหมาะกับฉัน',
+  'Showing every exercise': 'กำลังแสดงท่าทั้งหมด',
+  'To start: {0} {1}, from your {2}': 'เริ่มที่: {0} {1} อ้างอิงจาก {2} ของคุณ',
+  'Use it': 'ใช้ค่านี้',
+  '{0} more advanced exercises hidden': 'ซ่อนท่าขั้นสูงไว้ {0} ท่า',
 }
