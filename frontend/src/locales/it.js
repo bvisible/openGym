@@ -1024,5 +1024,5 @@ export default {
   'This workout': 'Questa sessione',
   'in progress': 'in corso',
   '{0} of {1} exercises done': '{0} esercizi completati su {1}',
-  '{0} of {1} sets': '{0} serie su {1}',
+  '{0} / {1} sets': '{0} / {1} serie',
 }

@@ -1024,5 +1024,5 @@ export default {
   'This workout': 'Ten trening',
   'in progress': 'w trakcie',
   '{0} of {1} exercises done': 'Ukończono {0} z {1} ćwiczeń',
-  '{0} of {1} sets': '{0} z {1} serii',
+  '{0} / {1} sets': '{0} / {1} serii',
 }

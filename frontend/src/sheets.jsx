@@ -210,7 +210,11 @@ function WorkoutOutline({ onPick, close }) {
     //// they have "4 of 6" when they have done one working set.
     const work = sets.filter(x => !isWarmupRow(x))
     const done = work.filter(x => x.done).length
-    return { idx, e, done, total: work.length, ex: exOr(st, e.id) }
+    //// exOr takes the ID ALONE — passing the state as a first argument
+        //// looked up EXIDX[state] and returned "Exercice inconnu" for every
+        //// row, which is what shipped. Custom exercises are covered too:
+        //// registerCustom() injects them into EXIDX.
+        return { idx, e, done, total: work.length, ex: exOr(e.id) }
   })
 
   return <>
@@ -232,7 +236,11 @@ function WorkoutOutline({ onPick, close }) {
           <div className="grow">
             <div className="tt">{r.ex ? exerciseNameFor(r.ex) : r.e.id}</div>
             {/* The count in the member's terms — "2 séries sur 3", not "2/3". */}
-            <div className="ss">{t('{0} of {1} sets', r.done, r.total)}
+            {/* //// "1 / 3 séries" and not "{0} séries sur {1}": the app has no
+                //// plural mechanism, so the second form renders "1 séries sur
+                //// 3". The slash also matches the header, which already reads
+                //// "1/6 séries". */}
+            <div className="ss">{t('{0} / {1} sets', r.done, r.total)}
               {current && !finished ? ' · ' + t('in progress') : ''}</div>
           </div>
           <Icon name="chevronRight" className="chev" />

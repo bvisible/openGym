@@ -1024,5 +1024,5 @@ export default {
   'This workout': 'Bu antrenman',
   'in progress': 'devam ediyor',
   '{0} of {1} exercises done': '{1} egzersizden {0} tanesi tamamlandı',
-  '{0} of {1} sets': '{1} setten {0} tanesi',
+  '{0} / {1} sets': '{0} / {1} set',
 }

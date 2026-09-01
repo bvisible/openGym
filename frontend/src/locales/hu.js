@@ -991,5 +991,5 @@ export default {
   'This workout': 'Ez az edzés',
   'in progress': 'folyamatban',
   '{0} of {1} exercises done': '{0}/{1} gyakorlat kész',
-  '{0} of {1} sets': '{0}/{1} sorozat',
+  '{0} / {1} sets': '{0} / {1} sorozat',
 }

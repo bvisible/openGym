@@ -999,5 +999,5 @@ export default {
   'This workout': 'การฝึกครั้งนี้',
   'in progress': 'กำลังทำ',
   '{0} of {1} exercises done': 'ทำครบ {0} จาก {1} ท่า',
-  '{0} of {1} sets': '{0} จาก {1} เซต',
+  '{0} / {1} sets': '{0} / {1} เซต',
 }

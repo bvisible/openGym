@@ -1041,5 +1041,5 @@ export default {
   'This workout': 'Dieses Training',
   'in progress': 'läuft',
   '{0} of {1} exercises done': '{0} von {1} Übungen erledigt',
-  '{0} of {1} sets': '{0} von {1} Sätzen',
+  '{0} / {1} sets': '{0} / {1} Sätze',
 }

@@ -1024,5 +1024,5 @@ export default {
   'This workout': '本次训练',
   'in progress': '进行中',
   '{0} of {1} exercises done': '已完成 {0}/{1} 个动作',
-  '{0} of {1} sets': '{0}/{1} 组',
+  '{0} / {1} sets': '{0} / {1} 组',
 }

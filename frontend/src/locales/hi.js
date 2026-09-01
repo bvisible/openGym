@@ -1024,5 +1024,5 @@ export default {
   'This workout': 'यह सत्र',
   'in progress': 'चल रहा है',
   '{0} of {1} exercises done': '{1} में से {0} व्यायाम पूर्ण',
-  '{0} of {1} sets': '{1} में से {0} सेट',
+  '{0} / {1} sets': '{0} / {1} सेट',
 }

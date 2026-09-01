@@ -1024,5 +1024,5 @@ export default {
   'This workout': '이번 운동',
   'in progress': '진행 중',
   '{0} of {1} exercises done': '운동 {1}개 중 {0}개 완료',
-  '{0} of {1} sets': '{1}세트 중 {0}세트',
+  '{0} / {1} sets': '{0} / {1} 세트',
 }

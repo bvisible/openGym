@@ -90,19 +90,24 @@ describe('the outline lists the whole session', () => {
 })
 
 describe('warm-up rows do not count', () => {
+  //// Read the COUNTER, not the whole row. The row also carries the exercise
+  //// NAME, and once names resolved correctly this test broke on its own
+  //// fixture: exercise 0001 is "Relevé de buste 3/4" — the "3" it was
+  //// asserting against was in the title.
+  const counter = (host, i) => host.querySelectorAll('.item')[i].querySelector('.ss').textContent
+
   it('reads the third exercise as 0 of 2, not 1 of 3', () => {
     // The trap: it carries a DONE warm-up set. Counting rows rather than work
-    // sets would show "1 of 3" and mark progress the member has not made.
+    // sets would show "1 / 3" and mark progress the member has not made.
     const { host } = open()
-    const third = rows(host)[2].textContent
-    expect(third).toMatch(/0/)
-    expect(third).toMatch(/2/)
-    expect(third).not.toMatch(/3/)
+    expect(counter(host, 2)).toMatch(/\b0\b/)
+    expect(counter(host, 2)).toMatch(/\b2\b/)
+    expect(counter(host, 2)).not.toMatch(/\b3\b/)
   })
 
   it('reads the one in progress as 1 of 2', () => {
     const { host } = open()
-    expect(rows(host)[1].textContent).toMatch(/1.*2/)
+    expect(counter(host, 1)).toMatch(/\b1\b.*\b2\b/)
   })
 })
 
@@ -116,11 +121,28 @@ describe('the outline is something you act on', () => {
     expect(useUI.getState().sheets).toHaveLength(0)
   })
 
-  it('names the exercises rather than showing ids', () => {
-    // "0025" tells a member nothing about which movement is left.
+  it('names the exercises — really names them', async () => {
+    //// 🔴 This assertion started as `not.toMatch(/^0025/)` plus a length check,
+    //// and it PASSED while every row read "Exercice inconnu": that string is
+    //// not an id and is plenty long. The screen shipped that way.
+    ////
+    //// The cause was a signature: exOr takes the ID ALONE, and it was being
+    //// called as exOr(state, id) — so it looked up EXIDX[state], missed, and
+    //// returned the fallback for every single row. Nothing failed: the lookup
+    //// has a fallback precisely so a missing exercise does not crash a
+    //// session.
+    ////
+    //// So the assertion is now against the REAL catalogue names, which is the
+    //// only form that can tell "resolved" from "fell back".
     const { host } = open()
-    const text = rows(host).map(r => r.querySelector('.tt').textContent).join(' | ')
-    expect(text).not.toMatch(/^0025/)
-    expect(text.length).toBeGreaterThan(20)
+    const names = rows(host).map(r => r.querySelector('.tt').textContent)
+    for (const n of names) {
+      expect(n, `row shows "${n}"`).not.toMatch(/Unknown exercise|Exercice inconnu/i)
+      expect(n, `row shows a bare id: "${n}"`).not.toMatch(/^\d{4}$/)
+    }
+    //// And at least one is the name the catalogue actually holds for 0025,
+    //// so a future fallback that invents a prettier placeholder is caught too.
+    const { EXIDX } = await import('./lib/exercises.js')
+    expect(names).toContain(EXIDX['0025'].n)
   })
 })
