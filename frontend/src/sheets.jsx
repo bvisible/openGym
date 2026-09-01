@@ -224,7 +224,10 @@ function WorkoutOutline({ onPick, close }) {
         const current = r.idx === A.cur
         return <div key={r.e.id + r.idx} className="item" {...tappable(() => { close(); onPick(r.idx) })}>
           <div className="thumb thumb-x" style={{ color: finished ? 'var(--green)' : current ? 'var(--acc)' : undefined }}>
-            <Icon name={finished ? 'check' : current ? 'play' : 'circle'} />
+            {/* //// Neoffice — `dot` and not `circle`: Icon returns null for a name
+                //// it does not know, silently, so a typo here is an invisible
+                //// bullet rather than an error. Checked against Icon.jsx. */}
+            <Icon name={finished ? 'checkCircle' : current ? 'play' : 'dot'} />
           </div>
           <div className="grow">
             <div className="tt">{r.ex ? exerciseNameFor(r.ex) : r.e.id}</div>
@@ -232,7 +235,7 @@ function WorkoutOutline({ onPick, close }) {
             <div className="ss">{t('{0} of {1} sets', r.done, r.total)}
               {current && !finished ? ' · ' + t('in progress') : ''}</div>
           </div>
-          <Icon name="chev" className="chev" />
+          <Icon name="chevronRight" className="chev" />
         </div>
       })}
     </div>
