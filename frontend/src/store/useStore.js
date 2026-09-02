@@ -27,7 +27,13 @@ const KEY = 'gym_state_v1'
 //// starting point. Falls back to English for a locale the journal has no pack
 //// for, rather than half-translating the screen.
 const bootLang = () => {
-  const raw = (typeof window !== 'undefined' && window.gym_boot?.user?.language) || ''
+  //// Neoffice — the member's language, then the SITE's. A visitor has no
+  //// member yet, and the server sends `gym_boot.lang` precisely for that
+  //// case ("the first thing a member sees") — but this read only the member's
+  //// field, so a new member of a French-speaking club landed on an English
+  //// sign-in screen. Seen on 2026-09-02, testing the Olympia branding.
+  const boot = (typeof window !== 'undefined' && window.gym_boot) || {}
+  const raw = boot.user?.language || boot.lang || ''
   const short = String(raw).toLowerCase().split(/[-_]/)[0]
   return LANGS[short] ? short : 'en'
 }
