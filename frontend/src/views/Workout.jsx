@@ -176,7 +176,9 @@ function ExerciseBlock({ entryIdx, compact, onEditSession, onToggle, onField, on
   return <>
     <Media ex={ex} key={entry.id} compact={compact} minimizable />
     <div className="row between" style={{ marginBottom: 6 }}>
-      <div style={{ fontSize: compact ? 17 : 20, fontWeight: 600, letterSpacing: '-.02em', textTransform: 'capitalize', lineHeight: 1.2 }}>{exerciseNameFor(ex)}</div>
+      {/* //// Neoffice — .capitalize (first letter only) instead of an inline
+          word-by-word capitalize: French names are sentence case. */}
+      <div className="capitalize" style={{ fontSize: compact ? 17 : 20, fontWeight: 600, letterSpacing: '-.02em', lineHeight: 1.2 }}>{exerciseNameFor(ex)}</div>
       <div className="row" style={{ gap: 2, flex: 'none' }}>
         <button className="iconbtn" aria-label={t('Note')} title={t('Note')}
           style={entry.note ? { color: 'var(--acc)' } : undefined}

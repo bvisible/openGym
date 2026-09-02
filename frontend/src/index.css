@@ -159,6 +159,7 @@ button,.chip,.tile,.item,.wday,.cal-d,.swatch,.hm-c,.lrow,.seg button,.stp butto
 .capitalize{text-transform:none}
 .capitalize::first-letter{text-transform:uppercase}
 span.capitalize{display:inline-block}
+#timer.working .lbl::first-letter,.today-row .ttl::first-letter{text-transform:uppercase}
 /* exercise names and body-part/equipment terms arrive lowercase from the dataset,
    so tags and chips capitalise by default. Anything that is a unit or a sentence opts
    back out — blanket-capitalising turned "60 kg" into "60 Kg" and a whole hint into
@@ -775,7 +776,7 @@ h4.sec{
 #timer.working .t{color:var(--acc)}
 #timer.working .grow{flex:1;min-width:0}
 #timer.working .lbl{
-  font-size:12px;color:var(--label-2);margin-bottom:5px;text-transform:capitalize;
+  font-size:12px;color:var(--label-2);margin-bottom:5px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 
@@ -1078,7 +1079,7 @@ h4.sec{
 .today-row:active{background:var(--surface-3)}
 .today-row .lbl2{font-size:11px;font-weight:500;letter-spacing:.03em;text-transform:uppercase;color:var(--label-3)}
 .today-row .ttl{
-  font-weight:500;font-size:17px;line-height:1.25;text-transform:capitalize;
+  font-weight:500;font-size:17px;line-height:1.25;
   letter-spacing:-.012em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;
 }
 
