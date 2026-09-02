@@ -18,6 +18,7 @@ import Modals from './components/Modals.jsx'
 import Toast from './components/Toast.jsx'
 import RestTimer from './components/RestTimer.jsx'
 import TimerFlash from './components/TimerFlash.jsx'
+import PrepCountdown from './components/PrepCountdown.jsx'
 //// Neoffice — upstream's Login.jsx (passkeys) is not shipped here: the
 //// journal is served from Frappe and the Frappe session IS the login
 //// (see views/SignIn.jsx and commit 2a97a09b). Upstream's import came
@@ -157,6 +158,7 @@ function Shell() {
       <Modals />
       <Toast />
       <TimerFlash />
+      <PrepCountdown />
     </>
   )
 }

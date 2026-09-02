@@ -57,6 +57,7 @@ let toastTm = null
 let timerInt = null
 let timerTick = null
 let workInt = null
+let prepInt = null, prepStart = null   // the 3-2-1 before a timed set (Neoffice)
 let workTick = null
 let workDone = null
 
@@ -66,6 +67,7 @@ export const useUI = create((set, get) => ({
   timer: null,         // rest countdown between sets — { left, total, endsAt, forIdx }
                        // forIdx: index of the active entry whose set started the rest (undefined when unknown)
   work: null,          // work countdown DURING a timed set (issue #16) — { left, total, endsAt, label }
+  prep: null,          // the 3-2-1 BEFORE a timed set starts — { left, total, label } (Neoffice)
   timerFlashId: 0,     // changing the id remounts the four-pulse visual alert
 
   flashTimer() {
@@ -171,6 +173,57 @@ export const useUI = create((set, get) => ({
     }
     workInt = setInterval(workTick, 1000)
     document.addEventListener('visibilitychange', workTick)
+  },
+  //// Neoffice — THE 3-2-1 BEFORE A TIMED SET.
+  ////
+  //// Jérémy, 02.09: *"j'ai cliqué sur démarrer et il a le décompte direct,
+  //// alors que j'aurais préféré avoir un 3 2 1 en overlay pour dire que ça
+  //// commence"*. A plank starts when you are ON the floor, not when your
+  //// thumb leaves the button — and the work timer started the moment the
+  //// button was tapped, so the first three seconds of every hold were spent
+  //// getting into position and counted as if they were not.
+  ////
+  //// So the tap arms a short, loud, full-screen count — 3, 2, 1 — and the
+  //// work timer starts at zero. Tapping the overlay skips straight to the
+  //// hold (somebody already in position should not wait); the small cancel
+  //// abandons without logging anything, exactly like the work bar's own.
+  //// The count is a state here and not in the component, for the same reason
+  //// the work timer is: the overlay must survive a re-render, and the tick
+  //// must keep counting behind a sheet.
+  startWorkWithPrep(sec, label, onDone, prepSec = 3) {
+    get().cancelPrep()
+    const total = Math.max(1, Math.round(prepSec) || 3)
+    prepStart = () => { get().cancelPrep(); get().startWork(sec, label, onDone) }
+    set({ prep: { left: total, total, label } })
+    const snd = () => useStore.getState().S.sound
+    beep(snd(), 660, 0.1); vibrate(20)
+    prepInt = setInterval(() => {
+      const pr = get().prep
+      if (!pr) return
+      const left = pr.left - 1
+      if (left <= 0) {
+        //: A higher note than the count: the ear hears "go", not "one more".
+        beep(snd(), 1040, 0.18); vibrate(60)
+        const go = prepStart
+        get().cancelPrep()
+        if (go) go()
+        return
+      }
+      beep(snd(), 660, 0.1); vibrate(20)
+      set({ prep: { ...pr, left } })
+    }, 1000)
+  },
+  // Already in position: start the hold now.
+  skipPrep() {
+    const go = prepStart
+    get().cancelPrep()
+    if (go) go()
+  },
+  // Abandon: nothing starts, nothing is logged.
+  cancelPrep() {
+    if (prepInt) clearInterval(prepInt); prepInt = null
+    prepStart = null
+    set({ prep: null })
   },
   // Ended the hold early — log what was actually held.
   finishWorkEarly() {

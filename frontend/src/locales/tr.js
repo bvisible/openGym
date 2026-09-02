@@ -1046,4 +1046,7 @@ export default {
   //// Neoffice — the password eye (views/SignIn.jsx).
   'Show password': 'Şifreyi göster',
   'Hide password': 'Şifreyi gizle',
+  //// Neoffice — the 3-2-1 before a timed set (components/PrepCountdown.jsx).
+  'Get ready': 'Hazırlan',
+  'Tap to start now': 'Hemen başlamak için dokun',
 }

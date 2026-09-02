@@ -1046,4 +1046,7 @@ export default {
   //// Neoffice — the password eye (views/SignIn.jsx).
   'Show password': '비밀번호 표시',
   'Hide password': '비밀번호 숨기기',
+  //// Neoffice — the 3-2-1 before a timed set (components/PrepCountdown.jsx).
+  'Get ready': '준비하세요',
+  'Tap to start now': '탭하면 바로 시작해요',
 }

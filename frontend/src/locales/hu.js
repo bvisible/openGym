@@ -1013,4 +1013,7 @@ export default {
   //// Neoffice — the password eye (views/SignIn.jsx).
   'Show password': 'Jelszó megjelenítése',
   'Hide password': 'Jelszó elrejtése',
+  //// Neoffice — the 3-2-1 before a timed set (components/PrepCountdown.jsx).
+  'Get ready': 'Készülj',
+  'Tap to start now': 'Koppints az azonnali indításhoz',
 }

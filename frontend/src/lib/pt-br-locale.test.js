@@ -51,11 +51,13 @@ describe('Brazilian Portuguese locale', () => {
 //// the words the phone's own menus use in Brazil), four inherited.
 //// Recomputed for the password eye: two overrides ("senha", never Portugal's
 //// "palavra-passe").
+//// Recomputed for the 3-2-1 count: "Prepare-se" and "Toque para começar já"
+//// read the same on both sides and stay inherited.
     expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(360)
-    expect(inherited).toHaveLength(703)
+    expect(inherited).toHaveLength(705)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('1df4d7197b561665940b7f6d2b2e26eaaf5251640161463fb864e507b199e86f')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('b8cbb5cbb9503ba3257626ced74b71e6eea06135f62b4d30c84536def969266d')
   })
 
   test('does not leak European Portuguese UI terms', () => {
