@@ -1193,6 +1193,11 @@ h4.sec{
   background: var(--acc-soft); color: var(--acc);
 }
 .signin-mark svg { width: 30px; height: 30px; }
+/* //// Neoffice — the club's icon fills the tile edge to edge: it already
+   carries its own background, and a 30px logo floating in an accent square
+   would look like a placeholder, not a brand. */
+.signin-mark:has(img) { background: none; overflow: hidden; }
+.signin-mark img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .signin h1 { text-align: center; font-size: 25px; margin: 0 0 6px; letter-spacing: -0.02em; }
 .signin .sub {
   text-align: center; color: var(--label-2); font-size: 14.5px;
