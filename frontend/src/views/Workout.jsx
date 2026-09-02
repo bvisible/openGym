@@ -699,7 +699,12 @@ function ActiveWorkout() {
         <ExerciseBlock entryIdx={cur} onEditSession={openSessionEdit} onToggle={i => toggle(cur, i)} onField={(i, f, v) => setField(cur, i, f, v)} onAddSet={() => addSet(cur)} onRemoveSet={() => removeSet(cur)} onAddWarmup={() => addWarmup(cur)} onRemoveSetAt={i => removeSetAt(cur, i)} onStartTimed={i => startTimed(cur, i)} onPairPrev={onPairPrev} onPairNext={onPairNext} onProgressionSettings={() => openProgressionSettings(cur)} />
       )}
       </div>
-    </> : <div className="empty"><div className="ico"><Icon name="shuffle" /></div>{t('Freestyle workout — add your first exercise.')}</div>}
+    </> : <div className="empty"><div className="ico"><Icon name="shuffle" /></div>{t('Freestyle workout — add your first exercise.')}
+      {/* //// Neoffice — the empty freestyle screen told you to add an exercise and
+          offered no way to: the only "add" lived in the ⋯ menu of an exercise header,
+          which does not exist until there is an exercise. Seen on the pilot, 02.09. */}
+      <div style={{ marginTop: 14 }}><Button variant="primary" icon="plus" onClick={addExerciseFlow}>{t('Add exercise')}</Button></div>
+    </div>}
 
     <div style={{ height: 12 }} />
     {/* //// Neoffice — what is left under the sets is what you use WHILE

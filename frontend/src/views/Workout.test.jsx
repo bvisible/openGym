@@ -761,3 +761,24 @@ describe('active exercise swap control', () => {
     expect(mocks.swapActiveWorkoutExercise).toHaveBeenCalledWith(1)
   })
 })
+
+//// Neoffice — the empty freestyle screen must offer the add itself: the only
+//// "add" lived in the ⋯ menu of an exercise header, which does not exist until
+//// there is an exercise. Seen on the pilot, 02.09.
+describe('freestyle empty state', () => {
+  afterEach(unmount)
+
+  it('offers "Add exercise" and opens the picker', async () => {
+    await mount([], 0, { active: { name: 'Freestyle', routineId: null } })
+    expect(container.textContent).toContain('Freestyle workout — add your first exercise.')
+    const add = [...container.querySelectorAll('button')].find(b => b.textContent.trim() === 'Add exercise')
+    expect(add).toBeTruthy()
+    await act(async () => { add.dispatchEvent(new dom.Event('click', { bubbles: true })) })
+    expect(mocks.exercisePicker).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not show the add button once an exercise is there', async () => {
+    await mount([exercise('bench', [false, false])], 0, { active: { name: 'Freestyle', routineId: null } })
+    expect([...container.querySelectorAll('button')].some(b => b.textContent.trim() === 'Add exercise')).toBe(false)
+  })
+})
