@@ -54,3 +54,16 @@ describe('the 3-2-1 before a timed set', () => {
     expect(useUI.getState().work).toMatchObject({ total: 60, label: 'B' })
   })
 })
+
+describe('what the work timer knows about the set it counts', () => {
+  it('carries the meta through the count to work.meta', () => {
+    useUI.getState().startWorkWithPrep(45, 'Planche', vi.fn(), 3, { entryIdx: 2, setIdx: 1 })
+    expect(useUI.getState().work).toBeNull()
+    vi.advanceTimersByTime(3000)
+    expect(useUI.getState().work).toMatchObject({ total: 45, meta: { entryIdx: 2, setIdx: 1 } })
+  })
+  it('is null when nothing was passed — a plain startWork stays as it was', () => {
+    useUI.getState().startWork(30, 'x', vi.fn())
+    expect(useUI.getState().work.meta).toBeNull()
+  })
+})

@@ -152,7 +152,13 @@ button,.chip,.tile,.item,.wday,.cal-d,.swatch,.hm-c,.lrow,.seg button,.stp butto
 .muted{color:var(--label-2)} .dim{color:var(--label-3)}
 .small{font-size:13px;line-height:1.38}
 .accent{color:var(--acc)}
-.capitalize{text-transform:capitalize}
+/* //// Neoffice — first letter only. Word-by-word capitals are English
+   title case; on the French catalogue they turned "Gainage latéral au poids
+   du corps" into "Gainage Latéral Au Poids Du Corps". ::first-letter needs a
+   block box, hence inline-block on the two spans that carry the class. */
+.capitalize{text-transform:none}
+.capitalize::first-letter{text-transform:uppercase}
+span.capitalize{display:inline-block}
 /* exercise names and body-part/equipment terms arrive lowercase from the dataset,
    so tags and chips capitalise by default. Anything that is a unit or a sentence opts
    back out — blanket-capitalising turned "60 kg" into "60 Kg" and a whole hint into
@@ -716,14 +722,23 @@ h4.sec{
 .progline svg{flex:none;margin-top:2px}
 
 /* start a timed set (issue #16) — sits where you'd otherwise reach for the checkbox */
+/* //// Neoffice — filled, not a pale icon on a grey disc: on a timed set the
+   play IS the action, the checkbox is the fallback. */
 .setrow .setgo{
   width:30px;height:30px;border-radius:50%;flex:none;
   display:flex;align-items:center;justify-content:center;
-  background:var(--surface-2);color:var(--acc);font-size:14px;
+  background:var(--acc);color:var(--on-acc);font-size:14px;
   transition:background var(--fast),opacity var(--fast);
 }
 .setrow .setgo:disabled{opacity:.3;cursor:default}
-.setrow .setgo:not(:disabled):active{background:var(--surface-3)}
+.setrow .setgo:not(:disabled):active{background:var(--acc-2)}
+/* //// Neoffice — the set being timed: accent rail, tinted row, a pulsing
+   play instead of a dimmed one. */
+.setrow.running{box-shadow:inset 3px 0 0 var(--acc);background:color-mix(in srgb,var(--acc) 12%,transparent)}
+.setrow.running .n{background:var(--acc);color:var(--on-acc)}
+.setrow.running .setgo:disabled{opacity:1;animation:setgo-pulse 1s ease-in-out infinite}
+@keyframes setgo-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.setrow.running .setgo:disabled{animation:none}}
 /* exercise-config sheet: three steppers side by side on narrow phones */
 .cfgrow{gap:8px}
 .cfgrow>div{flex:1;min-width:0}
@@ -1359,7 +1374,8 @@ h4.sec{
 .prep-hint { font-size: 22px; font-weight: 600; margin-top: 10px; }
 .prep-sub { font-size: 14px; opacity: .6; }
 .prep-cancel {
-  position: absolute; bottom: calc(28px + env(safe-area-inset-bottom)); padding: 10px 22px;
+  /* above the tab bar and its floating start button (the bar is 88px + safe area) */
+  position: absolute; bottom: calc(112px + var(--sab)); padding: 10px 22px;
   border: 1px solid rgba(255,255,255,.35); border-radius: 999px; background: transparent; color: #fff; font-size: 15px;
 }
 @media (prefers-reduced-motion: reduce) { .prep-n { animation: none } }

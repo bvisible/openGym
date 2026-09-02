@@ -147,13 +147,13 @@ export const useUI = create((set, get) => ({
      `onDone(elapsedSec)` is called both when the countdown reaches zero and on an early
      finish; the elapsed time is what actually gets logged, so stopping at 0:38 of a 0:45
      hold records 0:38 rather than crediting the full target. */
-  startWork(sec, label, onDone) {
+  startWork(sec, label, onDone, meta = null) {
     get().stopWork()
     get().stopRest()
     const total = Math.max(1, Math.round(sec) || 1)
     const endsAt = Date.now() + total * 1000
     workDone = onDone
-    set({ work: { left: total, total, endsAt, label } })
+    set({ work: { left: total, total, endsAt, label, meta } })
     workTick = () => {
       const wk = get().work
       if (!wk) return
@@ -190,10 +190,10 @@ export const useUI = create((set, get) => ({
   //// The count is a state here and not in the component, for the same reason
   //// the work timer is: the overlay must survive a re-render, and the tick
   //// must keep counting behind a sheet.
-  startWorkWithPrep(sec, label, onDone, prepSec = 3) {
+  startWorkWithPrep(sec, label, onDone, prepSec = 3, meta = null) {
     get().cancelPrep()
     const total = Math.max(1, Math.round(prepSec) || 3)
-    prepStart = () => { get().cancelPrep(); get().startWork(sec, label, onDone) }
+    prepStart = () => { get().cancelPrep(); get().startWork(sec, label, onDone, meta) }
     set({ prep: { left: total, total, label } })
     const snd = () => useStore.getState().S.sound
     beep(snd(), 660, 0.1); vibrate(20)

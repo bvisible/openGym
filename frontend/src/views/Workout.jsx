@@ -224,6 +224,10 @@ function ExerciseBlock({ entryIdx, compact, onEditSession, onToggle, onField, on
       <div className={'sethead' + (col3 ? ' eff3' : '')}><span className="n-sp" /><span className="w-sp">{col1.hd}</span>{col2 && <span className="r-sp">{col2.hd}</span>}{col3 && <span className="eff-sp">{col3.hd}</span>}{timed && <span className="ck-sp" />}<span className="ck-sp" /></div>
       {entry.sets.map((s, i) => {
         const warm = isWarmupRow(s)
+        //// Neoffice — while a hold is timed, its row is marked: with three
+        //// identical "45" rows and every play button dimmed, nothing said
+        //// which set the bar at the bottom was counting.
+        const runningHere = !!working?.meta && working.meta.entryIdx === entryIdx && working.meta.setIdx === i
         const warmBefore = i > 0 && isWarmupRow(entry.sets[i - 1])
         const isFirstWarmup = warm && !warmBefore
         // Numbering restarts per phase: with two warm-ups the first work set reads 1, not 3.
@@ -231,7 +235,7 @@ function ExerciseBlock({ entryIdx, compact, onEditSession, onToggle, onField, on
         return <div key={i}>
           {isFirstWarmup && <div className="setph">{t('Warm-up')}</div>}
           {!warm && warmBefore && <div className="setsep" />}
-          <div ref={el => onSetRowRef?.(i, el)} className={'setrow' + (s.done ? ' done' : '') + (col3 ? ' eff3' : '')}>
+          <div ref={el => onSetRowRef?.(i, el)} className={'setrow' + (s.done ? ' done' : '') + (col3 ? ' eff3' : '') + (runningHere ? ' running' : '')}>
             <div className="n">{phaseNum}</div>
             {cell(s, i, col1, 'w')}
             {col2 && cell(s, i, col2, 'r')}
@@ -391,13 +395,19 @@ function ActiveWorkout() {
     busy: !!work,
   })
 
-  const addExerciseFlow = () => exercisePicker(ex => {
+  const addExerciseFlow = () => {
+    //// Neoffice — the picker closes once the exercise is in the session. Left
+    //// open (upstream keeps it for the routine editor, where you stack
+    //// exercises), a member who had just added one was still looking at the
+    //// list and could not see what they had added. Same handle-and-close the
+    //// swap flow already uses.
+    const picker = exercisePicker(ex => {
       const routine = S.routines.find(r => r.id === A.routineId)
       const freestyle = !A.routineId
       // Freestyle has no routine prescription to apply: show the last target in the config
       // sheet and carry its completed rows forward. A planned session keeps its existing path.
       const seed = freestyle ? freestyleConfig(S, { id: ex.id, ...defaultConfig(ex.id) }) : null
-      exConfigSheet(ex, null, cfg => update(s => {
+      exConfigSheet(ex, null, cfg => { picker.close(); update(s => {
         const full = { ...cfg, id: ex.id }
         const plan = freestyle ? null : nextPrescription(s, full, s.routines.find(r => r.id === s.active.routineId))
         const sets = buildSets(s, full, { step: defaultIncrement(ex.id, s.unit), ...(freestyle ? { preferLast: true } : {}) })
@@ -406,8 +416,9 @@ function ActiveWorkout() {
         s.active.entries.splice(insertAt, 0, { id: ex.id, target: { ...cfg }, plan, sets: applyIntensifierPlan(progressed, full) })
         s.active.cur = insertAt
         useUI.getState().shiftRestOwner(insertAt, 1)
-      }), null, routine, seed)
-  })
+      }) }, null, routine, seed)
+    })
+  }
   const total = A.entries.reduce((n, e) => n + e.sets.length, 0)
   const done = setsDoneActive(A)
 
@@ -566,7 +577,7 @@ function ActiveWorkout() {
     useUI.getState().startWorkWithPrep(e.sets[i].sec || 45, exerciseNameFor(exOr(e.id)), elapsed => {
       mutEntry(idx, en => { en.sets[i].sec = elapsed })
       if (!useStore.getState().S.active.entries[idx].sets[i].done) toggle(idx, i)
-    })
+    }, 3, { entryIdx: idx, setIdx: i })
   }
 
   const toggle = (idx, i) => {

@@ -16,7 +16,9 @@ const mocks = vi.hoisted(() => {
     confirmSheet: vi.fn(),
     topWeightSheet: vi.fn(),
     workoutCompleteSheet: vi.fn(),
-    exercisePicker: vi.fn(),
+    //// Neoffice — the real picker returns a sheet handle the add flow closes.
+    exercisePicker: vi.fn(() => ({ close: vi.fn() })),
+    startWorkWithPrep: vi.fn(),
     exConfigSheet: vi.fn(),
     toast: vi.fn(),
     scrollCalls: [],
@@ -54,6 +56,7 @@ const mocks = vi.hoisted(() => {
     stopWork: state.stopWork,
     shiftRestOwner: vi.fn(),
     startWork: vi.fn(),
+    startWorkWithPrep: state.startWorkWithPrep,
     toast: state.toast,
     sheets: state.sheets,
     openSheet: state.openSheet,
@@ -780,5 +783,61 @@ describe('freestyle empty state', () => {
   it('does not show the add button once an exercise is there', async () => {
     await mount([exercise('bench', [false, false])], 0, { active: { name: 'Freestyle', routineId: null } })
     expect([...container.querySelectorAll('button')].some(b => b.textContent.trim() === 'Add exercise')).toBe(false)
+  })
+})
+
+//// Neoffice — the set being timed is marked in its row (work.meta), and the
+//// picker closes once an exercise is in the session.
+describe('timed set in progress', () => {
+  afterEach(async () => { mocks.work = null; await unmount() })
+
+  function hold(id) {
+    return { id, target: { mode: 'time', sets: 3, sec: 45, weight: 0, bodyweight: true }, sets: [{ sec: 45, done: false }, { sec: 45, done: false }, { sec: 45, done: false }] }
+  }
+
+  it('marks the row the bar is counting, and only that one', async () => {
+    mocks.work = { left: 40, total: 45, endsAt: Date.now() + 40000, label: 'Plank', meta: { entryIdx: 0, setIdx: 1 } }
+    await mount([hold('plank')])
+    const rows = [...container.querySelectorAll('.setrow')]
+    expect(rows).toHaveLength(3)
+    expect(rows.map(r => r.className.includes('running'))).toEqual([false, true, false])
+  })
+
+  it('marks nothing when the timer belongs to another exercise', async () => {
+    mocks.work = { left: 40, total: 45, endsAt: Date.now() + 40000, label: 'Plank', meta: { entryIdx: 1, setIdx: 0 } }
+    await mount([hold('plank')])
+    expect([...container.querySelectorAll('.setrow.running')]).toHaveLength(0)
+  })
+
+  it('starts the count with the row it will mark', async () => {
+    await mount([hold('plank')])
+    const prep = mocks.startWorkWithPrep
+    prep.mockClear()
+    const go = container.querySelectorAll('.setgo')[2]
+    await act(async () => { go.dispatchEvent(new dom.Event('click', { bubbles: true })) })
+    expect(prep).toHaveBeenCalledTimes(1)
+    expect(prep.mock.calls[0][0]).toBe(45)
+    expect(prep.mock.calls[0][3]).toBe(3)
+    expect(prep.mock.calls[0][4]).toEqual({ entryIdx: 0, setIdx: 2 })
+  })
+})
+
+describe('adding an exercise from the picker', () => {
+  afterEach(unmount)
+
+  it('closes the picker once the exercise is in the session', async () => {
+    const close = vi.fn()
+    mocks.exercisePicker.mockReturnValueOnce({ close })
+    await mount([], 0, { active: { name: 'Freestyle', routineId: null } })
+    const add = [...container.querySelectorAll('button')].find(b => b.textContent.trim() === 'Add exercise')
+    await act(async () => { add.dispatchEvent(new dom.Event('click', { bubbles: true })) })
+    const onPick = mocks.exercisePicker.mock.calls.at(-1)[0]
+    await act(async () => { onPick({ id: 'plank', name: 'Plank', bp: 'abs', eq: 'body weight' }) })
+    expect(close).not.toHaveBeenCalled()                     // the config sheet is still open
+    const onConfig = mocks.exConfigSheet.mock.calls.at(-1)[2]
+    await act(async () => { onConfig({ mode: 'time', sets: 2, sec: 30, weight: 0, bodyweight: true }) })
+    expect(close).toHaveBeenCalledTimes(1)
+    expect(mocks.S.active.entries).toHaveLength(1)
+    expect(mocks.S.active.entries[0].id).toBe('plank')
   })
 })
