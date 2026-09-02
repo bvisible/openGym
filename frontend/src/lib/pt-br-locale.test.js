@@ -49,7 +49,9 @@ describe('Brazilian Portuguese locale', () => {
 //// Recomputed for the add-to-home-screen card: seven overrides ("tela" for
 //// "ecrã", "aplicativo" for "aplicação", "Compartilhar" for "Partilhar" —
 //// the words the phone's own menus use in Brazil), four inherited.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(358)
+//// Recomputed for the password eye: two overrides ("senha", never Portugal's
+//// "palavra-passe").
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(360)
     expect(inherited).toHaveLength(703)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list

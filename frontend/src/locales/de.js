@@ -1060,4 +1060,7 @@ export default {
   'Open the browser menu (the three dots at the top right).': 'Öffne das Browser-Menü (die drei Punkte oben rechts).',
   'Tap “Install app” or “Add to Home screen”.': 'Tippe auf “App installieren” oder “Zum Startbildschirm hinzufügen”.',
   'Confirm. {0} now opens like any other app.': 'Bestätige. {0} öffnet sich jetzt wie jede andere App.',
+  //// Neoffice — the password eye (views/SignIn.jsx).
+  'Show password': 'Passwort anzeigen',
+  'Hide password': 'Passwort verbergen',
 }

@@ -411,6 +411,9 @@ export const PT_BR_OVERRIDES = {
   'Tap “Add” at the top right. {0} now opens like any other app.': 'Toque em “Adicionar” no canto superior direito. Agora {0} abre como qualquer outro aplicativo.',
   'Tap “Install app” or “Add to Home screen”.': 'Toque em “Instalar app” ou “Adicionar à tela inicial”.',
   'Confirm. {0} now opens like any other app.': 'Confirme. Agora {0} abre como qualquer outro aplicativo.',
+  //// Neoffice — pt-BR: "senha", never "palavra-passe" (Portugal).
+  'Show password': 'Mostrar senha',
+  'Hide password': 'Ocultar senha',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

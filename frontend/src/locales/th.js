@@ -1018,4 +1018,7 @@ export default {
   'Open the browser menu (the three dots at the top right).': 'เปิดเมนูเบราว์เซอร์ (ไอคอนจุดสามจุดที่มุมขวาบน)',
   'Tap “Install app” or “Add to Home screen”.': 'แตะ “ติดตั้งแอป” หรือ “เพิ่มไปยังหน้าจอหลัก”',
   'Confirm. {0} now opens like any other app.': 'ยืนยัน ตอนนี้ {0} จะเปิดเหมือนแอปอื่นๆ',
+  //// Neoffice — the password eye (views/SignIn.jsx).
+  'Show password': 'แสดงรหัสผ่าน',
+  'Hide password': 'ซ่อนรหัสผ่าน',
 }

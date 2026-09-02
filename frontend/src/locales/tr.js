@@ -1043,4 +1043,7 @@ export default {
   'Open the browser menu (the three dots at the top right).': 'Tarayıcı menüsünü açın (sağ üstteki üç nokta).',
   'Tap “Install app” or “Add to Home screen”.': '“Uygulamayı yükle” veya “Ana ekrana ekle”ye dokunun.',
   'Confirm. {0} now opens like any other app.': 'Onaylayın. {0} artık diğer uygulamalar gibi açılır.',
+  //// Neoffice — the password eye (views/SignIn.jsx).
+  'Show password': 'Şifreyi göster',
+  'Hide password': 'Şifreyi gizle',
 }

@@ -1043,4 +1043,7 @@ export default {
   'Open the browser menu (the three dots at the top right).': '打开浏览器菜单（右上角的三个点）。',
   'Tap “Install app” or “Add to Home screen”.': '轻触“安装应用”或“添加到主屏幕”。',
   'Confirm. {0} now opens like any other app.': '确认。现在 {0} 会像其他应用一样打开。',
+  //// Neoffice — the password eye (views/SignIn.jsx).
+  'Show password': '显示密码',
+  'Hide password': '隐藏密码',
 }

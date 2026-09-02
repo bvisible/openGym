@@ -1010,4 +1010,7 @@ export default {
   'Open the browser menu (the three dots at the top right).': 'Nyisd meg a böngésző menüjét (jobb fent a három pont).',
   'Tap “Install app” or “Add to Home screen”.': 'Koppints az “Alkalmazás telepítése” vagy a “Hozzáadás a kezdőképernyőhöz” lehetőségre.',
   'Confirm. {0} now opens like any other app.': 'Erősítsd meg. A(z) {0} mostantól úgy nyílik meg, mint bármely más alkalmazás.',
+  //// Neoffice — the password eye (views/SignIn.jsx).
+  'Show password': 'Jelszó megjelenítése',
+  'Hide password': 'Jelszó elrejtése',
 }
