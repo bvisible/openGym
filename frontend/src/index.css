@@ -1208,13 +1208,13 @@ h4.sec{
 .signin-f > span { font-size: 13px; color: var(--label-2); }
 /* The field is 46px tall: on a phone a smaller target gets missed, and a
    missed sign-in form is where people give up. */
-.signin-f > input {
+.signin-f > input, .signin-pw > input {
   height: 46px; padding: 0 14px; font-size: 16px;   /* 16px = iOS won't zoom */
   border: 1px solid var(--sep); border-radius: 12px;
   background: var(--surface-2); color: var(--label); font-family: inherit;
   -webkit-appearance: none; appearance: none;
 }
-.signin-f > input:focus {
+.signin-f > input:focus, .signin-pw > input:focus {
   outline: none; border-color: var(--acc);
   box-shadow: 0 0 0 3px var(--acc-soft);
 }
@@ -1329,3 +1329,16 @@ h4.sec{
 .install-mark svg { width: 22px; height: 22px; }
 .install-steps { margin: 6px 0 18px; padding-left: 22px; line-height: 1.55; }
 .install-steps li { margin-bottom: 8px; }
+
+/* //// Neoffice — the password eye (views/SignIn.jsx). The wrapper carries the
+   field's box; the input keeps its own styles via the `.signin-f > input`
+   rules, so `.signin-f > .signin-pw > input` re-applies them. */
+.signin-pw { position: relative; display: block; }
+.signin-pw > input { width: 100%; padding-right: 48px; }
+.signin-eye {
+  position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+  width: 40px; height: 40px; border: 0; background: transparent; color: var(--label-2);
+  display: grid; place-items: center; border-radius: 10px; cursor: pointer;
+}
+.signin-eye:active { background: var(--surface-3); }
+.signin-eye svg { width: 20px; height: 20px; }

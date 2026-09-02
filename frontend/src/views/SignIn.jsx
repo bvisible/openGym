@@ -25,6 +25,7 @@ export default function SignIn() {
   const [mode, setMode] = useState('signin')   // signin · forgot · sent
   const [email, setEmail] = useState('')
   const [pwd, setPwd] = useState('')
+  const [showPwd, setShowPwd] = useState(false)
   const [souvenir, setSouvenir] = useState(true)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState(null)
@@ -133,8 +134,19 @@ export default function SignIn() {
         </label>
         <label className="signin-f">
           <span>{t('Password')}</span>
-          <input type="password" autoComplete="current-password" required
-            value={pwd} onChange={e => setPwd(e.target.value)} />
+          {/* //// Neoffice — an eye to see what is being typed. Jérémy, 02.09:
+               on a phone, a password typed blind and refused once is where a
+               member gives up. `type="button"` so a tap never submits the
+               form; the label wraps the input, so the button sits outside it
+               (a click on a label focuses its control — here it must not). */}
+          <span className="signin-pw">
+            <input type={showPwd ? 'text' : 'password'} autoComplete="current-password" required
+              value={pwd} onChange={e => setPwd(e.target.value)} />
+            <button type="button" className="signin-eye" onClick={() => setShowPwd(v => !v)}
+              aria-label={showPwd ? t('Hide password') : t('Show password')} aria-pressed={showPwd}>
+              <Icon name={showPwd ? 'eyeOff' : 'eye'} />
+            </button>
+          </span>
         </label>
 
         <label className="signin-check">
