@@ -1006,4 +1006,16 @@ export default {
   'Keep the sets, change the movement': 'คงเซตไว้ เปลี่ยนท่า',
   'Move in the session': 'ย้ายในการฝึก',
   'Up': 'ขึ้น',
+  //// Neoffice — "add to home screen" banner (components/InstallBanner.jsx).
+  'Add {0} to your home screen': 'เพิ่ม {0} ไปยังหน้าจอโฮมของคุณ',
+  'One tap to open it, full screen, and it works even without network at the rack.': 'แตะครั้งเดียวเพื่อเปิดแบบเต็มหน้าจอ และใช้งานได้แม้ไม่มีสัญญาณที่ยิม',
+  'Install': 'ติดตั้ง',
+  'How?': 'อย่างไร?',
+  'Got it': 'เข้าใจแล้ว',
+  'Tap the Share button at the bottom of Safari (the square with an arrow).': 'แตะปุ่มแชร์ที่ด้านล่างของ Safari (ไอคอนสี่เหลี่ยมมีลูกศร)',
+  'Scroll down and tap “Add to Home Screen”.': 'เลื่อนลงแล้วแตะ “เพิ่มไปยังหน้าจอโฮม”',
+  'Tap “Add” at the top right. {0} now opens like any other app.': 'แตะ “เพิ่ม” ที่มุมขวาบน ตอนนี้ {0} จะเปิดเหมือนแอปอื่นๆ',
+  'Open the browser menu (the three dots at the top right).': 'เปิดเมนูเบราว์เซอร์ (ไอคอนจุดสามจุดที่มุมขวาบน)',
+  'Tap “Install app” or “Add to Home screen”.': 'แตะ “ติดตั้งแอป” หรือ “เพิ่มไปยังหน้าจอหลัก”',
+  'Confirm. {0} now opens like any other app.': 'ยืนยัน ตอนนี้ {0} จะเปิดเหมือนแอปอื่นๆ',
 }

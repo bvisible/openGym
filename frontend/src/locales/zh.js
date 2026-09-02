@@ -1031,4 +1031,16 @@ export default {
   'Keep the sets, change the movement': '保留组数，更换动作',
   'Move in the session': '在训练中移动',
   'Up': '上移',
+  //// Neoffice — "add to home screen" banner (components/InstallBanner.jsx).
+  'Add {0} to your home screen': '将 {0} 添加到主屏幕',
+  'One tap to open it, full screen, and it works even without network at the rack.': '轻触一下即可全屏打开，即使在架子旁没有网络也能使用。',
+  'Install': '安装',
+  'How?': '如何？',
+  'Got it': '知道了',
+  'Tap the Share button at the bottom of Safari (the square with an arrow).': '轻触 Safari 底部的分享按钮（带箭头的方块图标）。',
+  'Scroll down and tap “Add to Home Screen”.': '向下滚动，然后轻触“添加到主屏幕”。',
+  'Tap “Add” at the top right. {0} now opens like any other app.': '轻触右上角的“添加”。现在 {0} 会像其他应用一样打开。',
+  'Open the browser menu (the three dots at the top right).': '打开浏览器菜单（右上角的三个点）。',
+  'Tap “Install app” or “Add to Home screen”.': '轻触“安装应用”或“添加到主屏幕”。',
+  'Confirm. {0} now opens like any other app.': '确认。现在 {0} 会像其他应用一样打开。',
 }

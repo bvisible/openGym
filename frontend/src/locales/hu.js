@@ -998,4 +998,16 @@ export default {
   'Keep the sets, change the movement': 'Sorozatok megtartása, gyakorlat cseréje',
   'Move in the session': 'Mozgatás az edzésben',
   'Up': 'Fel',
+  //// Neoffice — "add to home screen" banner (components/InstallBanner.jsx).
+  'Add {0} to your home screen': 'Add hozzá a(z) {0} alkalmazást a kezdőképernyődhöz',
+  'One tap to open it, full screen, and it works even without network at the rack.': 'Egy koppintással megnyitod, teljes képernyőn – és edzőteremben net nélkül is működik.',
+  'Install': 'Telepítés',
+  'How?': 'Hogyan?',
+  'Got it': 'Értem',
+  'Tap the Share button at the bottom of Safari (the square with an arrow).': 'Koppints a Safari alján a Megosztás gombra (a nyilas négyzet).',
+  'Scroll down and tap “Add to Home Screen”.': 'Görgess le, és koppints a “Hozzáadás a kezdőképernyőhöz” lehetőségre.',
+  'Tap “Add” at the top right. {0} now opens like any other app.': 'Koppints jobb fent a “Hozzáadás” gombra. A(z) {0} mostantól úgy nyílik meg, mint bármely más alkalmazás.',
+  'Open the browser menu (the three dots at the top right).': 'Nyisd meg a böngésző menüjét (jobb fent a három pont).',
+  'Tap “Install app” or “Add to Home screen”.': 'Koppints az “Alkalmazás telepítése” vagy a “Hozzáadás a kezdőképernyőhöz” lehetőségre.',
+  'Confirm. {0} now opens like any other app.': 'Erősítsd meg. A(z) {0} mostantól úgy nyílik meg, mint bármely más alkalmazás.',
 }

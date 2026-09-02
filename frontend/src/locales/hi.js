@@ -1031,4 +1031,16 @@ export default {
   'Keep the sets, change the movement': 'सेट रखें, व्यायाम बदलें',
   'Move in the session': 'सत्र में ले जाएँ',
   'Up': 'ऊपर',
+  //// Neoffice — "add to home screen" banner (components/InstallBanner.jsx).
+  'Add {0} to your home screen': '{0} को अपनी होम स्क्रीन पर जोड़ें',
+  'One tap to open it, full screen, and it works even without network at the rack.': 'एक टैप में खुलता है, फ़ुल स्क्रीन में, और जिम में नेटवर्क न होने पर भी काम करता है।',
+  'Install': 'इंस्टॉल करें',
+  'How?': 'कैसे?',
+  'Got it': 'ठीक है',
+  'Tap the Share button at the bottom of Safari (the square with an arrow).': 'Safari के नीचे शेयर बटन पर टैप करें (तीर वाला वर्ग चिह्न)।',
+  'Scroll down and tap “Add to Home Screen”.': 'नीचे स्क्रॉल करें और “होम स्क्रीन पर जोड़ें” पर टैप करें।',
+  'Tap “Add” at the top right. {0} now opens like any other app.': 'ऊपर दाईं ओर “जोड़ें” पर टैप करें। अब {0} किसी भी अन्य ऐप की तरह खुलेगा।',
+  'Open the browser menu (the three dots at the top right).': 'ब्राउज़र मेन्यू खोलें (ऊपर दाईं ओर तीन डॉट्स)।',
+  'Tap “Install app” or “Add to Home screen”.': '“ऐप इंस्टॉल करें” या “होम स्क्रीन पर जोड़ें” पर टैप करें।',
+  'Confirm. {0} now opens like any other app.': 'पुष्टि करें। अब {0} किसी भी अन्य ऐप की तरह खुलेगा।',
 }

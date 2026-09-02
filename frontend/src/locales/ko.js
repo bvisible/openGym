@@ -1031,4 +1031,16 @@ export default {
   'Keep the sets, change the movement': '세트는 그대로, 동작만 변경',
   'Move in the session': '운동 내에서 이동',
   'Up': '위로',
+  //// Neoffice — "add to home screen" banner (components/InstallBanner.jsx).
+  'Add {0} to your home screen': '{0}을(를) 홈 화면에 추가하세요',
+  'One tap to open it, full screen, and it works even without network at the rack.': '한 번 탭하면 전체 화면으로 열리고, 랙 앞에서 네트워크가 없어도 작동해요.',
+  'Install': '설치',
+  'How?': '어떻게?',
+  'Got it': '알겠어요',
+  'Tap the Share button at the bottom of Safari (the square with an arrow).': 'Safari 하단의 공유 버튼을 탭하세요(화살표가 있는 사각형 아이콘).',
+  'Scroll down and tap “Add to Home Screen”.': '아래로 스크롤한 다음 “홈 화면에 추가”를 탭하세요.',
+  'Tap “Add” at the top right. {0} now opens like any other app.': '오른쪽 상단의 “추가”를 탭하세요. 이제 {0}이(가) 다른 앱처럼 열려요.',
+  'Open the browser menu (the three dots at the top right).': '브라우저 메뉴를 여세요(오른쪽 상단의 점 세 개).',
+  'Tap “Install app” or “Add to Home screen”.': '“앱 설치” 또는 “홈 화면에 추가”를 탭하세요.',
+  'Confirm. {0} now opens like any other app.': '확인하세요. 이제 {0}이(가) 다른 앱처럼 열려요.',
 }

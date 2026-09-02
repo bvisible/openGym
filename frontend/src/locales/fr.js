@@ -1122,4 +1122,16 @@ export default {
   'Keep the sets, change the movement': 'Garder les séries, changer le mouvement',
   'Move in the session': 'Déplacer dans la séance',
   'Up': 'Monter',
+  //// Neoffice — "add to home screen" banner (components/InstallBanner.jsx).
+  'Add {0} to your home screen': 'Ajoutez {0} à votre écran d\'accueil',
+  'One tap to open it, full screen, and it works even without network at the rack.': 'Un geste pour l\'ouvrir, en plein écran, et ça fonctionne même sans réseau au rack.',
+  'Install': 'Installer',
+  'How?': 'Comment ?',
+  'Got it': 'Compris',
+  'Tap the Share button at the bottom of Safari (the square with an arrow).': 'Appuyez sur le bouton Partager en bas de Safari (le carré avec une flèche).',
+  'Scroll down and tap “Add to Home Screen”.': 'Faites défiler vers le bas et appuyez sur “Sur l\'écran d\'accueil”.',
+  'Tap “Add” at the top right. {0} now opens like any other app.': 'Appuyez sur “Ajouter” en haut à droite. {0} s\'ouvre désormais comme n\'importe quelle autre application.',
+  'Open the browser menu (the three dots at the top right).': 'Ouvrez le menu du navigateur (les trois points en haut à droite).',
+  'Tap “Install app” or “Add to Home screen”.': 'Appuyez sur “Installer l\'application” ou “Ajouter à l\'écran d\'accueil”.',
+  'Confirm. {0} now opens like any other app.': 'Confirmez. {0} s\'ouvre désormais comme n\'importe quelle autre application.',
 }

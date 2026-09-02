@@ -46,11 +46,14 @@ describe('Brazilian Portuguese locale', () => {
 //// Brazil.
 //// Recomputed for the session outline: three inherited, "em curso" became
 //// an override ("em andamento" is what Brazil says of something running).
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(351)
-    expect(inherited).toHaveLength(699)
+//// Recomputed for the add-to-home-screen card: seven overrides ("tela" for
+//// "ecrã", "aplicativo" for "aplicação", "Compartilhar" for "Partilhar" —
+//// the words the phone's own menus use in Brazil), four inherited.
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(358)
+    expect(inherited).toHaveLength(703)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('136c054c690f2d56a1525384b8735925025c106cda5fb983f0844366a4236f94')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('1df4d7197b561665940b7f6d2b2e26eaaf5251640161463fb864e507b199e86f')
   })
 
   test('does not leak European Portuguese UI terms', () => {

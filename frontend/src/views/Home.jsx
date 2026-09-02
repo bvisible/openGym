@@ -12,6 +12,7 @@ import { describeOffer } from '../lib/coach-program.js'
 import { classesMine, challengesMine, announcements } from '../lib/api.js'
 import LineChart from '../components/LineChart.jsx'
 import Icon from '../components/Icon.jsx'
+import InstallBanner from '../components/InstallBanner.jsx'
 import { Button } from '../components/ui.jsx'
 import { tappable } from '../lib/use-sheet-keyboard.js'
 import { glyphOf } from '../lib/glyphs.js'
@@ -159,6 +160,11 @@ export default function Home() {
     {/* //// Neoffice — the notice board, BEFORE the classes: a notice can
          correct the schedule read just below it ("the gym is closed on
          Thursday"), so it has to be read first. */}
+    {/* //// Neoffice — "add to home screen", for a member still in the browser
+         on their phone. First, above the club's notices: it is the one thing that
+         makes every later visit shorter. Draws nothing once installed. */}
+    <InstallBanner />
+
     {openNotices.map(n => <div key={n.name} className="card" style={{ borderColor: 'var(--acc)' }}>
       <div className="row between" style={{ marginBottom: 6, gap: 10 }}>
         <div className="lbl2">{n.title}</div>

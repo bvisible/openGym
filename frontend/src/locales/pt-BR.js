@@ -397,6 +397,20 @@ export const PT_BR_OVERRIDES = {
   //// inherits them, so a pt-PT term reaches Brazilian members unless it is
   //// overridden here.
   'Slide or tap to set your weight. Once a week is enough for the curve — you can change that in Settings.': 'Deslize ou toque para definir seu peso. Uma vez por semana já basta para o gráfico — você pode mudar isso nas configurações.',
+  //// Neoffice — pt-BR overrides for the "add to home screen" card. Brazil
+  //// says "tela" where Portugal says "ecrã", "aplicativo" for "aplicação",
+  //// "Compartilhar" for "Partilhar" — and iOS/Android use those very words
+  //// in their Brazilian menus, so the steps must match what the phone shows.
+  //// The five remaining strings ("Instalar", "Como?", "Entendido", the
+  //// browser-menu step, "Mais tarde") read the same on both sides and stay
+  //// inherited.
+  'Add {0} to your home screen': 'Adicione {0} à tela inicial',
+  'One tap to open it, full screen, and it works even without network at the rack.': 'Um toque para abrir, em tela cheia, e funciona mesmo sem internet no rack.',
+  'Tap the Share button at the bottom of Safari (the square with an arrow).': 'Toque no botão Compartilhar, na parte inferior do Safari (o quadrado com uma seta).',
+  'Scroll down and tap “Add to Home Screen”.': 'Role para baixo e toque em “Adicionar à Tela de Início”.',
+  'Tap “Add” at the top right. {0} now opens like any other app.': 'Toque em “Adicionar” no canto superior direito. Agora {0} abre como qualquer outro aplicativo.',
+  'Tap “Install app” or “Add to Home screen”.': 'Toque em “Instalar app” ou “Adicionar à tela inicial”.',
+  'Confirm. {0} now opens like any other app.': 'Confirme. Agora {0} abre como qualquer outro aplicativo.',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

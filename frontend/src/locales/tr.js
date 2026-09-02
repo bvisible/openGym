@@ -1031,4 +1031,16 @@ export default {
   'Keep the sets, change the movement': 'Setleri koru, hareketi değiştir',
   'Move in the session': 'Antrenmanda taşı',
   'Up': 'Yukarı',
+  //// Neoffice — "add to home screen" banner (components/InstallBanner.jsx).
+  'Add {0} to your home screen': '{0} uygulamasını ana ekranınıza ekleyin',
+  'One tap to open it, full screen, and it works even without network at the rack.': 'Tek dokunuşla açılır, tam ekran çalışır ve rack başında bile ağ olmadan kullanılabilir.',
+  'Install': 'Yükle',
+  'How?': 'Nasıl?',
+  'Got it': 'Anladım',
+  'Tap the Share button at the bottom of Safari (the square with an arrow).': 'Safari\'nin altındaki Paylaş düğmesine dokunun (ok işaretli kare).',
+  'Scroll down and tap “Add to Home Screen”.': 'Aşağı kaydırın ve “Ana Ekrana Ekle”ye dokunun.',
+  'Tap “Add” at the top right. {0} now opens like any other app.': 'Sağ üstteki “Ekle”ye dokunun. {0} artık diğer uygulamalar gibi açılır.',
+  'Open the browser menu (the three dots at the top right).': 'Tarayıcı menüsünü açın (sağ üstteki üç nokta).',
+  'Tap “Install app” or “Add to Home screen”.': '“Uygulamayı yükle” veya “Ana ekrana ekle”ye dokunun.',
+  'Confirm. {0} now opens like any other app.': 'Onaylayın. {0} artık diğer uygulamalar gibi açılır.',
 }
