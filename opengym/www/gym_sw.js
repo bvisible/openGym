@@ -17,7 +17,10 @@
 
 /* openGym service worker — runtime caching (works with Vite's hashed asset names).
    Media (img/gif) cache-first; everything else network-first with offline fallback. */
-const CACHE = 'opengym-rt-v1'
+//// Neoffice — bumped to v2 so the activate handler EVICTS the signed-out
+//// shells already sitting on members' phones. Without a new name the fix
+//// below ships and the symptom stays.
+const CACHE = 'opengym-rt-v2'
 
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', e => {
@@ -66,6 +69,38 @@ self.addEventListener('notificationclick', e => {
 //// worse than no answer.
 const SHELL = '/gym'
 
+//// Neoffice — THE SHELL IS CACHED ONLY WHEN SOMEBODY IS SIGNED IN.
+////
+//// Reported 2026-09-01: *"ce matin j'ai relancé l'application et j'étais à
+//// nouveau déconnecté"*, from the installed PWA. The session was never the
+//// problem — the cookie carries Max-Age=2592000 and survived every purge that
+//// was tried. What signs a member out is THIS CACHE.
+////
+//// /gym is rendered by Frappe and carries the boot payload: the member's name
+//// and CSRF token, or `"user": null` for a guest. The handler below cached it
+//// like any other page. So one launch that happened to render signed-out (an
+//// expired session, a bad moment) wrote a signed-out shell into the cache, and
+//// the next launch that started before the network was up — a phone waking on
+//// Wi-Fi, every morning — was served that shell and showed the app signed out
+//// while the cookie was perfectly valid.
+////
+//// 🔴 2026-09-02: this fix was first written into frontend/public/sw.js only,
+//// with a test reading that file — and that file is the standalone build's
+//// copy, which Frappe never serves. The bug stayed live on every phone for a
+//// day while the test was green. The test now reads THIS file too, and asserts
+//// both carry the same cache name.
+async function cacheIfUsable(request, response) {
+  const type = response.headers.get('content-type') || ''
+  if (type.includes('text/html')) {
+    const body = await response.clone().text()
+    //// The boot payload prints `"user": null` for a guest. Anything else —
+    //// including a page with no boot at all — is cached as before.
+    if (/"user":\s*null/.test(body)) return
+  }
+  const c = await caches.open(CACHE)
+  return c.put(request, response)
+}
+
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url)
   if (e.request.method !== 'GET' || url.origin !== location.origin) return
@@ -84,8 +119,9 @@ self.addEventListener('fetch', e => {
     e.respondWith(fetch(e.request).then(res => {
       if (res.ok) {
         //// Neoffice — same fix, and waitUntil so the write outlives the response.
+        //// Through cacheIfUsable: a signed-out shell must never be written.
         const copy = res.clone()
-        e.waitUntil(caches.open(CACHE).then(c => c.put(e.request, copy)))
+        e.waitUntil(cacheIfUsable(e.request, copy))
       }
       return res
     }).catch(() =>
