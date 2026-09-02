@@ -4,7 +4,7 @@
     "name": "dist"
   },
   "index.html": {
-    "file": "assets/index-rvaWY4Bk.js",
+    "file": "assets/index-CIh36Rim.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -45,11 +45,11 @@
       "src/lib/body-paths.js"
     ],
     "css": [
-      "assets/index-BKuARbdY.css"
+      "assets/index-zg91LAjs.css"
     ]
   },
   "node_modules/@capacitor/app/dist/esm/index.js": {
-    "file": "assets/esm-gGYb1_i0.js",
+    "file": "assets/esm-DJq11a6r.js",
     "name": "esm",
     "src": "node_modules/@capacitor/app/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -71,7 +71,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/index.js": {
-    "file": "assets/esm-BX1AoVvn.js",
+    "file": "assets/esm-38e4ru-8.js",
     "name": "esm",
     "src": "node_modules/@capacitor/filesystem/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -84,7 +84,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/web.js": {
-    "file": "assets/web-UBKYt-9J.js",
+    "file": "assets/web-OK-5NhCf.js",
     "name": "web",
     "src": "node_modules/@capacitor/filesystem/dist/esm/web.js",
     "isDynamicEntry": true,
@@ -94,7 +94,7 @@
     ]
   },
   "node_modules/@capacitor/local-notifications/dist/esm/index.js": {
-    "file": "assets/esm-D1D6D1-L.js",
+    "file": "assets/esm-Cix2Q4hM.js",
     "name": "esm",
     "src": "node_modules/@capacitor/local-notifications/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -116,7 +116,7 @@
     ]
   },
   "node_modules/@capacitor/share/dist/esm/index.js": {
-    "file": "assets/esm-BsboRzA6.js",
+    "file": "assets/esm-C6amNgrS.js",
     "name": "esm",
     "src": "node_modules/@capacitor/share/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -228,7 +228,7 @@
     "isDynamicEntry": true
   },
   "src/lib/demoSeed.js": {
-    "file": "assets/demoSeed-DtA2DN8m.js",
+    "file": "assets/demoSeed-BfBU7IJc.js",
     "name": "demoSeed",
     "src": "src/lib/demoSeed.js",
     "isDynamicEntry": true,
