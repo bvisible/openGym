@@ -1,6 +1,6 @@
 {
-  "_base-Bjg9Ne1x.js": {
-    "file": "assets/base-Bjg9Ne1x.js",
+  "_base-C_eTlSmH.js": {
+    "file": "assets/base-C_eTlSmH.js",
     "name": "base",
     "imports": [
       "node_modules/@capacitor/core/dist/index.js",
@@ -12,7 +12,7 @@
     "name": "rolldown-runtime"
   },
   "index.html": {
-    "file": "assets/index-CA8H4TV-.js",
+    "file": "assets/index-DqkeHl7x.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -64,11 +64,11 @@
       "node_modules/@aparajita/capacitor-secure-storage/dist/esm/index.js"
     ],
     "css": [
-      "assets/index-MpmPtBpy.css"
+      "assets/index-BxPZwuVn.css"
     ]
   },
   "node_modules/@aparajita/capacitor-secure-storage/dist/esm/index.js": {
-    "file": "assets/esm-DsCKQhH4.js",
+    "file": "assets/esm-DLOH0AEp.js",
     "name": "esm",
     "src": "node_modules/@aparajita/capacitor-secure-storage/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -82,25 +82,25 @@
     ]
   },
   "node_modules/@aparajita/capacitor-secure-storage/dist/esm/native.js": {
-    "file": "assets/native-BajFEvjw.js",
+    "file": "assets/native-CGLzhuH1.js",
     "name": "native",
     "src": "node_modules/@aparajita/capacitor-secure-storage/dist/esm/native.js",
     "isDynamicEntry": true,
     "imports": [
-      "_base-Bjg9Ne1x.js"
+      "_base-C_eTlSmH.js"
     ]
   },
   "node_modules/@aparajita/capacitor-secure-storage/dist/esm/web.js": {
-    "file": "assets/web-BmOIeQQ3.js",
+    "file": "assets/web-BHrqPadz.js",
     "name": "web",
     "src": "node_modules/@aparajita/capacitor-secure-storage/dist/esm/web.js",
     "isDynamicEntry": true,
     "imports": [
-      "_base-Bjg9Ne1x.js"
+      "_base-C_eTlSmH.js"
     ]
   },
   "node_modules/@capacitor-mlkit/barcode-scanning/dist/esm/index.js": {
-    "file": "assets/esm-DonfqWog.js",
+    "file": "assets/esm-Dp4Jbu25.js",
     "name": "esm",
     "src": "node_modules/@capacitor-mlkit/barcode-scanning/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -113,7 +113,7 @@
     ]
   },
   "node_modules/@capacitor-mlkit/barcode-scanning/dist/esm/web.js": {
-    "file": "assets/web-D_JEdmAA.js",
+    "file": "assets/web-4qFvip_e.js",
     "name": "web",
     "src": "node_modules/@capacitor-mlkit/barcode-scanning/dist/esm/web.js",
     "isDynamicEntry": true,
@@ -123,7 +123,7 @@
     ]
   },
   "node_modules/@capacitor/app/dist/esm/index.js": {
-    "file": "assets/esm-BG44UXUQ.js",
+    "file": "assets/esm-DbKyWqN6.js",
     "name": "esm",
     "src": "node_modules/@capacitor/app/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -151,7 +151,7 @@
     "isDynamicEntry": true
   },
   "node_modules/@capacitor/filesystem/dist/esm/index.js": {
-    "file": "assets/esm-D8Kuko0U.js",
+    "file": "assets/esm-Sojspw9Q.js",
     "name": "esm",
     "src": "node_modules/@capacitor/filesystem/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -164,7 +164,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/web.js": {
-    "file": "assets/web-CsgxSYAt.js",
+    "file": "assets/web-DmUwJt1R.js",
     "name": "web",
     "src": "node_modules/@capacitor/filesystem/dist/esm/web.js",
     "isDynamicEntry": true,
@@ -174,7 +174,7 @@
     ]
   },
   "node_modules/@capacitor/local-notifications/dist/esm/index.js": {
-    "file": "assets/esm-Blzm57Cp.js",
+    "file": "assets/esm-BT3Nc2Al.js",
     "name": "esm",
     "src": "node_modules/@capacitor/local-notifications/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -196,7 +196,7 @@
     ]
   },
   "node_modules/@capacitor/share/dist/esm/index.js": {
-    "file": "assets/esm-CfblplGA.js",
+    "file": "assets/esm-VrNVs1-3.js",
     "name": "esm",
     "src": "node_modules/@capacitor/share/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -323,7 +323,7 @@
     "isDynamicEntry": true
   },
   "src/lib/coach-demo.js": {
-    "file": "assets/coach-demo-DYZ5WozJ.js",
+    "file": "assets/coach-demo-bQMXYZO0.js",
     "name": "coach-demo",
     "src": "src/lib/coach-demo.js",
     "isDynamicEntry": true,
@@ -332,7 +332,7 @@
     ]
   },
   "src/lib/coach-local.js": {
-    "file": "assets/coach-local-CVQ752Z7.js",
+    "file": "assets/coach-local-glakeThb.js",
     "name": "coach-local",
     "src": "src/lib/coach-local.js",
     "isDynamicEntry": true,
@@ -344,7 +344,7 @@
     ]
   },
   "src/lib/demoSeed.js": {
-    "file": "assets/demoSeed-4Q3B-jeg.js",
+    "file": "assets/demoSeed-X0k-rYxf.js",
     "name": "demoSeed",
     "src": "src/lib/demoSeed.js",
     "isDynamicEntry": true,
