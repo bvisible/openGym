@@ -240,6 +240,11 @@ function Consent({ onAgree, onDecline }) {
     <div className="ob-eyebrow">{t('Before we start')}</div>
     <h1 className="ob-h">{t('Meet the Coach')}</h1>
     <p className="ob-p">{t('It designs your plan from a few answers and adjusts it from what you actually log. It never changes anything without your say-so, and you can undo every change.')}</p>
+    {/* //// Neoffice — the club's own word (Gym Settings → "The club's word to the member"),
+        //// carried by the boot as `coach.intro`. A club sells coaching: it positions the AI
+        //// as a help between two sessions with ITS coaches, in its own sentences. Its text,
+        //// not ours: rendered as-is, never translated. */}
+    {config?.coach?.intro && <p className="ob-p ob-club-word">{config.coach.intro}</p>}
     <div className="ob-sub" style={{ marginTop: 0 }}>{t('What it reads')}</div>
     <div className="ob-consent">
       {(info?.categories || Object.keys(CATEGORY_TEXT)).map(k => {

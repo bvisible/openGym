@@ -13,6 +13,8 @@
 .ob-eyebrow{color:var(--acc);font-size:13px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px}
 .ob-h{font-size:30px;line-height:1.12;font-weight:700;letter-spacing:-.026em;margin:0 0 8px}
 .ob-p{color:var(--label-2);font-size:16px;line-height:1.45;margin:0 0 24px;letter-spacing:-.006em}
+/* //// Neoffice — the club's own word on the consent screen (Gym Settings), set apart from ours. */
+.ob-club-word{color:var(--label);border-left:3px solid var(--acc);padding:2px 0 2px 14px;white-space:pre-line}
 .ob-choices{display:flex;flex-direction:column;gap:10px}
 .ob-choice{
   display:flex;align-items:center;gap:14px;width:100%;text-align:left;
