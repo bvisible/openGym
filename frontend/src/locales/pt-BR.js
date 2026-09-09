@@ -719,6 +719,10 @@ export const PT_BR_OVERRIDES = {
   'Download & Install': 'Baixar e instalar',
   'Starting download…': 'Iniciando download…',
   'Downloading update…': 'Baixando atualização…',
+  //// Neoffice — the coach's consent screen, in Brazil's words (pt.js says registado / definições).
+  "Routines, exercises, sets and reps, your weekly schedule and progression settings.": "Rotinas, exercícios, séries e repetições, seu horário semanal e suas configurações de progressão.",
+  "Your logged training": "Seu treino registrado",
+  "Sets you logged in the review window — weights, reps, times, effort ratings and how long sessions took.": "Séries registradas no período de revisão — pesos, repetições, tempos, avaliações de esforço e duração das sessões.",
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

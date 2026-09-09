@@ -57,14 +57,15 @@ describe('Brazilian Portuguese locale', () => {
 //// invoice): all stay inherited, none needed a pt-BR override.
 //// Recomputed for the rename-an-exercise, rest-per-exercise and floor-plan
 //// strings (16 new keys): all stay inherited, none needed a pt-BR override.
-//// Recomputed after the upstream v1.3.5 merge (2026-09-09): upstream rewrote most
+//// Recomputed after the upstream v1.3.5 merge (2026-09-09), then once more for the
+//// coach questionnaire's 15 subtitles (three of them Brazilian overrides): upstream rewrote most
 //// of its pt-BR pack as explicit overrides (631 of theirs), and its new strings
 //// land in the inherited set; our own 24 overrides ride along.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(653)
-    expect(inherited).toHaveLength(917)
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(656)
+    expect(inherited).toHaveLength(929)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('a69f75c03b01384218d0dc41360196ffae1e57f06c1d3f8636f8ef9b30351ef9')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('5a1b77a729c76c8838d82c7030ec48925ad4d070a2a95a6313fe5c09984d31c8')
   })
 
   test('does not leak European Portuguese UI terms', () => {

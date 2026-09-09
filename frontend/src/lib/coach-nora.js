@@ -36,11 +36,17 @@ const frappeError = data => {
   return data.exception || data.exc_type || null
 }
 
+//// The job the request belongs to (create / review / refine / debrief), for the
+//// club's accounting only: the pipeline hands the adapter a prompt, not a kind,
+//// so the runner states it here before each call and the spec sends it as a header.
+let jobKind = null
+export const setJobKind = kind => { jobKind = kind || null }
+
 export const noraSpec = {
   ...base,
   path: () => NORA_CHAT_PATH,
   modelsPath: NORA_MODELS_PATH,
-  headers: () => (BOOT.csrf_token ? { 'X-Frappe-CSRF-Token': BOOT.csrf_token } : {}),
+  headers: () => ({ ...(BOOT.csrf_token ? { 'X-Frappe-CSRF-Token': BOOT.csrf_token } : {}), ...(jobKind ? { 'X-Coach-Kind': jobKind } : {}) }),
   errorMessage: data => base.errorMessage(unwrap(data)) || frappeError(data),
   readText: data => base.readText(unwrap(data)),
   readModels: data => base.readModels(unwrap(data)),

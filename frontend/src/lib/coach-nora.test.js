@@ -11,7 +11,8 @@ const load = async () => await import('./coach-nora.js')
 
 describe('the Nora adapter', () => {
   it('posts the chat-completions body to the instance with the CSRF header and the session', async () => {
-    const { noraAdapter, noraCfg, noraFetch } = await load()
+    const { noraAdapter, noraCfg, noraFetch, setJobKind } = await load()
+    setJobKind('create')
     const calls = []
     const fetchImpl = vi.fn(async (url, init) => { calls.push({ url, init }); return { ok: true, status: 200, text: async () => JSON.stringify({ message: { choices: [{ message: { content: '{"ok":true}' }, finish_reason: 'stop' }] } }) } })
     const r = await noraAdapter.invoke({ cfg: noraCfg(), prompt: 'hello', env: {}, model: 'nora', fetch: fetchImpl })
@@ -19,6 +20,7 @@ describe('the Nora adapter', () => {
     expect(r.text).toBe('{"ok":true}')
     expect(calls[0].url).toBe(window.location.origin + '/api/method/neoffice_gym.api.coach_ai.chat_completions')
     expect(calls[0].init.headers['X-Frappe-CSRF-Token']).toBe('tok')
+    expect(calls[0].init.headers['X-Coach-Kind']).toBe('create')
     const body = JSON.parse(calls[0].init.body)
     expect(body.model).toBe('nora')
     expect(body.messages.map(m => m.role)).toEqual(['system', 'user'])

@@ -26,7 +26,8 @@ import { nativeFetch } from './capacitor-fetch.js'
 import { getApiKey } from './coach-secrets.js'
 import { loadCoachDevice, saveCoachDevice } from './coach-device.js'
 //// Neoffice — the club's Nora as a fourth adapter; see coach-nora.js.
-import { noraAdapter, noraCfg, noraFetch } from './coach-nora.js'
+import { noraAdapter, noraCfg, noraFetch, setJobKind } from './coach-nora.js'
+import { BOOT } from './api.js'
 import { planHash } from './coach.js'
 import { todayISO } from './format.js'
 import { t } from './i18n.js'
@@ -78,7 +79,10 @@ async function capState() {
   const d = await loadCoachDevice()
   const today = todayISO()
   const used = d.daily && d.daily.d === today ? d.daily.n : 0
-  return { used, limit: LOCAL_DAILY_CAP }
+  //// Neoffice — with Nora the limit is the club's (BOOT.coach.dailyLimit), enforced on
+  //// the instance; the count kept here is this device's, for the line under the chat.
+  const limit = d.mode === 'nora' ? ((BOOT.coach && BOOT.coach.dailyLimit) || LOCAL_DAILY_CAP) : LOCAL_DAILY_CAP
+  return { used, limit }
 }
 async function bumpDaily() {
   const { used } = await capState()
@@ -139,8 +143,8 @@ async function start(S, kind, opts) {
   if (d.mode !== 'nora') {
     const cap = await capState()
     if (cap.used >= cap.limit) throw Object.assign(new Error(t('The Coach is resting — you have used today’s {0} runs on this phone.', cap.limit)), { status: 429, code: 'cap' })
-    await bumpDaily()
   }
+  await bumpDaily()
   job = { id: 'local-' + Date.now().toString(36), kind, state: 'running', startedAt: Date.now() }
   lastError = null
   // Not awaited: the screens poll, exactly as they do against a server.
@@ -150,6 +154,7 @@ async function start(S, kind, opts) {
 
 async function run(S, kind, opts, d, adapter) {
   const key = d.mode === 'nora' ? null : await getApiKey()
+  if (d.mode === 'nora') setJobKind(opts.refine ? 'refine' : kind)
   const payload = payloadLib.build(S, {
     handle: await handle(), kind, intake: opts.intake, note: opts.note, refine: opts.refine, previous: opts.previous, workoutId: opts.workoutId
   })
