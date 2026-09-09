@@ -1,6 +1,6 @@
 {
-  "_base-C0MbOpm0.js": {
-    "file": "assets/base-C0MbOpm0.js",
+  "_base-k7t1kwbr.js": {
+    "file": "assets/base-k7t1kwbr.js",
     "name": "base",
     "imports": [
       "node_modules/@capacitor/core/dist/index.js",
@@ -12,7 +12,7 @@
     "name": "rolldown-runtime"
   },
   "index.html": {
-    "file": "assets/index-CZ-0_P-W.js",
+    "file": "assets/index-C9eYRdCa.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -68,7 +68,7 @@
     ]
   },
   "node_modules/@aparajita/capacitor-secure-storage/dist/esm/index.js": {
-    "file": "assets/esm-B4wvEUCI.js",
+    "file": "assets/esm-CpysCgH9.js",
     "name": "esm",
     "src": "node_modules/@aparajita/capacitor-secure-storage/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -82,25 +82,25 @@
     ]
   },
   "node_modules/@aparajita/capacitor-secure-storage/dist/esm/native.js": {
-    "file": "assets/native-4GJuqs4u.js",
+    "file": "assets/native-BTyDdTx0.js",
     "name": "native",
     "src": "node_modules/@aparajita/capacitor-secure-storage/dist/esm/native.js",
     "isDynamicEntry": true,
     "imports": [
-      "_base-C0MbOpm0.js"
+      "_base-k7t1kwbr.js"
     ]
   },
   "node_modules/@aparajita/capacitor-secure-storage/dist/esm/web.js": {
-    "file": "assets/web-CF95Efpj.js",
+    "file": "assets/web-qEfek_gY.js",
     "name": "web",
     "src": "node_modules/@aparajita/capacitor-secure-storage/dist/esm/web.js",
     "isDynamicEntry": true,
     "imports": [
-      "_base-C0MbOpm0.js"
+      "_base-k7t1kwbr.js"
     ]
   },
   "node_modules/@capacitor-mlkit/barcode-scanning/dist/esm/index.js": {
-    "file": "assets/esm-Dew7a7yy.js",
+    "file": "assets/esm-LqzQQlDz.js",
     "name": "esm",
     "src": "node_modules/@capacitor-mlkit/barcode-scanning/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -113,7 +113,7 @@
     ]
   },
   "node_modules/@capacitor-mlkit/barcode-scanning/dist/esm/web.js": {
-    "file": "assets/web-iw9G2Uo8.js",
+    "file": "assets/web-Dwn9kSnF.js",
     "name": "web",
     "src": "node_modules/@capacitor-mlkit/barcode-scanning/dist/esm/web.js",
     "isDynamicEntry": true,
@@ -123,7 +123,7 @@
     ]
   },
   "node_modules/@capacitor/app/dist/esm/index.js": {
-    "file": "assets/esm-CvRQwG2n.js",
+    "file": "assets/esm-C1WkIIW2.js",
     "name": "esm",
     "src": "node_modules/@capacitor/app/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -151,7 +151,7 @@
     "isDynamicEntry": true
   },
   "node_modules/@capacitor/filesystem/dist/esm/index.js": {
-    "file": "assets/esm-p5K3aKex.js",
+    "file": "assets/esm-DWKRyrZ1.js",
     "name": "esm",
     "src": "node_modules/@capacitor/filesystem/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -164,7 +164,7 @@
     ]
   },
   "node_modules/@capacitor/filesystem/dist/esm/web.js": {
-    "file": "assets/web-CFuz7j8l.js",
+    "file": "assets/web-B3vzRZVO.js",
     "name": "web",
     "src": "node_modules/@capacitor/filesystem/dist/esm/web.js",
     "isDynamicEntry": true,
@@ -174,7 +174,7 @@
     ]
   },
   "node_modules/@capacitor/local-notifications/dist/esm/index.js": {
-    "file": "assets/esm-2b72qfTB.js",
+    "file": "assets/esm-DbWAvPyX.js",
     "name": "esm",
     "src": "node_modules/@capacitor/local-notifications/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -196,7 +196,7 @@
     ]
   },
   "node_modules/@capacitor/share/dist/esm/index.js": {
-    "file": "assets/esm-C9pCL0pB.js",
+    "file": "assets/esm-D3ZGomrG.js",
     "name": "esm",
     "src": "node_modules/@capacitor/share/dist/esm/index.js",
     "isDynamicEntry": true,
@@ -323,7 +323,7 @@
     "isDynamicEntry": true
   },
   "src/lib/coach-demo.js": {
-    "file": "assets/coach-demo-Yw29g-9G.js",
+    "file": "assets/coach-demo-DjDkvydu.js",
     "name": "coach-demo",
     "src": "src/lib/coach-demo.js",
     "isDynamicEntry": true,
@@ -332,7 +332,7 @@
     ]
   },
   "src/lib/coach-local.js": {
-    "file": "assets/coach-local-Bysp4LeD.js",
+    "file": "assets/coach-local-BwJ53dpt.js",
     "name": "coach-local",
     "src": "src/lib/coach-local.js",
     "isDynamicEntry": true,
@@ -344,7 +344,7 @@
     ]
   },
   "src/lib/demoSeed.js": {
-    "file": "assets/demoSeed-BOD0lGJm.js",
+    "file": "assets/demoSeed-Dax5500H.js",
     "name": "demoSeed",
     "src": "src/lib/demoSeed.js",
     "isDynamicEntry": true,
