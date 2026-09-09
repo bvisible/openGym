@@ -10,11 +10,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import CoachIntake from './CoachIntake.jsx'
 
 const mocks = vi.hoisted(() => {
-  const state = { intro: null, nav: vi.fn(), toast: vi.fn() }
+  const state = { intro: null, hosting: null, nav: vi.fn(), toast: vi.fn() }
   state.storeSnapshot = () => ({
     S: { coach: null },
     user: { id: 'u1' },
-    config: { coach: { enabled: true, provider: 'nora', ...(state.intro ? { intro: state.intro } : {}) } },
+    config: { coach: { enabled: true, provider: 'nora', ...(state.intro ? { intro: state.intro } : {}), ...(state.hosting ? { hosting: state.hosting } : {}) } },
     coachLocal: null,
     update: vi.fn(),
   })
@@ -56,7 +56,7 @@ function installDom() {
 beforeEach(() => { vi.clearAllMocks() })
 afterEach(async () => {
   if (root) { await act(async () => { root.unmount() }); root = null }
-  container = null; dom = null; mocks.intro = null
+  container = null; dom = null; mocks.intro = null; mocks.hosting = null
 })
 
 const render = async () => { installDom(); await act(async () => { root.render(React.createElement(CoachIntake)) }) }
@@ -74,5 +74,19 @@ describe('the consent screen carries the club’s word', () => {
     await render()
     expect(container.querySelector('.ob-club-word')).toBeNull()
     expect(container.querySelector('.ob-consent')).not.toBeNull()
+  })
+})
+
+describe('where the data goes is said by the server when it knows', () => {
+  it('prints the server’s sentence instead of upstream’s "running on this server"', async () => {
+    mocks.hosting = 'Envoyé à Nora, sur les serveurs de Neoservice.'
+    await render()
+    const fine = container.querySelector('.ob-fine').textContent
+    expect(fine).toContain(mocks.hosting)
+    expect(fine).not.toContain('running on this server')
+  })
+  it('keeps upstream’s sentence when the server said nothing', async () => {
+    await render()
+    expect(container.querySelector('.ob-fine').textContent).toContain('Nora')
   })
 })

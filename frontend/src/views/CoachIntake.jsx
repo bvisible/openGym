@@ -233,9 +233,16 @@ function Consent({ onAgree, onDecline }) {
   const config = useStore(s => s.config)
   const [info, setInfo] = useState(null)
   useEffect(() => { disclosure().then(setInfo).catch(() => {}) }, [])
-  const who = info?.payer === 'you'
-    ? t('Sent straight to {0} with your own API key — you pay for every request.', info.host || info.providerLabel)
-    : t('Sent to {0}, running on this server under the instance owner’s account.', info?.providerLabel || config?.coach?.providerLabel || t('the configured AI provider'))
+  //// Neoffice — where the data goes, said by the SERVER when the coach runs through
+  //// the instance (boot `coach.hosting`, api/coach_ai.hosting_line): the call leaves
+  //// for Nora's model, and the club may allow a third-party cloud fallback — upstream's
+  //// sentence ("running on this server") would promise more than the configuration
+  //// keeps. Upstream's own wording stays for the other modes.
+  const who = config?.coach?.hosting
+    ? config.coach.hosting
+    : info?.payer === 'you'
+      ? t('Sent straight to {0} with your own API key — you pay for every request.', info.host || info.providerLabel)
+      : t('Sent to {0}, running on this server under the instance owner’s account.', info?.providerLabel || config?.coach?.providerLabel || t('the configured AI provider'))
   return <>
     <div className="ob-eyebrow">{t('Before we start')}</div>
     <h1 className="ob-h">{t('Meet the Coach')}</h1>
