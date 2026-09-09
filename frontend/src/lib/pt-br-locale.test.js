@@ -57,11 +57,14 @@ describe('Brazilian Portuguese locale', () => {
 //// invoice): all stay inherited, none needed a pt-BR override.
 //// Recomputed for the rename-an-exercise, rest-per-exercise and floor-plan
 //// strings (16 new keys): all stay inherited, none needed a pt-BR override.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(360)
-    expect(inherited).toHaveLength(738)
+//// Recomputed after the upstream v1.3.5 merge (2026-09-09): upstream rewrote most
+//// of its pt-BR pack as explicit overrides (631 of theirs), and its new strings
+//// land in the inherited set; our own 24 overrides ride along.
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(653)
+    expect(inherited).toHaveLength(917)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('4925a26cad8fe7a58b296ce2ff32d582d6a297dcd209ecc7dc91364218696d44')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('a69f75c03b01384218d0dc41360196ffae1e57f06c1d3f8636f8ef9b30351ef9')
   })
 
   test('does not leak European Portuguese UI terms', () => {
@@ -79,6 +82,6 @@ describe('Brazilian Portuguese locale', () => {
     expect(ptBR['resistance band']).toBe('faixa elástica')
     expect(ptBR.soleus).toBe('sóleo')
     expect(ptBR.Unpair).toBe('Desvincular')
-    expect(ptBR['Starter plan loaded — Mon Push · Wed Pull · Fri Legs']).toContain('Seg Push · Qua Pull')
+    expect(ptBR['Choose starter plan']).toBe('Escolha um plano inicial')
   })
 })

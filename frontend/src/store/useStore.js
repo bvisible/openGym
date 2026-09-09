@@ -20,6 +20,9 @@ import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
 import { guestAllowed } from '../lib/guest.js'
 import { MOBILE, initReminderSync, nativeLoad, nativeSave, syncReminder, writeAutoBackup } from '../lib/mobile.js'
 import { loadRemote, chooseLocal, forgetRemote, connect } from '../lib/remote.js'
+import { loadCoachDevice, saveCoachDevice, coachDeviceSettings } from '../lib/coach-device.js'
+
+import { WC_DEFAULT } from '../lib/workout-controls.js'
 
 const KEY = 'gym_state_v1'
 //// Neoffice — the journal opens in the member's Neoffice language.
@@ -60,6 +63,17 @@ export const DEF = {
   theme: 'system', accent: 'lime', body: 'male', targetW: null,
   bodyweight: [], routines: [], week: {}, dayPlan: {},
   exWeights: {}, workouts: [], active: null, customEx: [], exAliases: {}, gifSize: 'full',
+  // How the active workout is laid out — 'cards' (one exercise at a time with Prev/Next),
+  // 'list' (every exercise stacked and scrollable) or 'compact' (that stack stripped to just
+  // names and set rows — no media, tags, notes, last-time or progression line). Purely
+  // presentational: profiles written before this setting existed overlay onto DEF and keep the
+  // 'cards' behaviour. beginWorkout copies the value onto s.active, so the header ⋮ menu can
+  // override it for the running session without touching this saved default.
+  workoutView: 'cards',
+  // Which controls the workout screen shows besides the sets themselves. The default is the
+  // lean layout: one "more" button per exercise and a menu on each set number. Every switch
+  // brings one of the old always-visible button groups back (Settings → During a workout).
+  wc: { ...WC_DEFAULT },
   // effort: which per-set effort scale is logged — 'none' | 'rir' | 'rpe'. null, not 'none', so
   // that a profile which never chose (loaded state is overlaid on DEF, on every path: local,
   // server pull, backup import) still falls back to the `showRir` boolean this replaced and
@@ -98,6 +112,37 @@ export const DEF = {
   //// 'week' or 'workout'. The setting is about being ASKED, never about being
   //// able to.
   weighInEvery: 'never',
+  // Standing per-exercise notes, keyed by exercise id: the gym-specific facts that are true
+  // every time you do the movement ("seat 4, pin 7"). Distinct from a routine's `note`, which
+  // belongs to one exercise in one plan, and from a session note, which belongs to one day.
+  exNotes: {},
+  // Favourite exercise ids (issue #6) — sorted to the top of the picker/Library. Personal, so
+  // it syncs with the profile but is never part of a shared plan bundle (lib/favourites.js).
+  favEx: [],
+  // First day of the week as a getDay() index — 1 Monday, 0 Sunday. Monday is the default so
+  // every profile written before this setting existed keeps the week it has been looking at.
+  // See lib/format.js: nothing reads this field directly, everything goes through the helpers.
+  weekStart: 1,
+  // Per-exercise bar weight overrides, keyed by exercise id, in the profile unit (see
+  // lib/bar.js). Personal equipment, so it syncs with the account but never travels in a
+  // shared plan. Logged weights stay the total — this only feeds the plate math.
+  barWeights: {},
+  // Gym check-in cards (see views/CheckIn.jsx). Each is a membership
+  // code shown as a QR/barcode at the gym's turnstile — added by typing it, importing a photo
+  // of the card, or scanning it. We only ever keep the code's VALUE, never a photo: the image
+  // is regenerated from `value` every time it's shown (lib/qr.js). `fmt` is the barcode symbology
+  // ('qrcode' | 'ean13' | 'code128' | … — lower-cased BarcodeFormat) so it renders as the same
+  // kind of code the gym issued. Just data, so it syncs and backs up like everything else.
+  //   [{ id, label, value, fmt }]
+  gymCards: [],
+  // The card the check-in screen last settled on, so it reopens where you left it (handy when
+  // you have more than one gym). Holds a gymCards id, or null before any card exists / is chosen;
+  // a stale id (card since removed) is simply ignored by the view.
+  lastGymCardId: null,
+  // Whether the check-in feature is on at all (Settings toggle). Off hides the Home
+  // card and the /checkin route; the saved gymCards stay so turning it back on restores them.
+  // Defaults on; an older profile without the key reads as on (`!== false`).
+  checkIn: true,
 }
 //// Neoffice — resolve the level: the member's own choice, else the club's
 //// default (sent in perms), else the full journal. `=== 'simple'` and never a
@@ -135,17 +180,10 @@ export function shouldAskWeighIn(S) {
 //// 'full' is kept as the top level's name rather than renamed to 'advanced':
 //// it is already stored on profiles and in club settings, and renaming it
 //// would silently reset every member who had chosen it.
-export const LEVELS = ['simple', 'normal', 'full']
-
-export const levelOf = S => {
-  const chosen = (S && S.level) || (S && S.perms && S.perms.defaultLevel)
-  return LEVELS.includes(chosen) ? chosen : 'full'
-}
-export const isSimple = S => levelOf(S) === 'simple'
-//// "at least this much": a check for the full level must not accidentally pass
-//// at normal, and a check for normal must pass at full. Comparing rank rather
-//// than string equality is what keeps that true when a level is added.
-export const atLeast = (S, level) => LEVELS.indexOf(levelOf(S)) >= LEVELS.indexOf(level)
+//// Neoffice — the level helpers live in lib/level.js (pure, no store): the
+//// screens' visibility rules import them from there, so an upstream test that
+//// mocks this store never has to know about them. Re-exported for callers.
+export { LEVELS, levelOf, isSimple, atLeast } from '../lib/level.js'
 
 const clone = o => JSON.parse(JSON.stringify(o))
 
@@ -260,7 +298,18 @@ export const useStore = create((set, get) => {
     S: (() => { const s = loadState(); registerCustom(s.customEx); setExerciseAliases(s.exAliases); return s })(),
     user: (() => { try { return JSON.parse(localStorage.getItem('gym_user')) || null } catch { return null } })(),
     ready: false,
+    /* Instance capabilities from GET /api/config. `config.coach` is present only when the owner
+       has both enabled the Coach and connected a provider — every Coach entry point in the app
+       hangs off it via coachAvailable(), so an unconfigured instance renders exactly what it
+       always did, and a configured one is the only place any of it appears. */
+    config: null,
     needsMobileOnboarding: false,   // mobile build only — set true by boot() on a genuine first launch
+    // Mobile build only: how the Coach runs on this phone — { mode: 'off'|'server'|'byok',
+    // provider, model, baseUrl } from lib/coach-device.js. Never the key, never a proposal.
+    coachLocal: null,
+    async setCoachLocal(patch) {
+      set({ coachLocal: coachDeviceSettings(await saveCoachDevice(patch)) })
+    },
 
     // Mutate a draft of S via producer fn, then persist + schedule sync.
     update(mut, push = true) {
@@ -281,13 +330,24 @@ export const useStore = create((set, get) => {
     isGuest: () => localStorage.getItem('gym_guest') === '1',
     setGuest(v) { if (v) localStorage.setItem('gym_guest', '1'); else localStorage.removeItem('gym_guest'); set({}) },
 
-    //// Neoffice — upstream added `config` / `loadConfig()` here, reading
-    //// /api/config from its Node server to learn whether the instance is
-    //// invite-only and whether guest mode is allowed. Neither applies: there is
-    //// no Node server, and there is no guest mode — /gym redirects an anonymous
-    //// visitor to /login before any of this loads, so the only session that
-    //// exists is a Frappe one. Kept as a note rather than a stub, so the next
-    //// merge shows plainly that the omission is deliberate.
+    //// Neoffice — upstream reads `config` from /api/config on its Node server
+    //// (invite-only, guest mode, and since v1.3 whether the Coach is on). There
+    //// is no Node server here: the instance's capabilities travel in the boot
+    //// blob written by www/gym.py — BOOT.coach is present only when the club
+    //// switched the AI coach on in Gym Settings — so the "fetch" is a read of
+    //// what the page already carries, and the screens that gate themselves on
+    //// `config.coach` (coachAvailable) work unchanged.
+    config: null,
+    async loadConfig() {
+      if (get().config) return get().config
+      return get().refreshConfig()
+    },
+    async refreshConfig() {
+      const boot = (typeof window !== 'undefined' && window.gym_boot) || {}
+      const c = { invite_only: true, allow_guest: false, ...(boot.coach ? { coach: boot.coach } : {}) }
+      set({ config: c })
+      return c
+    },
 
     setUser(u) {
       if (u) { localStorage.setItem('gym_user', JSON.stringify(u)); localStorage.removeItem('gym_guest') }
@@ -392,6 +452,7 @@ export const useStore = create((set, get) => {
     async connectToServer(url, code) {
       const user = await connect(url, code)   // throws on a bad URL/expired code — caller shows it
       get().setUser(user)
+      await get().refreshConfig()   // what this server offers (the Coach, guest mode) — see boot()
       await get().pullState()
       syncReminder(get().S)
       set({ needsMobileOnboarding: false })
@@ -436,11 +497,16 @@ export const useStore = create((set, get) => {
       // case it behaves exactly like the signed-in web flow below, straight from here.
       if (MOBILE) {
         const remote = await loadRemote()
+        set({ coachLocal: coachDeviceSettings(await loadCoachDevice()) })
         if (remote?.mode === 'remote') {
           setRemoteAuth(remote.base, remote.token)
           try {
             const me = await api('/api/me')   // also catches a token revoked elsewhere (sign out everywhere)
             get().setUser(me.user)
+            // The paired server's /api/config, the same one the web boot reads: without it the
+            // phone never learned whether the server offers the Coach and told everyone "your
+            // server has no Coach enabled" — with the admin looking at a green test.
+            await get().loadConfig()
             await get().pullState()
           } catch (e) {
             if (e.status === 401) { await forgetRemote(); get().setGuest(true) }

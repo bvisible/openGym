@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, forwardRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useStore, DEF, hasData, levelOf, isSimple} from '../store/useStore.js'
+import { useStore, DEF, hasData } from '../store/useStore.js'
+//// Neoffice — level helpers from lib/level.js, not the store: upstream's view tests mock the store.
+import { levelOf, isSimple } from '../lib/level.js'
+import { workoutControls } from '../lib/workout-controls.js'
+import { convertStateUnit } from '../lib/units.js'
 import { useUI } from '../store/useUI.js'
-import { ACCENTS, todayISO, localTZ } from '../lib/format.js'
+import { ACCENTS, todayISO, localTZ, weekStartOf, MONDAY, SUNDAY } from '../lib/format.js'
 import { effortOf } from '../lib/history.js'
 //// Neoffice — passkeys are gone: the Frappe session is the sign-in, and the
 //// journal never had a user directory of its own here. IS_ANDROID stays (it
@@ -12,9 +16,10 @@ import { pushSupported, enablePush, disablePush, sendTestPush } from '../lib/pus
 import { wakeLockSupported } from '../lib/wakelock.js'
 import { t, LANGS, INSTR_LANGS, dateLocale } from '../lib/i18n.js'
 import { DEMO, REPO } from '../lib/demo.js'
-import { MOBILE, shareExport, syncReminder } from '../lib/mobile.js'
+import { MOBILE, isAndroid, shareExport, syncReminder } from '../lib/mobile.js'
+import { checkForUpdate, downloadAndInstall } from '../lib/update.js'
 import { ConnectSheet } from './MobileOnboarding.jsx'
-import { loadStarterPlan, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet } from '../sheets.jsx'
+import { starterPlanSheet, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet, menuSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
 import { showsEffortSetting, showsEquipmentProfiles, showsRestPauseSetting } from '../lib/level-visibility.js'
@@ -23,11 +28,100 @@ export default function Settings() {
   const nav = useNavigate()
   const S = useStore(s => s.S)
   const user = useStore(s => s.user)
+  const coachLocal = useStore(s => s.coachLocal)
   const { update, replaceState, setUser, pullState, pushState, signOut, signOutAll, resetDemo, disconnectServer } = useStore()
   const toast = useUI(s => s.toast)
   const fileRef = useRef(null)
   const importRef = useRef(null)
   const wakeOK = wakeLockSupported()
+
+  // Two honest choices on a unit switch (issue #22): convert the numbers, or keep them and only
+  // change the label — the old behaviour, still right for someone who logged in lb all along
+  // under a kg label. Closing the sheet leaves the unit as it was.
+  const switchUnit = v => {
+    if (v === S.unit) return
+    menuSheet({
+      title: t('Convert to {0}?', v),
+      subtitle: t('Every stored weight — logged sets, working weights, routine targets, body weight, bar weights — is in {0}. Convert the numbers, or keep them and only change the label?', S.unit),
+      items: [
+        { icon: 'shuffle', label: t('Convert the numbers'), onClick: () => replaceState(convertStateUnit(useStore.getState().S, v)) },
+        { icon: 'pencil', label: t('Keep the numbers, change the label'), onClick: () => update(s => { s.unit = v }) },
+      ],
+    })
+  }
+
+  // --- update check state ---
+  const [updateInfo, setUpdateInfo] = useState(null) // { hasUpdate, latestVersion, apkUrl, hashUrl } | null
+  const [android, setAndroid] = useState(false)
+  const [checking, setChecking] = useState(false)
+
+  useEffect(() => {
+    // The in-app updater installs an .apk, so it only applies to the native Android build.
+    // On iOS and the web this check is skipped and the update row never appears. isAndroid()
+    // already answers false off the mobile build; the MOBILE check on top keeps the web bundle
+    // from even asking (and from calling gitlab.com on every Settings visit).
+    if (!MOBILE) return
+    isAndroid().then(ok => { setAndroid(ok); if (ok) checkForUpdate().then(setUpdateInfo).catch(() => {}) })
+  }, [])
+
+  // The same check, on demand: the automatic one is silent when it finds nothing or cannot
+  // reach gitlab.com, and a person who taps "Check for updates" deserves an answer either way.
+  const checkNow = async () => {
+    if (checking) return
+    setChecking(true)
+    try {
+      const info = await checkForUpdate()
+      setUpdateInfo(info)
+      if (!info.hasUpdate) toast(t('You have the latest version.'))
+    } catch {
+      toast(t('Could not check for updates — are you online?'))
+    }
+    setChecking(false)
+  }
+
+  const onUpdateRowClick = () => {
+    if (!updateInfo?.hasUpdate) return
+    if (updateInfo.apkUrl) {
+      // Start download & install
+      const version = updateInfo.latestVersion
+      confirmSheet({
+        title: t('Update to {0}?', version),
+        message: t('The latest version will be downloaded and the installer will open.'),
+        confirmText: t('Download & Install'),
+        onConfirm: async () => {
+          // Open a progress sheet
+          let closeProgress = null
+          let setProgress = null
+          useUI.getState().openSheet(close => {
+            closeProgress = close
+            return <DownloadProgress ref={fn => { setProgress = fn }} />
+          }, { locked: true })
+          try {
+            // The release always publishes the checksum next to the APK. Without it the file is
+            // not installed — a sideloaded binary is exactly the thing that should be verified.
+            let expectedHash = null
+            if (updateInfo.hashUrl) {
+              try {
+                const hashRes = await fetch(updateInfo.hashUrl)
+                if (hashRes.ok) expectedHash = (await hashRes.text()).split(/\s/)[0]
+              } catch (e) { /* reported below */ }
+            }
+            if (!/^[0-9a-f]{64}$/i.test(expectedHash || '')) throw new Error(t('Checksum not available — not installing'))
+            await downloadAndInstall(updateInfo.apkUrl, expectedHash, (received, total) => {
+              if (setProgress) setProgress(received, total)
+            })
+            if (closeProgress) closeProgress()
+          } catch (e) {
+            if (closeProgress) closeProgress()
+            toast(t('Update failed: {0}', e.message))
+          }
+        },
+      })
+    } else {
+      // Update available but no APK asset — open the releases page
+      window.open('https://gitlab.com/DuarteSantos8/opengym/-/releases', '_blank', 'noopener')
+    }
+  }
 
   const doExport = async () => {
     const json = JSON.stringify(S, null, 2)
@@ -108,9 +202,15 @@ export default function Settings() {
     <MyClub />
 
     <MyCoach />
+    {/* ---------- the Coach on a phone: through the paired server, or with the user's own key ---------- */}
+    {MOBILE && <Section title={t('AI Coach')}>
+      <Row icon="sparkles" iconTint="var(--acc)" title={t('AI Coach')} accessory="chevron"
+        subtitle={coachLocal?.mode === 'server' ? t('Runs on your openGym server') : coachLocal?.mode === 'byok' ? t('Runs on this phone with your own API key') : t('Off — choose how the Coach should run.')}
+        onClick={() => nav('/coach/setup')} />
+    </Section>}
 
     {/* ---------- general ---------- */}
-    <Section title={t('General')} footer={t('Note: switching units only changes the label — logged numbers are not converted.')}>
+    <Section title={t('General')} footer={t('Switching the unit offers to convert every stored weight.')}>
       <SelectRow
         icon="globe" iconTint="var(--blue)" title={t('Language')}
         value={S.lang || 'en'} onChange={v => update(s => { s.lang = v })}
@@ -132,12 +232,39 @@ export default function Settings() {
       <Row icon="scale" iconTint="var(--teal)" title={t('Weight unit')}>
         <Segmented className="seg-inline"
           options={[{ value: 'kg', label: 'kg' }, { value: 'lb', label: 'lb' }]}
-          value={S.unit} onChange={v => update(s => { s.unit = v })} />
+          value={S.unit} onChange={v => switchUnit(v)} />
+      </Row>
+      {/* Monday or Sunday — the Plan list, the Home strip, the calendar grid and every
+          "this week" total follow it. Stored as a getDay() index (see lib/format.js). */}
+      <Row icon="calendar" iconTint="var(--orange)" title={t('Week starts on')}>
+        <Segmented className="seg-inline"
+          options={[{ value: MONDAY, label: t('Monday') }, { value: SUNDAY, label: t('Sunday') }]}
+          value={weekStartOf(S)} onChange={v => update(s => { s.weekStart = v })} />
+      </Row>
+      {/* Membership QR codes on Home (views/CheckIn.jsx); off = no Home card, no route. */}
+      <Row icon="qr" iconTint="var(--blue)" title={t('Gym check-in')}
+        subtitle={t('Show a card on Home with your membership QR codes.')}>
+        <Switch checked={S.checkIn !== false} onChange={v => update(s => { s.checkIn = v })} />
       </Row>
     </Section>
 
     {/* ---------- during a workout ---------- */}
     <Section title={t('During a workout')} footer={wakeOK ? t('The screen stays on while a workout is running, so you don’t have to unlock your phone between sets.') : null}>
+      {/* One exercise at a time (cards with Prev/Next), the whole session stacked as a
+          scrollable list, or that list stripped to just names and set rows (compact).
+          Legacy/unknown values read as cards. The running session can override this from
+          the workout header's ⋮ menu without changing this default. */}
+      <Row icon="list" iconTint="var(--blue)" title={t('Workout view')}>
+        <Segmented className="seg-inline"
+          options={[{ value: 'cards', label: t('Cards') }, { value: 'list', label: t('List') }, { value: 'compact', label: t('Compact') }]}
+          value={['list', 'compact'].includes(S.workoutView) ? S.workoutView : 'cards'}
+          onChange={v => update(s => { s.workoutView = v })} />
+      </Row>
+      {/* The lean workout screen keeps the sets and one "more" button per exercise; each switch
+          brings one of the old always-visible button groups back for people who liked them. */}
+      <Row icon="wrench" iconTint="var(--purple)" title={t('Workout controls')} accessory="chevron"
+        subtitle={t('Everything hidden here stays one tap away: the ⋯ button of an exercise and the number of a set.')}
+        onClick={() => workoutControlsSheet()} />
       <SelectRow icon="timer" iconTint="var(--orange)" title={t('Rest timer')}
         value={S.restSec} onChange={v => update(s => { s.restSec = v })}
         options={[{ value: 0, label: t('Off') }, ...[60, 90, 120, 150, 180].map(v => ({ value: v, label: v + 's' }))]} />
@@ -248,7 +375,7 @@ export default function Settings() {
 
     {/* ---------- data: fill it, bring things over, back it up, wipe it ---------- */}
     <Section title={t('Data')}>
-      <Row icon="sparkles" iconTint="var(--acc)" title={t('Load starter plan (PPL)')} accessory="chevron" onClick={loadStarterPlan} />
+      <Row icon="sparkles" iconTint="var(--acc)" title={t('Load starter plan')} accessory="chevron" onClick={starterPlanSheet} />
       <Row icon="shuffle" iconTint="var(--teal)" title={t('Import from another app')}
         subtitle={t('FitNotes, Strong, Hevy — or body weight from Apple Health')}
         accessory="chevron" onClick={() => importRef.current.click()} />
@@ -275,6 +402,10 @@ export default function Settings() {
         subtitle={t('to install openGym as a full-screen app.') + ' ' + (user ? t('Your data syncs with your profile — sign in anywhere to see it.') : t('Guest data stays on this device — export a backup now and then!'))} />
     </Section>}
 
+    {/* //// Neoffice — upstream's "Updates" section (APK download, release check
+        on gitlab.com) is left out: the club's journal is a web app served by the
+        instance and updates with it; a row sending members to an APK on the
+        author's site would be a wrong door. The version line below stays. */}
     {/* //// Neoffice — the "source code" link points at OUR fork: AGPL §13 asks
         for the source of THE version that is running, and what runs here is the
         fork. The version number is upstream's addition, kept: on the phone there
@@ -301,6 +432,62 @@ const EFFORT_ROWS = [
 // RIR 2 / RPE 8: the row a working set usually lands on — the anchor the others are read
 // against. Not where the stepper starts; + walks up from the bottom of the scale.
 const EFFORT_TYPICAL = 2
+
+// Settings → During a workout → Workout controls. S.wc overlays DEF.wc, so a profile from
+// before this setting existed reads as the lean default.
+function WorkoutControlsSheet() {
+  const S = useStore(s => s.S)
+  const update = useStore(s => s.update)
+  const wc = workoutControls(S)
+  const set = (k, v) => update(s => { s.wc = { ...workoutControls(s), [k]: v } })
+  return <>
+    <h3>{t('Workout controls')}</h3>
+    <div className="muted small" style={{ marginBottom: 12 }}>{t('Everything hidden here stays one tap away: the ⋯ button of an exercise and the number of a set.')}</div>
+    <Section>
+      <Row icon="plus" iconTint="var(--acc)" title={t('Weight and reps buttons')} subtitle={t('Off: tap the number and type it')}>
+        <Switch checked={wc.steppers} onChange={v => set('steppers', v)} />
+      </Row>
+      <Row icon="bolt" iconTint="var(--orange)" title={t('Drop and burst shortcuts on every set')}>
+        <Switch checked={wc.setShortcuts} onChange={v => set('setShortcuts', v)} />
+      </Row>
+      <Row icon="link" iconTint="var(--blue)" title={t('Superset buttons in the exercise header')}>
+        <Switch checked={wc.pairButtons} onChange={v => set('pairButtons', v)} />
+      </Row>
+      <Row icon="shuffle" iconTint="var(--teal)" title={t('Move, swap and remove buttons below the exercise')}>
+        <Switch checked={wc.exerciseButtons} onChange={v => set('exerciseButtons', v)} />
+      </Row>
+    </Section>
+  </>
+}
+function workoutControlsSheet() {
+  useUI.getState().openSheet(() => <WorkoutControlsSheet />)
+}
+
+// Download progress sheet — receives a ref callback that exposes a (received, total) setter.
+// Uses forwardRef so the caller can push byte counts in without re-rendering the whole Settings tree.
+const DownloadProgress = forwardRef(function DownloadProgress(_, ref) {
+  const [pct, setPct] = useState(0)
+  const [text, setText] = useState(t('Starting download…'))
+  // Expose a setter the caller can invoke directly
+  if (ref) ref(function update(received, total) {
+    if (total > 0) {
+      const p = Math.min(100, Math.round((received / total) * 100))
+      setPct(p)
+      setText(t('{0} %', p))
+    } else {
+      setText(t('{0} MB', (received / 1_000_000).toFixed(1)))
+    }
+  })
+  return (
+    <div style={{ textAlign: 'center', padding: '8px 0' }}>
+      <h3>{t('Downloading update…')}</h3>
+      <div style={{ margin: '16px 0', height: 6, borderRadius: 3, background: 'var(--fill-3)', overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: pct + '%', background: 'var(--acc)', borderRadius: 3, transition: 'width .2s' }} />
+      </div>
+      <div className="muted small">{text}</div>
+    </div>
+  )
+})
 
 function effortHelpSheet() {
   useUI.getState().openSheet(close => <>

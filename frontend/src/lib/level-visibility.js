@@ -16,7 +16,7 @@
 //// Hiding a control that is already in use does not simplify anything: it
 //// traps the member with a setting they can no longer reach.
 
-import { atLeast, isSimple } from '../store/useStore.js'
+import { atLeast, isSimple } from './level.js'
 
 /** Drop-set / rest-pause picker on an exercise config. */
 export const showsIntensifier = (S, config) =>

@@ -38,7 +38,7 @@
 //// a given row — the cost of being wrong is that somebody taps "show every
 //// exercise", which is one tap and is written on screen.
 
-import { atLeast } from '../store/useStore.js'
+import { atLeast } from './level.js'
 
 //// Olympic lifts, their variants, and gymnastic skills. Matched on the ENGLISH
 //// name, which is what the dataset stores (`ex.n`) — translations never reach

@@ -44,7 +44,7 @@ const exportedBy = new Map()
 for (const file of files) {
   const src = readFileSync(file, 'utf8')
   const add = name => {
-    if (!name) return
+    if (!name || name === 'default') return   // `export { X as default }` names no symbol
     if (!exportedBy.has(name)) exportedBy.set(name, new Set())
     exportedBy.get(name).add(file)
   }
@@ -70,6 +70,16 @@ for (const file of files) {
     for (const part of m[1].split(',')) known.add(part.split(':').pop().trim())
   }
   for (const m of src.matchAll(/(?:^|\s)(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)/g)) known.add(m[1])
+  //// A destructured local — `const [label, setLabel] = useState('')`, `const { a } = x` —
+  //// is a binding too. Without this, a setter that happens to share a name with an
+  //// export elsewhere (setLabel in lib/history.js, setApiKey in lib/coach-secrets.js)
+  //// was reported as a missing import. Found on the v1.3.5 merge.
+  for (const m of src.matchAll(/(?:const|let|var)\s*[\[{]([^\]}]*)[\]}]\s*=/g)) {
+    for (const part of m[1].split(',')) {
+      const name = part.split(':').pop().trim().split(/[=\s]/)[0].replace(/^\.{3}/, '')
+      if (/^[A-Za-z_$][\w$]*$/.test(name)) known.add(name)
+    }
+  }
   //// A FUNCTION PARAMETER is a local binding, not a missing import. Without
   //// this, `export function initReminderSync(getState) { … getState() … }`
   //// was reported because lib/api.js happens to export a `getState` too.

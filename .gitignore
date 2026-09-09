@@ -28,3 +28,7 @@ opengym/public/media/
 #//// Neoffice — the COMPILED journal IS committed (opengym/public/frontend): the
 #//// fleet never rebuilds a SPA on an instance.
 frontend/dist/
+# CI reports (test:* jobs write these next to the suites)
+junit.xml
+coverage/
+frontend/bundle-size.json

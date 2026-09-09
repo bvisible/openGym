@@ -45,7 +45,11 @@ const plainSession = () => ({
 })
 
 const at = (level, session = plainSession()) => {
-  useStore.setState(s => ({ S: { ...s.S, level, unit: 'kg', active: session } }))
+  //// Upstream v1.3.5 hides the chips and the warm-up/remove/add row behind a
+  //// switch (Settings → Workout controls, off by default). Switched ON here: what
+  //// this file pins is the LEVEL gate on top of it — a beginner with the switch on
+  //// still gets no technique offered.
+  useStore.setState(s => ({ S: { ...s.S, level, unit: 'kg', active: session, wc: { setShortcuts: true } } }))
   const host = document.createElement('div')
   document.body.appendChild(host)
   const root = createRoot(host)

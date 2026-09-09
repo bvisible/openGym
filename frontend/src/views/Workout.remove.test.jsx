@@ -27,6 +27,7 @@ let sheetContainer
 
 function setActive(entries, cur = 0) {
   const S = clone(DEF)
+  S.wc = { ...S.wc, exerciseButtons: true }   // the removal button is opt-in now; the menu path is covered in Workout.test.jsx
   S.active = {
     id: 'remove-test', d: '2026-08-11', start: Date.now(), routineId: null,
     name: 'Remove test', bw: null, cur, entries
@@ -68,8 +69,10 @@ function renderTopSheet() {
 let editRoot = null
 let editContainer = null
 
-function openEditSheet() {
-  const more = container.querySelector('button[aria-label="Edit the session"]')
+function openEditSheet(idx = 0) {
+  //// Since the v1.3.5 merge the actions live in upstream's per-exercise ⋯ menu
+  //// (aria-label "More", lib menuSheet) — the same path a member takes.
+  const more = container.querySelectorAll('button[aria-label="More"]')[idx]
   //: No ⋯ at all — an empty freestyle session has no exercise header, and
   //: "hides the remove control" is a test of its own, so answer rather than throw.
   if (!more) return null
@@ -93,13 +96,13 @@ function openEditSheet() {
 //: removeButton() MOUNTS a root (the editing sheet), and mounting inside an
 //: act() callback leaves React with nothing painted — every lookup then returns
 //: undefined, which reads as "the button is gone". Find first, click after.
-function clickRemove() {
-  const button = removeButton()
+function clickRemove(idx = 0) {
+  const button = removeButton(idx)
   act(() => button.click())
 }
 
-function removeButton() {
-  const sheet = openEditSheet()
+function removeButton(idx = 0) {
+  const sheet = openEditSheet(idx)
   if (!sheet) return undefined
   return [...sheet.querySelectorAll('button, .item')]
     .find(el => el.textContent.includes('Remove exercise'))
@@ -133,11 +136,12 @@ describe('active-session exercise removal', () => {
   it('disables removal for the whole duration of a timed hold', () => {
     renderWorkout([entry('1001')])
     expect(removeButton()).toBeTruthy()
-    expect(removeButton().disabled).toBe(false)
+    //// upstream's menu rows are divs with aria-disabled, not buttons
+    expect(removeButton().getAttribute('aria-disabled')).toBeNull()
 
     act(() => useUI.getState().startWork(30, 'Hold', vi.fn()))
 
-    expect(removeButton().disabled).toBe(true)
+    expect(removeButton().getAttribute('aria-disabled')).toBe('true')
   })
 
   it('cancels a pending timed callback before indexes shift and cleans a one-member group', () => {
@@ -220,11 +224,9 @@ describe('active-session exercise removal', () => {
       s.active.entries[1].target.marker = 'remove-second'
     }, false)
 
-    clickRemove()
-    const chooser = renderTopSheet()
-    const choices = [...chooser.querySelectorAll('.item')]
-    expect(choices).toHaveLength(2)
-    act(() => choices[1].click())
+    //// Since the v1.3.5 merge every superset member carries its own ⋯ menu, so
+    //// the occurrence is chosen by WHICH menu is opened — no chooser sheet.
+    clickRemove(1)
 
     const dialog = renderTopSheet()
     const confirm = [...dialog.querySelectorAll('button')].find(button => button.textContent === 'Remove')

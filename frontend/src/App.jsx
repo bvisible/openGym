@@ -8,6 +8,7 @@ import { setLang, useLang } from './lib/i18n.js'
 import { setNav } from './lib/nav.js'
 import { initBackButton } from './lib/back.js'
 import { useWakeLock } from './lib/wakelock.js'
+import { installViewportGuard } from './lib/viewport-guard.js'
 import { startFlow } from './sheets.jsx'
 import Icon from './components/Icon.jsx'
 import SignIn from './views/SignIn.jsx'
@@ -26,6 +27,7 @@ import PrepCountdown from './components/PrepCountdown.jsx'
 //// back with the merge and points at a file we do not have.
 import MobileOnboarding from './views/MobileOnboarding.jsx'
 import Home from './views/Home.jsx'
+import CheckIn from './views/CheckIn.jsx'
 import Plan from './views/Plan.jsx'
 import RoutineEdit from './views/RoutineEdit.jsx'
 import Workout from './views/Workout.jsx'
@@ -37,7 +39,12 @@ import Challenges from './views/Challenges.jsx'
 import Assessments from './views/Assessments.jsx'
 import History from './views/History.jsx'
 import Library from './views/Library.jsx'
+import Muscles from './views/Muscles.jsx'
 import Settings from './views/Settings.jsx'
+//// Neoffice — no Admin.jsx: the club manages members in the Frappe desk (see the /admin note below).
+import CoachChat from './views/CoachChat.jsx'
+import CoachIntake from './views/CoachIntake.jsx'
+import CoachSetup from './views/CoachSetup.jsx'
 
 // last known scrollY per route, so back-navigation can put the page where it was
 const scrollPositions = new Map()
@@ -86,6 +93,8 @@ function Shell() {
   // The position is recorded from scroll events rather than read at route
   // change, because by then a shorter page may already have clamped it.
   const pathRef = useRef(loc.pathname)
+  // iOS leaves the page displaced after the keyboard goes away (see lib/viewport-guard.js).
+  useEffect(() => installViewportGuard(), [])
   useEffect(() => {
     const onScroll = () => {
       // Modals pins the body while a sheet is open; scrollY is 0 then, not a position.
@@ -134,6 +143,9 @@ function Shell() {
           {(
             <Routes>
               <Route path="/home" element={<Home />} />
+              {/* Gym check-in — switched off in Settings, the route falls through to the
+                  catch-all redirect below. */}
+              {S.checkIn !== false && <Route path="/checkin" element={<CheckIn />} />}
               <Route path="/plan" element={<Plan />} />
               <Route path="/plan/r/:id" element={<RoutineEdit />} />
               <Route path="/workout" element={<Workout />} />
@@ -147,7 +159,15 @@ function Shell() {
         <Route path="/challenges" element={<Challenges />} />
           {/* //// Neoffice — see views/Assessments.jsx */}
           <Route path="/assessments" element={<Assessments />} />
+              <Route path="/muscles" element={<Muscles />} />
               <Route path="/settings" element={<Settings />} />
+              {/* The Coach screens gate themselves on the instance config; the routes exist
+                  unconditionally so a deep link from a notification lands somewhere sane
+                  rather than on the catch-all. */}
+              <Route path="/coach" element={<CoachChat />} />
+              <Route path="/coach/intake" element={<CoachIntake />} />
+              <Route path="/coach/proposal" element={<Navigate to="/coach" replace />} />
+              <Route path="/coach/setup" element={<CoachSetup />} />
               {/* //// Neoffice — /admin removed. openGym's dashboard used to
                   list the profiles and invite codes of its Node user store;
                   the club manages its members, coaches and subscriptions in
@@ -157,7 +177,8 @@ function Shell() {
           )}
         </ErrorBoundary>
       </div>
-      <TabBar onStart={startFlow} />
+      {/* The chat owns the bottom of the screen: its composer sits where the tabs would be. */}
+      {loc.pathname !== '/coach' && <TabBar onStart={startFlow} />}
       <RestTimer />
       <Modals />
       <Toast />

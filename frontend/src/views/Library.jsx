@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
 import { EXDB, BODYPARTS, allExercises, equipmentOf, matchExercise } from '../lib/exercises.js'
 import { activeProfile, exAvailable } from '../lib/equipment.js'
@@ -15,8 +16,10 @@ import { exerciseDetailSheet, addToRoutineSheet, customExSheet, floorPlanSheet }
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
 import { tappable, useRevealActiveChip } from '../lib/use-sheet-keyboard.js'
+import { isFav, sortFavouritesFirst } from '../lib/favourites.js'
 
 export default function Library() {
+  const nav = useNavigate()
   const S = useStore(s => s.S)
   const [q, setQ] = useState('')
   const [bp, setBp] = useState('')
@@ -40,17 +43,22 @@ export default function Library() {
   //// bestWeightFor is already computed per row below, and a member who trained
   //// a movement must keep finding it.
   const levelOn = levelFiltersExercises(S) && !showEveryLevel && !q.trim()
-  const f = levelOn
+  // Favourites float to the top of whatever the filters left (issue #6), the rest keeps its order.
+  const f = sortFavouritesFirst(levelOn
     ? eqPicked.filter(e => suitsLevel(S, e, bestWeightFor(S, e.id) > 0))
-    : eqPicked
+    : eqPicked, S)
   const hiddenByLevel = levelOn ? eqPicked.length - f.length : 0
   useRevealActiveChip(bpStrip, bp)
   useRevealActiveChip(eqStrip, eqOn)
 
   return <>
     <div className="hdr"><div><h1>{t('Exercises')}</h1><div className="sub">{t('{0} exercises with animations', EXDB.length)}</div></div>
-      {/* //// Neoffice — the room, from the list of what you do in it (2026-09-09). */}
-      <button className="iconbtn" aria-label={t('Floor plan')} title={t('Floor plan')} onClick={() => floorPlanSheet()}><Icon name="map" /></button></div>
+      <div className="row" style={{ gap: 6 }}>
+        <Button size="sm" variant="tinted" icon="target" onClick={() => nav('/muscles')}>{t('By muscle')}</Button>
+        {/* //// Neoffice — the room, from the list of what you do in it (2026-09-09). */}
+        <button className="iconbtn" aria-label={t('Floor plan')} title={t('Floor plan')} onClick={() => floorPlanSheet()}><Icon name="map" /></button>
+      </div>
+    </div>
     <div className="search" style={{ marginBottom: 10 }}><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
       <input className="input" placeholder={t('Search…')} value={q} onChange={e => { setQ(e.target.value); setShown(40) }} /></div>
     {profile && <div className="small dim row" style={{ margin: '-4px 2px 10px', gap: 6, alignItems: 'center' }}>
@@ -88,7 +96,7 @@ export default function Library() {
         const best = bestWeightFor(S, e.id)
         return <div key={e.id} className="item" {...tappable(() => exerciseDetailSheet(e))}>
           <Thumb ex={e} />
-          <div className="grow"><div className="tt capitalize">{exerciseNameFor(e)}</div><div className="ss capitalize">{t(e.tg || e.bp)} · {t(e.eq)}</div></div>
+          <div className="grow"><div className="tt capitalize">{isFav(S, e.id) && <Icon name="starFill" className="fav-star" />}{exerciseNameFor(e)}</div><div className="ss capitalize">{t(e.tg || e.bp)} · {t(e.eq)}</div></div>
           {best > 0 && <span className="tag acc">{fmtNum(best)}</span>}
           <Button size="sm" variant="tinted" icon="plus" onClick={ev => { ev.stopPropagation(); addToRoutineSheet(e) }}>{t('Plan')}</Button>
         </div>

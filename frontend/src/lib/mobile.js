@@ -11,9 +11,25 @@
 // web bundles; the Capacitor plugins are only ever imported behind it.
 import { t } from './i18n-core.js'
 import { isoOf, todayISO } from './format.js'
-import { effectiveRoutineId } from './history.js'
+import { effectiveRoutineIds } from './history.js'
 
 export const MOBILE = import.meta.env.VITE_MOBILE === '1'
+
+// Some features only make sense on Android. The in-app updater downloads an .apk and hands it
+// to the system package installer — there is no equivalent on iOS (App Store only) or on the
+// web build. On anything but a native Android shell this must stay off.
+//
+// @capacitor/core is imported dynamically (like every other Capacitor dependency here) so it
+// never lands in the web bundle. Capacitor.getPlatform() returns 'android' | 'ios' | 'web'.
+export async function isAndroid() {
+  if (!MOBILE) return false
+  try {
+    const { Capacitor } = await import('@capacitor/core')
+    return Capacitor.getPlatform() === 'android'
+  } catch (e) {
+    return false
+  }
+}
 
 const FILE = 'opengym-state.json'
 
@@ -37,6 +53,22 @@ export async function nativeSave(state) {
 // is exactly what pushState() PUTs to a server, and a device's own connection secret must never
 // travel as if it were training data.
 const REMOTE_FILE = 'opengym-remote.json'
+
+// Small JSON files in the app's private data directory, for device facts that must not ride
+// in S (which syncs and exports): the pairing, and how the Coach runs on this phone.
+export async function readJsonFile(name) {
+  try {
+    const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem')
+    const r = await Filesystem.readFile({ path: name, directory: Directory.Data, encoding: Encoding.UTF8 })
+    return JSON.parse(r.data)
+  } catch (e) { return null }
+}
+export async function writeJsonFile(name, data) {
+  try {
+    const { Filesystem, Directory, Encoding } = await import('@capacitor/filesystem')
+    await Filesystem.writeFile({ path: name, directory: Directory.Data, data: JSON.stringify(data), encoding: Encoding.UTF8 })
+  } catch (e) { /* not a Capacitor build, or the write failed — the caller's in-memory copy stands */ }
+}
 
 export async function loadRemoteFile() {
   try {
@@ -76,16 +108,17 @@ export function buildReminderNotifications(S, now = new Date()) {
     day.setDate(date.getDate() + offset)
     const iso = isoOf(day)
     if (completed.has(iso)) continue
-    const rid = effectiveRoutineId(state, iso)
-    const routine = routines.find(x => x.id === rid)
-    if (!routine) continue
+    // A weekday can hold several routines; name them all, or fall back to a count.
+    const dayRoutines = effectiveRoutineIds(state, iso).map(id => routines.find(x => x.id === id)).filter(Boolean)
+    if (!dayRoutines.length) continue
+    const label = dayRoutines.length <= 2 ? dayRoutines.map(r => r.name).join(' + ') : t('{0} routines', dayRoutines.length)
     const at = new Date(day)
     at.setHours(hour, minute, 0, 0)
     if (at <= now) continue
     notifications.push({
       id: REMINDER_ID_BASE + offset,
       title: t('Workout day'),
-      body: t('{0} is on the plan today — let’s go!', routine.name),
+      body: t('{0} is on the plan today — let’s go!', label),
       schedule: { at, allowWhileIdle: true },
     })
   }

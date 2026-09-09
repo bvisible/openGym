@@ -145,7 +145,14 @@ export function removeProgramRoutines(s, program) {
   const doomed = new Set((s.routines || []).filter(r => r.coachProgram === program).map(r => r.id))
   if (!doomed.size) return 0
   s.routines = (s.routines || []).filter(r => !doomed.has(r.id))
-  Object.keys(s.week || {}).forEach(d => { if (doomed.has(s.week[d])) delete s.week[d] })
+  //// A weekday holds one routine id or, since upstream v1.3.5, a list of them.
+  //// Drop the doomed ones and keep the shape the member had: a lone survivor of
+  //// a plain id stays a plain id, a list stays a list, an emptied day goes.
+  Object.keys(s.week || {}).forEach(d => {
+    const kept = [].concat(s.week[d] || []).filter(id => !doomed.has(id))
+    if (!kept.length) delete s.week[d]
+    else s.week[d] = Array.isArray(s.week[d]) ? kept : kept[0]
+  })
   return doomed.size
 }
 

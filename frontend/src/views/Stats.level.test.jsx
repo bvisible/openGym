@@ -26,6 +26,15 @@ vi.mock('../store/useStore.js', () => ({
   atLeast: (_S, lvl) => (mocks.simple ? lvl === 'simple' : true),
   levelOf: () => (mocks.simple ? 'simple' : 'full'),
 }))
+//// The level helpers moved to lib/level.js (pure, no store) on the v1.3.5 merge,
+//// so the switch this test flips lives there now — the store mock above keeps its
+//// copies for any reader that still goes through the store.
+vi.mock('../lib/level.js', () => ({
+  LEVELS: ['simple', 'normal', 'full'],
+  isSimple: () => mocks.simple,
+  atLeast: (_S, lvl) => (mocks.simple ? lvl === 'simple' : true),
+  levelOf: () => (mocks.simple ? 'simple' : 'full'),
+}))
 vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))
 vi.mock('../sheets.jsx', () => ({
   bwSheet: () => {}, goalSheet: () => {}, calendarSheet: () => {}, workoutDetailSheet: () => {},

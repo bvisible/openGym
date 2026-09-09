@@ -38,6 +38,11 @@ const CALL = /(^|[^A-Za-z0-9_$.])t\(\s*(['"])((?:\\.|(?!\2)[^\\])*)\2/g
 
 const used = new Map()
 for (const file of walk(srcDir)) {
+  //// Neoffice — lib/coach-demo.js is the DEMO build's canned coach (imported only
+  //// when DEMO is true, which this deployment never is): its long English
+  //// sentences are not product strings, and translating them 13 times would be
+  //// work nobody reads.
+  if (/lib\/coach-demo\.js$/.test(file)) continue
   const text = readFileSync(file, 'utf8')
   for (const m of text.matchAll(CALL)) {
     const key = m[3].replace(/\\(['"\\])/g, '$1')
