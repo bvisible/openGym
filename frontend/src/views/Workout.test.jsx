@@ -206,11 +206,11 @@ async function addExerciseThroughSheets(ex = { id: 'added-exercise' }, cfg = { m
   //// "Add exercise" moved into the editing sheet behind the ⋯ button, with the
   //// rest of the editing actions. The flow it starts — picker, then config —
   //// is unchanged, and that is what the rest of this helper asserts.
-  const more = container.querySelector('button[aria-label="Edit the session"]')
-  expect(more, 'the ⋯ button is missing from the exercise header').toBeTruthy()
-  act(() => { more.dispatchEvent(new dom.Event('click', { bubbles: true })) })
-  expect(mocks.editOpts, 'the ⋯ button opened no sheet').toBeTruthy()
-  await act(async () => { mocks.editOpts.onAdd() })
+  //// Since the v1.3.5 merge "Add exercise" is upstream's button under the
+  //// sets (one flow for it and the empty freestyle screen: addExerciseFlow).
+  const add = [...container.querySelectorAll('button')].find(b => b.textContent.trim() === 'Add exercise')
+  expect(add, 'the Add exercise button is missing').toBeTruthy()
+  await act(async () => { add.dispatchEvent(new dom.Event('click', { bubbles: true })) })
 
   const pickerCall = mocks.exercisePicker.mock.calls.at(-1)
   expect(pickerCall?.[0]).toEqual(expect.any(Function))
@@ -955,7 +955,10 @@ describe('superset actionable-set centring', () => {
 describe('active workout whole-unit move controls', () => {
   // These exercise-level buttons are opt-in now (Settings → Workout controls); the menu path is covered below.
   const mountLegacy = (entries, cur) => mount(entries, cur, { wc: { exerciseButtons: true } })
-  const action = label => container.querySelector(`button[aria-label="${label}"]`)
+  //// Neoffice — our tests below read `.disabled` and call `.run()` on what the
+  //// helper returns (they were written against the editing sheet); the legacy
+  //// button carries both, so the assertions stay word for word.
+  const action = label => { const b = container.querySelector(`button[aria-label="${label}"]`); return b && Object.assign(b, { run: () => b.dispatchEvent(new dom.Event('click', { bubbles: true })) }) }
 
   it('shows labelled controls and moves the selected standalone exercise one unit', async () => {
     const selected = exercise('duplicate', [false], {
@@ -1025,11 +1028,11 @@ describe('active exercise swap control', () => {
   it('opens the swap flow for the selected duplicate occurrence', async () => {
     await mountLegacy([exercise('bench', [false]), exercise('bench', [false]), exercise('row', [false])], 1)
 
-    //// Swap moved into the editing sheet with the rest of the editing actions.
-    const more = container.querySelector('button[aria-label="Edit the session"]')
-    expect(more).toBeTruthy()
-    act(() => { more.dispatchEvent(new dom.Event('click', { bubbles: true })) })
-    await act(async () => { mocks.editOpts.onSwap() })
+    //// Since the v1.3.5 merge the swap is upstream's: a legacy button when the
+    //// switch is on (mountLegacy), else an item of the ⋯ menu.
+    const swap = container.querySelector('button[aria-label="Swap exercise"]')
+    expect(swap).toBeTruthy()
+    await act(async () => { swap.dispatchEvent(new dom.Event('click', { bubbles: true })) })
 
     expect(mocks.swapActiveWorkoutExercise).toHaveBeenCalledOnce()
     expect(mocks.swapActiveWorkoutExercise).toHaveBeenCalledWith(1)
@@ -1051,9 +1054,10 @@ describe('freestyle empty state', () => {
     expect(mocks.exercisePicker).toHaveBeenCalledTimes(1)
   })
 
-  it('does not show the add button once an exercise is there', async () => {
+  it('drops the empty-state message once an exercise is there (upstream keeps an add button at the bottom)', async () => {
     await mount([exercise('bench', [false, false])], 0, { active: { name: 'Freestyle', routineId: null } })
-    expect([...container.querySelectorAll('button')].some(b => b.textContent.trim() === 'Add exercise')).toBe(false)
+    expect(container.textContent).not.toContain('Freestyle workout — add your first exercise.')
+    expect([...container.querySelectorAll('button')].filter(b => b.textContent.trim() === 'Add exercise')).toHaveLength(1)
   })
 })
 
@@ -1143,6 +1147,9 @@ describe('rest per exercise, from the workout', () => {
     await act(async () => { onChange(0) })
     expect(mocks.S.active.entries[0].target.restSec).toBeUndefined()
     expect(mocks.S.routines[0].ex[0].restSec).toBeUndefined()
+  })
+})
+
 describe('workout list view', () => {
   const units = () => [...container.querySelectorAll('.wl-unit')]
   const focusButton = unit => [...unit.querySelectorAll('button')].find(b => b.textContent.trim() === 'Set current')

@@ -728,6 +728,8 @@ function ActiveWorkout() {
     onAddSet: () => addSet(idx),
     onRemoveSet: () => removeSet(idx),
     onAddWarmup: () => addWarmup(idx),
+    //// Neoffice — the rest line under the sets (« le temps de récupération par exercice »).
+    onRest: () => restOf(idx),
     onRemoveSetAt: i => removeSetAt(idx, i),
     onStartTimed: i => startTimed(idx, i),
     onProgressionSettings: () => openProgressionSettings(idx),

@@ -52,6 +52,11 @@ const umami = {
 const pkgVersion = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version
 
 export default defineConfig({
+  //// Neoffice — happy-dom resolves a relative fetch against http://localhost:3000,
+  //// where a dev server on a laptop answers and CI does not: a test that reaches
+  //// the real api.js was green here and red there (v1.3.5 merge). Pointing the
+  //// document at a port nothing listens on makes such a test fail everywhere.
+  test: { environmentOptions: { happyDOM: { url: 'http://localhost:1/' } } },
   define: { __APP_VERSION__: JSON.stringify(pkgVersion) },
   plugins: [react(), umami],
   base: '/assets/opengym/frontend/',

@@ -20,6 +20,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const mocks = vi.hoisted(() => ({ answer: { items: [] }, fail: false, calls: [] }))
 
 vi.mock('../lib/api.js', () => ({
+  //// Neoffice — what our store imports from api.js; absent from a partial mock it falls through to the real module.
+  getState: vi.fn(() => Promise.resolve({ state: null })), putState: vi.fn(() => Promise.resolve({})), logout: vi.fn(() => Promise.resolve({})),
   floorWhereIs: (id) => {
     mocks.calls.push(id)
     return mocks.fail ? Promise.reject(new Error('offline')) : Promise.resolve(mocks.answer)
