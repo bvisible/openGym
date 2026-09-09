@@ -297,7 +297,7 @@ function ExerciseBlock({ entryIdx, compact, onEditSession, onToggle, onField, on
       {/* //// Neoffice — rest after each set of THIS exercise, one tap away in front of
           //// the machine (« le temps de récupération par exercice », 2026-09-09). The
           //// config sheet has the same field; nobody found it there. */}
-      {mode !== 'cardio' && onRest && <button className="chip nocap" style={{ marginTop: 10 }} onClick={onRest}>
+      {mode !== 'cardio' && onRest && <button className="chip nocap rest-chip" onClick={onRest}>
         <Icon name="timer" style={{ fontSize: 12 }} />
         {entry.target?.restSec > 0 ? t('Rest {0} s after each set', entry.target.restSec) : t('Rest: your usual timer, {0} s', S.restSec)}
       </button>}

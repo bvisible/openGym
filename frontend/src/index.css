@@ -714,6 +714,10 @@ h4.sec{
 .setextra .chip.add{display:inline-flex;align-items:center;gap:4px;color:var(--acc)}
 .setextra .chip.add svg{width:13px;height:13px}
 .setextra .chip.add:disabled{opacity:.35}
+/* //// Neoffice — the rest line under the sets: a pill that reads as one, icon
+   and text on the same line (a bare .chip outside .chips stacks them). */
+.rest-chip{display:inline-flex;align-items:center;gap:6px;margin-top:10px;background:var(--surface-2)}
+.rest-chip svg{width:13px;height:13px;flex:none}
 /* why the next target is what it is (issue #17) */
 .progline{
   width:100%;display:flex;align-items:flex-start;gap:7px;margin:6px 0 2px;padding:0;
