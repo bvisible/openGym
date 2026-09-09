@@ -108,6 +108,8 @@ const P = {
   wrench: <path d="M15.2 3.9a5 5 0 0 0-4.8 6.6l-6 6a2.1 2.1 0 0 0 3 3l6-6a5 5 0 0 0 6.1-6.3l-2.9 2.9-2.8-.7-.7-2.8Z" />,
   // checkered, not a pennant — this marks "finish workout", and a 2×2 grid is
   // what reads as a finish line at 16px
+  //// Neoffice — the floor plan (components/FloorPlanSheet.jsx).
+  map: <><path d="M3.5 6.2v13.2l5.3-2.4 6.4 2.4 5.3-2.4V3.8l-5.3 2.4-6.4-2.4Z" /><path d="M8.8 3.8v13.2M15.2 6.2v13.2" /></>,
   flag: <><path d="M6 20.4V4.2" /><path d="M6.4 5.2h13v9.2h-13" /><path d="M12.9 5.2v9.2M6.4 9.8h13" /></>,
   chartLine: <path d="M3.6 20.2V4.4M3.6 20.2h16.8M6.4 16.4l3.9-4.8 3.1 2.7 5.2-6.6" />,
   dot: <circle cx="12" cy="12" r="4.2" fill="currentColor" stroke="none" />,

@@ -13,6 +13,9 @@ import { syncCycleWeek } from '../lib/coach-program.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
 import { LANGS } from '../lib/i18n.js'
+//// Neoffice — from i18n-core, not i18n: tests mock '../lib/i18n.js' with a bare
+//// `t`, and a store that imports more from it breaks every one of them.
+import { setExerciseAliases } from '../lib/i18n-core.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
 import { guestAllowed } from '../lib/guest.js'
 import { MOBILE, initReminderSync, nativeLoad, nativeSave, syncReminder, writeAutoBackup } from '../lib/mobile.js'
@@ -56,7 +59,7 @@ export const DEF = {
   //// default that was wrong for a while.
   theme: 'system', accent: 'lime', body: 'male', targetW: null,
   bodyweight: [], routines: [], week: {}, dayPlan: {},
-  exWeights: {}, workouts: [], active: null, customEx: [], gifSize: 'full',
+  exWeights: {}, workouts: [], active: null, customEx: [], exAliases: {}, gifSize: 'full',
   // effort: which per-set effort scale is logged — 'none' | 'rir' | 'rpe'. null, not 'none', so
   // that a profile which never chose (loaded state is overlaid on DEF, on every path: local,
   // server pull, backup import) still falls back to the `showRir` boolean this replaced and
@@ -184,6 +187,12 @@ export const useStore = create((set, get) => {
   const persist = (S, push = true) => {
     S._ts = Date.now()
     registerCustom(S.customEx)
+    //// Neoffice — the names a coach gave in a programme become this member's
+    //// aliases, unless the member already chose their own (theirs wins).
+    for (const r of S.routines || []) for (const e of r.ex || []) {
+      if (e.alias && !(S.exAliases && S.exAliases[e.id])) S.exAliases = { ...(S.exAliases || {}), [e.id]: e.alias }
+    }
+    setExerciseAliases(S.exAliases)
     localStorage.setItem(KEY, JSON.stringify(S))
     set({ S })
     if (MOBILE) nativePersist()
@@ -248,7 +257,7 @@ export const useStore = create((set, get) => {
   }
 
   return {
-    S: (() => { const s = loadState(); registerCustom(s.customEx); return s })(),
+    S: (() => { const s = loadState(); registerCustom(s.customEx); setExerciseAliases(s.exAliases); return s })(),
     user: (() => { try { return JSON.parse(localStorage.getItem('gym_user')) || null } catch { return null } })(),
     ready: false,
     needsMobileOnboarding: false,   // mobile build only — set true by boot() on a genuine first launch
@@ -362,6 +371,9 @@ export const useStore = create((set, get) => {
     //// request comes back 403 on a page that still looks signed in. The local
     //// copy is pushed first — a session ended with an unsynced workout is the
     //// one case where the member loses real work.
+    //// Neoffice — the membership gate signs out without pushing a state it never loaded.
+    clearLocal() { clearLocalSession() },
+
     async signOut() {
       try { await get().pushState(); await logout() } catch (e) { /* offline: the local copy stays */ }
       clearLocalSession()

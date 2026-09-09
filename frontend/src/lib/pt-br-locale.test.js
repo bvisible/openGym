@@ -53,11 +53,15 @@ describe('Brazilian Portuguese locale', () => {
 //// "palavra-passe").
 //// Recomputed for the 3-2-1 count: "Prepare-se" and "Toque para começar já"
 //// read the same on both sides and stay inherited.
+//// Recomputed for the membership gate's 17 strings (terms, signature, renewal,
+//// invoice): all stay inherited, none needed a pt-BR override.
+//// Recomputed for the rename-an-exercise, rest-per-exercise and floor-plan
+//// strings (16 new keys): all stay inherited, none needed a pt-BR override.
     expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(360)
-    expect(inherited).toHaveLength(705)
+    expect(inherited).toHaveLength(738)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('b8cbb5cbb9503ba3257626ced74b71e6eea06135f62b4d30c84536def969266d')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('4925a26cad8fe7a58b296ce2ff32d582d6a297dcd209ecc7dc91364218696d44')
   })
 
   test('does not leak European Portuguese UI terms', () => {

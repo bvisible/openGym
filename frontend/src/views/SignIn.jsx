@@ -94,11 +94,16 @@ export default function SignIn() {
         otherwise. Tested as Olympia Fitness on 2026-09-02: the sign-in screen
         showed a dumbbell over "Fitness" while the home screen showed the club's
         name — two identities for one app, on the first screen a member sees. */}
-    <div className="signin-mark">
-      {BOOT.app_icon
-        ? <img src={BOOT.app_icon} alt="" />
-        : <Icon name="dumbbell" />}
-    </div>
+    {/* //// Neoffice — the club's FULL logo when it has one (Gym Settings › Full
+        Logo, "le logo complet sur la page de connexion", 2026-09-09); the square
+        icon otherwise, the dumbbell last. */}
+    {BOOT.app_logo
+      ? <img className="signin-logo" src={BOOT.app_logo} alt={BOOT.app_title || ''} />
+      : <div className="signin-mark">
+        {BOOT.app_icon
+          ? <img src={BOOT.app_icon} alt="" />
+          : <Icon name="dumbbell" />}
+      </div>}
     <h1>{BOOT.app_title || t('Fitness')}</h1>
 
     {mode === 'sent' ? <>

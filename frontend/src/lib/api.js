@@ -44,6 +44,9 @@ const M = {
   //// there, and apply no matter who calls it. The other two are ours and
   //// never touch a password.
   login: '/api/method/login',
+  //// Neoffice — the front door (views/MembershipGate.jsx): the offer to sign, and the signature.
+  renewalOffer: '/api/method/neoffice_gym.api.membership.renewal_offer',
+  acceptRenewal: '/api/method/neoffice_gym.api.membership.accept_renewal',
   rememberMe: '/api/method/neoffice_gym.api.session.remember_me',
   forgotPassword: '/api/method/neoffice_gym.api.session.forgot_password',
   //// Neoffice — physical assessments. Read-only on the member's side: it's
@@ -207,6 +210,8 @@ export const deviceOf = (nav = typeof navigator !== 'undefined' ? navigator : nu
 export const signIn = (usr, pwd, device = deviceOf()) =>
   api(M.login, { method: 'POST', body: JSON.stringify({ usr, pwd, device }) })
 export const rememberMe = () => api(M.rememberMe, { method: 'POST', body: '{}' })
+export const renewalOffer = () => api(M.renewalOffer)
+export const acceptRenewal = (payload) => api(M.acceptRenewal, { method: 'POST', body: JSON.stringify(payload) })
 export const forgotPassword = (email) =>
   api(M.forgotPassword, { method: 'POST', body: JSON.stringify({ email }) })
 

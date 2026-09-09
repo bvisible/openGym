@@ -20,6 +20,7 @@ const mocks = vi.hoisted(() => {
     exercisePicker: vi.fn(() => ({ close: vi.fn() })),
     startWorkWithPrep: vi.fn(),
     exConfigSheet: vi.fn(),
+    exerciseRestSheet: vi.fn(),
     toast: vi.fn(),
     scrollCalls: [],
     swapActiveWorkoutExercise: vi.fn(),
@@ -89,7 +90,9 @@ vi.mock('../sheets.jsx', () => ({
   startFlow: vi.fn(),
   exercisePicker: mocks.exercisePicker,
   exConfigSheet: mocks.exConfigSheet,
-  exerciseDetailSheet: vi.fn(),
+  exerciseRestSheet: mocks.exerciseRestSheet,
+    renameExerciseSheet: vi.fn(),
+    exerciseDetailSheet: vi.fn(),
   topWeightSheet: mocks.topWeightSheet,
   finishWorkout: vi.fn(),
   workoutCompleteSheet: mocks.workoutCompleteSheet,
@@ -839,5 +842,38 @@ describe('adding an exercise from the picker', () => {
     expect(close).toHaveBeenCalledTimes(1)
     expect(mocks.S.active.entries).toHaveLength(1)
     expect(mocks.S.active.entries[0].id).toBe('plank')
+  })
+})
+
+
+//// Neoffice — the rest line under the sets: the entry's own rest, or the member's
+//// usual timer, one tap from the sheet that changes it.
+describe('rest per exercise, from the workout', () => {
+  afterEach(unmount)
+
+  it('shows the usual timer when the exercise has none, and opens the sheet with it', async () => {
+    mocks.exerciseRestSheet.mockClear()
+    await mount([exercise('bench', [false, false])])
+    const line = [...container.querySelectorAll('button')].find(b => /Rest: your usual timer, 90 s/.test(b.textContent))
+    expect(line).toBeTruthy()
+    await act(async () => { line.dispatchEvent(new dom.Event('click', { bubbles: true })) })
+    expect(mocks.exerciseRestSheet).toHaveBeenCalledTimes(1)
+    expect(mocks.exerciseRestSheet.mock.calls[0].slice(0, 2)).toEqual([0, 90])
+  })
+
+  it('shows the exercise\'s own rest when it has one, and writes it back on the entry and the routine', async () => {
+    mocks.exerciseRestSheet.mockClear()
+    const entry = exercise('bench', [false, false], { target: { mode: 'reps', reps: 5, weight: 60, restSec: 120 } })
+    await mount([entry], 0, { routines: [{ id: 'r1', name: 'Push', ex: [{ id: 'bench', sets: 2, reps: 5 }] }], active: { routineId: 'r1' } })
+    const line = [...container.querySelectorAll('button')].find(b => /Rest 120 s after each set/.test(b.textContent))
+    expect(line).toBeTruthy()
+    await act(async () => { line.dispatchEvent(new dom.Event('click', { bubbles: true })) })
+    const onChange = mocks.exerciseRestSheet.mock.calls[0][2]
+    await act(async () => { onChange(45) })
+    expect(mocks.S.active.entries[0].target.restSec).toBe(45)
+    expect(mocks.S.routines[0].ex[0].restSec).toBe(45)
+    await act(async () => { onChange(0) })
+    expect(mocks.S.active.entries[0].target.restSec).toBeUndefined()
+    expect(mocks.S.routines[0].ex[0].restSec).toBeUndefined()
   })
 })

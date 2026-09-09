@@ -4,7 +4,8 @@ import { useStore } from '../store/useStore.js'
 import { effectiveRoutine, effectiveRoutineId, streakWeeks, lastBW, setsDoneActive } from '../lib/history.js'
 import { fmtNum, fmtDate, todayISO, isoOf, weekKey, DAYS, exCount } from '../lib/format.js'
 import { t, dateLocale } from '../lib/i18n.js'
-import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadStarterPlan, bwDeltaColor, coachOfferSheet } from '../sheets.jsx'
+import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, loadStarterPlan, bwDeltaColor, coachOfferSheet, floorPlanSheet } from '../sheets.jsx'
+import { loadFloorPlan } from '../components/FloorPlanSheet.jsx'
 //// Neoffice — the "your coach sent you a program" banner.
 import { useEffect } from 'react'
 import { programInbox } from '../lib/api.js'
@@ -36,6 +37,8 @@ export default function Home() {
   const nav = useNavigate()
   const S = useStore(s => s.S)
   const user = useStore(s => s.user)
+  const [floor, setFloor] = useState([])
+  useEffect(() => { let alive = true; loadFloorPlan().then(z => { if (alive) setFloor(z || []) }); return () => { alive = false } }, [])
   const [weekOffset, setWeekOffset] = useState(0)
 
   //// Neoffice — what the coach has sent.
@@ -174,6 +177,16 @@ export default function Home() {
       </div>
       <div className="small" style={{ lineHeight: 1.5, whiteSpace: 'pre-line' }}>{n.body}</div>
     </div>)}
+
+    {/* //// Neoffice — the room itself, one tap away: « voir le plan de la salle
+        hors exercice » (2026-09-09). Only when the club drew one. */}
+    {floor.length > 0 && <div className="card tappable" style={{ cursor: 'pointer' }} {...tappable(() => floorPlanSheet(floor))}>
+      <div className="row between">
+        <div className="row" style={{ gap: 9 }}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="map" /></span>
+          <div><div className="lbl2">{t('Floor plan')}</div><div className="small dim">{t('{0} zones · find every machine', floor.length)}</div></div></div>
+        <Icon name="chevronRight" className="chev" />
+      </div>
+    </div>}
 
     {/* //// Neoffice — les prochains cours. Sous les offres et au-dessus de la
          semaine : un cours est un RENDEZ-VOUS, donc il se lit avant le plan. */}

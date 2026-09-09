@@ -42,7 +42,20 @@ export const instrFor = ex => (instr && instr[ex.id]) || ex.st || []
 
 // Built-in catalogue names are bilingual when a complete translated name pack is active.
 // User-created exercises have no entry in the pack and keep their exact chosen name.
+//// Neoffice — the member's own names for exercises ("Épaules" for a dip they
+//// never call a dip), and the display names a coach gives in a programme. Set
+//// from the store (S.exAliases) on every persist; an alias wins over every
+//// catalogue name, on every screen. Asked by the pilot club, 2026-09-09.
+let aliases = {}
+export function setExerciseAliases(map) { aliases = map || {} }
+export const exerciseAliasOf = id => (id && aliases[id]) || ''
 export const exerciseNameFor = ex => {
+  const alias = ex && aliases[ex.id]
+  if (alias) return alias
+  return catalogueNameFor(ex)
+}
+// The name without the member's alias — what the catalogue calls it.
+export const catalogueNameFor = ex => {
   const translated = exerciseNames && ex && exerciseNames[ex.id]
   if (!translated) return ex?.n || ''
   //// Neoffice — French shows the translated name ALONE; upstream's pt-BR keeps
@@ -68,7 +81,9 @@ export const exerciseNameFor = ex => {
 // Search both the localized and canonical English title without changing persisted data.
 export const exerciseNameSearchText = ex => {
   const translated = exerciseNames && ex && exerciseNames[ex.id]
-  return translated ? `${translated} ${ex.n}` : (ex?.n || '')
+  const alias = ex && aliases[ex.id]
+  const base = translated ? `${translated} ${ex.n}` : (ex?.n || '')
+  return alias ? `${alias} ${base}` : base
 }
 
 // Called by i18n.js's setLang once the locale pack has been loaded — kept here rather than

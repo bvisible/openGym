@@ -11,6 +11,7 @@ import { useWakeLock } from './lib/wakelock.js'
 import { startFlow } from './sheets.jsx'
 import Icon from './components/Icon.jsx'
 import SignIn from './views/SignIn.jsx'
+import MembershipGate from './views/MembershipGate.jsx'
 import { BOOT } from './lib/api.js'
 import TabBar from './components/TabBar.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
@@ -111,6 +112,9 @@ function Shell() {
   //// the appearance, not the authentication — the form posts to
   //// `/api/method/login`. See `views/SignIn.jsx`.
   if (BOOT.signed_in === false) return <div id="app"><SignIn /></div>
+  //// Neoffice — signed in, but no valid membership: the club's message (and
+  //// its renewal, when allowed) instead of the journal. See views/MembershipGate.jsx.
+  if (BOOT.membership && BOOT.membership.blocked) return <div id="app"><MembershipGate /></div>
 
   const authed = user || isGuest
   if (!ready && !authed) return (

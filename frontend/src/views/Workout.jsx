@@ -10,7 +10,7 @@ import { t, exerciseNameFor } from '../lib/i18n.js'
 import { api } from '../lib/api.js'
 import { insertionIndexAfterCurrentUnit, nextUnfinishedUnit, setProgressHighWater, supersetFlowStep, restAfterSet, restOnRecheck, restSecFor } from '../lib/supersetFlow.js'
 import Media from '../components/Media.jsx'
-import { workoutEditSheet, workoutOutlineSheet, startFlow, exercisePicker, exConfigSheet, exerciseDetailSheet, topWeightSheet, finishWorkout, workoutCompleteSheet, confirmSheet, exerciseNoteSheet, sessionNoteSheet, swapActiveWorkoutExercise } from '../sheets.jsx'
+import { workoutEditSheet, workoutOutlineSheet, startFlow, exercisePicker, exConfigSheet, exerciseDetailSheet, exerciseRestSheet, topWeightSheet, finishWorkout, workoutCompleteSheet, confirmSheet, exerciseNoteSheet, sessionNoteSheet, swapActiveWorkoutExercise } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Button, Check, NumberField } from '../components/ui.jsx'
 import { nextPrescription, applyPrescription, defaultIncrement } from '../lib/progression.js'
@@ -72,7 +72,7 @@ function Elapsed({ start }) {
 }
 
 /* ---------- one exercise block (reps: weight×reps · time: a held duration · cardio: duration+speed) ---------- */
-function ExerciseBlock({ entryIdx, compact, onEditSession, onToggle, onField, onAddSet, onRemoveSet, onAddWarmup, onRemoveSetAt, onStartTimed, onPairPrev, onPairNext, onSetRowRef, onProgressionSettings }) {
+function ExerciseBlock({ entryIdx, compact, onEditSession, onToggle, onField, onAddSet, onRemoveSet, onAddWarmup, onRemoveSetAt, onStartTimed, onPairPrev, onPairNext, onSetRowRef, onProgressionSettings, onRest }) {
   const S = useStore(s => s.S)
   const update = useStore(s => s.update)
   const working = useUI(s => s.work)
@@ -294,6 +294,13 @@ function ExerciseBlock({ entryIdx, compact, onEditSession, onToggle, onField, on
         <Button size="sm" icon="minus" disabled={entry.sets.length <= 1} onClick={onRemoveSet}>{t('Remove set')}</Button>
         <Button size="sm" icon="plus" onClick={onAddSet}>{t('Add set')}</Button>
       </div>
+      {/* //// Neoffice — rest after each set of THIS exercise, one tap away in front of
+          //// the machine (« le temps de récupération par exercice », 2026-09-09). The
+          //// config sheet has the same field; nobody found it there. */}
+      {mode !== 'cardio' && onRest && <button className="chip nocap" style={{ marginTop: 10 }} onClick={onRest}>
+        <Icon name="timer" style={{ fontSize: 12 }} />
+        {entry.target?.restSec > 0 ? t('Rest {0} s after each set', entry.target.restSec) : t('Rest: your usual timer, {0} s', S.restSec)}
+      </button>}
     </div>
   </>
 }
@@ -572,6 +579,20 @@ function ActiveWorkout() {
   // finish logs 0:38 of a 0:45 target rather than crediting the full prescription — and then
   // checks the set off through the normal path, so rest, supersets and the finish prompt all
   // behave exactly as they do for a reps set.
+  //// Neoffice — rest per exercise, written on the live entry AND on the routine it
+  //// came from, so the next session starts with it. 0 = the member's default.
+  const restOf = idx => {
+    const e = A.entries[idx]
+    exerciseRestSheet(e.target?.restSec || 0, S.restSec, v => update(s => {
+      const en = s.active.entries[idx]
+      en.target = { ...(en.target || {}) }
+      if (v > 0) en.target.restSec = v; else delete en.target.restSec
+      const r = s.routines.find(x => x.id === s.active.routineId)
+      const x = r && r.ex.find(x => x.id === en.id)
+      if (x) { if (v > 0) x.restSec = v; else delete x.restSec }
+    }))
+  }
+
   const startTimed = (idx, i) => {
     const e = A.entries[idx]
     //// Neoffice — through the 3-2-1 (useUI.startWorkWithPrep), not straight
@@ -704,12 +725,12 @@ function ActiveWorkout() {
             return <div key={idx} ref={el => bindExRef(entry, el)} className="ss-ex" data-exidx={idx}>
               {k > 0 && <div className="ss-amp">+</div>}
               <ExerciseBlock entryIdx={idx} compact onEditSession={openSessionEdit} onSetRowRef={(setIdx, el) => bindSetRef(entry, setIdx, el)}
-                onToggle={i => toggle(idx, i)} onField={(i, f, v) => setField(idx, i, f, v)} onAddSet={() => addSet(idx)} onRemoveSet={() => removeSet(idx)} onAddWarmup={() => addWarmup(idx)} onRemoveSetAt={i => removeSetAt(idx, i)} onStartTimed={i => startTimed(idx, i)} onProgressionSettings={() => openProgressionSettings(idx)} />
+                onToggle={i => toggle(idx, i)} onField={(i, f, v) => setField(idx, i, f, v)} onAddSet={() => addSet(idx)} onRemoveSet={() => removeSet(idx)} onAddWarmup={() => addWarmup(idx)} onRemoveSetAt={i => removeSetAt(idx, i)} onStartTimed={i => startTimed(idx, i)} onRest={() => restOf(idx)} onProgressionSettings={() => openProgressionSettings(idx)} />
             </div>
           })}
         </div>
       ) : (
-        <ExerciseBlock entryIdx={cur} onEditSession={openSessionEdit} onToggle={i => toggle(cur, i)} onField={(i, f, v) => setField(cur, i, f, v)} onAddSet={() => addSet(cur)} onRemoveSet={() => removeSet(cur)} onAddWarmup={() => addWarmup(cur)} onRemoveSetAt={i => removeSetAt(cur, i)} onStartTimed={i => startTimed(cur, i)} onPairPrev={onPairPrev} onPairNext={onPairNext} onProgressionSettings={() => openProgressionSettings(cur)} />
+        <ExerciseBlock entryIdx={cur} onEditSession={openSessionEdit} onToggle={i => toggle(cur, i)} onField={(i, f, v) => setField(cur, i, f, v)} onAddSet={() => addSet(cur)} onRemoveSet={() => removeSet(cur)} onAddWarmup={() => addWarmup(cur)} onRemoveSetAt={i => removeSetAt(cur, i)} onStartTimed={i => startTimed(cur, i)} onRest={() => restOf(cur)} onPairPrev={onPairPrev} onPairNext={onPairNext} onProgressionSettings={() => openProgressionSettings(cur)} />
       )}
       </div>
     </> : <div className="empty"><div className="ico"><Icon name="shuffle" /></div>{t('Freestyle workout — add your first exercise.')}

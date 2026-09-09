@@ -49,6 +49,9 @@ import { buildSessionEntries } from './lib/session-start.js'
 import { workoutsOn, backfillStart, backfillEnd, completeBackfill } from './lib/backfill.js'
 import { showsIntensifier, showsWarmupRamp } from './lib/level-visibility.js'
 import FloorPlanFor from './components/FloorPlan.jsx'
+import FloorPlanSheet from './components/FloorPlanSheet.jsx'
+//// Neoffice — see the same note in store/useStore.js: i18n-core, so mocks of i18n.js keep working.
+import { catalogueNameFor, exerciseAliasOf } from './lib/i18n-core.js'
 import ShareWorkout from './components/ShareWorkout.jsx'
 
 const S = () => useStore.getState().S
@@ -672,6 +675,10 @@ function ExerciseDetail({ ex, close }) {
     {ex.desc && <div className="exnote">{ex.desc}</div>}
     {best > 0 && <div className="small row" style={{ marginBottom: 6, gap: 5 }}><Icon name="trophy" style={{ fontSize: 14, color: 'var(--yellow)' }} />{t('Best:')} <b className="accent">{fmtNum(best)} {st.unit}</b>{last ? ` · ${t('last')} ${fmtDate(last.d)}: ${last.sets.map(s => setLabel(ex.id, s, last.target)).join(', ')}` : ''}</div>}
     <Button variant="primary" icon="plus" style={{ margin: '10px 0 4px' }} onClick={() => addToRoutineSheet(ex)}>{t('Add to my plan')}</Button>
+    {/* //// Neoffice — "dips machin → épaules": the member's own name for it, on
+        //// every screen. The catalogue name stays one line below. 2026-09-09. */}
+    <Button icon="pencil" style={{ margin: '0 0 4px' }} onClick={() => { close(); renameExerciseSheet(ex) }}>{exerciseAliasOf(ex.id) ? t('Rename') : t('Give it my own name')}</Button>
+    {exerciseAliasOf(ex.id) && <div className="small dim" style={{ marginBottom: 6 }}>{t('Catalogue name: {0}', catalogueNameFor(ex))}</div>}
     {ex.custom && <div className="row" style={{ gap: 8, marginTop: 8 }}>
       <Button icon="pencil" style={{ flex: 1 }} onClick={() => { close(); customExSheet(ex) }}>{t('Edit')}</Button>
       <Button variant="danger" icon="trash" style={{ flex: 1 }} onClick={() => deleteCustomEx(ex, close)}>{t('Delete')}</Button>
@@ -689,6 +696,49 @@ function ExerciseDetail({ ex, close }) {
   </>
 }
 export const exerciseDetailSheet = ex => ui().openSheet(close => <ExerciseDetail ex={ex} close={close} />)
+//// Neoffice — the whole room, on its own (Home card, Exercises tab). 2026-09-09.
+export const floorPlanSheet = zones => ui().openSheet(close => <FloorPlanSheet zones={zones} close={close} />)
+
+//// Neoffice — added. The member renames an exercise for themselves; the alias
+//// lives in S.exAliases (synced) and wins everywhere through exerciseNameFor.
+function RenameExercise({ ex, close }) {
+  const S = useStore(s => s.S)
+  const update = useStore(s => s.update)
+  const original = catalogueNameFor(ex)
+  const [name, setName] = useState((S.exAliases || {})[ex.id] || '')
+  const write = value => update(s => {
+    const next = { ...(s.exAliases || {}) }
+    const v = (value || '').trim()
+    if (v && v !== original) next[ex.id] = v; else delete next[ex.id]
+    s.exAliases = next
+  })
+  return <>
+    <h3>{t('Rename this exercise')}</h3>
+    <div className="muted small" style={{ marginBottom: 12 }}>{t('Your own name for it, on every screen of your journal. The club and the catalogue keep theirs.')}</div>
+    <input className="input" autoFocus value={name} placeholder={original} onChange={e => setName(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { write(name); close() } }} />
+    <div className="small dim" style={{ margin: '8px 0 16px' }}>{t('Catalogue name: {0}', original)}</div>
+    <Button variant="primary" onClick={() => { write(name); close() }}>{t('Save')}</Button>
+    {(S.exAliases || {})[ex.id] && <Button variant="ghost" style={{ marginTop: 8 }} onClick={() => { write(''); close() }}>{t('Back to the catalogue name')}</Button>}
+  </>
+}
+export const renameExerciseSheet = ex => ui().openSheet(close => <RenameExercise ex={ex} close={close} />)
+
+//// Neoffice — added. Rest after each set of THIS exercise, changed from the
+//// workout itself (« le temps de récupération par exercice », 2026-09-09). 0 =
+//// the member's default. The config sheet has the same field; this is the
+//// short way to it, in front of the machine.
+function ExerciseRest({ value, defaultSec, onChange, close }) {
+  const [v, setV] = useState(value || 0)
+  return <>
+    <h3>{t('Rest after each set')}</h3>
+    <div className="muted small" style={{ marginBottom: 12 }}>{t('For this exercise only. 0 uses your default rest timer ({0} s).', defaultSec)}</div>
+    <Stepper label={t('Rest (s)')} unit="s" value={v} step={15} decimal={false} onChange={x => setV(Math.max(0, Math.round(x)))} />
+    <div style={{ height: 14 }} />
+    <Button variant="primary" onClick={() => { onChange(v); close() }}>{t('Save')}</Button>
+    {v > 0 && <Button variant="ghost" style={{ marginTop: 8 }} onClick={() => { onChange(0); close() }}>{t('Use my default')}</Button>}
+  </>
+}
+export const exerciseRestSheet = (value, defaultSec, onChange) => ui().openSheet(close => <ExerciseRest value={value} defaultSec={defaultSec} onChange={onChange} close={close} />)
 
 /* ============================ add to routine ============================ */
 function AddToRoutine({ ex, close }) {
