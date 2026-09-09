@@ -47,7 +47,24 @@ export const instrFor = ex => (instr && instr[ex.id]) || ex.st || []
 //// from the store (S.exAliases) on every persist; an alias wins over every
 //// catalogue name, on every screen. Asked by the pilot club, 2026-09-09.
 let aliases = {}
-export function setExerciseAliases(map) { aliases = map || {} }
+let aliasesKey = ''
+let aliasVersion = 0
+//// The search corpus (lib/exercises.js) is cached per exercise and keyed on
+//// the language version; a rename must move that key too, or the member
+//// searches their new name and finds nothing until the next launch (seen on
+//// osiris, 2026-09-09). Same map, same key: persist() calls this on every
+//// state change and must not flush ~1300 cached entries each time.
+export function setExerciseAliases(map) {
+  const next = map || {}
+  const key = JSON.stringify(next)
+  if (key === aliasesKey) return
+  aliases = next
+  aliasesKey = key
+  aliasVersion++
+}
+// What a cached name or search corpus must be keyed on: the language AND the
+// member's own names. A string, so two counters never collide.
+export const getNamesVersion = () => version + '.' + aliasVersion
 export const exerciseAliasOf = id => (id && aliases[id]) || ''
 export const exerciseNameFor = ex => {
   const alias = ex && aliases[ex.id]

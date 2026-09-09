@@ -1,6 +1,6 @@
 import { EXDB } from './exercises-data.js'
 import { USER_EXERCISE_MUSCLE_OVERRIDES, exerciseMuscleMetadataFor } from './exercise-muscle-batch-1.js'
-import { t, getVersion, exerciseNameSearchText } from './i18n-core.js'
+import { t, getNamesVersion, exerciseNameSearchText } from './i18n-core.js'
 
 export { EXDB }
 
@@ -192,13 +192,13 @@ export const normalizeStr = s => (s || '')
 //
 // The haystack is built once per exercise and cached: NFD-normalising ~1300 catalogue entries
 // on every keystroke costs ~8ms on a desktop and several times that on a phone. The cache key
-// is the i18n version (bumped by every setLang), so switching language rebuilds the translated
-// terms. Custom exercises are re-cached automatically — the store clones state on update, so an
+// is the names version (bumped by every setLang AND by a rename), so switching language or
+// giving an exercise your own name rebuilds the terms. Custom exercises are re-cached automatically — the store clones state on update, so an
 // edited exercise arrives as a new object the WeakMap has never seen.
 const corpusCache = new WeakMap()
 
 function corpusOf(e) {
-  const v = getVersion()
+  const v = getNamesVersion()
   const hit = corpusCache.get(e)
   if (hit && hit.v === v) return hit.s
   const sm = Array.isArray(e?.sm) ? e.sm : []
