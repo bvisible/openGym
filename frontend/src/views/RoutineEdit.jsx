@@ -19,6 +19,7 @@ import { copyRoutine } from '../lib/routines.js'
 import { POLICIES_FOR, POLICY_NAME, POLICY_DESC } from '../lib/progression.js'
 import BodyMap from '../components/BodyMap.jsx'
 import { loadOfRoutine, rankOf, MUSCLE_NAME } from '../lib/muscles.js'
+//// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
 import { showsSupersetControl } from '../lib/level-visibility.js'
 
 export const ROUTINE_LONG_PRESS_MS = 380

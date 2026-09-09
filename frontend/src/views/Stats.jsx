@@ -28,6 +28,7 @@ import {
 import { Button, Segmented, SelectRow } from '../components/ui.jsx'
 import { tappable } from '../lib/use-sheet-keyboard.js'
 import { isWarmupRow } from '../lib/workout-model.js'
+//// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
 import { showsBodyMap, showsEffortHistogram, showsEstimated1RM } from '../lib/level-visibility.js'
 import Badges from '../components/Badges.jsx'
 

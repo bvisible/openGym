@@ -32,7 +32,7 @@ import { planHash } from './coach.js'
 import { todayISO } from './format.js'
 import { t } from './i18n.js'
 
-export const ADAPTERS = { anthropic, openai, gemini, compatible, nora: noraAdapter }
+export const ADAPTERS = { anthropic, openai, gemini, compatible, nora: noraAdapter }   //// Neoffice — `nora` added
 export const LOCAL_DAILY_CAP = 10
 // Five minutes is right for a cloud API and wrong for a model on somebody's laptop; the
 // OpenAI-compatible endpoint is the one that may be local, so it gets the long budget.
@@ -125,6 +125,7 @@ export async function localDisclosure() {
 export async function localModels(settings, key) {
   const adapter = ADAPTERS[settings.provider]
   if (!adapter) return { ok: false, error: 'unknown provider', models: [] }
+  //// Neoffice — fetchFor: the page's own fetch for Nora, the native one for a key of its own.
   return adapter.models(cfgOf(settings), envOf(settings, key), { fetch: fetchFor(settings), timeoutMs: 20000 })
 }
 
@@ -153,6 +154,7 @@ async function start(S, kind, opts) {
 }
 
 async function run(S, kind, opts, d, adapter) {
+  //// Neoffice — no key with Nora (the instance holds it); the job's kind travels in a header for the club's accounting.
   const key = d.mode === 'nora' ? null : await getApiKey()
   if (d.mode === 'nora') setJobKind(opts.refine ? 'refine' : kind)
   const payload = payloadLib.build(S, {
@@ -161,7 +163,7 @@ async function run(S, kind, opts, d, adapter) {
   const attempt = await runPipeline({
     adapter, cfg: cfgOf(d), kind, payload,
     model: d.model || HTTP_PROVIDERS[d.provider].defaultModel, timeoutMs: timeoutFor(d.provider),
-    invokeOpts: { env: envOf(d, key), fetch: fetchFor(d) }
+    invokeOpts: { env: envOf(d, key), fetch: fetchFor(d) }   //// Neoffice — fetchFor, see above
   })
   if (!attempt.ok) {
     // There is no admin card on a phone, so the reason has to reach the person holding it:

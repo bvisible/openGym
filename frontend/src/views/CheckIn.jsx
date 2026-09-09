@@ -154,6 +154,8 @@ export function openEditCard(card) {
 // field for it — so an edit that only renames keeps the existing scanned code untouched.
 function CardSheet({ close, card }) {
   const editing = !!card
+  //// Neoffice — `setCardLabel`, not upstream's `setLabel`: lib/history.js exports a
+  //// `setLabel` too, and scripts/check-imports.mjs read the local setter as a missing import.
   const [label, setCardLabel] = useState(card?.label || '')
   const [value, setValue] = useState(card?.value || '')
   const [busy, setBusy] = useState(false)

@@ -31,6 +31,7 @@ const S = () => useStore.getState().S
 // validator only ever load on a phone that chose this). A paired phone takes the api() branch
 // like the web app does; nothing on the web or demo builds reaches this.
 let localMod = null
+//// Neoffice — `|| noraConfigured()`: a club's journal runs the Coach the local way, against the instance.
 const LOCAL = () => (MOBILE && useStore.getState().coachLocal?.mode === 'byok') || noraConfigured()
 const local = async () => {
   if (!localMod) {
@@ -64,6 +65,7 @@ export const disclosure = async () => DEMO ? (await demo()).demoDisclosure() : L
    they ask for anything rather than after a job is turned down. */
 export const coachAccount = async () =>
   DEMO ? { mode: 'instance', provider: 'demo', providerLabel: 'Demo', account: null, connected: true, reason: null, message: null }
+    //// Neoffice — with Nora the account is the instance's (the club pays), not the phone's.
     : LOCAL() ? (noraConfigured()
         ? { mode: 'instance', provider: 'nora', providerLabel: 'Nora', account: null, connected: true, reason: null, message: null }
         : { mode: 'device', provider: useStore.getState().coachLocal?.provider || null, providerLabel: null, account: null, connected: true, reason: null, message: null })

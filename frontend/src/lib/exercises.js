@@ -194,6 +194,7 @@ export const normalizeStr = s => (s || '')
 // name, equipment, target muscle, body part (both in English and translated to active language),
 // secondary muscles or description.
 //
+//// Neoffice — keyed on the NAMES version (language + the member's aliases), see below.
 // The haystack is built once per exercise and cached: NFD-normalising ~1300 catalogue entries
 // on every keystroke costs ~8ms on a desktop and several times that on a phone. The cache key
 // is the names version (bumped by every setLang AND by a rename), so switching language or

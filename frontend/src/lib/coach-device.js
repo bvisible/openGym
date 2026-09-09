@@ -15,7 +15,7 @@ import { BOOT } from './api.js'
 
 const FILE = 'opengym-coach.json'
 
-export const COACH_MODES = ['off', 'server', 'byok', 'nora']
+export const COACH_MODES = ['off', 'server', 'byok', 'nora']   //// Neoffice — 'nora': the club's assistant, see coach-nora.js
 
 const DEFAULTS = { mode: 'off', provider: null, model: null, baseUrl: null, handle: null, daily: null, pending: null }
 
