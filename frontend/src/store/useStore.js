@@ -491,6 +491,10 @@ export const useStore = create((set, get) => {
 
     // Boot: ask the server who we are, then pull.
     async boot() {
+      //// Neoffice — upstream's boot() reads /api/config here; ours reads the boot blob
+      //// (loadConfig, see above). Before the pull, so the Plan's Coach entry and the
+      //// Coach screens have what they gate on from the first render.
+      await get().loadConfig()
       // Mobile build: no backend by default — restore from the file mirror (the durable copy;
       // localStorage may have been evicted since the last run) and go straight in. Unless this
       // device was paired to a server ("connect to my server" mode, lib/remote.js), in which
