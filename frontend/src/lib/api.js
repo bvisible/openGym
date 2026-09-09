@@ -190,8 +190,22 @@ export const myBadges = () => api(M.badges)
 //// Neoffice — signing in WITHOUT leaving the journal. `signIn` posts the
 //// credentials to Frappe, as-is: none of them are checked here.
 //// ⚠️ `usr`/`pwd` are the names `LoginManager` expects — not `email`.
-export const signIn = (usr, pwd) =>
-  api(M.login, { method: 'POST', body: JSON.stringify({ usr, pwd }) })
+//// Neoffice — the journal tells Frappe what opened the session. `device` is
+//// read by our frappe fork (frappe.sessions.session_device): a session marked
+//// mobile is never evicted by a desk login of the same account, and a staff
+//// account may keep the 30-day memory on it. A phone or a tablet says
+//// "mobile"; a desktop browser says "desktop" and keeps upstream's behaviour.
+//// iPadOS calls itself a Mac — the touch points tell it apart. Found
+//// 2026-09-09: a coach's phone and desk signed each other out every morning.
+export const deviceOf = (nav = typeof navigator !== 'undefined' ? navigator : null) => {
+  if (!nav) return 'desktop'
+  const ua = nav.userAgent || ''
+  if (/iPhone|iPad|iPod|Android/i.test(ua)) return 'mobile'
+  if (/Macintosh/i.test(ua) && (nav.maxTouchPoints || 0) > 1) return 'mobile'
+  return 'desktop'
+}
+export const signIn = (usr, pwd, device = deviceOf()) =>
+  api(M.login, { method: 'POST', body: JSON.stringify({ usr, pwd, device }) })
 export const rememberMe = () => api(M.rememberMe, { method: 'POST', body: '{}' })
 export const forgotPassword = (email) =>
   api(M.forgotPassword, { method: 'POST', body: JSON.stringify({ email }) })
