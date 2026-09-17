@@ -288,6 +288,13 @@ export const useStore = create((set, get) => {
       pushTm = setTimeout(() => get().pushState(), 1500)
     }
     pushPending = false
+    //// Neoffice — the banner's `pending` was read from gym_dirty when the page
+    //// loaded, BEFORE boot knew whose profile this device holds. On a shared
+    //// tablet the flag can belong to the previous member: setUser wipes it with
+    //// their copy, nothing is owed, and the banner still said "not synced yet"
+    //// until the next push. Seen on osiris, 2026-09-17, switching test
+    //// accounts. What is owed after boot is what the flag says now.
+    setSync({ pending: localStorage.getItem('gym_dirty') === '1' || pushTm !== null })
   }
 
   // A signed-in device shows what the server has. Coming back — to the tab, the window, the app,
@@ -448,6 +455,8 @@ export const useStore = create((set, get) => {
     localStorage.removeItem(KEY)
     persist(clone(DEF), false)
     localStorage.removeItem('gym_owner')
+    //// Neoffice — same as the owner switch above: nothing is owed once the copy is gone.
+    setSync({ offline: false, pending: false })
     //// Neoffice — and drop the service worker's caches, which localStorage
     //// alone does not cover. The offline shell cached at /gym is a RENDERED,
     //// per-member page: it carries the member's name and their CSRF token. On a
@@ -528,6 +537,9 @@ export const useStore = create((set, get) => {
           localStorage.removeItem(SYNC_KEY)
           localStorage.removeItem(KEY)
           persist(clone(DEF), false)
+          //// Neoffice — the previous member's unsent change went with their copy;
+          //// the banner must not keep announcing it to the next one.
+          setSync({ offline: false, pending: false })
         }
         localStorage.setItem('gym_owner', u.id)
         localStorage.setItem('gym_user', JSON.stringify(u)); localStorage.removeItem('gym_guest')

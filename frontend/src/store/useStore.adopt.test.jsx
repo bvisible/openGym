@@ -135,6 +135,30 @@ describe('offline and unsynced flags', () => {
   })
 })
 
+//// Neoffice — a shared tablet: the flag a previous member left behind must not
+//// keep the banner on for the next one, whose copy starts clean.
+describe('a stale dirty flag from another profile', () => {
+  it('is cleared with that profile\'s copy when a different member signs in', async () => {
+    localStorage.setItem('gym_owner', 'previous-member')
+    localStorage.setItem('gym_dirty', '1')
+    useStore.setState({ S: { ...clone(DEF), _ts: 50, workouts: [workout('theirs')] }, user: null, ready: false, sync: { offline: false, pending: true, lastSynced: 0 } })
+
+    useStore.getState().setUser({ id: 'user-2' })
+
+    expect(localStorage.getItem('gym_dirty')).toBeNull()
+    expect(useStore.getState().S.workouts).toEqual([])
+    expect(useStore.getState().sync.pending).toBe(false)
+  })
+
+  it('is cleared by a sign-out too', async () => {
+    signedIn({ ...clone(DEF), _ts: 50 }, { sync: { offline: false, pending: true, lastSynced: 0 } })
+    api.mockResolvedValue({})
+    useStore.getState().clearLocal()
+    expect(useStore.getState().sync.pending).toBe(false)
+    expect(localStorage.getItem('gym_owner')).toBeNull()
+  })
+})
+
 describe('revision check on resume', () => {
   it('asks only for the revision and pulls the document when it moved', async () => {
     signedIn({ ...clone(DEF), _ts: 100, workouts: [workout('w1')] })
