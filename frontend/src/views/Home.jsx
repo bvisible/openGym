@@ -344,7 +344,11 @@ export default function Home() {
           </div>
         )}
         <div className="chart" style={{ marginTop: 8 }}><LineChart points={bwPoints} h={130} unit={S.unit} goal={S.targetW} /></div>
-      </> : <div className="muted small">{t("No entries yet — log your weight to start the curve. It's also asked before every workout.")}</div>}
+      </> : <div className="muted small">{/* //// Neoffice — "also asked before every workout" is only true
+          //// when the member set our weighInEvery to 'workout'; the default asks nobody. */}
+        {S.weighIn === false || S.weighInEvery !== 'workout'
+        ? t('No entries yet — log your weight to start the curve.')
+        : t("No entries yet — log your weight to start the curve. It's also asked before every workout.")}</div>}
     </div>
 
     <div className="card tappable" style={{ cursor: 'pointer' }} {...tappable(() => calendarSheet())}>

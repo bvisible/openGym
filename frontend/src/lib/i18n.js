@@ -4,13 +4,17 @@
 // subscription hook `useLang`.
 
 import { useSyncExternalStore } from 'react'
+//// Neoffice — upstream's list plus catalogueNameFor / setExerciseAliases /
+//// exerciseAliasOf / getNamesVersion: the member's own exercise names (an
+//// alias a coach or the member gave a machine) are resolved through here.
 import {
-  LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, DATE_LOCALES,
-  getLang, dateLocale, t, instrFor, exerciseNameFor, exerciseNameSearchText, catalogueNameFor, setExerciseAliases, exerciseAliasOf, getVersion, getNamesVersion, _setLangState
+  LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, DATE_LOCALES, DERIVED_LOCALES,
+  getLang, dateLocale, t, instrFor, exerciseNameFor, exerciseNameSearchText, catalogueNameFor, setExerciseAliases, exerciseAliasOf, getVersion, getNamesVersion,
+  baseLang, derivePack, _setLangState
 } from './i18n-core.js'
 
 export {
-  LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, DATE_LOCALES,
+  LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, DATE_LOCALES, DERIVED_LOCALES,
   getLang, dateLocale, t, instrFor, exerciseNameFor, exerciseNameSearchText, catalogueNameFor, setExerciseAliases, exerciseAliasOf, getNamesVersion
 }
 
@@ -27,15 +31,19 @@ const notify = () => { subs.forEach(f => f()) }
 export async function setLang(l) {
   if (!LANGS[l]) l = 'en'
   if (l === getLang() && getVersion() > 0) return
+  // A derived locale (de-CH) ships no packs of its own: it loads its base language's and
+  // transforms the strings on the way through. `l` stays the selected language throughout, so
+  // dateLocale() still reports de-CH and formats numbers Swiss-style.
+  const base = baseLang(l)
   let dict = {}, instr = null, exerciseNames = null
-  try { dict = l === 'en' ? {} : (await localePacks['../locales/' + l + '.js']()).default } catch (e) { dict = {} }
-  try { instr = l === 'en' || !INSTR_LANGS.includes(l) ? null : (await instrPacks['../instr/' + l + '.js']()).default } catch (e) { instr = null }
+  try { dict = base === 'en' ? {} : (await localePacks['../locales/' + base + '.js']()).default } catch (e) { dict = {} }
+  try { instr = base === 'en' || !INSTR_LANGS.includes(base) ? null : (await instrPacks['../instr/' + base + '.js']()).default } catch (e) { instr = null }
   try {
-    exerciseNames = l === 'en' || !EXERCISE_NAME_LANGS.includes(l)
+    exerciseNames = base === 'en' || !EXERCISE_NAME_LANGS.includes(base)
       ? null
-      : (await exerciseNamePacks['../exercise-names/' + l + '.js']()).default
+      : (await exerciseNamePacks['../exercise-names/' + base + '.js']()).default
   } catch (e) { exerciseNames = null }
-  _setLangState(l, dict, instr, exerciseNames)
+  _setLangState(l, derivePack(l, dict), derivePack(l, instr), derivePack(l, exerciseNames))
   notify()
 }
 

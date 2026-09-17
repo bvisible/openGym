@@ -39,7 +39,7 @@ vi.mock('./lib/nav.js', async orig => ({ ...(await orig()), nav }))
 
 import { useStore, DEF, shouldAskWeighIn } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
-import { bwSheet } from './sheets.jsx'
+import { bwSheet, startFlow } from './sheets.jsx'
 
 const mounted = []
 
@@ -157,5 +157,33 @@ describe('the three buttons of the weigh-in sheet', () => {
     expect(buttonSaying(host, 'Save')).toBeTruthy()
     expect(buttonSaying(host, 'Start without weighing in')).toBeFalsy()
     expect(buttonSaying(host, 'Cancel — don’t start yet')).toBeFalsy()
+  })
+})
+
+//// Upstream added its own switch in v1.3.7 (Settings → "Weigh in before
+//// workouts", issue #137, `S.weighIn`). Ours is the three-way `weighInEvery`
+//// and it is the one the club sees; upstream's is still honoured so that a
+//// profile which turned the weigh-in off there is not asked here either. What
+//// this pins: `weighIn: false` wins even over 'workout'.
+describe('upstream’s own switch is honoured', () => {
+  beforeEach(() => {
+    useUI.setState({ sheets: [], toasts: [] })
+    useStore.setState(s => ({ S: { ...s.S, active: null, routines: [], workouts: [], bodyweight: [] } }))
+  })
+
+  it('weighIn: false starts the session at once, whatever weighInEvery says', () => {
+    useStore.setState(s => ({ S: { ...s.S, weighIn: false, weighInEvery: 'workout' } }))
+    act(() => startFlow([]))
+    expect(useUI.getState().sheets).toHaveLength(0)
+    const { active } = useStore.getState().S
+    expect(active).not.toBeNull()
+    expect(active.bw).toBeNull()
+  })
+
+  it('weighIn: true on its own changes nothing — our default still asks nobody', () => {
+    useStore.setState(s => ({ S: { ...s.S, weighIn: true, weighInEvery: 'never' } }))
+    act(() => startFlow([]))
+    expect(useUI.getState().sheets).toHaveLength(0)
+    expect(useStore.getState().S.active).not.toBeNull()
   })
 })

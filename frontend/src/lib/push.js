@@ -13,6 +13,13 @@
 //// a switch that silently does nothing. The one thing push was load-bearing for
 //// — the rest timer firing with the app closed — is covered meanwhile by the
 //// wake lock, which keeps the screen on for the length of a workout.
+////
+//// v1.3.7 upstream added two callers that are stubbed here for the same reason:
+//// syncPushSubscription() (App.jsx re-registers the browser's subscription on
+//// every signed-in boot) answers "the server holds nothing", and deviceId()
+//// (the per-browser token upstream tags rest-timer pushes with) is not needed
+//// while nothing is pushed. Upstream's push.test.js exercises the real relay
+//// and is not carried: it would test an implementation this file does not have.
 
 export const pushSupported = () => false
 export const pushPermission = () => 'unsupported'
@@ -26,3 +33,8 @@ export async function disablePush() {
 }
 
 export const sendTestPush = () => Promise.reject(new Error('Push notifications are not available on this instance yet'))
+
+// Resolves to whether the server now holds this browser's subscription: never, here.
+export async function syncPushSubscription() { return false }
+
+export function deviceId() { return undefined }

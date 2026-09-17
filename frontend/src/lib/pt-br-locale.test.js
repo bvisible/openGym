@@ -61,11 +61,14 @@ describe('Brazilian Portuguese locale', () => {
 //// coach questionnaire's 15 subtitles (three of them Brazilian overrides): upstream rewrote most
 //// of its pt-BR pack as explicit overrides (631 of theirs), and its new strings
 //// land in the inherited set; our own 24 overrides ride along.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(656)
-    expect(inherited).toHaveLength(929)
+//// Recomputed after the upstream v1.3.7 merge (2026-09-17): upstream's v1.3.6
+//// pt-BR block (sign-in adoption, offline banner, progression step) adds 13
+//// overrides — 669 with ours — and the rest of its new strings inherit pt-PT.
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(669)
+    expect(inherited).toHaveLength(932)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('5a1b77a729c76c8838d82c7030ec48925ad4d070a2a95a6313fe5c09984d31c8')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('a02e21922b6a0ff2c342731fce5dcabff266f327cb16cfbe481709ef77fc61ff')
   })
 
   test('does not leak European Portuguese UI terms', () => {

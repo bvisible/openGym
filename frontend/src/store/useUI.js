@@ -6,9 +6,11 @@ import { useStore } from './useStore.js'
 
 //// Neoffice — the server-side rest alert is a no-op here. Upstream asked its
 //// Node server to push a "rest over" notification in case this tab got
-//// suspended mid-countdown; that server is gone, and Frappe self-hosted has no
-//// push relay either (frappe/push_notification talks to Frappe Cloud, which our
-//// instances do not have). It comes back with pywebpush, in its own lot.
+//// suspended mid-countdown (v1.3.7 tags it with a per-browser deviceId so a
+//// desktop tab no longer cancels the phone's alert); that server is gone, and
+//// Frappe self-hosted has no push relay either (frappe/push_notification talks
+//// to Frappe Cloud, which our instances do not have). It comes back with
+//// pywebpush, in its own lot — deviceId included.
 ////
 //// It matters much less than it did: maybeRestNotification() below fires a
 //// LOCAL notification when the tab is hidden, which covers the case the server

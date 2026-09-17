@@ -1,26 +1,66 @@
-/* openGym service worker — runtime caching (works with Vite's hashed asset names).
-   Media (img/gif) cache-first; everything else network-first with offline fallback. */
-//// Neoffice — bumped to v2 to DROP what is already out there. The activate
-//// handler deletes every cache whose name is not the current one, so the
-//// rename is what evicts the signed-out shells already sitting on members'
-//// phones. Without it the fix ships and the symptom stays.
-const CACHE = 'opengym-rt-v2'
+/* openGym service worker — the app shell and its hashed assets are cached at install and kept
+   fresh network-first, media (img/gif) cache-first. A home-screen app reopened without a network
+   comes back from here with the same bundle it last ran; the state itself lives in localStorage.
+   Every deploy is a new worker with its own cache and the previous build's files are dropped on
+   activate. */
+//// Neoffice — v3 (v2 shipped the signed-out-shell fix below, v1 was upstream's):
+//// the strategy changed with upstream v1.3.7 — the shell and its assets are
+//// now precached at install — and a new name is what makes activate drop what
+//// phones hold under the old one. A FIXED name rather than upstream's
+//// `__BUILD__` stamp, on purpose: this file is served as is by Frappe (no build
+//// rewrites it), and src/sw.session.test.js pins both copies to one name.
+const CACHE = 'opengym-rt-v3'
+//// Neoffice — where the app shell lives. Upstream serves index.html next to
+//// this worker; on Neoffice the shell is rendered by Frappe at /gym (see the
+//// header of opengym/www/gym_sw.js) and carries the member's boot payload.
+const SHELL = 'index.html'
 
-self.addEventListener('install', () => self.skipWaiting())
+// What the shell needs to boot without a network: the shell itself plus every script/style/icon
+// it references. Read from the served shell so the list follows the build, not a hand-kept
+// manifest that would go stale the first time a chunk is renamed.
+async function precache() {
+  const c = await caches.open(CACHE)
+  const res = await fetch(SHELL, { cache: 'no-cache' })
+  if (!res.ok) return
+  const html = await res.clone().text()
+  //// Neoffice — through the same rule as a runtime fetch: a shell rendered
+  //// signed-out is not kept, its scripts, styles and icons are (they carry no
+  //// session, and the next signed-in launch needs them offline).
+  await cacheIfUsable(new Request(SHELL), res)
+  const refs = [...html.matchAll(/(?:src|href)="([^"]+)"/g)].map(m => m[1])
+    .filter(u => /\.(?:js|css|png|svg|webmanifest|json)(?:\?|$)/.test(u) && !/^(?:https?:)?\/\//.test(u))
+  await Promise.all([...new Set(refs)].map(u => c.add(u).catch(() => {})))
+}
+
+self.addEventListener('install', e => {
+  e.waitUntil(precache().catch(() => {}).then(() => self.skipWaiting()))
+})
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(keys =>
     Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
   ).then(() => self.clients.claim()))
 })
+
+// The payload is parsed inside waitUntil: a push whose handler throws before showing anything is
+// a "silent push", which Chrome counts against the site and eventually revokes. A body that is
+// not JSON still shows a notification.
 self.addEventListener('push', e => {
-  const data = e.data ? e.data.json() : {}
-  e.waitUntil(self.registration.showNotification(data.title || 'openGym', {
-    body: data.body || '',
-    icon: 'icon-512.png',
-    badge: 'icon-180.png',
-    tag: data.tag || 'opengym',
-    renotify: true
-  }))
+  e.waitUntil((async () => {
+    let data = {}
+    try { data = e.data ? e.data.json() : {} } catch { data = { body: (() => { try { return e.data.text() } catch { return '' } })() } }
+    // One alert per kind: a new rest-timer push replaces the last one instead of stacking
+    // up in the tray (issue #172). `tag` alone should do that, but iOS keeps every one, so
+    // the previous notification with the same tag is closed by hand first.
+    const tag = data.tag || 'opengym'
+    try { for (const n of await self.registration.getNotifications({ tag })) n.close() } catch {}
+    await self.registration.showNotification(data.title || 'openGym', {
+      body: data.body || '',
+      icon: 'icon-512.png',
+      badge: 'icon-180.png',
+      tag,
+      renotify: true
+    })
+  })())
 })
 self.addEventListener('notificationclick', e => {
   e.notification.close()
@@ -29,34 +69,41 @@ self.addEventListener('notificationclick', e => {
     return c ? c.focus() : self.clients.openWindow('./')
   }))
 })
+// The push service rotated the subscription (key change, expiry): subscribe again with the same
+// server key and tell the server, so the row it holds keeps pointing at this browser.
+//// Neoffice — inert here (nothing subscribes while lib/push.js reports push as
+//// unsupported); kept in step with upstream so the day push arrives it is
+//// already handled.
+self.addEventListener('pushsubscriptionchange', e => {
+  e.waitUntil((async () => {
+    const old = e.oldSubscription || (await self.registration.pushManager.getSubscription())
+    const key = e.newSubscription?.options?.applicationServerKey || old?.options?.applicationServerKey
+    if (!key) return
+    const sub = e.newSubscription || await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key })
+    await fetch('api/push/subscribe', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ subscription: sub.toJSON() }) }).catch(() => {})
+  })())
+})
 
-//// Neoffice — rewritten, and it fixes a real bug rather than adapting one.
+//// Neoffice — THE SHELL IS CACHED ONLY WHEN SOMEBODY IS SIGNED IN.
 ////
-//// Upstream cached nothing at all. Three reasons, in order of how much they
-//// cost:
+//// Reported 2026-09-01: *"ce matin j'ai relancé l'application et j'étais à
+//// nouveau déconnecté"*, from the installed PWA. The session was never the
+//// problem — the cookie carries Max-Age=2592000 and survived every purge that
+//// was tried. What signs a member out is THIS CACHE.
 ////
-////  1. `caches.open(CACHE).then(c => c.put(req, res.clone()))` cloned the
-////     response INSIDE the .then(), i.e. one microtask after `return res` had
-////     already handed the body to the page. By then the body is consumed and
-////     clone() throws "Response body is already used" — into a promise with no
-////     .catch(), so it failed in complete silence. Measured on osiris: worker
-////     controlling the page, cache created, zero entries. Cloning must happen
-////     synchronously, before the response is returned.
-////  2. Nothing was tied to event.waitUntil(), so even a successful write was
-////     racing the worker going to sleep.
-////  3. The offline fallback looked for 'index.html'. On Neoffice the shell is
-////     served at /gym by Frappe — there is no index.html to fall back to, so
-////     the one case the cache exists for (no network) found nothing.
+//// /gym is rendered by Frappe and carries the boot payload: the member's name
+//// and CSRF token, or `"user": null` for a guest. The handler below cached it
+//// like any other page. So one launch that happened to render signed-out (an
+//// expired session, a bad moment) wrote a signed-out shell into the cache, and
+//// the next launch that started before the network was up — a phone waking on
+//// Wi-Fi, every morning — was served that shell and showed the app signed out
+//// while the cookie was perfectly valid.
 ////
-//// Everything else is upstream's design and stays: media cache-first, the rest
-//// network-first, /api/ never cached — a stale workout or a stale session is
-//// worse than no answer.
-const SHELL = '/gym'
-
-//// Neoffice — added. Caches a response, unless it is an app shell rendered for
-//// a signed-out visitor. Reads the clone as text rather than trusting the URL:
-//// the shell is served at /gym, but also at /gym/ and with query strings, and
-//// a check on the path alone has already been wrong here.
+//// 🔴 2026-09-02: this fix was first written into frontend/public/sw.js only,
+//// with a test reading that file — and that file is the standalone build's
+//// copy, which Frappe never serves. The bug stayed live on every phone for a
+//// day while the test was green. The test now reads BOTH files, and asserts
+//// both carry the same cache name.
 async function cacheIfUsable(request, response) {
   const type = response.headers.get('content-type') || ''
   if (type.includes('text/html')) {
@@ -69,7 +116,6 @@ async function cacheIfUsable(request, response) {
   return c.put(request, response)
 }
 
-
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url)
   if (e.request.method !== 'GET' || url.origin !== location.origin) return
@@ -79,41 +125,31 @@ self.addEventListener('fetch', e => {
   if (isMedia) {
     e.respondWith(caches.open(CACHE).then(c => c.match(e.request).then(hit =>
       hit || fetch(e.request).then(res => {
-        //// Neoffice — clone before anything else can read the body.
+        //// Neoffice — clone before anything else can read the body, and
+        //// waitUntil so the write outlives the response (upstream's put was
+        //// racing the worker going to sleep).
         if (res.ok) { const copy = res.clone(); e.waitUntil(c.put(e.request, copy)) }
         return res
       })
     )))
-  } else {
-    e.respondWith(fetch(e.request).then(res => {
-      if (res.ok) {
-        //// Neoffice — same fix, and waitUntil so the write outlives the response.
-        const copy = res.clone()
-        //// 🔴 …but NEVER cache a SIGNED-OUT shell.
-        ////
-        //// /gym is rendered by Frappe and carries the session: the boot payload
-        //// holds the member's name and the CSRF token, or `"user": null` when
-        //// nobody is signed in. Cached as an ordinary page, a signed-out shell
-        //// becomes the offline fallback — and the next launch that starts
-        //// before the network is up (a phone waking on Wi-Fi, every morning)
-        //// is served it, showing the app SIGNED OUT while the cookie is still
-        //// perfectly valid.
-        ////
-        //// Reported 2026-09-01: "ce matin j'ai relancé l'application et j'étais
-        //// à nouveau déconnecté". The session itself was never the problem —
-        //// measured 30 days on the cookie, surviving clear-cache, session purge,
-        //// concurrent logins and a bench restart.
-        ////
-        //// So the shell is cached only when it carries a signed-in boot. Worst
-        //// case there is simply no offline shell until the member opens the app
-        //// online once, which is the honest failure: no fallback beats a
-        //// fallback that signs people out.
-        e.waitUntil(cacheIfUsable(e.request, copy))
-      }
-      return res
-    }).catch(() =>
-      //// Neoffice — offline: the exact page first, then the app shell at /gym.
-      caches.match(e.request).then(hit => hit || caches.match(SHELL))
-    ))
+    return
   }
+  // Network first; the copy for the cache is cloned before the response is handed to the page —
+  // cloning later, once the page has started reading the body, throws and caches nothing, which
+  // is why the shell never used to survive an offline reload.
+  e.respondWith(fetch(e.request).then(res => {
+    if (res.ok) {
+      //// Neoffice — through cacheIfUsable: a signed-out shell must never be written.
+      const copy = res.clone()
+      e.waitUntil(cacheIfUsable(e.request, copy))
+    }
+    return res
+  }).catch(() =>
+    //// Neoffice — offline: the exact page first (query string ignored — a
+    //// `?v=` stamped asset is the same file), then the app shell for a
+    //// navigation, nothing for anything else.
+    caches.match(e.request, { ignoreSearch: true }).then(hit =>
+      hit || (e.request.mode === 'navigate' ? caches.match(SHELL) : undefined)
+    )
+  ))
 })

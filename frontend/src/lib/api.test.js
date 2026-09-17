@@ -49,6 +49,33 @@ describe('deviceOf', () => {
   })
 })
 
+describe('api()', () => {
+  it('a failed request throws with the status and the parsed body attached', async () => {
+    const { api } = await import('./api.js')
+    const original = globalThis.fetch
+    globalThis.fetch = async () => ({ ok: false, status: 409, json: async () => ({ error: 'conflict', rev: 3, state: { _rev: 3 } }) })
+    try {
+      await expect(api('/api/data', { method: 'PUT', body: '{}' })).rejects.toMatchObject({
+        message: 'conflict', status: 409, data: { error: 'conflict', rev: 3, state: { _rev: 3 } }
+      })
+    } finally { globalThis.fetch = original }
+  })
+
+  //// Neoffice — the same, in the shape Frappe gives it: a whitelisted method
+  //// that answers 409 still wraps its return value in {message: …}. The store
+  //// reads e.data.state whichever server sent it, so the unwrapping happens here.
+  it('unwraps a Frappe-shaped error body the same way', async () => {
+    const { api } = await import('./api.js')
+    const original = globalThis.fetch
+    globalThis.fetch = async () => ({ ok: false, status: 409, json: async () => ({ message: { error: 'conflict', rev: 3, state: { _rev: 3 } } }) })
+    try {
+      await expect(api('/api/method/neoffice_gym.api.state.put', { method: 'POST', body: '{}' })).rejects.toMatchObject({
+        message: 'conflict', status: 409, data: { error: 'conflict', rev: 3, state: { _rev: 3 } }
+      })
+    } finally { globalThis.fetch = original }
+  })
+})
+
 describe('signIn', () => {
   const originalFetch = globalThis.fetch
   afterEach(() => { globalThis.fetch = originalFetch })

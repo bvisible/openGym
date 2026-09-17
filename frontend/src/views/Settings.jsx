@@ -12,14 +12,16 @@ import { effortOf } from '../lib/history.js'
 //// journal never had a user directory of its own here. IS_ANDROID stays (it
 //// only phrases a hint about the install prompt).
 import { IS_ANDROID, myCoach, openChat, wallet, classesMine } from '../lib/api.js'
-import { pushSupported, enablePush, disablePush, sendTestPush } from '../lib/push.js'
+import { unlock, playOnSilentSupported } from '../lib/sound.js'
+import { pushSupported, enablePush, disablePush, sendTestPush, syncPushSubscription } from '../lib/push.js'
 import { wakeLockSupported } from '../lib/wakelock.js'
 import { t, LANGS, INSTR_LANGS, dateLocale } from '../lib/i18n.js'
 import { DEMO, REPO } from '../lib/demo.js'
 import { MOBILE, isAndroid, shareExport, syncReminder } from '../lib/mobile.js'
 import { checkForUpdate, downloadAndInstall } from '../lib/update.js'
+import { forgetCoach } from '../lib/coach-api.js'
 import { ConnectSheet } from './MobileOnboarding.jsx'
-import { starterPlanSheet, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet, menuSheet } from '../sheets.jsx'
+import { starterPlanSheet, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet, menuSheet, askAddDeviceData } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
@@ -30,7 +32,7 @@ export default function Settings() {
   const S = useStore(s => s.S)
   const user = useStore(s => s.user)
   const coachLocal = useStore(s => s.coachLocal)
-  const { update, replaceState, setUser, pullState, pushState, signOut, signOutAll, resetDemo, disconnectServer } = useStore()
+  const { update, replaceState, setUser, pullState, pushState, adoptProfile, signOut, signOutAll, resetDemo, disconnectServer } = useStore()
   const toast = useUI(s => s.toast)
   const fileRef = useRef(null)
   const importRef = useRef(null)
@@ -153,6 +155,31 @@ export default function Settings() {
   //// out everywhere") are gone. Ending sessions on every device is a Frappe
   //// feature the member reaches from their own account settings; duplicating
   //// it here would mean a second session store next to Frappe's.
+  // Signed in, the empty state is pushed to the profile like any other change, so the wipe
+  // reaches the server and every device that syncs with it — the dialog has to say so. The Coach
+  // keeps its data outside S in two homes that can both be in use on one phone: a file per
+  // profile on the server, and — when it runs with the phone's own key — a file on the device.
+  // Each is cleared on its own; forgetCoach() alone would pick one by mode. A failed call must
+  // not stop the reset.
+  //// Neoffice — one call instead of upstream's two. Upstream POSTs
+  //// /api/coach/forget to its Node server AND calls forgetCoach() for a
+  //// phone running the Coach with its own key. Here the Coach is the club's
+  //// Nora, run the "local" way (lib/coach-api.js routes every call by mode),
+  //// and there is no /api/coach/forget on Frappe: forgetCoach() is the one
+  //// door, and it already picks the right home. What the server holds of the
+  //// Coach travels inside the state (`coach`), which the pushed reset wipes.
+  const resetEverything = () => confirmSheet({
+    title: t('Reset everything?'),
+    message: user
+      ? t('Deletes your plan, workouts and body weight from your profile on this server and on every signed-in device. This cannot be undone.')
+      : t('Deletes your plan, workouts and body weight on this device. This cannot be undone.'),
+    confirmText: t('Delete everything'), danger: true,
+    onConfirm: () => {
+      if (user || coachLocal?.mode === 'byok') forgetCoach().catch(() => {})
+      replaceState(JSON.parse(JSON.stringify(DEF)), true)
+      nav('/home'); toast(t('All data reset'))
+    },
+  })
 
   return <div className="narrow">
     <div className="hdr">
@@ -251,6 +278,11 @@ export default function Settings() {
 
     {/* ---------- during a workout ---------- */}
     <Section title={t('During a workout')} footer={wakeOK ? t('The screen stays on while a workout is running, so you don’t have to unlock your phone between sets.') : null}>
+      {/* //// Neoffice — upstream's "Weigh in before workouts" switch (v1.3.7,
+          //// issue #137, `S.weighIn`) is not drawn: our three-way "Ask me to
+          //// weigh in" further down (never / weekly / each session) is the same
+          //// choice with the default the club asked for. The key is still
+          //// honoured by startFlow, so nothing a member set elsewhere is lost. */}
       {/* One exercise at a time (cards with Prev/Next), the whole session stacked as a
           scrollable list, or that list stripped to just names and set rows (compact).
           Legacy/unknown values read as cards. The running session can override this from
@@ -320,8 +352,19 @@ export default function Settings() {
           onChange={v => update(s => { s.gifSize = v })} />
       </Row>
       <Row icon="bell" iconTint="var(--pink)" title={t('Sounds')}>
-        <Switch checked={!!S.sound} onChange={v => update(s => { s.sound = v })} />
+        {/* Turning Sounds on is a tap: unlock the audio context now so a timer that ends before
+            the next set check can already sound (iOS, #152). */}
+        <Switch checked={!!S.sound} onChange={v => { if (v) unlock(true); update(s => { s.sound = v }) }} />
       </Row>
+      {/* iOS only (WebKit's audio-session API, iOS 17+): with it off the ring/silent switch mutes
+          the timer. On, the phone treats the timer like a music player — exclusive, and the
+          music app is not told it may resume — so it is a choice, off by default (lib/sound.js). */}
+      {S.sound && playOnSilentSupported() && (
+        <Row icon="bell" iconTint="var(--orange)" title={t('Play sounds when the phone is on silent')}
+          subtitle={t('Music playing on this phone stops during a workout and does not resume by itself.')}>
+          <Switch checked={!!S.soundOnSilent} onChange={v => update(s => { s.soundOnSilent = v })} />
+        </Row>
+      )}
       <Row icon="sun" iconTint="var(--yellow)" title={t('Flash screen when timer ends')}>
         <Switch checked={!!S.timerFlash} onChange={v => update(s => { s.timerFlash = v })} />
       </Row>
@@ -389,7 +432,7 @@ export default function Settings() {
         subtitle={t('Saves a dated copy to the Documents folder after finishing a workout or editing a routine — point a sync app at it, or copy it out by hand.')}>
         <Switch checked={!!S.autoBackup} onChange={v => update(s => { s.autoBackup = v })} />
       </Row>}
-      <Row icon="trash" iconTint="var(--red)" title={t('Reset everything')} danger onClick={() => confirmSheet({ title: t('Reset everything?'), message: t('Deletes your plan, workouts and body weight on this device. This cannot be undone.'), confirmText: t('Delete everything'), danger: true, onConfirm: () => { replaceState(JSON.parse(JSON.stringify(DEF)), true); nav('/home'); toast(t('All data reset')) } })} />
+      <Row icon="trash" iconTint="var(--red)" title={t('Reset everything')} danger onClick={resetEverything} />
     </Section>
     <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: 'none' }} onChange={doImport} />
     {/* Reset after reading so picking the same file twice still fires onChange. */}
@@ -551,9 +594,17 @@ function PushCard({ S, update, toast }) {
   const [busy, setBusy] = useState(false)
   const supported = pushSupported()
 
+  // "On" means the server holds this browser's subscription, not merely that the browser has
+  // one: a row the instance dropped (dead send, rebuilt db.json) left the switch on with nothing
+  // ever arriving. syncPushSubscription re-registers on the way; if the server cannot be asked
+  // (offline), the browser's side is the best answer available.
   useEffect(() => {
     if (!supported) return
-    navigator.serviceWorker.ready.then(reg => reg.pushManager.getSubscription()).then(sub => setOn(!!sub)).catch(() => {})
+    let gone = false
+    syncPushSubscription()
+      .then(ok => { if (!gone) setOn(ok) })
+      .catch(() => navigator.serviceWorker.ready.then(reg => reg.pushManager.getSubscription()).then(sub => { if (!gone) setOn(!!sub) }).catch(() => {}))
+    return () => { gone = true }
   }, [supported])
 
   const toggle = async v => {

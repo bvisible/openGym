@@ -124,7 +124,19 @@ describe.each(Object.entries(WORKERS))('%s — the shell is cached only when som
     //// The activate handler deletes every cache whose name is not the current
     //// one. Without a new name the fix ships and the symptom stays: the
     //// signed-out shells already sitting on members' phones keep being served.
-    expect(SW).toMatch(/const CACHE = 'opengym-rt-v2'/)
+    //// v3 since the upstream v1.3.7 merge: the shell and its assets are now
+    //// precached at install, and what phones held under v2 goes with it.
+    expect(SW).toMatch(/const CACHE = 'opengym-rt-v3'/)
+  })
+
+  it('precaches the shell through the same rule, never around it', () => {
+    //// v1.3.7's install-time precache fetches the shell itself. On Neoffice that
+    //// is the rendered /gym — the very page the rule exists for — so the put
+    //// must go through cacheIfUsable there too, or a worker installed during a
+    //// signed-out moment would seed the cache with exactly the wrong shell.
+    expect(SW).toMatch(/await cacheIfUsable\(new Request\(SHELL\), res\)/)
+    expect(SW).not.toMatch(/c\.put\(SHELL/)
+    expect(SW).not.toMatch(/c\.put\('index\.html'/)
   })
 })
 

@@ -23,6 +23,9 @@ export const IS_ANDROID = /Android/.test(navigator.userAgent)
 const M = {
   stateGet: '/api/method/neoffice_gym.api.state.get',
   statePut: '/api/method/neoffice_gym.api.state.put',
+  //// Neoffice — the revision alone, one small GET the store makes on every
+  //// resume and every half minute (upstream v1.3.6: GET /api/data/rev).
+  stateRev: '/api/method/neoffice_gym.api.state.rev',
   logout: '/api/method/logout',
   //// Neoffice — programs written by a coach. The journal asks what's
   //// waiting for it, merges it ITSELF (mergePlan is upstream and tested
@@ -108,12 +111,19 @@ export async function api(path, opts = {}) {
 
   const r = await fetch(path, Object.assign({ credentials: 'same-origin' }, opts, { headers }))
   const data = await r.json().catch(() => ({}))
+  //// Neoffice — unwrapped here, ONCE, for the error path too: a whitelisted
+  //// method that answers 409 (state.put on a stale revision) still comes back
+  //// as {message: {…}}, and the store reads e.data.state whichever server
+  //// sent it (upstream's Node server sends the bare object).
+  const payload = data && typeof data === 'object' && 'message' in data ? data.message : data
   if (!r.ok) {
-    const e = new Error(serverMessage(data) || ('HTTP ' + r.status))
+    const e = new Error(serverMessage(data) || (payload && payload.error) || ('HTTP ' + r.status))
     e.status = r.status
+    // The body rides along on the error: a 409 from the state endpoint carries the server's document.
+    e.data = payload
     throw e
   }
-  return 'message' in data ? data.message : data
+  return payload
 }
 
 /** Pull the human-readable half out of a Frappe error payload. */
@@ -129,10 +139,17 @@ function serverMessage(data) {
   return data.exc_type || data.exception || ''
 }
 
-//// Neoffice — the three calls the store makes. Named after what they do rather
+//// Neoffice — the four calls the store makes. Named after what they do rather
 //// than after a URL, so moving an endpoint never reaches into the store.
+//// Upstream v1.3.6's protocol, on Frappe: getState answers {state, rev},
+//// getRev answers {rev}, and putState sends the revision this device last saw
+//// as `base_rev` — the server refuses (409, with its current document in the
+//// body) a write over a document the device never read. No baseRev means a
+//// deliberate replace (a backup import, a reset).
 export const getState = () => api(M.stateGet)
-export const putState = (state) => api(M.statePut, { method: 'POST', body: JSON.stringify({ state }) })
+export const getRev = () => api(M.stateRev)
+export const putState = (state, baseRev) =>
+  api(M.statePut, { method: 'POST', body: JSON.stringify(baseRev == null ? { state } : { state, base_rev: baseRev }) })
 export const logout = () => api(M.logout, { method: 'POST', body: '{}' })
 
 /** The signed-in member, straight from the page boot. */

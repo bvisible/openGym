@@ -5,10 +5,14 @@ import { useUI } from './store/useUI.js'
 import { bindUI } from './components/ui.jsx'
 import { ACCENTS } from './lib/format.js'
 import { setLang, useLang } from './lib/i18n.js'
+import { setPlayOnSilent } from './lib/sound.js'
 import { setNav } from './lib/nav.js'
 import { initBackButton } from './lib/back.js'
 import { useWakeLock } from './lib/wakelock.js'
 import { installViewportGuard } from './lib/viewport-guard.js'
+import { installChipDrag } from './lib/hchips.js'
+import { syncPushSubscription } from './lib/push.js'
+import { MOBILE } from './lib/mobile.js'
 import { startFlow } from './sheets.jsx'
 import Icon from './components/Icon.jsx'
 import SignIn from './views/SignIn.jsx'
@@ -18,6 +22,7 @@ import TabBar from './components/TabBar.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Modals from './components/Modals.jsx'
 import Toast from './components/Toast.jsx'
+import SyncBanner from './components/SyncBanner.jsx'
 import RestTimer from './components/RestTimer.jsx'
 import TimerFlash from './components/TimerFlash.jsx'
 import PrepCountdown from './components/PrepCountdown.jsx'
@@ -69,6 +74,9 @@ function Shell() {
   const loc = useLocation()
   const navType = useNavigationType()
   const { S, user, ready } = useStore()
+  // iOS: whether timer sounds get past the ring/silent switch (Settings → Sounds). Page-level,
+  // so it is applied here on load and on change rather than at each beep.
+  useEffect(() => { setPlayOnSilent(!!S.soundOnSilent) }, [S.soundOnSilent])
   const isGuest = useStore(s => s.isGuest())
   const langV = useLang()   // re-renders the whole shell when the language (pack) changes
   useEffect(() => { setNav(navigate) }, [navigate])
@@ -95,6 +103,16 @@ function Shell() {
   const pathRef = useRef(loc.pathname)
   // iOS leaves the page displaced after the keyboard goes away (see lib/viewport-guard.js).
   useEffect(() => installViewportGuard(), [])
+  // Click-drag a horizontal chip strip to scroll it sideways (lib/hchips.js) — on a desktop
+  // browser there's otherwise no way to reach the filters past the edge.
+  useEffect(() => installChipDrag(), [])
+  // Once per signed-in boot, hand the server this browser's push subscription again (see
+  // lib/push.js): a subscription the instance lost is back before the next reminder is due,
+  // with nobody having to visit Settings. Web only — the APK has no service worker.
+  useEffect(() => {
+    if (MOBILE || !user || !ready) return
+    syncPushSubscription().catch(() => {})
+  }, [user?.id, ready])
   useEffect(() => {
     const onScroll = () => {
       // Modals pins the body while a sheet is open; scrollY is 0 then, not a position.
@@ -140,6 +158,13 @@ function Shell() {
           re-mounts the boundary, so the tab bar is always a way out */}
       <div id="app" className="vfade" key={loc.pathname}>
         <ErrorBoundary>
+          {/* //// Neoffice — upstream draws <Login/> here for a signed-out visitor
+              //// and its mobile onboarding; on Neoffice the sign-in screen is
+              //// decided above from BOOT.signed_in (views/SignIn.jsx) and there is
+              //// no paired-server onboarding. The offline / not-synced banner is
+              //// upstream's (v1.3.6) and stays: a member in the club's basement
+              //// sees that their session is saved here and will sync. */}
+          {authed && <SyncBanner />}
           {(
             <Routes>
               <Route path="/home" element={<Home />} />
