@@ -24,7 +24,16 @@ import { parsePlan, mergePlan } from './plan-share.js'
  */
 export function applyCoachProgram(s, offer) {
   const bundle = parsePlan(offer.bundle)
-  const replaced = removeProgramRoutines(s, offer.program)
+  let replaced = removeProgramRoutines(s, offer.program)
+  //// Neoffice — « Remplacer son programme », asked of the coach at every send
+  //// since 2026-09-18 (a member may follow several programs at once). The
+  //// bundle then NAMES the programs this one takes the place of, and their
+  //// routines leave with them: retiring the assignment on the server alone
+  //// would leave the old sessions sitting in the member's journal for ever,
+  //// unscheduled and unexplained.
+  for (const gone of (offer.bundle && offer.bundle.replaces) || []) {
+    if (gone && gone !== offer.program) replaced += removeProgramRoutines(s, gone)
+  }
   const before = new Set((s.routines || []).map(r => r.id))
   mergePlan(s, bundle, { schedule: offer.replaceSchedule })
 
@@ -68,6 +77,12 @@ export function attachCycle(s, offer, bundle, idMap) {
     // A non-periodized program clears the previous one's cycle: otherwise a
     // "single typical week" v2 would leave v1's calendar running.
     if (s.coachCycle && s.coachCycle.program === offer.program) delete s.coachCycle
+    //// Neoffice — and a program that REPLACES another takes its calendar with
+    //// it: the cycle of a program whose sessions just left would keep laying
+    //// down days for routines the member no longer has.
+    for (const gone of (offer.bundle && offer.bundle.replaces) || []) {
+      if (s.coachCycle && s.coachCycle.program === gone) delete s.coachCycle
+    }
     return
   }
   const weeks = {}

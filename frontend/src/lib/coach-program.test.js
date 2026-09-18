@@ -48,6 +48,33 @@ describe('applyCoachProgram', () => {
     expect(s.routines[0].coachVersion).toBe(2)
   })
 
+  //// Neoffice — « Remplacer son programme » (asked of the coach at every send
+  //// since 2026-09-18): the bundle names the programs this one takes the place
+  //// of, and their sessions leave with them. Without this the member would keep
+  //// training from a program their coach believes they retired.
+  it('drops the sessions of the programs the bundle says it replaces', () => {
+    const s = emptyState()
+    applyCoachProgram(s, offer('PROG-1', 1, bundle('Force', ['0001'])))
+    applyCoachProgram(s, offer('PROG-2', 1, bundle('Cardio', ['0002'])))
+    const third = offer('PROG-3', 1, bundle('Reprise', ['0003']))
+    third.bundle.replaces = ['PROG-1', 'PROG-2']
+    const res = applyCoachProgram(s, third)
+    expect(res.replaced).toBe(2)
+    expect(s.routines.map(r => r.coachProgram)).toEqual(['PROG-3'])
+  })
+
+  it('takes the calendar of a replaced program with it', () => {
+    const s = emptyState()
+    const cycled = offer('PROG-1', 1, bundle('Cycle', ['0001']))
+    cycled.bundle.cycle = { span: 4, weeks: { 1: { 1: '0001' }, 2: { 3: '0001' } } }
+    applyCoachProgram(s, cycled)
+    expect(s.coachCycle && s.coachCycle.program).toBe('PROG-1')
+    const plain = offer('PROG-2', 1, bundle('Semaine type', ['0002']))
+    plain.bundle.replaces = ['PROG-1']
+    applyCoachProgram(s, plain)
+    expect(s.coachCycle, 'the replaced program kept laying down its weeks').toBeUndefined()
+  })
+
   it('does NOT touch routines from a different program', () => {
     const s = emptyState()
     applyCoachProgram(s, offer('PROG-1', 1, bundle('Force', ['0001'])))
