@@ -49,7 +49,7 @@ vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))
 //// out they are `undefined` and the screen throws in its first effect.
 vi.mock('../lib/api.js', () => ({
   api: (...a) => mocks.api(...a), webauthnOK: () => false, passkeyLogin: vi.fn(), passkeyRegister: vi.fn(), IS_ANDROID: false,
-  myCoach: vi.fn(() => Promise.resolve(null)), openChat: vi.fn(), wallet: vi.fn(() => Promise.resolve(null)), classesMine: vi.fn(() => Promise.resolve([])),
+  myCoach: vi.fn(() => Promise.resolve(null)), openChat: vi.fn(), wallet: vi.fn(() => Promise.resolve(null)), classesMine: vi.fn(() => Promise.resolve([])), myMembership: vi.fn(() => Promise.resolve({ shown: false })),
 }))
 vi.mock('../lib/push.js', () => ({ pushSupported: () => false, enablePush: vi.fn(), disablePush: vi.fn(), sendTestPush: vi.fn(), syncPushSubscription: vi.fn(() => Promise.resolve(false)) }))
 vi.mock('../lib/wakelock.js', () => ({ wakeLockSupported: () => false }))

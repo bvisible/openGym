@@ -37,6 +37,7 @@ vi.mock('../lib/api.js', () => ({
   api: vi.fn(), webauthnOK: () => false, passkeyLogin: vi.fn(), passkeyRegister: vi.fn(), IS_ANDROID: false,
   //// Neoffice — what our Settings sections read (MyClub, MyCoach): the club's wallet and the member's coach.
   wallet: vi.fn(async () => null), myCoach: vi.fn(async () => null), openChat: vi.fn(), classesMine: vi.fn(async () => []),
+  myMembership: vi.fn(async () => ({ shown: false })),
 }))
 vi.mock('../lib/push.js', () => ({ pushSupported: () => false, enablePush: vi.fn(), disablePush: vi.fn(), sendTestPush: vi.fn() }))
 vi.mock('../lib/wakelock.js', () => ({ wakeLockSupported: () => false }))

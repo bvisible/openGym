@@ -46,7 +46,7 @@ vi.mock('../lib/api.js', () => ({
   logout: vi.fn(() => Promise.resolve({})),
   currentUser: () => null,
   setRemoteAuth: () => {},
-  wallet: vi.fn(() => Promise.resolve({})),
+  wallet: vi.fn(() => Promise.resolve({})), myMembership: vi.fn(() => Promise.resolve({ shown: false })),
   myCoach: vi.fn(() => Promise.resolve({})),
   openChat: vi.fn(() => Promise.resolve({})),
   classesMine: vi.fn(() => Promise.resolve({ classes: [] })),

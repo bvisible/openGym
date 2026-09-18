@@ -11,7 +11,7 @@ import { effortOf } from '../lib/history.js'
 //// Neoffice — passkeys are gone: the Frappe session is the sign-in, and the
 //// journal never had a user directory of its own here. IS_ANDROID stays (it
 //// only phrases a hint about the install prompt).
-import { IS_ANDROID, myCoach, openChat, wallet, classesMine } from '../lib/api.js'
+import { IS_ANDROID, myCoach, openChat, wallet, classesMine, myMembership } from '../lib/api.js'
 import { unlock, playOnSilentSupported } from '../lib/sound.js'
 import { pushSupported, enablePush, disablePush, sendTestPush, syncPushSubscription } from '../lib/push.js'
 import { wakeLockSupported } from '../lib/wakelock.js'
@@ -743,6 +743,7 @@ function MyCoach() {
 function MyClub() {
   const [bal, setBal] = useState(null)
   const [next, setNext] = useState([])
+  const [money, setMoney] = useState(null)
   const S = useStore(s => s.S)
   const nav = useNavigate()
 
@@ -753,18 +754,30 @@ function MyClub() {
     if (S.perms?.classes !== false) {
       classesMine().then(l => { if (alive) setNext(Array.isArray(l) ? l.slice(0, 3) : []) }).catch(() => {})
     }
+    // The cached rights say whether to DRAW the row (they work offline); the
+    // server says whether the club still shows the screen at all, and what is
+    // owed. The rights ride on the member's own state, whose revision only
+    // moves when THEIR records change — a club that unticks the setting would
+    // otherwise keep the door open on every phone until the member trains.
+    if (S.perms?.membership !== false) {
+      myMembership().then(r => { if (alive) setMoney(r || {}) }).catch(() => {})
+    }
     return () => { alive = false }
-  }, [S.perms && S.perms.classes])
+  }, [S.perms && S.perms.classes, S.perms && S.perms.membership])
 
   const hasPack = bal && bal.available && bal.sessionsLeft > 0
-  // What the club answers in the app about money. Off (`perms.membership === false`)
-  // means the club bills at the desk: no door rather than a screen that says so.
-  const showMembership = !MOBILE && !DEMO && S.perms?.membership !== false
+  // What the club answers in the app about money. Off means the club bills at
+  // the desk: no door rather than a screen that says so.
+  const showMembership = !MOBILE && !DEMO && S.perms?.membership !== false && money?.shown !== false
   if (!hasPack && !next.length && !showMembership) return null
 
   return <Section title={t('Your club')}>
     {showMembership && <Row icon="key" iconTint="var(--acc)" title={t('My membership')}
-      subtitle={t('Your plan, your invoices and what is owed')}
+      subtitle={money && money.due > 0
+        ? (money.overdue > 0
+          ? t('{0} overdue', money.overdue.toLocaleString(dateLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + (money.currency ? ' ' + money.currency : ''))
+          : t('{0} to pay', money.due.toLocaleString(dateLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + (money.currency ? ' ' + money.currency : '')))
+        : t('Your plan, your invoices and what is owed')}
       accessory="chevron" onClick={() => nav('/membership')} />}
     {hasPack && <Row icon="trophy" iconTint="var(--acc)"
       title={t(bal.sessionsLeft === 1 ? '{0} class left' : '{0} classes left', bal.sessionsLeft)}

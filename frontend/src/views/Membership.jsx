@@ -95,7 +95,7 @@ export default function Membership() {
     {/* What is owed, said once and in one place: a member who owes nothing
         should not have to read a list to find that out. */}
     {data.due > 0 && <Section>
-      <Row icon={data.overdue > 0 ? 'warning' : 'key'} iconTint={data.overdue > 0 ? 'var(--red)' : 'var(--yellow)'}
+      <Row icon={data.overdue > 0 ? 'warning' : 'clock'} iconTint={data.overdue > 0 ? 'var(--red)' : 'var(--yellow)'}
         title={data.overdue > 0 ? t('{0} overdue', fmtMoney(data.overdue, data.currency)) : t('{0} to pay', fmtMoney(data.due, data.currency))}
         subtitle={data.canPay ? t('You can settle it from here.') : t('Settle it at the desk or by bank transfer.')} />
     </Section>}
