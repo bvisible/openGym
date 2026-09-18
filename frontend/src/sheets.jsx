@@ -41,7 +41,7 @@ import { buildPlanBundle, parsePlan, mergePlan, printPlan, planPrintHTML } from 
 //// Neoffice — a coach's offer goes through the same mergePlan as importing
 //// a friend's, but it REPLACES what the previous version had set.
 import { applyCoachProgram, describeOffer, countProgramRoutines } from './lib/coach-program.js'
-import { programAccept, programDecline, openRoutines, classBook, classCancel, payStart, payWith, payState } from './lib/api.js'
+import { programAccept, programDecline, openRoutines, classBook, classCancel, payStart, payWith, payState, invoiceMethods, payInvoice, invoicePayState } from './lib/api.js'
 import { estimate1RM, best1RM, is1RMRecord, REP_CAP } from './lib/onerm.js'
 import { exerciseHistory } from './lib/exercise-history.js'
 import { nextPrescription, applyPrescription, policyFor, defaultIncrement, POLICIES_FOR, POLICY_NAME, POLICY_DESC, MAX_BW_SETS, weightIncrement } from './lib/progression.js'
@@ -2638,23 +2638,55 @@ function doFinishWorkout() {
 //// provider's page opens — but the return trip lands back in the app,
 //// which reads the state back and concludes.
 
-function PaySheet({ s, close, onDone }) {
+//// Neoffice — `kind` added: the SAME screen settles a class and a membership
+//// invoice. Only three things differ — what is opened (a held slot, or an
+//// invoice that already exists), what pays it, and what "done" means — so
+//// they are named here instead of being a second copy of a payment screen.
+//// Money code is the last place to keep two of anything.
+const PAY_KINDS = {
+  class: {
+    //// The slot is held AS SOON as this opens, even before the method is
+    //// chosen: otherwise the member picks one, pays, and their spot is gone
+    //// in the meantime — we'd have charged them for nothing. But it's only a
+    //// HOLD: no invoice exists until they've chosen something, so closing
+    //// this screen leaves neither a firm booking nor an amount owed.
+    open: s => payStart(s.id),
+    openFailed: () => t('That slot could not be held. Try another time.'),
+    pay: (s, data, method) => payWith(data.booking, method),
+    //: Called, never referenced: naming the function here would read it at
+    //: module load, and a test that mocks the api module without this one
+    //: could no longer even IMPORT the screen.
+    state: args => payState(args),
+    done: action => action?.action === 'none'
+      ? { title: t('Your place is booked'), sub: t('The invoice will follow — nothing to pay right now.') }
+      : { title: t('Payment received'), sub: t('See you at the class.') },
+  },
+  invoice: {
+    //// Nothing is held and nothing is raised: the invoice exists, the member
+    //// is settling it. Opening this screen commits them to nothing.
+    open: s => invoiceMethods(s.id),
+    openFailed: () => t('That invoice could not be opened. Try again in a moment.'),
+    pay: (s, _data, method) => payInvoice(s.id, method),
+    state: args => invoicePayState(args),
+    done: action => action?.action === 'none'
+      ? { title: t('Nothing was charged'), sub: t('Your club will settle this invoice with you.') }
+      : { title: t('Payment received'), sub: t('Your invoice is settled.') },
+  },
+}
+
+function PaySheet({ s, close, onDone, kind = 'class' }) {
+  const how = PAY_KINDS[kind] || PAY_KINDS.class
   const [step, setStep] = useState('loading')   // loading · choose · qr · waiting · done · error
   const [data, setData] = useState(null)        // {booking, amount, currency, methods}
   const [action, setAction] = useState(null)    // the provider's response
   const [err, setErr] = useState(null)
   const [busy, setBusy] = useState(null)
 
-  //// The slot is held AS SOON as this opens, even before the method is
-  //// chosen: otherwise the member picks one, pays, and their spot is gone
-  //// in the meantime — we'd have charged them for nothing. But it's only a
-  //// HOLD: no invoice exists until they've chosen something, so closing
-  //// this screen leaves neither a firm booking nor an amount owed.
   useEffect(() => {
     let vivant = true
-    payStart(s.id)
+    how.open(s)
       .then(r => { if (!vivant) return; setData(r); setStep('choose') })
-      .catch(e => { if (!vivant) return; setErr(e?.message || t('That slot could not be held. Try another time.')); setStep('error') })
+      .catch(e => { if (!vivant) return; setErr(e?.message || how.openFailed()); setStep('error') })
     return () => { vivant = false }
   }, [s.id])
 
@@ -2666,9 +2698,11 @@ function PaySheet({ s, close, onDone }) {
     let vivant = true
     const tic = setInterval(async () => {
       try {
-        const r = await payState({ invoice: action.invoice })
+        const r = await how.state({ invoice: action.invoice })
         if (!vivant) return
-        if (r.state === 'paid') { setStep('done'); onDone && onDone() }
+        //// Two spellings across the two endpoints, one meaning: the class
+        //// side answers `{state: 'paid'}`, the invoice side `{paid: true}`.
+        if (r.state === 'paid' || r.paid === true) { setStep('done'); onDone && onDone() }
       } catch { /* a failed poll is not a payment failure */ }
     }, 3000)
     return () => { vivant = false; clearInterval(tic) }
@@ -2677,7 +2711,7 @@ function PaySheet({ s, close, onDone }) {
   const choisir = async (moy) => {
     setBusy(moy.id)
     try {
-      const r = await payWith(data.booking, moy.id)
+      const r = await how.pay(s, data, moy.id)
       setAction({ ...r, title: moy.title })
       if (r.action === 'qr') setStep('qr')
       else if (r.action === 'redirect') {
@@ -2700,7 +2734,7 @@ function PaySheet({ s, close, onDone }) {
 
   const debut = s.start ? new Date(s.start) : null
   const quand = debut ? debut.toLocaleString(dateLocale(), {
-    weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : ''
+    weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : s.subtitle || ''
 
   const Entete = () => <>
     <h3 style={{ marginBottom: 2 }}>{s.title}</h3>
@@ -2708,7 +2742,8 @@ function PaySheet({ s, close, onDone }) {
   </>
 
   if (step === 'loading') return <><Entete />
-    <div className="card muted" style={{ textAlign: 'center' }}>{t('Holding your place…')}</div></>
+    <div className="card muted" style={{ textAlign: 'center' }}>
+      {kind === 'invoice' ? t('Loading…') : t('Holding your place…')}</div></>
 
   if (step === 'error') return <><Entete />
     <div className="card" style={{ marginBottom: 14 }}>{err}</div>
@@ -2717,10 +2752,8 @@ function PaySheet({ s, close, onDone }) {
   if (step === 'done') return <><Entete />
     <div className="pay-done">
       <div className="ico"><Icon name="check" /></div>
-      <div className="tt">{action?.action === 'none' ? t('Your place is booked') : t('Payment received')}</div>
-      <div className="ss">{action?.action === 'none'
-        ? t('The invoice will follow — nothing to pay right now.')
-        : t('See you at the class.')}</div>
+      <div className="tt">{how.done(action).title}</div>
+      <div className="ss">{how.done(action).sub}</div>
     </div>
     <Button variant="primary" onClick={close}>{t('Done')}</Button></>
 
@@ -2799,6 +2832,11 @@ function fmtMoney(n) {
 
 export const paySheet = (s, onDone) =>
   ui().openSheet(close => <PaySheet s={s} close={close} onDone={onDone} />)
+
+//// Neoffice — the same sheet, settling an invoice the member already owes
+//// (views/Membership.jsx). `s` is {id: invoice number, title, subtitle}.
+export const payInvoiceSheet = (invoice, onDone) =>
+  ui().openSheet(close => <PaySheet s={invoice} kind="invoice" close={close} onDone={onDone} />)
 
 export const classSheet = (s, act) => ui().openSheet(close => <ClassSheet s={s} act={act} close={close} />)
 

@@ -15,6 +15,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { myMembership, invoicePdfUrl } from '../lib/api.js'
+import { payInvoiceSheet } from '../sheets.jsx'
+import { Button } from '../components/ui.jsx'
 import { t, dateLocale } from '../lib/i18n.js'
 import Icon from '../components/Icon.jsx'
 import { Section, Row } from '../components/ui.jsx'
@@ -37,10 +39,19 @@ const every = (interval, count) => {
   return ''
 }
 
+// The oldest invoice still owed: the one a club chases first, and the one a
+// member means when they say "I'll pay it".
+const oldestOwed = invoices => [...(invoices || [])]
+  .filter(i => i.state !== 'paid')
+  .sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')))[0] || null
+
 export default function Membership() {
   const nav = useNavigate()
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
+  // Bumped when a payment goes through: the amounts and the states are the
+  // club's, not ours to guess — we ask again rather than patch them here.
+  const [round, setRound] = useState(0)
 
   useEffect(() => {
     let alive = true
@@ -48,7 +59,7 @@ export default function Membership() {
       .then(r => { if (alive) setData(r || {}) })
       .catch(e => { if (alive) setError(e.message || String(e)) })
     return () => { alive = false }
-  }, [])
+  }, [round])
 
   const head = <div className="hdr">
     <button className="iconbtn" onClick={() => nav('/settings')} aria-label={t('Back')}><Icon name="chevronLeft" /></button>
@@ -70,6 +81,10 @@ export default function Membership() {
 
   const plan = data.plan
   const invoices = data.invoices || []
+  const pay = inv => payInvoiceSheet(
+    { id: inv.name, title: t('Invoice {0}', inv.name), subtitle: fmtMoney(inv.outstanding ?? inv.total, inv.currency) },
+    () => setRound(n => n + 1),
+  )
   //: `_my_invoices` only ever returns submitted invoices, so there is no
   //: "draft" word to translate here: a draft is the club writing, not
   //: something the member owes.
@@ -98,6 +113,14 @@ export default function Membership() {
       <Row icon={data.overdue > 0 ? 'warning' : 'clock'} iconTint={data.overdue > 0 ? 'var(--red)' : 'var(--yellow)'}
         title={data.overdue > 0 ? t('{0} overdue', fmtMoney(data.overdue, data.currency)) : t('{0} to pay', fmtMoney(data.due, data.currency))}
         subtitle={data.canPay ? t('You can settle it from here.') : t('Settle it at the desk or by bank transfer.')} />
+      {/* The button settles ONE invoice — the oldest one still owed. Paying
+          "everything" would raise a document nobody asked for; the club's
+          invoices are what the member owes, one at a time. */}
+      {data.canPay && oldestOwed(invoices) && <div style={{ padding: '0 14px 14px' }}>
+        <Button variant="primary" icon="bolt" onClick={() => pay(oldestOwed(invoices))}>
+          {t('Pay {0}', fmtMoney(oldestOwed(invoices).outstanding ?? oldestOwed(invoices).total, oldestOwed(invoices).currency))}
+        </Button>
+      </div>}
     </Section>}
 
     <Section title={t('Your invoices')} footer={invoices.length ? t('Tap an invoice to open its PDF.') : null}>

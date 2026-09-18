@@ -86,6 +86,9 @@ const M = {
   //// not put money in the app, and the screen then draws nothing.
   myMembership: '/api/method/neoffice_gym.api.membership.mine',
   invoicePdf: '/api/method/neoffice_gym.api.membership.invoice_pdf',
+  invoiceMethods: '/api/method/neoffice_gym.api.membership.payment_methods',
+  payInvoice: '/api/method/neoffice_gym.api.membership.pay_invoice',
+  invoicePayState: '/api/method/neoffice_gym.api.membership.payment_state',
   //// Neoffice — the club's floor plan. `floorWhereIs` answers "where do I do
   //// this exercise": the club maps its machines once, and a member stops
   //// wandering the room looking for one. Both return an empty answer when the
@@ -254,6 +257,17 @@ export const payWith = (booking, method) =>
   api(M.payWith, { method: 'POST', body: JSON.stringify({ booking, method }) })
 export const payState = ({ intent, invoice }) =>
   api(M.payState + '?' + new URLSearchParams(intent ? { intent } : { invoice }))
+
+//// Neoffice — settling a MEMBERSHIP invoice, which hangs off no booking and
+//// therefore cannot travel the three calls above: the club's own endpoints
+//// prove the invoice belongs to the member before saying a word about it.
+//// Same three stages, same `{action}` shape, so one payment screen serves both.
+export const invoiceMethods = (invoice) =>
+  api(M.invoiceMethods + '?invoice=' + encodeURIComponent(invoice))
+export const payInvoice = (invoice, method) =>
+  api(M.payInvoice, { method: 'POST', body: JSON.stringify({ invoice, method }) })
+export const invoicePayState = ({ intent, invoice }) =>
+  api(M.invoicePayState + '?' + new URLSearchParams(intent ? { intent } : { invoice }))
 
 //// Neoffice — kept from upstream because other files import them, but INERT here.
 //// Upstream's mobile shell can pair with a Node server by code; our journal is
