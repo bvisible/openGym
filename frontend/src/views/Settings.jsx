@@ -757,9 +757,15 @@ function MyClub() {
   }, [S.perms && S.perms.classes])
 
   const hasPack = bal && bal.available && bal.sessionsLeft > 0
-  if (!hasPack && !next.length) return null
+  // What the club answers in the app about money. Off (`perms.membership === false`)
+  // means the club bills at the desk: no door rather than a screen that says so.
+  const showMembership = !MOBILE && !DEMO && S.perms?.membership !== false
+  if (!hasPack && !next.length && !showMembership) return null
 
   return <Section title={t('Your club')}>
+    {showMembership && <Row icon="key" iconTint="var(--acc)" title={t('My membership')}
+      subtitle={t('Your plan, your invoices and what is owed')}
+      accessory="chevron" onClick={() => nav('/membership')} />}
     {hasPack && <Row icon="trophy" iconTint="var(--acc)"
       title={t(bal.sessionsLeft === 1 ? '{0} class left' : '{0} classes left', bal.sessionsLeft)}
       subtitle={bal.expiresOn ? t('valid until {0}', bal.expiresOn) : null} />}

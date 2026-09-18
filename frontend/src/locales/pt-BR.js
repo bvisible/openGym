@@ -737,6 +737,19 @@ export const PT_BR_OVERRIDES = {
   "Routines, exercises, sets and reps, your weekly schedule and progression settings.": "Rotinas, exercícios, séries e repetições, seu horário semanal e suas configurações de progressão.",
   "Your logged training": "Seu treino registrado",
   "Sets you logged in the review window — weights, reps, times, effort ratings and how long sessions took.": "Séries registradas no período de revisão — pesos, repetições, tempos, avaliações de esforço e duração das sessões.",
+  //// Neoffice — "My membership": the member's plan, their invoices and what is owed.
+  'Ask at the desk for your invoices.': 'Peça suas faturas na recepção.',
+  'No membership on your account': 'Nenhuma inscrição na sua conta',
+  'Settle it at the desk or by bank transfer.': 'Pague-o na recepção ou por transferência bancária.',
+  'Tap an invoice to open its PDF.': 'Toque em uma fatura para abrir o PDF.',
+  'The club sets this up at the desk.': 'O clube configura isso na recepção.',
+  'You can settle it from here.': 'Você pode pagá-lo por aqui.',
+  'Your club handles the membership outside the app.': 'Seu clube gerencia a inscrição fora do aplicativo.',
+  'Your invoices': 'Suas faturas',
+  'Your membership could not be loaded.': 'Não foi possível carregar sua inscrição.',
+  'Your membership has ended': 'Sua inscrição terminou',
+  'Your membership': 'Sua inscrição',
+  'Your plan, your invoices and what is owed': 'Sua inscrição, suas faturas e o que você deve',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

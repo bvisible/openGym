@@ -64,11 +64,16 @@ describe('Brazilian Portuguese locale', () => {
 //// Recomputed after the upstream v1.3.7 merge (2026-09-17): upstream's v1.3.6
 //// pt-BR block (sign-in adoption, offline banner, progression step) adds 13
 //// overrides — 669 with ours — and the rest of its new strings inherit pt-PT.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(669)
-    expect(inherited).toHaveLength(932)
+//// Recomputed for "My membership" (30 new keys): 12 are Brazilian overrides —
+//// "recepção" for Portugal's "receção", "aplicativo" for "aplicação",
+//// "inscrição" and "você" where pt-PT says "assinatura" and "tu" — and the
+//// other 18 (the invoice words, the billing intervals) read the same on both
+//// sides and stay inherited.
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(681)
+    expect(inherited).toHaveLength(950)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('a02e21922b6a0ff2c342731fce5dcabff266f327cb16cfbe481709ef77fc61ff')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('f1fa638cb5cac8f5c90e0509171426db40578a8cf50ed2f0196a010c9030863d')
   })
 
   test('does not leak European Portuguese UI terms', () => {

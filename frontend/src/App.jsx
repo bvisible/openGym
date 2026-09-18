@@ -46,6 +46,8 @@ import History from './views/History.jsx'
 import Library from './views/Library.jsx'
 import Muscles from './views/Muscles.jsx'
 import Settings from './views/Settings.jsx'
+//// Neoffice — added screen: the member's own membership and invoices.
+import Membership from './views/Membership.jsx'
 //// Neoffice — no Admin.jsx: the club manages members in the Frappe desk (see the /admin note below).
 import CoachChat from './views/CoachChat.jsx'
 import CoachIntake from './views/CoachIntake.jsx'
@@ -186,6 +188,11 @@ function Shell() {
           <Route path="/assessments" element={<Assessments />} />
               <Route path="/muscles" element={<Muscles />} />
               <Route path="/settings" element={<Settings />} />
+              {/* //// Neoffice — "My membership". The screen gates itself on the
+                  club's setting, so the route exists unconditionally: a member
+                  who bookmarked it lands on a real answer, not on the home
+                  screen with no explanation. */}
+              <Route path="/membership" element={<Membership />} />
               {/* The Coach screens gate themselves on the instance config; the routes exist
                   unconditionally so a deep link from a notification lands somewhere sane
                   rather than on the catch-all. */}

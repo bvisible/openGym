@@ -81,6 +81,11 @@ const M = {
   //// long as the club doesn't sell any: the journal shows "no pack"
   //// without having to handle a special case.
   wallet: '/api/method/neoffice_gym.api.wallet.balance',
+  //// Neoffice — « mon abonnement » : what the member pays and what is owed,
+  //// resolved from their session. `shown: false` is the club saying it does
+  //// not put money in the app, and the screen then draws nothing.
+  myMembership: '/api/method/neoffice_gym.api.membership.mine',
+  invoicePdf: '/api/method/neoffice_gym.api.membership.invoice_pdf',
   //// Neoffice — the club's floor plan. `floorWhereIs` answers "where do I do
   //// this exercise": the club maps its machines once, and a member stops
   //// wandering the room looking for one. Both return an empty answer when the
@@ -203,6 +208,11 @@ export const myCoach = () => api(M.myCoach)
 export const openChat = () =>
   api(M.openChat, { method: 'POST', body: '{}' })
 export const wallet = () => api(M.wallet)
+export const myMembership = () => api(M.myMembership)
+//// A URL rather than a call: the PDF is opened by the browser, which does the
+//// download itself — fetching it here would mean holding a file in memory to
+//// hand it straight back to the same browser.
+export const invoicePdfUrl = (invoice) => M.invoicePdf + '?invoice=' + encodeURIComponent(invoice)
 export const floorPlan = () => api(M.floorPlan)
 export const floorWhereIs = exercise => api(M.floorWhereIs + '?exercise=' + encodeURIComponent(exercise))
 export const myBadges = () => api(M.badges)
