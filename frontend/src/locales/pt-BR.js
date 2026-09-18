@@ -750,6 +750,10 @@ export const PT_BR_OVERRIDES = {
   'Your membership has ended': 'Sua inscrição terminou',
   'Your membership': 'Sua inscrição',
   'Your plan, your invoices and what is owed': 'Sua inscrição, suas faturas e o que você deve',
+  //// Neoffice — settling a membership invoice from the app.
+  'That invoice could not be opened. Try again in a moment.': 'Não foi possível abrir esta fatura. Tente novamente em instantes.',
+  'Your club will settle this invoice with you.': 'Seu clube vai resolver esta fatura com você.',
+  'Your invoice is settled.': 'Sua fatura está paga.',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

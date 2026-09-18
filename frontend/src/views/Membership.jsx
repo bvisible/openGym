@@ -81,6 +81,7 @@ export default function Membership() {
 
   const plan = data.plan
   const invoices = data.invoices || []
+  const owed = oldestOwed(invoices)
   const pay = inv => payInvoiceSheet(
     { id: inv.name, title: t('Invoice {0}', inv.name), subtitle: fmtMoney(inv.outstanding ?? inv.total, inv.currency) },
     () => setRound(n => n + 1),
@@ -116,9 +117,9 @@ export default function Membership() {
       {/* The button settles ONE invoice — the oldest one still owed. Paying
           "everything" would raise a document nobody asked for; the club's
           invoices are what the member owes, one at a time. */}
-      {data.canPay && oldestOwed(invoices) && <div style={{ padding: '0 14px 14px' }}>
-        <Button variant="primary" icon="bolt" onClick={() => pay(oldestOwed(invoices))}>
-          {t('Pay {0}', fmtMoney(oldestOwed(invoices).outstanding ?? oldestOwed(invoices).total, oldestOwed(invoices).currency))}
+      {data.canPay && owed && <div style={{ padding: '0 14px 14px' }}>
+        <Button variant="primary" icon="bolt" onClick={() => pay(owed)}>
+          {t('Pay {0}', fmtMoney(owed.outstanding ?? owed.total, owed.currency))}
         </Button>
       </div>}
     </Section>}

@@ -1589,4 +1589,11 @@ export default {
   'per year': 'évente',
   '{0} overdue': '{0} lejárt',
   '{0} to pay': '{0} fizetendő',
+  //// Neoffice — settling a membership invoice from the app.
+  'Invoice {0}': '{0} számla',
+  'Nothing was charged': 'Nem történt terhelés',
+  'Pay {0}': '{0} fizetése',
+  'That invoice could not be opened. Try again in a moment.': 'Ezt a számlát nem sikerült megnyitni. Próbáld újra egy pillanat múlva.',
+  'Your club will settle this invoice with you.': 'A klubod veled rendezi ezt a számlát.',
+  'Your invoice is settled.': 'A számlád rendezve van.',
 }

@@ -1626,4 +1626,11 @@ export default {
   'per year': '매년',
   '{0} overdue': '{0} 연체',
   '{0} to pay': '{0} 납부',
+  //// Neoffice — settling a membership invoice from the app.
+  'Invoice {0}': '청구서 {0}',
+  'Nothing was charged': '결제된 금액이 없습니다',
+  'Pay {0}': '{0} 결제',
+  'That invoice could not be opened. Try again in a moment.': '이 청구서를 열 수 없습니다. 잠시 후 다시 시도하세요.',
+  'Your club will settle this invoice with you.': '클럽에서 이 청구서를 처리해 드립니다.',
+  'Your invoice is settled.': '청구서가 결제되었습니다.',
 }

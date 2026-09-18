@@ -1626,4 +1626,11 @@ export default {
   'per year': 'в год',
   '{0} overdue': '{0} просрочено',
   '{0} to pay': '{0} к оплате',
+  //// Neoffice — settling a membership invoice from the app.
+  'Invoice {0}': 'Счёт {0}',
+  'Nothing was charged': 'Списания не было',
+  'Pay {0}': 'Оплатить {0}',
+  'That invoice could not be opened. Try again in a moment.': 'Не удалось открыть этот счёт. Попробуйте через минуту.',
+  'Your club will settle this invoice with you.': 'Ваш клуб решит вопрос с этим счётом.',
+  'Your invoice is settled.': 'Ваш счёт оплачен.',
 }

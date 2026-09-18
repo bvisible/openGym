@@ -1626,4 +1626,11 @@ export default {
   'per year': 'por año',
   '{0} overdue': '{0} vencido',
   '{0} to pay': '{0} por pagar',
+  //// Neoffice — settling a membership invoice from the app.
+  'Invoice {0}': 'Factura {0}',
+  'Nothing was charged': 'No se ha cobrado nada',
+  'Pay {0}': 'Pagar {0}',
+  'That invoice could not be opened. Try again in a moment.': 'No se ha podido abrir esta factura. Inténtalo de nuevo en un momento.',
+  'Your club will settle this invoice with you.': 'Tu club resolverá esta factura contigo.',
+  'Your invoice is settled.': 'Tu factura está pagada.',
 }

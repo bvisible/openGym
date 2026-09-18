@@ -1626,4 +1626,11 @@ export default {
   'per year': 'प्रति वर्ष',
   '{0} overdue': '{0} अतिदेय',
   '{0} to pay': '{0} देय',
+  //// Neoffice — settling a membership invoice from the app.
+  'Invoice {0}': 'चालान {0}',
+  'Nothing was charged': 'कुछ भी नहीं लिया गया',
+  'Pay {0}': '{0} का भुगतान करें',
+  'That invoice could not be opened. Try again in a moment.': 'यह चालान नहीं खुल सका। थोड़ी देर में फिर कोशिश करें।',
+  'Your club will settle this invoice with you.': 'आपका क्लब यह चालान आपके साथ निपटाएगा।',
+  'Your invoice is settled.': 'आपका चालान चुका दिया गया है।',
 }

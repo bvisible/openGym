@@ -1597,4 +1597,11 @@ export default {
   'per year': 'ต่อปี',
   '{0} overdue': 'เกินกำหนด {0}',
   '{0} to pay': 'ต้องชำระ {0}',
+  //// Neoffice — settling a membership invoice from the app.
+  'Invoice {0}': 'ใบแจ้งหนี้ {0}',
+  'Nothing was charged': 'ยังไม่มีการเรียกเก็บเงิน',
+  'Pay {0}': 'ชำระ {0}',
+  'That invoice could not be opened. Try again in a moment.': 'เปิดใบแจ้งหนี้นี้ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+  'Your club will settle this invoice with you.': 'คลับของคุณจะจัดการใบแจ้งหนี้นี้กับคุณ',
+  'Your invoice is settled.': 'ชำระใบแจ้งหนี้ของคุณเรียบร้อยแล้ว',
 }

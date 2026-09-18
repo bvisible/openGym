@@ -1626,4 +1626,11 @@ export default {
   'per year': 'yıllık',
   '{0} overdue': '{0} gecikmiş',
   '{0} to pay': '{0} ödenecek',
+  //// Neoffice — settling a membership invoice from the app.
+  'Invoice {0}': '{0} numaralı fatura',
+  'Nothing was charged': 'Hiçbir tahsilat yapılmadı',
+  'Pay {0}': '{0} öde',
+  'That invoice could not be opened. Try again in a moment.': 'Bu fatura açılamadı. Birazdan tekrar deneyin.',
+  'Your club will settle this invoice with you.': 'Kulübün bu faturayı seninle birlikte çözecek.',
+  'Your invoice is settled.': 'Faturan ödendi.',
 }
