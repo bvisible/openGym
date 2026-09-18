@@ -73,7 +73,9 @@ export default defineConfig({
   //// where a dev server on a laptop answers and CI does not: a test that reaches
   //// the real api.js was green here and red there (v1.3.5 merge). Pointing the
   //// document at a port nothing listens on makes such a test fail everywhere.
-  test: { environmentOptions: { happyDOM: { url: 'http://localhost:1/' } } },
+  //// Neoffice — setupFiles added: Node 25's own empty `localStorage` global
+  //// shadows happy-dom's (see vitest.setup.js).
+  test: { environmentOptions: { happyDOM: { url: 'http://localhost:1/' } }, setupFiles: ['./vitest.setup.js'] },
   define: { __APP_VERSION__: JSON.stringify(pkgVersion) },
   //// Neoffice — upstream v1.3.7 adds a `swStamp` plugin that names the service
   //// worker's cache after the build hash. Not taken: the worker Frappe serves is
