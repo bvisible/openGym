@@ -1633,4 +1633,10 @@ export default {
   'That invoice could not be opened. Try again in a moment.': 'Bu fatura açılamadı. Birazdan tekrar deneyin.',
   'Your club will settle this invoice with you.': 'Kulübün bu faturayı seninle birlikte çözecek.',
   'Your invoice is settled.': 'Faturan ödendi.',
+  //// Neoffice — renewing a membership from « My membership ».
+  'Ends on {0}': '{0} tarihinde bitiyor',
+  'It ends on {0} unless you renew it.': 'Yenilemezsen {0} tarihinde bitiyor.',
+  'It will not renew itself': 'Kendiliğinden yenilenmiyor',
+  'Read the terms, accept them and sign: your membership carries on without a break.': 'Koşulları oku, kabul et ve imzala: üyeliğin kesintisiz devam eder.',
+  'Renew it now': 'Şimdi yenile',
 }

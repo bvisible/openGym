@@ -72,11 +72,14 @@ describe('Brazilian Portuguese locale', () => {
 //// Recomputed for paying an invoice (6 new keys): 3 overrides — Brazil says
 //// "com você" and "em instantes" where Portugal says "consigo" and "dentro de
 //// momentos" — and "Fatura {0}" / "Pagar {0}" read the same on both sides.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(684)
-    expect(inherited).toHaveLength(953)
+//// Recomputed for renewing from the app (5 new keys): 3 overrides — Brazil
+//// dates things "em 5 de outubro" where Portugal says "a 5 de outubro", and
+//// the European clitic "se não o renovar" is not how Brazil says it.
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(687)
+    expect(inherited).toHaveLength(955)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('a4228be0f98550bd49b51a3dff60032c6d63fd46d23c64667f96e8d3328fe938')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('f48105580e297fd17948da973e6ce1697e127ebbc2605add28eb8906d97d0ae3')
   })
 
   test('does not leak European Portuguese UI terms', () => {

@@ -1633,4 +1633,10 @@ export default {
   'That invoice could not be opened. Try again in a moment.': 'Não foi possível abrir esta fatura. Tente novamente dentro de momentos.',
   'Your club will settle this invoice with you.': 'O seu clube vai resolver esta fatura consigo.',
   'Your invoice is settled.': 'A sua fatura está paga.',
+  //// Neoffice — renewing a membership from « My membership ».
+  'Ends on {0}': 'Termina a {0}',
+  'It ends on {0} unless you renew it.': 'Termina a {0} se não o renovar.',
+  'It will not renew itself': 'Não se renova sozinho',
+  'Read the terms, accept them and sign: your membership carries on without a break.': 'Leia as condições, aceite-as e assine: a sua subscrição continua sem interrupção.',
+  'Renew it now': 'Renovar agora',
 }

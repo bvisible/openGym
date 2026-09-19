@@ -1633,4 +1633,10 @@ export default {
   'That invoice could not be opened. Try again in a moment.': 'Не удалось открыть этот счёт. Попробуйте через минуту.',
   'Your club will settle this invoice with you.': 'Ваш клуб решит вопрос с этим счётом.',
   'Your invoice is settled.': 'Ваш счёт оплачен.',
+  //// Neoffice — renewing a membership from « My membership ».
+  'Ends on {0}': 'Заканчивается {0}',
+  'It ends on {0} unless you renew it.': 'Закончится {0}, если не продлить.',
+  'It will not renew itself': 'Сам он не продлевается',
+  'Read the terms, accept them and sign: your membership carries on without a break.': 'Прочитайте условия, примите их и подпишите: абонемент продолжится без перерыва.',
+  'Renew it now': 'Продлить сейчас',
 }

@@ -1604,4 +1604,10 @@ export default {
   'That invoice could not be opened. Try again in a moment.': 'เปิดใบแจ้งหนี้นี้ไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
   'Your club will settle this invoice with you.': 'คลับของคุณจะจัดการใบแจ้งหนี้นี้กับคุณ',
   'Your invoice is settled.': 'ชำระใบแจ้งหนี้ของคุณเรียบร้อยแล้ว',
+  //// Neoffice — renewing a membership from « My membership ».
+  'Ends on {0}': 'สิ้นสุดวันที่ {0}',
+  'It ends on {0} unless you renew it.': 'จะสิ้นสุดวันที่ {0} หากไม่ต่ออายุ',
+  'It will not renew itself': 'จะไม่ต่ออายุอัตโนมัติ',
+  'Read the terms, accept them and sign: your membership carries on without a break.': 'อ่านเงื่อนไข ยอมรับ แล้วลงลายมือชื่อ สมาชิกของคุณจะต่อเนื่องโดยไม่ขาดช่วง',
+  'Renew it now': 'ต่ออายุตอนนี้',
 }

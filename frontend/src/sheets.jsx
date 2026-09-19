@@ -30,6 +30,7 @@ import Media, { Thumb } from './components/Media.jsx'
 import LineChart from './components/LineChart.jsx'
 import Stepper from './components/Stepper.jsx'
 import Icon from './components/Icon.jsx'
+import RenewalForm from './components/RenewalForm.jsx'
 import { Button, Slider, Switch, Segmented, SelectRow, Row, TextField, NumberField, MultiSelectRow } from './components/ui.jsx'
 import { glyphOf, GLYPH_GROUPS, DEFAULT_GLYPH } from './lib/glyphs.js'
 import BodyMap from './components/BodyMap.jsx'
@@ -2664,7 +2665,7 @@ const PAY_KINDS = {
   invoice: {
     //// Nothing is held and nothing is raised: the invoice exists, the member
     //// is settling it. Opening this screen commits them to nothing.
-    open: s => invoiceMethods(s.id),
+    open: s => invoiceMethods(s.id, s.allowDeferred),
     openFailed: () => t('That invoice could not be opened. Try again in a moment.'),
     pay: (s, _data, method) => payInvoice(s.id, method),
     state: args => invoicePayState(args),
@@ -2834,9 +2835,16 @@ export const paySheet = (s, onDone) =>
   ui().openSheet(close => <PaySheet s={s} close={close} onDone={onDone} />)
 
 //// Neoffice — the same sheet, settling an invoice the member already owes
-//// (views/Membership.jsx). `s` is {id: invoice number, title, subtitle}.
+//// (views/Membership.jsx). `s` is {id: invoice number, title, subtitle,
+//// allowDeferred} — the last one only right after a renewal is signed.
 export const payInvoiceSheet = (invoice, onDone) =>
   ui().openSheet(close => <PaySheet s={invoice} kind="invoice" close={close} onDone={onDone} />)
+
+//// Neoffice — signing a renewal without leaving « Mon abonnement ». The form
+//// is the gate's own (components/RenewalForm.jsx): what a member signs does
+//// not change with the screen they signed it on.
+export const renewalSheet = (onDone) =>
+  ui().openSheet(close => <RenewalForm onDone={r => { close(); onDone && onDone(r) }} onCancel={close} />)
 
 export const classSheet = (s, act) => ui().openSheet(close => <ClassSheet s={s} act={act} close={close} />)
 

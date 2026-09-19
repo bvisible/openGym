@@ -1596,4 +1596,10 @@ export default {
   'That invoice could not be opened. Try again in a moment.': 'Ezt a számlát nem sikerült megnyitni. Próbáld újra egy pillanat múlva.',
   'Your club will settle this invoice with you.': 'A klubod veled rendezi ezt a számlát.',
   'Your invoice is settled.': 'A számlád rendezve van.',
+  //// Neoffice — renewing a membership from « My membership ».
+  'Ends on {0}': 'Lejár: {0}',
+  'It ends on {0} unless you renew it.': '{0} napon lejár, ha nem újítod meg.',
+  'It will not renew itself': 'Nem újul meg magától',
+  'Read the terms, accept them and sign: your membership carries on without a break.': 'Olvasd el a feltételeket, fogadd el és írd alá: a tagságod megszakítás nélkül folytatódik.',
+  'Renew it now': 'Megújítás most',
 }

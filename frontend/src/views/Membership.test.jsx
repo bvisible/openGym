@@ -20,10 +20,14 @@ vi.mock('react-router-dom', () => ({ useNavigate: () => nav }))
 //: here would drag the whole module in. What this view owes is WHICH invoice
 //: it hands over, and that is what is checked.
 const sheet = vi.fn()
-vi.mock('../sheets.jsx', () => ({ payInvoiceSheet: (...a) => sheet(...a) }))
+const renewal = vi.fn()
+vi.mock('../sheets.jsx', () => ({
+  payInvoiceSheet: (...a) => sheet(...a),
+  renewalSheet: (...a) => renewal(...a),
+}))
 
 let root, host
-beforeEach(() => { globalThis.IS_REACT_ACT_ENVIRONMENT = true; vi.resetModules(); api.myMembership.mockReset(); nav.mockReset(); sheet.mockReset() })
+beforeEach(() => { globalThis.IS_REACT_ACT_ENVIRONMENT = true; vi.resetModules(); api.myMembership.mockReset(); nav.mockReset(); sheet.mockReset(); renewal.mockReset() })
 afterEach(async () => { await act(async () => { root?.unmount() }); document.body.innerHTML = '' })
 
 const mount = async (payload) => {
@@ -124,6 +128,38 @@ describe('my membership', () => {
     await act(async () => { sheet.mock.calls[0][1]() })
     expect(api.myMembership).toHaveBeenCalledTimes(2)
     expect(h.textContent).toContain('No invoice yet.')
+  })
+
+  it('offers to renew when the club does not renew in the member’s name, and never otherwise', async () => {
+    //: A membership that rolls on has nothing to say yes to: the server sends
+    //: no renewal, and the screen draws no button.
+    let h = await mount({ shown: true, state: 'active', periodEnd: '2026-10-31', due: 0, overdue: 0, invoices: [], plan: null })
+    expect([...h.querySelectorAll('button')].some(b => /Renew/.test(b.textContent))).toBe(false)
+
+    await act(async () => { root.unmount() }); document.body.innerHTML = ''
+    h = await mount({
+      shown: true, state: 'active', periodEnd: '2026-10-31', due: 0, overdue: 0, invoices: [], plan: null,
+      renewal: { why: 'ending', endsOn: '2026-10-31', plan: { label: 'Mensuel', cost: 59, currency: 'CHF' } },
+    })
+    expect(h.textContent).toContain('It will not renew itself')
+    const button = [...h.querySelectorAll('button')].find(b => /Renew it now/.test(b.textContent))
+    await act(async () => { button.click() })
+    expect(renewal).toHaveBeenCalled()
+  })
+
+  it('offers to settle the renewal it just signed, on the invoice if the club allows it', async () => {
+    const h = await mount({
+      shown: true, state: 'expired', endsOn: '2026-08-31', due: 0, overdue: 0, canPay: true, invoices: [],
+      plan: { label: 'Mensuel', cost: 59, currency: 'CHF', interval: 'Month', intervalCount: 1 },
+      renewal: { why: 'ended', endsOn: '2026-08-31', plan: { label: 'Mensuel', cost: 59, currency: 'CHF' } },
+    })
+    await act(async () => { [...h.querySelectorAll('button')].find(b => /Renew my membership/.test(b.textContent)).click() })
+    //: The sheet calls back with what the renewal raised.
+    await act(async () => { renewal.mock.calls[0][0]({ ok: true, invoice: 'FA-2026-0042' }) })
+    expect(sheet.mock.calls[0][0].id).toBe('FA-2026-0042')
+    //: `allowDeferred` — right after signing, "I'll settle it on the invoice"
+    //: is a real answer, unlike on an invoice opened to pay now.
+    expect(sheet.mock.calls[0][0].allowDeferred).toBe(true)
   })
 
   it('says so when the membership has ended instead of leaving the screen empty', async () => {

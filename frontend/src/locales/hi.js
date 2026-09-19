@@ -1633,4 +1633,10 @@ export default {
   'That invoice could not be opened. Try again in a moment.': 'यह चालान नहीं खुल सका। थोड़ी देर में फिर कोशिश करें।',
   'Your club will settle this invoice with you.': 'आपका क्लब यह चालान आपके साथ निपटाएगा।',
   'Your invoice is settled.': 'आपका चालान चुका दिया गया है।',
+  //// Neoffice — renewing a membership from « My membership ».
+  'Ends on {0}': '{0} को समाप्त होता है',
+  'It ends on {0} unless you renew it.': 'नवीनीकरण न करने पर यह {0} को समाप्त हो जाएगा।',
+  'It will not renew itself': 'यह अपने आप नवीनीकृत नहीं होगा',
+  'Read the terms, accept them and sign: your membership carries on without a break.': 'शर्तें पढ़ें, स्वीकार करें और हस्ताक्षर करें: आपकी सदस्यता बिना रुकावट जारी रहेगी।',
+  'Renew it now': 'अभी नवीनीकृत करें',
 }

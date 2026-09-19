@@ -262,8 +262,12 @@ export const payState = ({ intent, invoice }) =>
 //// therefore cannot travel the three calls above: the club's own endpoints
 //// prove the invoice belongs to the member before saying a word about it.
 //// Same three stages, same `{action}` shape, so one payment screen serves both.
-export const invoiceMethods = (invoice) =>
-  api(M.invoiceMethods + '?invoice=' + encodeURIComponent(invoice))
+//// `allowDeferred` is the difference between the two moments money is asked
+//// for: settling an invoice you already owe (pay now, so "Invoice" is not an
+//// answer) and signing a renewal (where « je signe, vous me facturez » is one,
+//// if the club allows it).
+export const invoiceMethods = (invoice, allowDeferred) =>
+  api(M.invoiceMethods + '?' + new URLSearchParams({ invoice, allow_deferred: allowDeferred ? 1 : 0 }))
 export const payInvoice = (invoice, method) =>
   api(M.payInvoice, { method: 'POST', body: JSON.stringify({ invoice, method }) })
 export const invoicePayState = ({ intent, invoice }) =>

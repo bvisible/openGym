@@ -7,13 +7,16 @@
 //// the club — and, when the club allows it, the renewal signed right here:
 //// the terms, a checkbox, a signature, and the membership restarts.
 //// Asked by the pilot club on 2026-09-09.
-import React, { useEffect, useState } from 'react'
-import { BOOT, acceptRenewal, logout, renewalOffer } from '../lib/api.js'
+import React, { useState } from 'react'
+import { BOOT, logout } from '../lib/api.js'
 import { useStore } from '../store/useStore.js'
 import { t } from '../lib/i18n.js'
 import { Button } from '../components/ui.jsx'
 import Icon from '../components/Icon.jsx'
-import SignaturePad from '../components/SignaturePad.jsx'
+//// Neoffice — the terms, the checkbox and the signature now live in one
+//// place: the member also signs from « Mon abonnement », before their
+//// membership runs out. See components/RenewalForm.jsx.
+import RenewalForm from '../components/RenewalForm.jsx'
 
 const fmtDate = iso => {
   if (!iso) return ''
@@ -28,37 +31,13 @@ const fmtPlan = p => {
 export default function MembershipGate() {
   const m = BOOT.membership || {}
   const [mode, setMode] = useState('gate')      // gate | renew | done
-  const [offer, setOffer] = useState(null)
-  const [accepted, setAccepted] = useState(false)
-  const [signature, setSignature] = useState(null)
-  const [busy, setBusy] = useState(false)
-  const [error, setError] = useState(null)
   const [result, setResult] = useState(null)
-
-  useEffect(() => {
-    if (mode !== 'renew' || offer) return
-    renewalOffer().then(r => setOffer(r.message || r)).catch(e => setError(e.message || String(e)))
-  }, [mode, offer])
 
   const signOut = async () => {
     try { await logout() } catch { /* the cookie may already be gone */ }
     useStore.getState().clearLocal()
     window.location.href = '/gym'
   }
-
-  const renew = async () => {
-    setBusy(true); setError(null)
-    try {
-      const r = await acceptRenewal({ terms_accepted: 1, signature, terms_hash: offer?.termsHash })
-      setResult(r.message || r)
-      setMode('done')
-    } catch (e) {
-      setError(e.message || String(e))
-    } finally { setBusy(false) }
-  }
-
-  const needsSignature = offer ? offer.signatureRequired !== false : true
-  const canSign = accepted && (!needsSignature || !!signature) && !busy
 
   return <div className="signin gate">
     {BOOT.app_logo
@@ -84,35 +63,9 @@ export default function MembershipGate() {
       <p className="gate-who">{BOOT.user?.full_name} · {BOOT.user?.name}</p>
     </>}
 
-    {mode === 'renew' && <>
-      <p className="sub">{t('Read the terms, accept them and sign: your membership restarts today.')}</p>
-      {!offer && !error && <p className="gate-line">{t('Loading…')}</p>}
-      {offer && <>
-        <div className="card gate-plan">
-          <div className="gate-plan-name">{fmtPlan(offer.plan)}</div>
-          {offer.endedOn && <div className="small dim">{t('Ended on {0}', fmtDate(offer.endedOn))}</div>}
-        </div>
-        {offer.terms
-          ? <div className="gate-terms" dangerouslySetInnerHTML={{ __html: offer.terms }} />
-          : <p className="gate-line">{t('Your club has not written any terms for this membership.')}</p>}
-        <label className="gate-accept">
-          <input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)} />
-          <span>{t('I have read and I accept the terms of the membership.')}</span>
-        </label>
-        {needsSignature && <SignaturePad onChange={setSignature} />}
-        {error && <p className="gate-error">{error}</p>}
-        <div className="gate-actions">
-          <Button variant="primary" icon="checkCircle" disabled={!canSign} onClick={renew}>
-            {busy ? t('Renewing…') : needsSignature ? t('Sign and renew') : t('Renew')}
-          </Button>
-          <Button variant="ghost" onClick={() => { setMode('gate'); setError(null) }}>{t('Back')}</Button>
-        </div>
-      </>}
-      {error && !offer && <div className="gate-actions">
-        <p className="gate-error">{error}</p>
-        <Button variant="ghost" onClick={() => { setMode('gate'); setError(null) }}>{t('Back')}</Button>
-      </div>}
-    </>}
+    {mode === 'renew' && <RenewalForm
+      onDone={r => { setResult(r); setMode('done') }}
+      onCancel={() => setMode('gate')} />}
 
     {mode === 'done' && <>
       <div className="gate-lock gate-ok"><Icon name="checkCircle" /></div>

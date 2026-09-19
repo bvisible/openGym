@@ -1633,4 +1633,10 @@ export default {
   'That invoice could not be opened. Try again in a moment.': '이 청구서를 열 수 없습니다. 잠시 후 다시 시도하세요.',
   'Your club will settle this invoice with you.': '클럽에서 이 청구서를 처리해 드립니다.',
   'Your invoice is settled.': '청구서가 결제되었습니다.',
+  //// Neoffice — renewing a membership from « My membership ».
+  'Ends on {0}': '{0}에 종료',
+  'It ends on {0} unless you renew it.': '갱신하지 않으면 {0}에 종료됩니다.',
+  'It will not renew itself': '자동으로 갱신되지 않습니다',
+  'Read the terms, accept them and sign: your membership carries on without a break.': '약관을 읽고 동의한 뒤 서명하세요. 회원권이 끊김 없이 이어집니다.',
+  'Renew it now': '지금 갱신',
 }

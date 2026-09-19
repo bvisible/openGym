@@ -754,6 +754,10 @@ export const PT_BR_OVERRIDES = {
   'That invoice could not be opened. Try again in a moment.': 'Não foi possível abrir esta fatura. Tente novamente em instantes.',
   'Your club will settle this invoice with you.': 'Seu clube vai resolver esta fatura com você.',
   'Your invoice is settled.': 'Sua fatura está paga.',
+  //// Neoffice — renewing a membership from « My membership ».
+  'Ends on {0}': 'Termina em {0}',
+  'It ends on {0} unless you renew it.': 'Termina em {0} se você não renovar.',
+  'Read the terms, accept them and sign: your membership carries on without a break.': 'Leia as condições, aceite-as e assine: sua inscrição continua sem interrupção.',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

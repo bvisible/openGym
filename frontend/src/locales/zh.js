@@ -1633,4 +1633,10 @@ export default {
   'That invoice could not be opened. Try again in a moment.': '无法打开该账单，请稍后再试。',
   'Your club will settle this invoice with you.': '俱乐部会与你结清这张账单。',
   'Your invoice is settled.': '你的账单已结清。',
+  //// Neoffice — renewing a membership from « My membership ».
+  'Ends on {0}': '{0} 到期',
+  'It ends on {0} unless you renew it.': '若不续期，将于 {0} 到期。',
+  'It will not renew itself': '不会自动续期',
+  'Read the terms, accept them and sign: your membership carries on without a break.': '阅读条款、同意并签名：你的会籍将不间断地继续。',
+  'Renew it now': '立即续期',
 }

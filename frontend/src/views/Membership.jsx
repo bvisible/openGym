@@ -15,7 +15,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { myMembership, invoicePdfUrl } from '../lib/api.js'
-import { payInvoiceSheet } from '../sheets.jsx'
+import { payInvoiceSheet, renewalSheet } from '../sheets.jsx'
 import { Button } from '../components/ui.jsx'
 import { t, dateLocale } from '../lib/i18n.js'
 import Icon from '../components/Icon.jsx'
@@ -82,10 +82,20 @@ export default function Membership() {
   const plan = data.plan
   const invoices = data.invoices || []
   const owed = oldestOwed(invoices)
-  const pay = inv => payInvoiceSheet(
-    { id: inv.name, title: t('Invoice {0}', inv.name), subtitle: fmtMoney(inv.outstanding ?? inv.total, inv.currency) },
+  const renewal = data.renewal
+  const pay = (inv, allowDeferred) => payInvoiceSheet(
+    { id: inv.name, title: t('Invoice {0}', inv.name), subtitle: fmtMoney(inv.outstanding ?? inv.total, inv.currency), allowDeferred },
     () => setRound(n => n + 1),
   )
+  // Signing restarts the membership and raises its invoice. Paying it is the
+  // next gesture, not another screen — and there "Invoice" is a real answer:
+  // the member signs now and the club bills them.
+  const renew = () => renewalSheet(result => {
+    setRound(n => n + 1)
+    if (data.canPay && result?.invoice) {
+      pay({ name: result.invoice, outstanding: plan?.cost, currency: plan?.currency }, true)
+    }
+  })
   //: `_my_invoices` only ever returns submitted invoices, so there is no
   //: "draft" word to translate here: a draft is the club writing, not
   //: something the member owes.
@@ -106,6 +116,19 @@ export default function Membership() {
         subtitle={data.endsOn ? t('It ended on {0}.', fmtDate(data.endsOn)) : ''} />}
       {data.state === 'active' && data.periodEnd && <Row icon="calendar" iconTint="var(--blue)"
         title={t('Current period until {0}', fmtDate(data.periodEnd))} />}
+      {/* Nothing renews itself in this club, or the membership is over: either
+          way the member says yes here rather than at the desk. A membership
+          that rolls on shows no button — there is nothing to say yes to. */}
+      {renewal && <>
+        {renewal.why === 'ending' && <Row icon="info" iconTint="var(--yellow)"
+          title={t('It will not renew itself')}
+          subtitle={renewal.endsOn ? t('It ends on {0} unless you renew it.', fmtDate(renewal.endsOn)) : ''} />}
+        <div style={{ padding: '0 14px 14px' }}>
+          <Button variant={renewal.why === 'ending' ? 'tinted' : 'primary'} icon="checkCircle" onClick={renew}>
+            {renewal.why === 'ending' ? t('Renew it now') : t('Renew my membership')}
+          </Button>
+        </div>
+      </>}
     </Section>
 
     {/* What is owed, said once and in one place: a member who owes nothing
@@ -118,7 +141,7 @@ export default function Membership() {
           "everything" would raise a document nobody asked for; the club's
           invoices are what the member owes, one at a time. */}
       {data.canPay && owed && <div style={{ padding: '0 14px 14px' }}>
-        <Button variant="primary" icon="bolt" onClick={() => pay(owed)}>
+        <Button variant="primary" icon="bolt" onClick={() => pay(owed, false)}>
           {t('Pay {0}', fmtMoney(owed.outstanding ?? owed.total, owed.currency))}
         </Button>
       </div>}
