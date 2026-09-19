@@ -84,7 +84,8 @@ export default function Membership() {
   const owed = oldestOwed(invoices)
   const renewal = data.renewal
   const pay = (inv, allowDeferred) => payInvoiceSheet(
-    { id: inv.name, title: t('Invoice {0}', inv.name), subtitle: fmtMoney(inv.outstanding ?? inv.total, inv.currency), allowDeferred },
+    { id: inv.name, title: t('Invoice {0}', inv.name), allowDeferred,
+      subtitle: inv.outstanding != null || inv.total != null ? fmtMoney(inv.outstanding ?? inv.total, inv.currency) : '' },
     () => setRound(n => n + 1),
   )
   // Signing restarts the membership and raises its invoice. Paying it is the
@@ -93,7 +94,9 @@ export default function Membership() {
   const renew = () => renewalSheet(result => {
     setRound(n => n + 1)
     if (data.canPay && result?.invoice) {
-      pay({ name: result.invoice, outstanding: plan?.cost, currency: plan?.currency }, true)
+      //: No subtitle: what is owed on that invoice is the server's to say, and
+      //: the plan's price is not it — the sheet shows the real amount.
+      pay({ name: result.invoice }, true)
     }
   })
   //: `_my_invoices` only ever returns submitted invoices, so there is no

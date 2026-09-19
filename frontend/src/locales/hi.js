@@ -1639,4 +1639,5 @@ export default {
   'It will not renew itself': 'यह अपने आप नवीनीकृत नहीं होगा',
   'Read the terms, accept them and sign: your membership carries on without a break.': 'शर्तें पढ़ें, स्वीकार करें और हस्ताक्षर करें: आपकी सदस्यता बिना रुकावट जारी रहेगी।',
   'Renew it now': 'अभी नवीनीकृत करें',
+  'Settle it when the invoice reaches you': 'चालान मिलने पर भुगतान करें',
 }

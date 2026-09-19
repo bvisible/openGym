@@ -1732,4 +1732,5 @@ export default {
   'It will not renew itself': 'Il ne se renouvelle pas tout seul',
   'Read the terms, accept them and sign: your membership carries on without a break.': 'Lisez les conditions, acceptez-les et signez : votre abonnement se poursuit sans interruption.',
   'Renew it now': 'Renouveler maintenant',
+  'Settle it when the invoice reaches you': 'Réglez-la à réception de la facture',
 }

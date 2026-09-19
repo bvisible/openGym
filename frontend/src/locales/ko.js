@@ -1639,4 +1639,5 @@ export default {
   'It will not renew itself': '자동으로 갱신되지 않습니다',
   'Read the terms, accept them and sign: your membership carries on without a break.': '약관을 읽고 동의한 뒤 서명하세요. 회원권이 끊김 없이 이어집니다.',
   'Renew it now': '지금 갱신',
+  'Settle it when the invoice reaches you': '청구서를 받으면 결제하세요',
 }

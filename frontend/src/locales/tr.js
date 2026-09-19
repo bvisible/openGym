@@ -1639,4 +1639,5 @@ export default {
   'It will not renew itself': 'Kendiliğinden yenilenmiyor',
   'Read the terms, accept them and sign: your membership carries on without a break.': 'Koşulları oku, kabul et ve imzala: üyeliğin kesintisiz devam eder.',
   'Renew it now': 'Şimdi yenile',
+  'Settle it when the invoice reaches you': 'Fatura ulaştığında öde',
 }

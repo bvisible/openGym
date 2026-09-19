@@ -1602,4 +1602,5 @@ export default {
   'It will not renew itself': 'Nem újul meg magától',
   'Read the terms, accept them and sign: your membership carries on without a break.': 'Olvasd el a feltételeket, fogadd el és írd alá: a tagságod megszakítás nélkül folytatódik.',
   'Renew it now': 'Megújítás most',
+  'Settle it when the invoice reaches you': 'Fizesd ki, amikor megérkezik a számla',
 }

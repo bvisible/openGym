@@ -1610,4 +1610,5 @@ export default {
   'It will not renew itself': 'จะไม่ต่ออายุอัตโนมัติ',
   'Read the terms, accept them and sign: your membership carries on without a break.': 'อ่านเงื่อนไข ยอมรับ แล้วลงลายมือชื่อ สมาชิกของคุณจะต่อเนื่องโดยไม่ขาดช่วง',
   'Renew it now': 'ต่ออายุตอนนี้',
+  'Settle it when the invoice reaches you': 'ชำระเมื่อได้รับใบแจ้งหนี้',
 }

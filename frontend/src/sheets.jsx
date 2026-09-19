@@ -2810,9 +2810,13 @@ function PaySheet({ s, close, onDone, kind = 'class' }) {
             <div className="tt">{m.title}</div>
             {m.description && <div className="ss">{m.description}</div>}
             {/* //// Saying what "Invoice" means: without this line, the
-                 member thinks they must pay on the spot and gives up. */}
+                 member thinks they must pay on the spot and gives up. The
+                 sentence follows what was just done — a class is booked, a
+                 membership is signed. */}
             {m.gateway_type === 'facture' && !m.description &&
-              <div className="ss">{t('Book now, pay on the invoice')}</div>}
+              <div className="ss">{kind === 'invoice'
+                ? t('Settle it when the invoice reaches you')
+                : t('Book now, pay on the invoice')}</div>}
           </div>
           <Icon name="chevronRight" />
         </button>

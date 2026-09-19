@@ -1639,4 +1639,5 @@ export default {
   'It will not renew itself': 'Nie odnawia się sam',
   'Read the terms, accept them and sign: your membership carries on without a break.': 'Przeczytaj warunki, zaakceptuj je i podpisz: Twój karnet trwa bez przerwy.',
   'Renew it now': 'Odnów teraz',
+  'Settle it when the invoice reaches you': 'Zapłać po otrzymaniu faktury',
 }

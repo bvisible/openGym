@@ -1639,4 +1639,5 @@ export default {
   'It will not renew itself': 'Сам он не продлевается',
   'Read the terms, accept them and sign: your membership carries on without a break.': 'Прочитайте условия, примите их и подпишите: абонемент продолжится без перерыва.',
   'Renew it now': 'Продлить сейчас',
+  'Settle it when the invoice reaches you': 'Оплатите по получении счёта',
 }

@@ -1639,4 +1639,5 @@ export default {
   'It will not renew itself': '不会自动续期',
   'Read the terms, accept them and sign: your membership carries on without a break.': '阅读条款、同意并签名：你的会籍将不间断地继续。',
   'Renew it now': '立即续期',
+  'Settle it when the invoice reaches you': '收到账单后再付款',
 }
