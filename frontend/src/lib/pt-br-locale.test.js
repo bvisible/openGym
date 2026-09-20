@@ -64,6 +64,12 @@ describe('Brazilian Portuguese locale', () => {
 //// Recomputed after the upstream v1.3.7 merge (2026-09-17): upstream's v1.3.6
 //// pt-BR block (sign-in adoption, offline banner, progression step) adds 13
 //// overrides — 669 with ours — and the rest of its new strings inherit pt-PT.
+//// Recomputed for the Coach's busy/restarting outage messages (2 new keys): both
+//// are overrides, none inherited — each carries the "Try again" imperative that
+//// is tu in pt.js ("Tenta") and você in Brazil ("Tente"), and the restart line
+//// also carries the EU progressive/BR gerund split already established for this
+//// feature ("está a reiniciar" / "está reiniciando"). Inherited set unchanged, so
+//// the hash does not move; only the override count does (698 → 700).
 //// Recomputed for "My membership" (30 new keys): 12 are Brazilian overrides —
 //// "recepção" for Portugal's "receção", "aplicativo" for "aplicação",
 //// "inscrição" and "você" where pt-PT says "assinatura" and "tu" — and the
@@ -90,7 +96,7 @@ describe('Brazilian Portuguese locale', () => {
 //// "contactar"/"contatar" and "momentos"/"instantes" EU/BR spelling and word
 //// choice — and the other 5 (three person-neutral infinitives, two
 //// statements with no 2nd-person marking) read the same on both sides.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(698)
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(700)
     expect(inherited).toHaveLength(964)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list

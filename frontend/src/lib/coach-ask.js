@@ -32,6 +32,28 @@ const MODEL_LANGUAGE = { fr: 'French', de: 'German', it: 'Italian', es: 'Spanish
 /** The language to answer in, named for the model rather than as a code. */
 const answerLanguage = () => MODEL_LANGUAGE[(getLang() || 'en').slice(0, 2)] || 'English'
 
+//: 🔴 TWO different 503s, and they mean opposite things. Telling the member
+//: "try again in a moment" for both is wrong half the time:
+//:
+//:   * `service_unavailable` — back-pressure. The wait is COMPUTED by the
+//:     proxy (2 to 30 s) and is worth saying to the second.
+//:   * `upstream_unavailable` — the engine is restarting. Its `retry_after: 20`
+//:     is a fixed, optimistic guess: measured 115 to 320 s before it answers at
+//:     all, plus 15 to 90 s of warming up. Twenty seconds is "come back later",
+//:     not "it will be ready then", and a member who retries at 20 s fails
+//:     again and stops trusting the screen.
+//:
+//: A screen hands back at once either way — nobody waits five minutes on a
+//: button — but it says which of the two it is.
+export function outage(err, res) {
+  const said = err && (err.message || (typeof err === 'string' ? err : ''))
+  if (err && err.type === 'upstream_unavailable') return t('The Coach is restarting. Try again in a few minutes.')
+  const header = res && res.headers && res.headers.get && res.headers.get('Retry-After')
+  const wait = Math.round(Number((err && err.retry_after) ?? header))
+  if (wait > 0 && wait <= 60) return t('The Coach is busy. Try again in {0} seconds.', wait)
+  return String(said || '') || t('The Coach could not be reached. Try again in a moment.')
+}
+
 /**
  * One question, one answer, in plain text.
  *
@@ -63,8 +85,9 @@ export async function askNora(kind, { system, prompt, maxTokens = 500 }) {
   if (!res.ok || (body && body.error)) {
     //: The club's refusal and the provider's outage read differently and the
     //: member deserves the difference: one is an answer, the other a hiccup.
-    const said = frappeError(data) || (body && body.error && (body.error.message || body.error)) || ''
-    throw new Error(String(said) || t('The Coach could not be reached. Try again in a moment.'))
+    const refused = frappeError(data)
+    if (refused) throw new Error(String(refused))
+    throw new Error(outage(body && body.error, res))
   }
   const choice = ((body && body.choices) || [])[0]
   const text = (choice && choice.message && choice.message.content) || ''

@@ -42,8 +42,32 @@ export const frappeError = data => {
 let jobKind = null
 export const setJobKind = kind => { jobKind = kind || null }
 
+//// Neoffice — how long to wait before trying again, when Nora says so.
+//// The proxy sends TWO different 503s and they mean opposite things:
+////
+////   * `service_unavailable` is back-pressure, and its `retry_after` is
+////     COMPUTED by the proxy (2 to 30 s) — worth honouring to the second
+////     rather than guessing 2 s;
+////   * `upstream_unavailable` means the engine is RESTARTING, and its
+////     `retry_after: 20` is a fixed optimistic guess. Measured 2026-09-20:
+////     115 to 320 s before it answers at all, plus 15 to 90 s of warming up.
+////     Retrying inside that window burns the two attempts in seven seconds
+////     and loses the member's program to an outage that had not even begun
+////     to clear. We give up at once instead, and the screen says so.
+////
+//// Read from the body and the header, because Frappe forwards both.
+export const waitBeforeRetry = (data, res) => {
+  const err = (unwrap(data) || {}).error
+  if (err && err.type === 'upstream_unavailable') return false
+  const header = res && res.headers && res.headers.get && res.headers.get('Retry-After')
+  const seconds = Number((err && err.retry_after) ?? header)
+  //: A wait we cannot believe is not a wait: fall back to the caller's own delays.
+  return Number.isFinite(seconds) && seconds > 0 && seconds <= 60 ? seconds * 1000 : null
+}
+
 export const noraSpec = {
   ...base,
+  waitBeforeRetry,
   path: () => NORA_CHAT_PATH,
   modelsPath: NORA_MODELS_PATH,
   headers: () => ({ ...(BOOT.csrf_token ? { 'X-Frappe-CSRF-Token': BOOT.csrf_token } : {}), ...(jobKind ? { 'X-Coach-Kind': jobKind } : {}) }),

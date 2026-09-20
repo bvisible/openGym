@@ -1746,6 +1746,8 @@ export default {
   //// Neoffice — writing to the coach from the logbook, with optional AI wording help (askable 'messageCoach').
   'The Coach is writing…': 'Le Coach écrit…',
   'This question does not say what it is for.': 'Cette question ne dit pas à quoi elle sert.',
+  'The Coach is restarting. Try again in a few minutes.': 'Le Coach redémarre. Réessayez dans quelques minutes.',
+  'The Coach is busy. Try again in {0} seconds.': 'Le Coach est occupé. Réessayez dans {0} secondes.',
   'The Coach could not be reached. Try again in a moment.': 'Le Coach n’a pas pu être joint. Réessayez dans un instant.',
   'The Coach answered nothing this time.': 'Le Coach n’a rien répondu cette fois.',
   'Write to {0}': 'Écrire à {0}',

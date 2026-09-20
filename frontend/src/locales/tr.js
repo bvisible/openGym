@@ -1653,6 +1653,8 @@ export default {
   //// Neoffice — writing to the coach from the logbook, with optional AI wording help (askable 'messageCoach').
   'The Coach is writing…': 'Koç yazıyor…',
   'This question does not say what it is for.': 'Bu soru ne için olduğunu belirtmiyor.',
+  'The Coach is restarting. Try again in a few minutes.': 'Koç yeniden başlatılıyor. Birkaç dakika sonra tekrar dene.',
+  'The Coach is busy. Try again in {0} seconds.': 'Koç meşgul. {0} saniye sonra tekrar dene.',
   'The Coach could not be reached. Try again in a moment.': 'Koç’a ulaşılamadı. Birazdan tekrar dene.',
   'The Coach answered nothing this time.': 'Koç bu sefer hiçbir şey yanıtlamadı.',
   'Write to {0}': '{0} için yaz',

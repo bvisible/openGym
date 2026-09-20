@@ -141,8 +141,26 @@ export function httpAdapter(spec) {
         const { data, text } = await readJson(res);
         if (!res.ok) {
           const msg = spec.errorMessage(data) || trim(text, 200);
-          if (RETRY_STATUSES.has(res.status) && transientRetries < RETRY_DELAYS_MS.length && !(signal && signal.aborted)) {
-            await sleep(opts.retryDelayMs != null ? opts.retryDelayMs : RETRY_DELAYS_MS[transientRetries], signal);
+          //// Neoffice — the provider gets to say how long, and whether at all.
+          //// `spec.waitBeforeRetry(data, res)` answers `false` (do not retry —
+          //// this outage lasts minutes, not seconds), a number of milliseconds,
+          //// or null/undefined to keep the delays below. A spec without the hook
+          //// behaves exactly as upstream: the three lines that follow are
+          //// unchanged for every other provider.
+          ////
+          //// Why it exists: Nora's proxy sends TWO different 503s. One is
+          //// back-pressure with a COMPUTED wait (2-30 s), the other says the
+          //// engine is restarting — measured at 115 to 320 s before it answers,
+          //// against the fixed 2 s + 5 s here, which burn both retries in seven
+          //// seconds and lose the member's program for nothing.
+          const asked = spec.waitBeforeRetry ? spec.waitBeforeRetry(data, res) : null;
+          const mayRetry = asked !== false
+            && RETRY_STATUSES.has(res.status)
+            && transientRetries < RETRY_DELAYS_MS.length
+            && !(signal && signal.aborted);
+          if (mayRetry) {
+            const fallback = opts.retryDelayMs != null ? opts.retryDelayMs : RETRY_DELAYS_MS[transientRetries];
+            await sleep(typeof asked === 'number' && asked >= 0 ? asked : fallback, signal);
             transientRetries++;
             continue;
           }

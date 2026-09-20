@@ -1616,6 +1616,8 @@ export default {
   //// Neoffice — writing to the coach from the logbook, with optional AI wording help (askable 'messageCoach').
   'The Coach is writing…': 'Az Edző ír…',
   'This question does not say what it is for.': 'Ez a kérdés nem mondja meg, mire vonatkozik.',
+  'The Coach is restarting. Try again in a few minutes.': 'Az Edző újraindul. Próbálja újra néhány perc múlva.',
+  'The Coach is busy. Try again in {0} seconds.': 'Az Edző foglalt. Próbálja újra {0} másodperc múlva.',
   'The Coach could not be reached. Try again in a moment.': 'Nem sikerült elérni az Edzőt. Próbálja újra egy pillanat múlva.',
   'The Coach answered nothing this time.': 'Az Edző ezúttal nem válaszolt semmit.',
   'Write to {0}': 'Írjon {0} részére',

@@ -1653,6 +1653,8 @@ export default {
   //// Neoffice — writing to the coach from the logbook, with optional AI wording help (askable 'messageCoach').
   'The Coach is writing…': '코치가 쓰는 중…',
   'This question does not say what it is for.': '이 질문에는 용도가 나와 있지 않아요.',
+  'The Coach is restarting. Try again in a few minutes.': '코치가 재시작 중이에요. 몇 분 후에 다시 시도해 주세요.',
+  'The Coach is busy. Try again in {0} seconds.': '코치가 바빠요. {0}초 후에 다시 시도해 주세요.',
   'The Coach could not be reached. Try again in a moment.': '코치에게 연결할 수 없었어요. 잠시 후 다시 시도해 주세요.',
   'The Coach answered nothing this time.': '이번에는 코치가 아무 답도 주지 않았어요.',
   'Write to {0}': '{0}님에게 메시지 보내기',

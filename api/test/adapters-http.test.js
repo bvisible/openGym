@@ -170,6 +170,39 @@ test('a transient status (429, 5xx, 529) is retried twice with the same request,
   assert.equal(f.calls.length, 1);
 });
 
+//// Neoffice — added test. `spec.waitBeforeRetry` lets a provider say how long
+//// to wait, or that waiting is pointless. A spec without the hook is untouched,
+//// which the test above already proves.
+test('Neoffice: a spec can say how long to wait, or that retrying is pointless', async () => {
+  const { httpAdapter } = await import('../coach/core/adapters/http.js');
+  const { chatCompletionsSpec } = await import('../coach/core/adapters/openai.js');
+  const base = chatCompletionsSpec('compatible', { maxTokensField: 'max_tokens', temperature: 0 });
+  const ok200 = ok({ choices: [{ message: { content: ANSWER }, finish_reason: 'stop' }] });
+
+  // `false` — this outage lasts minutes, not seconds: nothing is sent again.
+  let f = fakeFetch([{ status: 503, body: { error: { type: 'restarting' } } }]);
+  let r = await httpAdapter({ ...base, waitBeforeRetry: () => false })
+    .invoke({ cfg: cfgCompat, prompt: 'P', env, model: 'llama3', fetch: f, retryDelayMs: 0 });
+  assert.equal(r.code, 1);
+  assert.equal(f.calls.length, 1, 'a pointless retry is not made');
+
+  // A number — the provider's own wait is used in place of the fixed delays.
+  const waited = [];
+  f = fakeFetch([{ status: 503, body: { error: { retry_after: 3 } } }, ok200]);
+  r = await httpAdapter({ ...base, waitBeforeRetry: (data) => { waited.push(data.error.retry_after); return 0; } })
+    .invoke({ cfg: cfgCompat, prompt: 'P', env, model: 'llama3', fetch: f, retryDelayMs: 99999 });
+  assert.equal(r.code, 0);
+  assert.equal(f.calls.length, 2);
+  assert.deepEqual(waited, [3], 'the hook is handed the parsed body');
+
+  // null — the caller's own delays still apply, exactly as without the hook.
+  f = fakeFetch([{ status: 503, body: { error: { message: 'busy' } } }]);
+  r = await httpAdapter({ ...base, waitBeforeRetry: () => null })
+    .invoke({ cfg: cfgCompat, prompt: 'P', env, model: 'llama3', fetch: f, retryDelayMs: 0 });
+  assert.equal(r.code, 1);
+  assert.equal(f.calls.length, 3, 'two retries, like upstream');
+});
+
 test('an abort that lands during a retry pause sends nothing more and ends as a timeout', async () => {
   // A forget mid-backoff: the payload must not go out a second time, and the job must drain
   // now rather than wait for the next attempt to time out.

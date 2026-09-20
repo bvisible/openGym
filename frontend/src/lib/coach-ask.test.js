@@ -122,6 +122,48 @@ describe('the same movement is not paid for twice', () => {
   })
 })
 
+const unavailable = (type, retryAfter, message, header) => ({
+  ok: false,
+  status: 503,
+  headers: { get: name => (name === 'Retry-After' && header != null ? String(header) : null) },
+  json: async () => ({ message: { error: { code: 503, type, message, ...(retryAfter != null ? { retry_after: retryAfter } : {}) } } }),
+})
+
+describe('the two 503s do not mean the same thing', () => {
+  //: `upstream_unavailable` carries `retry_after: 20`, and that 20 is a fixed
+  //: optimistic guess — the engine takes 115 to 320 s to answer again. Saying
+  //: "20 seconds" would send the member back into the same failure.
+  it('says the Coach is restarting, and never repeats its optimistic 20 s', async () => {
+    global.fetch = vi.fn(async () => unavailable('upstream_unavailable', 20, 'The model backend is unreachable (loading or restarting).'))
+    const { explainExercise } = await load()
+    await expect(explainExercise(SQUAT)).rejects.toThrow('The Coach is restarting. Try again in a few minutes.')
+  })
+
+  it('honours a back-pressure wait to the second — the proxy computed it', async () => {
+    global.fetch = vi.fn(async () => unavailable('service_unavailable', 7, 'Busy.'))
+    const { explainExercise } = await load()
+    await expect(explainExercise(SQUAT)).rejects.toThrow('The Coach is busy. Try again in 7 seconds.')
+  })
+
+  it('reads the wait from the header when the body has none', async () => {
+    global.fetch = vi.fn(async () => unavailable('service_unavailable', null, 'Busy.', 12))
+    const { explainExercise } = await load()
+    await expect(explainExercise(SQUAT)).rejects.toThrow('Try again in 12 seconds.')
+  })
+
+  it('falls back to the provider words when the wait is absurd or absent', async () => {
+    global.fetch = vi.fn(async () => unavailable('service_unavailable', 9000, 'Queue is full.'))
+    const { explainExercise } = await load()
+    await expect(explainExercise(SQUAT)).rejects.toThrow('Queue is full.')
+  })
+
+  it('still lets the CLUB\u2019s refusal through unchanged — it is an answer, not an outage', async () => {
+    global.fetch = vi.fn(async () => refusal(403, 'Your club has not enabled this from the AI coach.'))
+    const { explainExercise } = await load()
+    await expect(explainExercise(SQUAT)).rejects.toThrow('Your club has not enabled this from the AI coach.')
+  })
+})
+
 describe('what a refusal says', () => {
   it('repeats the club’s own words rather than a generic failure', async () => {
     global.fetch = vi.fn(async () => refusal(403, 'Your club has not enabled this from the AI coach.'))
