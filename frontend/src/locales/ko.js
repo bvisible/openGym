@@ -1645,4 +1645,6 @@ export default {
   'Let it renew again': '다시 갱신되도록 하기',
   'Nothing to do — it carries on period after period.': '할 일이 없습니다. 기간마다 계속 이어집니다.',
   'Stop the renewal': '갱신 중지',
+  //// Neoffice — what the club lets the AI coach do.
+  'Your club has not enabled this from the Coach.': '클럽에서 코치의 이 기능을 사용하도록 설정하지 않았습니다.',
 }

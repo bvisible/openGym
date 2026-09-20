@@ -80,11 +80,14 @@ describe('Brazilian Portuguese locale', () => {
 //// Recomputed for stopping a renewal (4 new keys): 2 overrides — Brazil says
 //// "Cancelar a renovação" where Portugal says "Parar", and spells the way
 //// back "Voltar a renovar automaticamente".
+//// Recomputed for the club's AI switches (1 new key): "O seu clube" is the
+//// European form, but this file already overrides that turn of phrase where
+//// it matters, and the sentence itself reads the same in Brazil.
     expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(689)
-    expect(inherited).toHaveLength(958)
+    expect(inherited).toHaveLength(959)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('6bae8678ef5fc574ecf3adb5608dd275a897a701c0f530b3a4f5439d95dc1b1d')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('f99fdd3155a2f3a4221da6569261d115ceb1c3031516af1c705bf406ba9a1a21')
   })
 
   test('does not leak European Portuguese UI terms', () => {

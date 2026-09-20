@@ -1608,4 +1608,6 @@ export default {
   'Let it renew again': 'Hadd újuljon meg újra',
   'Nothing to do — it carries on period after period.': 'Nincs teendő — időszakról időszakra folytatódik.',
   'Stop the renewal': 'Megújítás leállítása',
+  //// Neoffice — what the club lets the AI coach do.
+  'Your club has not enabled this from the Coach.': 'A klubod ezt nem engedélyezte az edzőnél.',
 }

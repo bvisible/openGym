@@ -29,6 +29,10 @@ import {
 import { insightsFor, sessionInsights } from '../lib/coach-insights.js'
 import { useCoachStatus, requestReview, requestDebrief, requestPlan, refinePlan, resolvePending, cohortStats, setCohortShare, jobErrorText } from '../lib/coach-api.js'
 import { confirmSheet } from '../sheets.jsx'
+//// Neoffice — what the club lets the Coach do (Gym Settings). The server
+//// refuses the rest whatever the screen draws; this only spares the member a
+//// button that would come back with a refusal.
+import { BOOT } from '../lib/api.js'
 import Icon from '../components/Icon.jsx'
 import LineChart from '../components/LineChart.jsx'
 import { Button, Check, Switch, Section, Row, SelectRow } from '../components/ui.jsx'
@@ -140,17 +144,22 @@ export default function CoachChat() {
   const showCohort = () => openSheet(() => <CohortSheet S={S} update={update} toast={toast} />)
 
   const idle = !job && !pending
+  //: Absent (an older server, the demo, the mobile build) reads as allowed:
+  //: the club's answer is what removes something, never our not knowing.
+  const may = (BOOT.coach && BOOT.coach.can) || {}
+  const mayAdvise = may.advise !== false
+  const mayWrite = may.writePrograms !== false
   const menu = () => openSheet(close => <div className="chat-menu">
     <h3>{t('Coach')}</h3>
     <div className="sect-b">
-      {idle && <Row icon="sparkles" iconTint="var(--acc)" title={t('Ask for a review')} subtitle={t('What would the Coach change after your last sessions?')} accessory="chevron" onClick={() => { close(); askReview() }} />}
-      {idle && !!lastWorkout && <Row icon="checkCircle" iconTint="var(--green)" title={t('Review my last workout')} subtitle={t('What went well, what to watch, what to do next time')} accessory="chevron" onClick={() => { close(); askDebrief() }} />}
-      {idle && !!(S.routines || []).length && <Row icon="wrench" iconTint="var(--orange)" title={t('Improve a routine')} subtitle={t('Pick one; the Coach works on just that')} accessory="chevron" onClick={() => { close(); pickRoutine() }} />}
+      {idle && mayAdvise && <Row icon="sparkles" iconTint="var(--acc)" title={t('Ask for a review')} subtitle={t('What would the Coach change after your last sessions?')} accessory="chevron" onClick={() => { close(); askReview() }} />}
+      {idle && mayAdvise && !!lastWorkout && <Row icon="checkCircle" iconTint="var(--green)" title={t('Review my last workout')} subtitle={t('What went well, what to watch, what to do next time')} accessory="chevron" onClick={() => { close(); askDebrief() }} />}
+      {idle && mayAdvise && !!(S.routines || []).length && <Row icon="wrench" iconTint="var(--orange)" title={t('Improve a routine')} subtitle={t('Pick one; the Coach works on just that')} accessory="chevron" onClick={() => { close(); pickRoutine() }} />}
       {community && <Row icon="person" iconTint="var(--teal)" title={t('Compare with others here')} subtitle={t('Anonymous medians from this instance')} accessory="chevron" onClick={() => { close(); showCohort() }} />}
       <Row icon="history" iconTint="var(--blue)" title={t('Everything the Coach proposed')} subtitle={t('Plans, suggestions and debriefs, kept')} accessory="chevron" onClick={() => { close(); showHistory() }} />
-      {idle && <Row icon="sparkles" iconTint="var(--indigo)" title={t('Start a new plan')} subtitle={t('A fresh plan from your answers; your workouts stay')} accessory="chevron" onClick={() => { close(); askNewPlan() }} />}
-      <Row icon="clipboard" iconTint="var(--indigo)" title={t('Edit my answers')} subtitle={t('Goal, days, equipment, limits')} accessory="chevron" onClick={() => { close(); nav('/coach/intake?edit=1') }} />
-      <Row icon="clock" iconTint="var(--purple)" title={t('Automatic reviews')} subtitle={cadenceLabel(coach)} accessory="chevron" onClick={() => { close(); cadenceSheet(openSheet, update) }} />
+      {idle && mayWrite && <Row icon="sparkles" iconTint="var(--indigo)" title={t('Start a new plan')} subtitle={t('A fresh plan from your answers; your workouts stay')} accessory="chevron" onClick={() => { close(); askNewPlan() }} />}
+      {mayWrite && <Row icon="clipboard" iconTint="var(--indigo)" title={t('Edit my answers')} subtitle={t('Goal, days, equipment, limits')} accessory="chevron" onClick={() => { close(); nav('/coach/intake?edit=1') }} />}
+      {mayAdvise && <Row icon="clock" iconTint="var(--purple)" title={t('Automatic reviews')} subtitle={cadenceLabel(coach)} accessory="chevron" onClick={() => { close(); cadenceSheet(openSheet, update) }} />}
       {canRevert(S) && <Row icon="reset" iconTint="var(--blue)" title={t('Undo the last Coach changes')} accessory="chevron" onClick={() => { close(); doRevert() }} />}
     </div>
     <div style={{ height: 10 }} />
@@ -170,6 +179,9 @@ export default function CoachChat() {
   const status = job ? t('thinking…') : pending ? t('has a suggestion for you') : t('here when you need it')
   const placeholder = pending?.kind === 'create'
     ? t('What should change?')
+    //: A free message is asked as a review, so it goes where the club's
+    //: "advise" switch goes. Saying it in the box beats a refusal on send.
+    : !mayAdvise ? t('Your club has not enabled this from the Coach.')
     : job ? t('Coach is thinking…') : t('Message the Coach…')
 
   return <div className="narrow chat">
@@ -201,13 +213,13 @@ export default function CoachChat() {
 
     <div className="composer">
       {idle && !busy && <div className="chips-row">
-        <button className="qchip" onClick={askReview}><Icon name="sparkles" />{t('Review my training')}</button>
-        {!!lastWorkout && <button className="qchip" onClick={askDebrief}><Icon name="checkCircle" />{t('Last workout')}</button>}
-        {!!(S.routines || []).length && <button className="qchip" onClick={pickRoutine}><Icon name="wrench" />{t('Improve a routine')}</button>}
+        {mayAdvise && <button className="qchip" onClick={askReview}><Icon name="sparkles" />{t('Review my training')}</button>}
+        {mayAdvise && !!lastWorkout && <button className="qchip" onClick={askDebrief}><Icon name="checkCircle" />{t('Last workout')}</button>}
+        {mayAdvise && !!(S.routines || []).length && <button className="qchip" onClick={pickRoutine}><Icon name="wrench" />{t('Improve a routine')}</button>}
         {community && <button className="qchip" onClick={showCohort}><Icon name="person" />{t('Compare')}</button>}
       </div>}
       <div className="composer-in">
-        <textarea rows={1} value={text} maxLength={1000} placeholder={placeholder} disabled={!!job}
+        <textarea rows={1} value={text} maxLength={1000} placeholder={placeholder} disabled={!!job || !mayAdvise}
           onChange={e => setText(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }} />
         <button className="send" onClick={send} disabled={!text.trim() || busy || !!job} aria-label={t('Send')}><Icon name="arrowUp" /></button>

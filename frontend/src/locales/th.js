@@ -1616,4 +1616,6 @@ export default {
   'Let it renew again': 'ให้ต่ออายุอีกครั้ง',
   'Nothing to do — it carries on period after period.': 'ไม่ต้องทำอะไร ระบบจะต่อให้ทุกงวด',
   'Stop the renewal': 'หยุดการต่ออายุ',
+  //// Neoffice — what the club lets the AI coach do.
+  'Your club has not enabled this from the Coach.': 'คลับของคุณยังไม่ได้เปิดใช้ฟังก์ชันนี้ของโค้ช',
 }

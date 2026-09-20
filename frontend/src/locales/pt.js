@@ -1645,4 +1645,6 @@ export default {
   'Let it renew again': 'Deixar renovar de novo',
   'Nothing to do — it carries on period after period.': 'Nada a fazer: continua período após período.',
   'Stop the renewal': 'Parar a renovação',
+  //// Neoffice — what the club lets the AI coach do.
+  'Your club has not enabled this from the Coach.': 'O seu clube não ativou isto no treinador.',
 }

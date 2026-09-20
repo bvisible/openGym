@@ -47,6 +47,9 @@ vi.mock('../sheets.jsx', () => ({ startFlow: vi.fn(), confirmSheet: vi.fn() }))
 vi.mock('../lib/api.js', () => ({
   api: vi.fn(() => Promise.resolve({})),
   IS_APPLE: false, IS_ANDROID: false, BIO: 'biometrics',
+  //: What the club lets the Coach do. Absent here on purpose: the screen must
+  //: read "not said" as "allowed", or an older server would empty its menu.
+  BOOT: { coach: {} },
 }))
 vi.mock('../coach.css', () => ({}))
 
@@ -201,6 +204,28 @@ describe('the Coach chat', () => {
     expect(byText(/Last workout/)).toBeFalsy()          // no workout logged yet
     await mount(null, { id: 'j1', kind: 'review', state: 'running', startedAt: Date.now() })
     expect(byText(/Review my training/)).toBeFalsy()
+  })
+
+  //// Neoffice — what the CLUB lets the Coach do (Gym Settings). The server
+  //// refuses the rest whatever the screen draws; these pin that the screen
+  //// does not offer what would come back refused — and that "not said" reads
+  //// as allowed, so an older server never empties the menu.
+  it('offers everything the club has not spoken about', async () => {
+    const { BOOT } = await import('../lib/api.js')
+    BOOT.coach = {}
+    await mount(null)
+    expect(byText(/Review my training/)).toBeTruthy()
+  })
+
+  it('drops the advice when the club unticked it, and says so in the box', async () => {
+    const { BOOT } = await import('../lib/api.js')
+    BOOT.coach = { can: { advise: false, writePrograms: true } }
+    await mount(null)
+    expect(byText(/Review my training/)).toBeFalsy()
+    const box = document.querySelector('textarea')
+    expect(box.disabled).toBe(true)
+    expect(box.placeholder).toMatch(/not enabled/)
+    BOOT.coach = {}
   })
 
   it('offers the comparison only when the instance allows it', async () => {

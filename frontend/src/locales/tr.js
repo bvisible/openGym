@@ -1645,4 +1645,6 @@ export default {
   'Let it renew again': 'Yeniden yenilenmesine izin ver',
   'Nothing to do — it carries on period after period.': 'Yapılacak bir şey yok — dönem dönem devam eder.',
   'Stop the renewal': 'Yenilemeyi durdur',
+  //// Neoffice — what the club lets the AI coach do.
+  'Your club has not enabled this from the Coach.': 'Kulübün koçta bunu açmamış.',
 }

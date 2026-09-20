@@ -1645,4 +1645,6 @@ export default {
   'Let it renew again': '恢复自动续期',
   'Nothing to do — it carries on period after period.': '无需操作，它会按周期持续。',
   'Stop the renewal': '停止续期',
+  //// Neoffice — what the club lets the AI coach do.
+  'Your club has not enabled this from the Coach.': '你的俱乐部未开启教练的这项功能。',
 }
