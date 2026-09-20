@@ -1640,4 +1640,9 @@ export default {
   'Read the terms, accept them and sign: your membership carries on without a break.': 'Прочитайте условия, примите их и подпишите: абонемент продолжится без перерыва.',
   'Renew it now': 'Продлить сейчас',
   'Settle it when the invoice reaches you': 'Оплатите по получении счёта',
+  //// Neoffice — stopping (and resuming) a renewal from « My membership ».
+  'It renews itself': 'Он продлевается сам',
+  'Let it renew again': 'Снова продлевать',
+  'Nothing to do — it carries on period after period.': 'Ничего делать не нужно — он продолжается период за периодом.',
+  'Stop the renewal': 'Остановить продление',
 }

@@ -14,7 +14,7 @@
 //// with the payment methods it really accepts.
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { myMembership, invoicePdfUrl } from '../lib/api.js'
+import { myMembership, invoicePdfUrl, stopRenewal, resumeRenewal } from '../lib/api.js'
 import { payInvoiceSheet, renewalSheet } from '../sheets.jsx'
 import { Button } from '../components/ui.jsx'
 import { t, dateLocale } from '../lib/i18n.js'
@@ -52,6 +52,10 @@ export default function Membership() {
   // Bumped when a payment goes through: the amounts and the states are the
   // club's, not ours to guess — we ask again rather than patch them here.
   const [round, setRound] = useState(0)
+  //: With the other hooks, ABOVE the early returns: a hook declared further
+  //: down runs on some renders and not others, which React counts and refuses
+  //: ("rendered more hooks than during the previous render").
+  const [busy, setBusy] = useState(false)
 
   useEffect(() => {
     let alive = true
@@ -83,6 +87,9 @@ export default function Membership() {
   const invoices = data.invoices || []
   const owed = oldestOwed(invoices)
   const renewal = data.renewal
+  //: Only while it is actually running: there is nothing to stop in a
+  //: membership that has already ended, or one the member has just signed for.
+  const canStop = data.canStop && data.state === 'active'
   const pay = (inv, allowDeferred) => payInvoiceSheet(
     { id: inv.name, title: t('Invoice {0}', inv.name), allowDeferred,
       subtitle: inv.outstanding != null || inv.total != null ? fmtMoney(inv.outstanding ?? inv.total, inv.currency) : '' },
@@ -91,6 +98,19 @@ export default function Membership() {
   // Signing restarts the membership and raises its invoice. Paying it is the
   // next gesture, not another screen — and there "Invoice" is a real answer:
   // the member signs now and the club bills them.
+  // Saying what happens NEXT, not walking out today: the membership runs to
+  // the end of the period already paid for either way. The server refuses
+  // what the club has not opened, so the screen only draws the door.
+  const decide = async (what) => {
+    setBusy(true)
+    try {
+      await (what === 'stop' ? stopRenewal() : resumeRenewal())
+      setRound(n => n + 1)
+    } catch (e) {
+      setError(e.message || String(e))
+    } finally { setBusy(false) }
+  }
+
   const renew = () => renewalSheet(result => {
     setRound(n => n + 1)
     if (data.canPay && result?.invoice) {
@@ -122,6 +142,19 @@ export default function Membership() {
       {/* Nothing renews itself in this club, or the membership is over: either
           way the member says yes here rather than at the desk. A membership
           that rolls on shows no button — there is nothing to say yes to. */}
+      {/* It renews itself, and the club lets the member say otherwise. Two
+          sentences, never both: what happens next, and how to change it. */}
+      {canStop && !renewal && <Row icon={data.stopped ? 'warning' : 'reset'}
+        iconTint={data.stopped ? 'var(--yellow)' : 'var(--grey)'}
+        title={data.stopped ? t('It will not renew itself') : t('It renews itself')}
+        subtitle={data.stopped
+          ? (data.periodEnd ? t('It ends on {0} unless you renew it.', fmtDate(data.periodEnd)) : '')
+          : t('Nothing to do — it carries on period after period.')} />}
+      {canStop && !renewal && <div style={{ padding: '0 14px 14px' }}>
+        <Button variant="ghost" disabled={busy} onClick={() => decide(data.stopped ? 'resume' : 'stop')}>
+          {data.stopped ? t('Let it renew again') : t('Stop the renewal')}
+        </Button>
+      </div>}
       {renewal && <>
         {renewal.why === 'ending' && <Row icon="info" iconTint="var(--yellow)"
           title={t('It will not renew itself')}

@@ -1640,4 +1640,9 @@ export default {
   'Read the terms, accept them and sign: your membership carries on without a break.': '약관을 읽고 동의한 뒤 서명하세요. 회원권이 끊김 없이 이어집니다.',
   'Renew it now': '지금 갱신',
   'Settle it when the invoice reaches you': '청구서를 받으면 결제하세요',
+  //// Neoffice — stopping (and resuming) a renewal from « My membership ».
+  'It renews itself': '자동으로 갱신됩니다',
+  'Let it renew again': '다시 갱신되도록 하기',
+  'Nothing to do — it carries on period after period.': '할 일이 없습니다. 기간마다 계속 이어집니다.',
+  'Stop the renewal': '갱신 중지',
 }

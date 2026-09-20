@@ -1640,4 +1640,9 @@ export default {
   'Read the terms, accept them and sign: your membership carries on without a break.': '阅读条款、同意并签名：你的会籍将不间断地继续。',
   'Renew it now': '立即续期',
   'Settle it when the invoice reaches you': '收到账单后再付款',
+  //// Neoffice — stopping (and resuming) a renewal from « My membership ».
+  'It renews itself': '会自动续期',
+  'Let it renew again': '恢复自动续期',
+  'Nothing to do — it carries on period after period.': '无需操作，它会按周期持续。',
+  'Stop the renewal': '停止续期',
 }

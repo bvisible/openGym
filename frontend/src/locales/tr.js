@@ -1640,4 +1640,9 @@ export default {
   'Read the terms, accept them and sign: your membership carries on without a break.': 'Koşulları oku, kabul et ve imzala: üyeliğin kesintisiz devam eder.',
   'Renew it now': 'Şimdi yenile',
   'Settle it when the invoice reaches you': 'Fatura ulaştığında öde',
+  //// Neoffice — stopping (and resuming) a renewal from « My membership ».
+  'It renews itself': 'Kendiliğinden yenileniyor',
+  'Let it renew again': 'Yeniden yenilenmesine izin ver',
+  'Nothing to do — it carries on period after period.': 'Yapılacak bir şey yok — dönem dönem devam eder.',
+  'Stop the renewal': 'Yenilemeyi durdur',
 }

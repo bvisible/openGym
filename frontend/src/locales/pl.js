@@ -1640,4 +1640,9 @@ export default {
   'Read the terms, accept them and sign: your membership carries on without a break.': 'Przeczytaj warunki, zaakceptuj je i podpisz: Twój karnet trwa bez przerwy.',
   'Renew it now': 'Odnów teraz',
   'Settle it when the invoice reaches you': 'Zapłać po otrzymaniu faktury',
+  //// Neoffice — stopping (and resuming) a renewal from « My membership ».
+  'It renews itself': 'Odnawia się sam',
+  'Let it renew again': 'Pozwól mu znów się odnawiać',
+  'Nothing to do — it carries on period after period.': 'Nic nie trzeba robić — trwa okres po okresie.',
+  'Stop the renewal': 'Zatrzymaj odnawianie',
 }

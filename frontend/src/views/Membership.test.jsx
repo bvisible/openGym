@@ -11,6 +11,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const api = vi.hoisted(() => ({
   myMembership: vi.fn(),
+  stopRenewal: vi.fn(() => Promise.resolve({ ok: true })),
+  resumeRenewal: vi.fn(() => Promise.resolve({ ok: true })),
   invoicePdfUrl: name => '/api/method/neoffice_gym.api.membership.invoice_pdf?invoice=' + encodeURIComponent(name),
 }))
 vi.mock('../lib/api.js', () => api)
@@ -27,7 +29,7 @@ vi.mock('../sheets.jsx', () => ({
 }))
 
 let root, host
-beforeEach(() => { globalThis.IS_REACT_ACT_ENVIRONMENT = true; vi.resetModules(); api.myMembership.mockReset(); nav.mockReset(); sheet.mockReset(); renewal.mockReset() })
+beforeEach(() => { globalThis.IS_REACT_ACT_ENVIRONMENT = true; vi.resetModules(); api.myMembership.mockReset(); nav.mockReset(); sheet.mockReset(); renewal.mockReset(); api.stopRenewal.mockClear(); api.resumeRenewal.mockClear() })
 afterEach(async () => { await act(async () => { root?.unmount() }); document.body.innerHTML = '' })
 
 const mount = async (payload) => {
@@ -160,6 +162,27 @@ describe('my membership', () => {
     //: `allowDeferred` — right after signing, "I'll settle it on the invoice"
     //: is a real answer, unlike on an invoice opened to pay now.
     expect(sheet.mock.calls[0][0].allowDeferred).toBe(true)
+  })
+
+  it('lets the member stop the renewal, and take it back, only where the club opened it', async () => {
+    const rolling = {
+      shown: true, state: 'active', periodEnd: '2026-10-31', due: 0, overdue: 0, invoices: [], plan: null,
+    }
+    //: The club has not opened it: nothing to stop, and no door drawn.
+    let h = await mount(rolling)
+    expect([...h.querySelectorAll('button')].some(b => /Stop the renewal/.test(b.textContent))).toBe(false)
+
+    await act(async () => { root.unmount() }); document.body.innerHTML = ''
+    h = await mount({ ...rolling, canStop: true })
+    expect(h.textContent).toContain('It renews itself')
+    await act(async () => { [...h.querySelectorAll('button')].find(b => /Stop the renewal/.test(b.textContent)).click() })
+    expect(api.stopRenewal).toHaveBeenCalled()
+
+    await act(async () => { root.unmount() }); document.body.innerHTML = ''
+    h = await mount({ ...rolling, canStop: true, stopped: true })
+    expect(h.textContent).toContain('It will not renew itself')
+    await act(async () => { [...h.querySelectorAll('button')].find(b => /Let it renew again/.test(b.textContent)).click() })
+    expect(api.resumeRenewal).toHaveBeenCalled()
   })
 
   it('says so when the membership has ended instead of leaving the screen empty', async () => {

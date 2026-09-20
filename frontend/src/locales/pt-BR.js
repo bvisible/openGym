@@ -758,6 +758,9 @@ export const PT_BR_OVERRIDES = {
   'Ends on {0}': 'Termina em {0}',
   'It ends on {0} unless you renew it.': 'Termina em {0} se você não renovar.',
   'Read the terms, accept them and sign: your membership carries on without a break.': 'Leia as condições, aceite-as e assine: sua inscrição continua sem interrupção.',
+  //// Neoffice — stopping (and resuming) a renewal from « My membership ».
+  'Stop the renewal': 'Cancelar a renovação',
+  'Let it renew again': 'Voltar a renovar automaticamente',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

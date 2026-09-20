@@ -1603,4 +1603,9 @@ export default {
   'Read the terms, accept them and sign: your membership carries on without a break.': 'Olvasd el a feltételeket, fogadd el és írd alá: a tagságod megszakítás nélkül folytatódik.',
   'Renew it now': 'Megújítás most',
   'Settle it when the invoice reaches you': 'Fizesd ki, amikor megérkezik a számla',
+  //// Neoffice — stopping (and resuming) a renewal from « My membership ».
+  'It renews itself': 'Magától megújul',
+  'Let it renew again': 'Hadd újuljon meg újra',
+  'Nothing to do — it carries on period after period.': 'Nincs teendő — időszakról időszakra folytatódik.',
+  'Stop the renewal': 'Megújítás leállítása',
 }

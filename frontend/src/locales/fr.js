@@ -1733,4 +1733,9 @@ export default {
   'Read the terms, accept them and sign: your membership carries on without a break.': 'Lisez les conditions, acceptez-les et signez : votre abonnement se poursuit sans interruption.',
   'Renew it now': 'Renouveler maintenant',
   'Settle it when the invoice reaches you': 'Réglez-la à réception de la facture',
+  //// Neoffice — stopping (and resuming) a renewal from « My membership ».
+  'It renews itself': 'Il se renouvelle tout seul',
+  'Let it renew again': 'Le laisser se renouveler',
+  'Nothing to do — it carries on period after period.': 'Rien à faire, il se poursuit période après période.',
+  'Stop the renewal': 'Arrêter le renouvellement',
 }

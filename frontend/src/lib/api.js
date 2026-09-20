@@ -87,6 +87,8 @@ const M = {
   myMembership: '/api/method/neoffice_gym.api.membership.mine',
   invoicePdf: '/api/method/neoffice_gym.api.membership.invoice_pdf',
   invoiceMethods: '/api/method/neoffice_gym.api.membership.payment_methods',
+  stopRenewal: '/api/method/neoffice_gym.api.membership.stop_renewal',
+  resumeRenewal: '/api/method/neoffice_gym.api.membership.resume_renewal',
   payInvoice: '/api/method/neoffice_gym.api.membership.pay_invoice',
   invoicePayState: '/api/method/neoffice_gym.api.membership.payment_state',
   //// Neoffice — the club's floor plan. `floorWhereIs` answers "where do I do
@@ -272,6 +274,12 @@ export const payInvoice = (invoice, method) =>
   api(M.payInvoice, { method: 'POST', body: JSON.stringify({ invoice, method }) })
 export const invoicePayState = ({ intent, invoice }) =>
   api(M.invoicePayState + '?' + new URLSearchParams(intent ? { intent } : { invoice }))
+
+//// Neoffice — « je ne veux pas qu'il se reconduise », and the way back. The
+//// membership runs to the end of the period already paid for either way: the
+//// member is saying what happens NEXT, not walking out today.
+export const stopRenewal = () => api(M.stopRenewal, { method: 'POST', body: '{}' })
+export const resumeRenewal = () => api(M.resumeRenewal, { method: 'POST', body: '{}' })
 
 //// Neoffice — kept from upstream because other files import them, but INERT here.
 //// Upstream's mobile shell can pair with a Node server by code; our journal is

@@ -1611,4 +1611,9 @@ export default {
   'Read the terms, accept them and sign: your membership carries on without a break.': 'อ่านเงื่อนไข ยอมรับ แล้วลงลายมือชื่อ สมาชิกของคุณจะต่อเนื่องโดยไม่ขาดช่วง',
   'Renew it now': 'ต่ออายุตอนนี้',
   'Settle it when the invoice reaches you': 'ชำระเมื่อได้รับใบแจ้งหนี้',
+  //// Neoffice — stopping (and resuming) a renewal from « My membership ».
+  'It renews itself': 'ต่ออายุอัตโนมัติ',
+  'Let it renew again': 'ให้ต่ออายุอีกครั้ง',
+  'Nothing to do — it carries on period after period.': 'ไม่ต้องทำอะไร ระบบจะต่อให้ทุกงวด',
+  'Stop the renewal': 'หยุดการต่ออายุ',
 }

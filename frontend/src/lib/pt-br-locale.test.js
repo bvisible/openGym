@@ -77,11 +77,14 @@ describe('Brazilian Portuguese locale', () => {
 //// the European clitic "se não o renovar" is not how Brazil says it.
 //// Recomputed for "settle it when the invoice reaches you": Brazil says it
 //// the same way Portugal does, so it inherits.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(687)
-    expect(inherited).toHaveLength(956)
+//// Recomputed for stopping a renewal (4 new keys): 2 overrides — Brazil says
+//// "Cancelar a renovação" where Portugal says "Parar", and spells the way
+//// back "Voltar a renovar automaticamente".
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(689)
+    expect(inherited).toHaveLength(958)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('acdb7f34b9a49441df40a25fe68718dc6f60eaf2691126a614b4ff46bf1f8daf')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('6bae8678ef5fc574ecf3adb5608dd275a897a701c0f530b3a4f5439d95dc1b1d')
   })
 
   test('does not leak European Portuguese UI terms', () => {
