@@ -56,7 +56,16 @@ export default function CoachChat() {
   const coachMode = coachLocal?.mode
 
   const ok = coachAvailable(config, user, { demo: DEMO, mobile: MOBILE, coachMode })
-  const ready = ok && hasConsent(S) && !!S.coach?.profile
+  //: What the club lets the Coach do. Absent (an older server, the demo, the
+  //: mobile build) reads as allowed: the club's answer is what removes
+  //: something, never our not knowing.
+  const may = (BOOT.coach && BOOT.coach.can) || {}
+  const mayAdvise = may.advise !== false
+  const mayWrite = may.writePrograms !== false
+  //: The questionnaire exists to BUILD a plan. Where the club does not let the
+  //: Coach write one, it is not a prerequisite — a member sent to fill it in
+  //: would answer twelve questions and be refused at the end.
+  const ready = ok && hasConsent(S) && (!!S.coach?.profile || !mayWrite)
   // Not before the store has loaded: a cold start straight on #/coach would otherwise read an
   // empty state, decide there is no consent, and bounce a consenting user into the intake.
   useEffect(() => {
@@ -144,11 +153,6 @@ export default function CoachChat() {
   const showCohort = () => openSheet(() => <CohortSheet S={S} update={update} toast={toast} />)
 
   const idle = !job && !pending
-  //: Absent (an older server, the demo, the mobile build) reads as allowed:
-  //: the club's answer is what removes something, never our not knowing.
-  const may = (BOOT.coach && BOOT.coach.can) || {}
-  const mayAdvise = may.advise !== false
-  const mayWrite = may.writePrograms !== false
   const menu = () => openSheet(close => <div className="chat-menu">
     <h3>{t('Coach')}</h3>
     <div className="sect-b">

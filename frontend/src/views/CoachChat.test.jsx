@@ -228,6 +228,24 @@ describe('the Coach chat', () => {
     BOOT.coach = {}
   })
 
+  it('does not send a member to the questionnaire when the club forbids writing plans', async () => {
+    //: Twelve questions and a refusal at the end is the worst of both.
+    const { BOOT } = await import('../lib/api.js')
+    const noProfile = { ...state(), coach: { ...state().coach, profile: null } }
+    //: First the proof that this member WOULD be sent there — otherwise the
+    //: case below passes for the wrong reason.
+    BOOT.coach = {}
+    mocks.nav.mockClear()
+    await mount(null, null, { S: noProfile })
+    expect(mocks.nav).toHaveBeenCalledWith('/coach/intake', { replace: true })
+
+    BOOT.coach = { can: { advise: true, writePrograms: false } }
+    mocks.nav.mockClear()
+    await mount(null, null, { S: noProfile })
+    expect(mocks.nav).not.toHaveBeenCalledWith('/coach/intake', { replace: true })
+    BOOT.coach = {}
+  })
+
   it('offers the comparison only when the instance allows it', async () => {
     await mount(null)
     expect(byText(/^Compare$/)).toBeFalsy()
