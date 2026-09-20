@@ -116,6 +116,39 @@ describe('nothing leaves without the member', () => {
   })
 })
 
+describe('landing in the conversation', () => {
+  //: 🔴 Opening a sheet pushes a history entry (Modals.jsx) and closing one
+  //: answers with `history.go(-1)`. A traversal CANCELS a navigation issued
+  //: right after it, so closing before leaving lost the member on the settings
+  //: screen with their message already sent. Measured on osiris, 2026-09-20.
+  it('leaves for the conversation WITHOUT closing the sheet first', async () => {
+    const href = []
+    const original = Object.getOwnPropertyDescriptor(window, 'location')
+    delete window.location
+    window.location = { set href(v) { href.push(v) }, get href() { return href[href.length - 1] || '' } }
+    try {
+      writeToCoachSheet(COACH)
+      const host = renderTop()
+      type(host, 'bonjour')
+      await act(async () => { buttonSaying(host, /^Send$/).click() })
+      expect(href).toEqual(['/raven/channel/ch1'])
+      expect(useUI.getState().sheets).toHaveLength(1, 'closing first would cancel the navigation')
+    } finally {
+      if (original) Object.defineProperty(window, 'location', original)
+    }
+  })
+
+  it('closes and says so when the server gave no conversation to go to', async () => {
+    mocks.sendToCoach.mockResolvedValue({ channel: 'ch1' })
+    writeToCoachSheet(COACH)
+    const host = renderTop()
+    type(host, 'bonjour')
+    await act(async () => { buttonSaying(host, /^Send$/).click() })
+    expect(useUI.getState().sheets).toHaveLength(0)
+    expect(useUI.getState().toastMsg).toContain('Sent to your coach.')
+  })
+})
+
 describe('when it does not work', () => {
   it('says so and keeps what the member typed', async () => {
     mocks.wordItForCoach.mockRejectedValue(new Error('Your club has not enabled this from the AI coach.'))

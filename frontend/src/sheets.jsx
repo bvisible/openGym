@@ -913,11 +913,18 @@ function WriteToCoach({ coach, close }) {
     setSending(true)
     try {
       const r = await sendToCoach(text)
-      close()
-      toast(t('Sent to your coach.'))
       //: Straight to the conversation: they wrote to a person, and the answer
       //: comes back there, not here.
-      if (r && r.url) window.location.href = r.url
+      //:
+      //: 🔴 The navigation goes FIRST, and the sheet is deliberately NOT closed
+      //: before it. Opening a sheet pushes a history entry (Modals.jsx, so
+      //: Android back dismisses it) and closing one answers with
+      //: `history.go(-1)` — a traversal that CANCELS the assignment to
+      //: location.href issued just after. Measured on osiris: the message was
+      //: sent, and the member stayed on the settings screen with nothing said.
+      if (r && r.url) { window.location.href = r.url; return }
+      close()
+      toast(t('Sent to your coach.'))
     } catch (e) {
       toast(e.message || t('Could not open the conversation.'))
       setSending(false)
