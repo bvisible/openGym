@@ -21,7 +21,9 @@ import { MOBILE, isAndroid, shareExport, syncReminder } from '../lib/mobile.js'
 import { checkForUpdate, downloadAndInstall } from '../lib/update.js'
 import { forgetCoach } from '../lib/coach-api.js'
 import { ConnectSheet } from './MobileOnboarding.jsx'
-import { starterPlanSheet, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet, menuSheet, askAddDeviceData } from '../sheets.jsx'
+//// Neoffice — `writeToCoachSheet` is ours: writing to the club's coach from
+//// the logbook (see MyCoach below).
+import { starterPlanSheet, writeToCoachSheet, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet, menuSheet, askAddDeviceData } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
@@ -728,7 +730,15 @@ function MyCoach() {
   return <Section title={t('Your coach')}>
     <Row icon="personCircle" iconTint="var(--acc)" title={coach.name}
       subtitle={coach.reachable ? t('Follows your training') : t('Follows your training — no account for messages')} />
+    {/* //// Neoffice — writing happens HERE, in the logbook, and the message
+        //// lands in the club's messenger (lot B). The Coach can word the
+        //// question when the club has ticked it; the box works without it.
+        //// The second row still goes to the conversation itself, which is
+        //// where the coach's answer is read. */}
     {coach.reachable && <Row icon="bell" iconTint="var(--blue)" title={t('Write to your coach')}
+      subtitle={t('Ask a question without leaving the logbook')} accessory="chevron"
+      onClick={() => writeToCoachSheet(coach)} />}
+    {coach.reachable && <Row icon="link" iconTint="var(--blue)" title={t('Open the conversation')}
       subtitle={t('Opens the club’s messaging')} accessory="chevron" onClick={busy ? undefined : write} />}
   </Section>
 }

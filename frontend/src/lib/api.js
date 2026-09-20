@@ -73,10 +73,12 @@ const M = {
   //// Neoffice — the routines the club has explicitly opened up. Its
   //// library stays closed: it opens what it decides to open.
   openRoutines: '/api/method/neoffice_gym.api.challenges.open_routines',
-  //// Neoffice — reaching your coach. The messaging is Raven; these two
-  //// endpoints only route to the right conversation.
+  //// Neoffice — reaching your coach. The messaging is Raven; these three
+  //// endpoints only route to the right conversation. None of them takes a
+  //// recipient: who receives is derived from who is asking.
   myCoach: '/api/method/neoffice_gym.api.contact.my_coach',
   openChat: '/api/method/neoffice_gym.api.contact.open_chat',
+  sendToCoach: '/api/method/neoffice_gym.api.contact.send_to_coach',
   //// Neoffice — the member's session pack. Returns an empty response as
   //// long as the club doesn't sell any: the journal shows "no pack"
   //// without having to handle a special case.
@@ -212,6 +214,11 @@ export const openRoutines = () => api(M.openRoutines)
 export const myCoach = () => api(M.myCoach)
 export const openChat = () =>
   api(M.openChat, { method: 'POST', body: '{}' })
+//// Neoffice — the member writes from the logbook and the message lands in the
+//// club's messenger. The text and nothing else: the recipient is derived from
+//// who is asking, like `openChat` above.
+export const sendToCoach = text =>
+  api(M.sendToCoach, { method: 'POST', body: JSON.stringify({ text }) })
 export const wallet = () => api(M.wallet)
 export const myMembership = () => api(M.myMembership)
 //// A URL rather than a call: the PDF is opened by the browser, which does the

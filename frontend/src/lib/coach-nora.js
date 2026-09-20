@@ -24,7 +24,7 @@ const base = chatCompletionsSpec('nora', { maxTokensField: 'max_tokens', tempera
 /** Frappe answers `{"message": <the provider's JSON>}`; an error answers `{"exception": …, "_server_messages": …}`. */
 export const unwrap = data => (data && typeof data === 'object' && data.message && typeof data.message === 'object') ? data.message : data
 
-const frappeError = data => {
+export const frappeError = data => {
   if (!data || typeof data !== 'object') return null
   if (data._server_messages) {
     try {

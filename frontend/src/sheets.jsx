@@ -42,7 +42,10 @@ import { buildPlanBundle, parsePlan, mergePlan, printPlan, planPrintHTML } from 
 //// Neoffice — a coach's offer goes through the same mergePlan as importing
 //// a friend's, but it REPLACES what the previous version had set.
 import { applyCoachProgram, describeOffer, countProgramRoutines } from './lib/coach-program.js'
-import { programAccept, programDecline, openRoutines, classBook, classCancel, payStart, payWith, payState, invoiceMethods, payInvoice, invoicePayState } from './lib/api.js'
+import { programAccept, programDecline, openRoutines, classBook, classCancel, payStart, payWith, payState, invoiceMethods, payInvoice, invoicePayState, sendToCoach } from './lib/api.js'
+//// Neoffice — « expliquer un exercice » (lot B) : une question ponctuelle au
+//// coach du club, hors du pipeline de programme. Voir lib/coach-ask.js.
+import { askable, explainExercise, wordItForCoach } from './lib/coach-ask.js'
 import { estimate1RM, best1RM, is1RMRecord, REP_CAP } from './lib/onerm.js'
 import { exerciseHistory } from './lib/exercise-history.js'
 import { nextPrescription, applyPrescription, policyFor, defaultIncrement, POLICIES_FOR, POLICY_NAME, POLICY_DESC, MAX_BW_SETS, weightIncrement } from './lib/progression.js'
@@ -828,6 +831,12 @@ function ExerciseDetail({ ex, close }) {
         //// every screen. The catalogue name stays one line below. 2026-09-09. */}
     <Button icon="pencil" style={{ margin: '0 0 4px' }} onClick={() => { close(); renameExerciseSheet(ex) }}>{exerciseAliasOf(ex.id) ? t('Rename') : t('Give it my own name')}</Button>
     {exerciseAliasOf(ex.id) && <div className="small dim" style={{ marginBottom: 6 }}>{t('Catalogue name: {0}', catalogueNameFor(ex))}</div>}
+    {/* //// Neoffice — the club's Coach explains the movement, when the club
+        //// has ticked it. `instrFor(ex)` below is upstream's fixed list of
+        //// steps: English only, and only for catalogue exercises — a club's
+        //// own machine has none. Shown ABOVE the history because it answers
+        //// "how do I do this", not "what did I lift". */}
+    {askable('explain') && <Button icon="sparkles" style={{ margin: '0 0 4px' }} onClick={() => explainExerciseSheet(ex)}>{t('Explain this movement')}</Button>}
     {last && <Button icon="history" style={{ marginTop: 4 }} onClick={() => exerciseHistorySheet(ex.id)}>{t('History')}</Button>}
     {ex.custom && <div className="row" style={{ gap: 8, marginTop: 8 }}>
       <Button icon="pencil" style={{ flex: 1 }} onClick={() => { close(); customExSheet(ex) }}>{t('Edit')}</Button>
@@ -850,6 +859,92 @@ function ExerciseDetail({ ex, close }) {
   </>
 }
 export const exerciseDetailSheet = ex => ui().openSheet(close => <ExerciseDetail ex={ex} close={close} />)
+
+//// Neoffice — « EXPLIQUER UN EXERCICE » (lot B, capacité `explain` du club).
+//// The member is standing in front of the machine and wants to know how the
+//// movement goes. The answer is prose, so it does not go through upstream's
+//// program pipeline — see lib/coach-ask.js for why.
+function ExplainExercise({ ex }) {
+  const [text, setText] = useState('')
+  const [failed, setFailed] = useState('')
+  const [busy, setBusy] = useState(true)
+  useEffect(() => {
+    //: The sheet can be closed while the answer is on its way; writing to a
+    //: component that is gone is a warning in the console and a leak in ours.
+    let alive = true
+    explainExercise(ex)
+      .then(answer => { if (alive) { setText(answer); setBusy(false) } })
+      .catch(e => { if (alive) { setFailed(e.message || t('The Coach could not be reached. Try again in a moment.')); setBusy(false) } })
+    return () => { alive = false }
+  }, [ex.id])
+  return <>
+    <h3 className="capitalize">{exerciseNameFor(ex)}</h3>
+    <div className="small dim" style={{ marginBottom: 10 }}>{t('Explained by your club’s Coach')}</div>
+    {busy && <div className="muted">{t('The Coach is writing…')}</div>}
+    {!!failed && <div className="exnote">{failed}</div>}
+    {!!text && <div className="coach-explain">{text.split(/\n{2,}/).map((p, i) => <p key={i}>{p}</p>)}</div>}
+  </>
+}
+export const explainExerciseSheet = ex => ui().openSheet(close => <ExplainExercise ex={ex} close={close} />)
+
+//// Neoffice — « ÉCRIRE À SON COACH » (lot B, capacité `messageCoach`).
+//// The member writes here and the message lands in the club's messenger. The
+//// Coach's help is OPTIONAL and sits beside the box: it words the question,
+//// it never sends it, and the member reads over what it wrote before anything
+//// leaves. Without the club's tick, the box alone remains — the AI is the
+//// help, not the channel.
+function WriteToCoach({ coach, close }) {
+  const [text, setText] = useState('')
+  const [wording, setWording] = useState(false)
+  const [sending, setSending] = useState(false)
+  const helped = askable('messageCoach')
+
+  const wordIt = async () => {
+    setWording(true)
+    try {
+      setText(await wordItForCoach(text))
+    } catch (e) {
+      toast(e.message || t('The Coach could not be reached. Try again in a moment.'))
+    }
+    setWording(false)
+  }
+
+  const send = async () => {
+    setSending(true)
+    try {
+      const r = await sendToCoach(text)
+      close()
+      toast(t('Sent to your coach.'))
+      //: Straight to the conversation: they wrote to a person, and the answer
+      //: comes back there, not here.
+      if (r && r.url) window.location.href = r.url
+    } catch (e) {
+      toast(e.message || t('Could not open the conversation.'))
+      setSending(false)
+    }
+  }
+
+  const busy = wording || sending
+  return <>
+    <h3>{coach && coach.name ? t('Write to {0}', coach.name) : t('Write to your coach')}</h3>
+    <div className="small dim" style={{ marginBottom: 10 }}>
+      {helped ? t('Say it however it comes. The Coach can put it into words for you, and you read it over before it goes.')
+        : t('Your message goes to the club’s messaging, where your coach answers.')}
+    </div>
+    {/* //// The server refuses past 4000 characters; the box stops there so
+        //// nobody writes a page and loses it to a refusal. */}
+    <textarea className="input area" autoFocus value={text} disabled={busy} maxLength={4000}
+      placeholder={t('What would you like to ask?')}
+      onChange={e => setText(e.target.value)} />
+    {helped && <Button icon="sparkles" style={{ margin: '8px 0 4px' }} disabled={busy || !text.trim()} onClick={wordIt}>
+      {wording ? t('The Coach is writing…') : t('Help me word it')}
+    </Button>}
+    <Button variant="primary" icon="bell" style={{ marginTop: 4 }} disabled={busy || !text.trim()} onClick={send}>
+      {sending ? t('Sending…') : t('Send')}
+    </Button>
+  </>
+}
+export const writeToCoachSheet = coach => ui().openSheet(close => <WriteToCoach coach={coach} close={close} />)
 //// Neoffice — the whole room, on its own (Home card, Exercises tab). 2026-09-09.
 export const floorPlanSheet = zones => ui().openSheet(close => <FloorPlanSheet zones={zones} close={close} />)
 

@@ -530,6 +530,12 @@ body.chips-dragging *{cursor:inherit}
   line-height:1.45;white-space:pre-wrap;font-size:15px;margin-bottom:10px;color:var(--label-2);
 }
 
+/* //// Neoffice — what the club's Coach wrote, in paragraphs: an explanation
+   of a movement, or the message it worded for the member's human coach. */
+.coach-explain{line-height:1.5;font-size:15px;color:var(--label-1)}
+.coach-explain p{margin:0 0 10px}
+.coach-explain p:last-child{margin-bottom:0}
+
 /* --- search field --- */
 .searchf{position:relative;display:flex;align-items:center}
 .searchf .lead{
