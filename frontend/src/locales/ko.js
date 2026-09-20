@@ -1647,4 +1647,20 @@ export default {
   'Stop the renewal': '갱신 중지',
   //// Neoffice — what the club lets the AI coach do.
   'Your club has not enabled this from the Coach.': '클럽에서 코치의 이 기능을 사용하도록 설정하지 않았습니다.',
+  //// Neoffice — the club's Coach explains an exercise's movement, when the club has ticked it (askable 'explain').
+  'Explain this movement': '이 동작 설명하기',
+  'Explained by your club’s Coach': '클럽 코치가 설명함',
+  //// Neoffice — writing to the coach from the logbook, with optional AI wording help (askable 'messageCoach').
+  'The Coach is writing…': '코치가 쓰는 중…',
+  'This question does not say what it is for.': '이 질문에는 용도가 나와 있지 않아요.',
+  'The Coach could not be reached. Try again in a moment.': '코치에게 연결할 수 없었어요. 잠시 후 다시 시도해 주세요.',
+  'The Coach answered nothing this time.': '이번에는 코치가 아무 답도 주지 않았어요.',
+  'Write to {0}': '{0}님에게 메시지 보내기',
+  'Say it however it comes. The Coach can put it into words for you, and you read it over before it goes.': '생각나는 대로 적어보세요. 코치가 문구를 다듬어 드리고, 보내기 전에 다시 읽어볼 수 있어요.',
+  'Your message goes to the club’s messaging, where your coach answers.': '보낸 메시지는 클럽 메시지로 전달되고, 코치가 그곳에서 답해요.',
+  'What would you like to ask?': '무엇을 물어보고 싶으세요?',
+  'Help me word it': '문구 다듬기',
+  'Sent to your coach.': '코치에게 보냈어요.',
+  'Ask a question without leaving the logbook': '일지를 벗어나지 않고 질문해 보세요.',
+  'Open the conversation': '대화 열기',
 }

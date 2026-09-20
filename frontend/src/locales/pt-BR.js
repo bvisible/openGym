@@ -761,6 +761,16 @@ export const PT_BR_OVERRIDES = {
   //// Neoffice — stopping (and resuming) a renewal from « My membership ».
   'Stop the renewal': 'Cancelar a renovação',
   'Let it renew again': 'Voltar a renovar automaticamente',
+  //// Neoffice — writing to the coach from the logbook (14 new keys): 9 are Brazilian overrides — the informal tu/te/ti forms and the EU progressive "está a + infinitive" that pt.js uses throughout this feature become você + 3rd-person conjugation, gerund, and "contatar"/"instantes" spelling in Brazil — and the other 5 (the plain infinitives and the two person-neutral statements) read the same on both sides and stay inherited.
+  'Explained by your club’s Coach': 'Explicado pelo Coach do seu clube',
+  'The Coach is writing…': 'O Coach está escrevendo…',
+  'The Coach could not be reached. Try again in a moment.': 'Não foi possível contatar o Coach. Tente novamente dentro de instantes.',
+  'Say it however it comes. The Coach can put it into words for you, and you read it over before it goes.': 'Diga como vier à cabeça. O Coach pode colocá-lo em palavras para você, e você lê tudo antes de ser enviado.',
+  'Your message goes to the club’s messaging, where your coach answers.': 'A sua mensagem vai para as mensagens do clube, onde o seu coach responde.',
+  'What would you like to ask?': 'O que você gostaria de perguntar?',
+  'Help me word it': 'Me ajude a escrever isso.',
+  'Sent to your coach.': 'Enviado ao seu coach.',
+  'Ask a question without leaving the logbook': 'Faça uma pergunta sem sair do diário.',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

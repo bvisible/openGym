@@ -1647,4 +1647,20 @@ export default {
   'Stop the renewal': 'नवीनीकरण रोकें',
   //// Neoffice — what the club lets the AI coach do.
   'Your club has not enabled this from the Coach.': 'आपके क्लब ने कोच के लिए यह सक्षम नहीं किया है।',
+  //// Neoffice — the club's Coach explains an exercise's movement, when the club has ticked it (askable 'explain').
+  'Explain this movement': 'इस मूवमेंट को समझाएँ',
+  'Explained by your club’s Coach': 'आपके क्लब के कोच द्वारा समझाया गया',
+  //// Neoffice — writing to the coach from the logbook, with optional AI wording help (askable 'messageCoach').
+  'The Coach is writing…': 'कोच लिख रहा है…',
+  'This question does not say what it is for.': 'यह सवाल यह नहीं बताता कि यह किसलिए है।',
+  'The Coach could not be reached. Try again in a moment.': 'कोच से संपर्क नहीं हो सका। थोड़ी देर में फिर कोशिश करें।',
+  'The Coach answered nothing this time.': 'इस बार कोच ने कुछ भी जवाब नहीं दिया।',
+  'Write to {0}': '{0} को लिखें',
+  'Say it however it comes. The Coach can put it into words for you, and you read it over before it goes.': 'जैसा भी मन में आए, वैसा ही कहें। कोच इसे आपके लिए शब्दों में ढाल सकता है, और भेजने से पहले आप इसे पढ़ लेते हैं।',
+  'Your message goes to the club’s messaging, where your coach answers.': 'आपका संदेश क्लब की मैसेजिंग में जाता है, जहाँ आपका कोच जवाब देता है।',
+  'What would you like to ask?': 'आप क्या पूछना चाहेंगे?',
+  'Help me word it': 'इसे शब्दों में लिखने में मदद करें',
+  'Sent to your coach.': 'आपके कोच को भेज दिया गया।',
+  'Ask a question without leaving the logbook': 'अपनी डायरी से बाहर गए बिना सवाल पूछें।',
+  'Open the conversation': 'बातचीत खोलें',
 }

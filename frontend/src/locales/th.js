@@ -1618,4 +1618,20 @@ export default {
   'Stop the renewal': 'หยุดการต่ออายุ',
   //// Neoffice — what the club lets the AI coach do.
   'Your club has not enabled this from the Coach.': 'คลับของคุณยังไม่ได้เปิดใช้ฟังก์ชันนี้ของโค้ช',
+  //// Neoffice — the club's Coach explains an exercise's movement, when the club has ticked it (askable 'explain').
+  'Explain this movement': 'อธิบายการเคลื่อนไหวนี้',
+  'Explained by your club’s Coach': 'อธิบายโดยโค้ชของคลับ',
+  //// Neoffice — writing to the coach from the logbook, with optional AI wording help (askable 'messageCoach').
+  'The Coach is writing…': 'โค้ชกำลังเขียน…',
+  'This question does not say what it is for.': 'คำถามนี้ไม่ได้ระบุว่ามีไว้เพื่ออะไร',
+  'The Coach could not be reached. Try again in a moment.': 'ติดต่อโค้ชไม่สำเร็จ กรุณาลองใหม่อีกครั้ง',
+  'The Coach answered nothing this time.': 'ครั้งนี้โค้ชไม่ได้ตอบอะไรเลย',
+  'Write to {0}': 'เขียนถึง {0}',
+  'Say it however it comes. The Coach can put it into words for you, and you read it over before it goes.': 'พิมพ์ไปตามที่คุณคิด โค้ชจะช่วยเรียบเรียงคำให้คุณ แล้วคุณอ่านทวนอีกครั้งก่อนส่ง',
+  'Your message goes to the club’s messaging, where your coach answers.': 'ข้อความของคุณจะไปที่ระบบข้อความของคลับ ที่โค้ชของคุณจะตอบ',
+  'What would you like to ask?': 'คุณอยากถามอะไร?',
+  'Help me word it': 'ช่วยเรียบเรียงให้หน่อย',
+  'Sent to your coach.': 'ส่งถึงโค้ชของคุณแล้ว',
+  'Ask a question without leaving the logbook': 'ถามคำถามได้โดยไม่ต้องออกจากสมุดบันทึก',
+  'Open the conversation': 'เปิดการสนทนา',
 }

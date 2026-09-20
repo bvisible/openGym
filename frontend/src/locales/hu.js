@@ -1610,4 +1610,20 @@ export default {
   'Stop the renewal': 'Megújítás leállítása',
   //// Neoffice — what the club lets the AI coach do.
   'Your club has not enabled this from the Coach.': 'A klubod ezt nem engedélyezte az edzőnél.',
+  //// Neoffice — the club's Coach explains an exercise's movement, when the club has ticked it (askable 'explain').
+  'Explain this movement': 'Mozdulat magyarázata',
+  'Explained by your club’s Coach': 'A klub Edzője magyarázta el',
+  //// Neoffice — writing to the coach from the logbook, with optional AI wording help (askable 'messageCoach').
+  'The Coach is writing…': 'Az Edző ír…',
+  'This question does not say what it is for.': 'Ez a kérdés nem mondja meg, mire vonatkozik.',
+  'The Coach could not be reached. Try again in a moment.': 'Nem sikerült elérni az Edzőt. Próbálja újra egy pillanat múlva.',
+  'The Coach answered nothing this time.': 'Az Edző ezúttal nem válaszolt semmit.',
+  'Write to {0}': 'Írjon {0} részére',
+  'Say it however it comes. The Coach can put it into words for you, and you read it over before it goes.': 'Írja úgy, ahogy eszébe jut. Az Edző segíthet megfogalmazni, és elolvashatja még egyszer, mielőtt elmegy.',
+  'Your message goes to the club’s messaging, where your coach answers.': 'Az üzenete a klub üzenetküldőjébe kerül, ahol az edzője válaszol.',
+  'What would you like to ask?': 'Mit szeretne kérdezni?',
+  'Help me word it': 'Segítsen megfogalmazni',
+  'Sent to your coach.': 'Elküldve az edzőjének.',
+  'Ask a question without leaving the logbook': 'Kérdezzen anélkül, hogy elhagyná a naplót.',
+  'Open the conversation': 'Nyissa meg a beszélgetést',
 }

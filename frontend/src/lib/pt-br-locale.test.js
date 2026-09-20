@@ -83,11 +83,18 @@ describe('Brazilian Portuguese locale', () => {
 //// Recomputed for the club's AI switches (1 new key): "O seu clube" is the
 //// European form, but this file already overrides that turn of phrase where
 //// it matters, and the sentence itself reads the same in Brazil.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(689)
-    expect(inherited).toHaveLength(959)
+//// Recomputed for explaining an exercise and writing to the coach (14 new
+//// keys): 9 overrides — pt.js runs the informal tu/te/ti forms and the EU
+//// progressive "está a + infinitive" through this whole feature, so Brazil's
+//// você + 3rd-person conjugation and gerund apply throughout, along with the
+//// "contactar"/"contatar" and "momentos"/"instantes" EU/BR spelling and word
+//// choice — and the other 5 (three person-neutral infinitives, two
+//// statements with no 2nd-person marking) read the same on both sides.
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(698)
+    expect(inherited).toHaveLength(964)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('f99fdd3155a2f3a4221da6569261d115ceb1c3031516af1c705bf406ba9a1a21')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('4077694350470edaa812cbc79152dd697b0959e078ddaffea5f08d7f4f622a3e')
   })
 
   test('does not leak European Portuguese UI terms', () => {

@@ -1647,4 +1647,20 @@ export default {
   'Stop the renewal': '停止续期',
   //// Neoffice — what the club lets the AI coach do.
   'Your club has not enabled this from the Coach.': '你的俱乐部未开启教练的这项功能。',
+  //// Neoffice — the club's Coach explains an exercise's movement, when the club has ticked it (askable 'explain').
+  'Explain this movement': '讲解这个动作',
+  'Explained by your club’s Coach': '由俱乐部的教练讲解',
+  //// Neoffice — writing to the coach from the logbook, with optional AI wording help (askable 'messageCoach').
+  'The Coach is writing…': '教练撰写中…',
+  'This question does not say what it is for.': '这个问题没有说明它的用途。',
+  'The Coach could not be reached. Try again in a moment.': '无法联系到教练，请稍后再试。',
+  'The Coach answered nothing this time.': '这次教练什么都没有回答。',
+  'Write to {0}': '给 {0} 发消息',
+  'Say it however it comes. The Coach can put it into words for you, and you read it over before it goes.': '想到什么就说什么，教练会帮你把它写成话，发送前你还可以再读一遍。',
+  'Your message goes to the club’s messaging, where your coach answers.': '你的消息会发送到俱乐部的消息系统，由你的教练在那里回复。',
+  'What would you like to ask?': '你想问什么？',
+  'Help me word it': '帮我润色',
+  'Sent to your coach.': '已发送给你的教练。',
+  'Ask a question without leaving the logbook': '无需离开日记即可提问。',
+  'Open the conversation': '打开对话',
 }

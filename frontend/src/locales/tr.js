@@ -1647,4 +1647,20 @@ export default {
   'Stop the renewal': 'Yenilemeyi durdur',
   //// Neoffice — what the club lets the AI coach do.
   'Your club has not enabled this from the Coach.': 'Kulübün koçta bunu açmamış.',
+  //// Neoffice — the club's Coach explains an exercise's movement, when the club has ticked it (askable 'explain').
+  'Explain this movement': 'Bu hareketi açıkla',
+  'Explained by your club’s Coach': 'Kulübünün Koç’u tarafından açıklandı',
+  //// Neoffice — writing to the coach from the logbook, with optional AI wording help (askable 'messageCoach').
+  'The Coach is writing…': 'Koç yazıyor…',
+  'This question does not say what it is for.': 'Bu soru ne için olduğunu belirtmiyor.',
+  'The Coach could not be reached. Try again in a moment.': 'Koç’a ulaşılamadı. Birazdan tekrar dene.',
+  'The Coach answered nothing this time.': 'Koç bu sefer hiçbir şey yanıtlamadı.',
+  'Write to {0}': '{0} için yaz',
+  'Say it however it comes. The Coach can put it into words for you, and you read it over before it goes.': 'Aklına nasıl geliyorsa öyle yaz. Koç senin için sözcüklere dökebilir, göndermeden önce sen de okursun.',
+  'Your message goes to the club’s messaging, where your coach answers.': 'Mesajın kulübün mesajlaşmasına gider, orada koçun cevaplar.',
+  'What would you like to ask?': 'Ne sormak istersin?',
+  'Help me word it': 'Sözcüklere dökmeme yardım et',
+  'Sent to your coach.': 'Koçuna gönderildi.',
+  'Ask a question without leaving the logbook': 'Günlükten çıkmadan soru sor.',
+  'Open the conversation': 'Sohbeti aç',
 }

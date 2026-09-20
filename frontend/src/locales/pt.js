@@ -1647,4 +1647,20 @@ export default {
   'Stop the renewal': 'Parar a renovação',
   //// Neoffice — what the club lets the AI coach do.
   'Your club has not enabled this from the Coach.': 'O seu clube não ativou isto no treinador.',
+  //// Neoffice — the club's Coach explains an exercise's movement, when the club has ticked it (askable 'explain').
+  'Explain this movement': 'Explicar este movimento',
+  'Explained by your club’s Coach': 'Explicado pelo Coach do teu clube',
+  //// Neoffice — writing to the coach from the logbook, with optional AI wording help (askable 'messageCoach').
+  'The Coach is writing…': 'O Coach está a escrever…',
+  'This question does not say what it is for.': 'Esta pergunta não diz para que serve.',
+  'The Coach could not be reached. Try again in a moment.': 'Não foi possível contactar o Coach. Tenta novamente dentro de momentos.',
+  'The Coach answered nothing this time.': 'O Coach não respondeu nada desta vez.',
+  'Write to {0}': 'Escrever a {0}',
+  'Say it however it comes. The Coach can put it into words for you, and you read it over before it goes.': 'Diz como te vier à cabeça. O Coach pode pô-lo em palavras por ti, e lês tudo antes de ser enviado.',
+  'Your message goes to the club’s messaging, where your coach answers.': 'A tua mensagem vai para as mensagens do clube, onde o teu coach responde.',
+  'What would you like to ask?': 'O que gostarias de perguntar?',
+  'Help me word it': 'Ajuda-me a escrevê-lo',
+  'Sent to your coach.': 'Enviado ao teu coach.',
+  'Ask a question without leaving the logbook': 'Faz uma pergunta sem saíres do diário.',
+  'Open the conversation': 'Abrir a conversa',
 }
