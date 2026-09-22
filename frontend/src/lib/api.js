@@ -79,6 +79,10 @@ const M = {
   myCoach: '/api/method/neoffice_gym.api.contact.my_coach',
   openChat: '/api/method/neoffice_gym.api.contact.open_chat',
   sendToCoach: '/api/method/neoffice_gym.api.contact.send_to_coach',
+  //// Neoffice — the conversation with the coach, ours: no recipient is ever
+  //// named, the thread is resolved from the session. See api/chat.py.
+  coachThread: '/api/method/neoffice_gym.api.chat.my_thread',
+  coachThreadPost: '/api/method/neoffice_gym.api.chat.post',
   //// Neoffice — the member's session pack. Returns an empty response as
   //// long as the club doesn't sell any: the journal shows "no pack"
   //// without having to handle a special case.
@@ -219,6 +223,10 @@ export const openChat = () =>
 //// who is asking, like `openChat` above.
 export const sendToCoach = text =>
   api(M.sendToCoach, { method: 'POST', body: JSON.stringify({ text }) })
+//// Neoffice — the member's own thread. No parameter names anybody.
+export const coachThread = () => api(M.coachThread)
+export const coachThreadPost = (text, attachment) =>
+  api(M.coachThreadPost, { method: 'POST', body: JSON.stringify({ text, attachment }) })
 export const wallet = () => api(M.wallet)
 export const myMembership = () => api(M.myMembership)
 //// A URL rather than a call: the PDF is opened by the browser, which does the

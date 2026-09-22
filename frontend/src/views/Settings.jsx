@@ -11,7 +11,7 @@ import { effortOf } from '../lib/history.js'
 //// Neoffice — passkeys are gone: the Frappe session is the sign-in, and the
 //// journal never had a user directory of its own here. IS_ANDROID stays (it
 //// only phrases a hint about the install prompt).
-import { IS_ANDROID, myCoach, openChat, wallet, classesMine, myMembership } from '../lib/api.js'
+import { IS_ANDROID, myCoach, wallet, classesMine, myMembership } from '../lib/api.js'
 import { unlock, playOnSilentSupported } from '../lib/sound.js'
 import { pushSupported, enablePush, disablePush, sendTestPush, syncPushSubscription } from '../lib/push.js'
 import { wakeLockSupported } from '../lib/wakelock.js'
@@ -21,9 +21,7 @@ import { MOBILE, isAndroid, shareExport, syncReminder } from '../lib/mobile.js'
 import { checkForUpdate, downloadAndInstall } from '../lib/update.js'
 import { forgetCoach } from '../lib/coach-api.js'
 import { ConnectSheet } from './MobileOnboarding.jsx'
-//// Neoffice — `writeToCoachSheet` is ours: writing to the club's coach from
-//// the logbook (see MyCoach below).
-import { starterPlanSheet, writeToCoachSheet, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet, menuSheet, askAddDeviceData } from '../sheets.jsx'
+import { starterPlanSheet, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet, menuSheet, askAddDeviceData } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
@@ -701,9 +699,12 @@ function EquipmentCard({ S, update }) {
 
 
 //// Neoffice — added: who follows this member, and how to write to them.
+//// The conversation lives in the journal now (views/CoachThread.jsx). It used
+//// to send the member OUT, into the team messenger — which let them list every
+//// person on the instance, and showed them the club's desk menu.
 function MyCoach() {
+  const nav = useNavigate()
   const [coach, setCoach] = useState(null)
-  const [busy, setBusy] = useState(false)
   useEffect(() => {
     let alive = true
     myCoach()
@@ -713,33 +714,12 @@ function MyCoach() {
   }, [])
   if (!coach) return null
 
-  const write = async () => {
-    setBusy(true)
-    try {
-      const r = await openChat()
-      //// Raven is another application on the same site: we GO there, we do
-      //// not embed it. A new tab would leave the logbook open behind, with two
-      //// possible threads for the same conversation.
-      window.location.href = r.url
-    } catch (e) {
-      toast(e.message || t('Could not open the conversation.'))
-      setBusy(false)
-    }
-  }
-
   return <Section title={t('Your coach')}>
     <Row icon="personCircle" iconTint="var(--acc)" title={coach.name}
       subtitle={coach.reachable ? t('Follows your training') : t('Follows your training — no account for messages')} />
-    {/* //// Neoffice — writing happens HERE, in the logbook, and the message
-        //// lands in the club's messenger (lot B). The Coach can word the
-        //// question when the club has ticked it; the box works without it.
-        //// The second row still goes to the conversation itself, which is
-        //// where the coach's answer is read. */}
-    {coach.reachable && <Row icon="bell" iconTint="var(--blue)" title={t('Write to your coach')}
+    {coach.reachable && <Row icon="bell" iconTint="var(--acc)" title={t('Write to your coach')}
       subtitle={t('Ask a question without leaving the logbook')} accessory="chevron"
-      onClick={() => writeToCoachSheet(coach)} />}
-    {coach.reachable && <Row icon="link" iconTint="var(--blue)" title={t('Open the conversation')}
-      subtitle={t('Opens the club’s messaging')} accessory="chevron" onClick={busy ? undefined : write} />}
+      onClick={() => nav('/coach-thread')} />}
   </Section>
 }
 

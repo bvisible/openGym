@@ -774,6 +774,8 @@ export const PT_BR_OVERRIDES = {
   'Help me word it': 'Me ajude a escrever isso.',
   'Sent to your coach.': 'Enviado ao seu coach.',
   'Ask a question without leaving the logbook': 'Faça uma pergunta sem sair do diário.',
+  //// Neoffice — the standalone "write to your coach" screen (CoachThread.jsx, 4 new keys): 1 is a Brazilian override — pt.js's tu-form imperative and future subjunctive ("Pergunta... quiseres") become você + 3rd-person ("Pergunte... quiser") in Brazil — and the other 3 (the day name, the error fallback, and the header subtitle — none carry 2nd-person verb marking) read the same on both sides and stay inherited.
+  'Nothing said yet. Ask what you like — your coach answers here.': 'Ainda sem mensagens. Pergunte o que quiser — o seu coach responde aqui.',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

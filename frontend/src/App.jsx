@@ -48,6 +48,8 @@ import Muscles from './views/Muscles.jsx'
 import Settings from './views/Settings.jsx'
 //// Neoffice — added screen: the member's own membership and invoices.
 import Membership from './views/Membership.jsx'
+//// Neoffice — the conversation with the coach, in the journal itself.
+import CoachThread from './views/CoachThread.jsx'
 //// Neoffice — no Admin.jsx: the club manages members in the Frappe desk (see the /admin note below).
 import CoachChat from './views/CoachChat.jsx'
 import CoachIntake from './views/CoachIntake.jsx'
@@ -193,6 +195,7 @@ function Shell() {
                   who bookmarked it lands on a real answer, not on the home
                   screen with no explanation. */}
               <Route path="/membership" element={<Membership />} />
+              <Route path="/coach-thread" element={<CoachThread />} />
               {/* The Coach screens gate themselves on the instance config; the routes exist
                   unconditionally so a deep link from a notification lands somewhere sane
                   rather than on the catch-all. */}

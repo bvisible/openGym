@@ -1,8 +1,8 @@
 // French UI strings. Keys are the English source strings (see lib/i18n.js).
-//// Neoffice — vouvoiement partout. Upstream tutoyait (« configure ta routine »),
-//// ce que la charte de la marque interdit : en Suisse romande une application
-//// professionnelle vouvoie. Reprendre les tournures à la main au lieu d'un
-//// remplacement mécanique était nécessaire — les verbes changent avec le pronom.
+//// Neoffice — vouvoiement (formal "you") throughout. Upstream used tu ("configure ta
+//// routine"), which the brand guidelines forbid: in Suisse romande a professional
+//// application uses vous. Reworking the phrasing by hand instead of a mechanical
+//// replacement was necessary — the verb forms change with the pronoun.
 export default {
   'Confirm': 'Confirmer',
   'Cancel': 'Annuler',
@@ -765,9 +765,9 @@ export default {
   '{0} sets of {1} — time to add weight or move to a harder variation.': '{0} séries de {1} — il est temps d’ajouter du poids ou de passer à une variante plus dure.',
   '{0} per side': '{0} par côté',
   'You still log the total: {0} is {1} per side.': 'Vous notez toujours le total : {0}, c’est {1} par côté.',
-  //// Neoffice — chaînes introduites par le portage sur Frappe (la session
-  //// remplace les passkeys) et chaînes du build de démonstration qui
-  //// n'avaient pas de traduction française en amont.
+  //// Neoffice — strings introduced by the Frappe port (the session replaces
+  //// passkeys) and strings from the demo build that had no French translation
+  //// upstream.
   'Demo': 'Démo',
   'Self-host openGym': 'Hébergez openGym vous-même',
   'Passkey sign-in, sync across your devices, your own data.': 'Connexion par clé d’accès, synchronisation entre vos appareils, vos données chez vous.',
@@ -785,9 +785,9 @@ export default {
   'source code': 'code source',
   'exercise data': 'données d\'exercices',
   'animations': 'animations',
-  //// Neoffice — chaînes arrivées avec la mise à jour amont du 2026-08-24
-  //// (supersets de séance, échauffement, carte de fatigue, bouton retour),
-  //// passées au vouvoiement comme le reste du pack.
+  //// Neoffice — strings that came in with the 2026-08-24 upstream update
+  //// (workout supersets, warm-up, fatigue card, back button), switched to
+  //// vouvoiement like the rest of the pack.
   'Press back again to exit': 'Appuyez de nouveau pour quitter',
   'The sets you logged for this exercise in this session will be lost.': 'Les séries enregistrées pour cet exercice pendant cet entraînement seront perdues.',
   'This removes the exercise from your current session.': 'Cela retire l’exercice de votre entraînement actuel.',
@@ -1027,13 +1027,13 @@ export default {
   'How the session went as a whole.': 'Comment l’entraînement s’est passé dans l’ensemble.',
   'Rest-pause always trains as one warm-up set at this rep count, then one rest-pause work set — "Sets" is not used.': 'Le rest-pause s’entraîne toujours comme une série d’échauffement à ce nombre de reps, puis une série de travail rest-pause — « Séries » n’est pas utilisé.',
 
-  //// Neoffice — le coaching : l'offre de programme d'un coach.
+  //// Neoffice — coaching: a coach's program offer.
   'Week {0} of {1} of your program': 'Semaine {0} sur {1} de votre programme',
   '{0}-week cycle': 'cycle de {0} semaines',
   'Week {0} of {1} — {2}': 'Semaine {0} sur {1} — {2}',
   'Your schedule follows this program week by week: it changes on its own at the start of each week, over {0} weeks, then starts again.': 'Votre planning suit ce programme semaine par semaine : il change tout seul au début de chaque semaine, sur {0} semaines, puis recommence.',
 
-  //// Neoffice — les tests physiques et la composition corporelle.
+  //// Neoffice — physical tests and body composition.
   'Your goals': 'Vos objectifs',
   'reached': 'atteint',
   'by {0}': 'pour le {0}',
@@ -1190,7 +1190,7 @@ export default {
   'Take part if you want to': 'Participez si vous le souhaitez',
   'See all': 'Voir tout',
   '{0} kg': '{0} kg',
-  //// Neoffice — l'écran de paiement d'un cours, dans le carnet.
+  //// Neoffice — the class payment screen, in the logbook.
   'Book now, pay on the invoice': 'Réserver maintenant, payer sur facture',
   'Finish the payment in the window that just opened.': 'Terminez le paiement dans la fenêtre qui vient de s’ouvrir.',
   'Holding your place…': 'Réservation de votre place…',
@@ -1210,7 +1210,7 @@ export default {
   'Waiting for your payment…': 'En attente de votre paiement…',
   'Your place is booked': 'Votre place est réservée',
   'or enter this code in the app': 'ou saisissez ce code dans l’application',
-  //// Neoffice — chaînes restées en anglais faute de traduction (relevé du 2026-08-25).
+  //// Neoffice — strings that stayed in English for lack of translation (surveyed on 2026-08-25).
   'Could not open the conversation.': 'Impossible d’ouvrir la conversation.',
   'Follows your training': 'Suit votre entraînement',
   'Follows your training — no account for messages': 'Suit votre entraînement — aucun compte pour les messages',
@@ -1221,7 +1221,12 @@ export default {
   'Your club': 'Votre club',
   'Your coach': 'Votre coach',
   'valid until {0}': 'valable jusqu’au {0}',
-  //// Neoffice — l'écran de connexion du carnet.
+  //// Neoffice — the standalone "write to your coach" screen (CoachThread.jsx, added 2026-09-22).
+  'Nothing said yet. Ask what you like — your coach answers here.': 'Rien de dit pour l’instant. Demandez ce que vous voulez : votre coach répond ici.',
+  'This could not be read.': 'Impossible de lire cela.',
+  'Yesterday': 'Hier',
+  'Your club answers here': 'Votre club répond ici',
+  //// Neoffice — the logbook's sign-in screen.
   'Back to sign in': 'Revenir à la connexion',
   'Email address': 'Adresse e-mail',
   'Enter your address and we will send you a link to choose a new password.': 'Indiquez votre adresse et nous vous enverrons un lien pour choisir un nouveau mot de passe.',

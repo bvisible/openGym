@@ -96,11 +96,16 @@ describe('Brazilian Portuguese locale', () => {
 //// "contactar"/"contatar" and "momentos"/"instantes" EU/BR spelling and word
 //// choice — and the other 5 (three person-neutral infinitives, two
 //// statements with no 2nd-person marking) read the same on both sides.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(700)
-    expect(inherited).toHaveLength(964)
+//// Recomputed for the standalone "write to your coach" screen (CoachThread.jsx,
+//// 4 new keys): 1 override — pt.js's tu-form imperative and future subjunctive
+//// ("Pergunta... quiseres") become você + 3rd-person ("Pergunte... quiser") in
+//// Brazil — and the other 3 (the day name, the error fallback, the header
+//// subtitle) carry no 2nd-person verb marking and read the same on both sides.
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(701)
+    expect(inherited).toHaveLength(967)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('4077694350470edaa812cbc79152dd697b0959e078ddaffea5f08d7f4f622a3e')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('a49a7bc6fa07bdf65f5e6dc38ab37e23d636cb2d7adf37ea907a5ff6d7af1d0e')
   })
 
   test('does not leak European Portuguese UI terms', () => {
