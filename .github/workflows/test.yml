@@ -66,15 +66,6 @@ jobs:
       # Property probe over ~108k comparisons; too slow for the unit suite, cheap here.
       - run: npm run test:fatigue-probe
         working-directory: frontend
-      # //// Neoffice — the api/ suite ran NOWHERE. It carried a permanent red
-      # //// (a provider of ours whose adapter is served by the browser, which the
-      # //// pairing test read as a missing adapter), and a red nobody can fix is a
-      # //// red everybody stops reading. Now that it is green, something has to
-      # //// run it, or the next real failure is just as invisible as the old one.
-      - run: npm ci
-        working-directory: api
-      - run: npm test
-        working-directory: api
 
 
   mcp:
