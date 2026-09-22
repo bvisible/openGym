@@ -208,9 +208,12 @@
 /* the photo waiting to go, above the composer */
 .photo-pick{max-width:560px;margin:0 auto 8px;position:relative;width:max-content}
 .photo-pick img{display:block;max-height:120px;max-width:180px;border-radius:12px}
-.photo-drop{
-  position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:99px;
-  background:var(--label);color:var(--bg);font-size:13px;
+/* Scoped to its parent on purpose: `.iconbtn` also sets position and a size,
+   and on a single-class rule the last stylesheet loaded wins — measured on
+   screen, the cross landed BELOW the photo instead of on its corner. */
+.photo-pick .photo-drop{
+  position:absolute;top:-8px;right:-8px;width:26px;height:26px;min-width:0;padding:0;
+  border-radius:99px;background:var(--label);color:var(--bg);font-size:13px;
   display:flex;align-items:center;justify-content:center
 }
 /* The camera sits where the send button sits, quiet until it is used. */
