@@ -13,7 +13,13 @@ on:
       - 'api/coach/prompts/**'
       - '.github/workflows/test.yml'
   push:
-    branches: [main, coach]
+    # //// Neoffice — version-15 added. THIS WORKFLOW HAD NEVER RUN ON OUR
+    # //// BRANCH: upstream watches main and coach, and every instance of the
+    # //// fleet runs version-15. So the frontend suite, the build, the locale
+    # //// check and the fatigue probe were all dormant here — the only thing
+    # //// firing on a push was the artifact bot, which builds without testing.
+    # //// A workflow can be perfectly consistent with itself and watch nothing.
+    branches: [main, coach, version-15]
     paths:
       - 'frontend/**'
       - 'api/**'
