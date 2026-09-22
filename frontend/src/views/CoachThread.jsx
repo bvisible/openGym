@@ -64,7 +64,6 @@ export default function CoachThread() {
   const [failed, setFailed] = useState('')
   const [photo, setPhoto] = useState(null)
   const [preview, setPreview] = useState('')
-  const foot = useRef(null)
   const picker = useRef(null)
   const helped = askable('messageCoach')
 
@@ -99,8 +98,14 @@ export default function CoachThread() {
     return () => { clearInterval(tick); document.removeEventListener('visibilitychange', wake) }
   }, [])
 
-  //: Newest at the bottom, like every conversation anybody has ever used.
-  useEffect(() => { foot.current?.scrollIntoView({ block: 'end' }) }, [state.messages.length])
+  //: Newest at the bottom, like every conversation anybody has ever used —
+  //: and to the PAGE's end, not to the marker. `scrollIntoView` puts the
+  //: marker at the bottom of the viewport, which is behind the composer fixed
+  //: over it: measured, the last message ended up under it. The page's own
+  //: bottom padding is what clears the composer, so the end of the page is
+  //: the target that shows the whole of the last message.
+  const toEnd = () => { const el = document.scrollingElement; if (el) el.scrollTop = el.scrollHeight }
+  useEffect(toEnd, [state.messages.length])
 
   const send = async () => {
     const body = text.trim()
@@ -183,7 +188,7 @@ export default function CoachThread() {
                   //// height until it is decoded, so the first scroll stopped
                   //// short and the newest message sat below the fold. */}
               {!!m.attachment && <img className="bub-img" src={m.attachment} alt=""
-                onLoad={() => foot.current?.scrollIntoView({ block: 'end' })} />}
+                onLoad={toEnd} />}
               {m.body}
             </div>
             <div className="msg-t">{clock(m.at)}</div>
@@ -192,7 +197,6 @@ export default function CoachThread() {
       })}
 
       {!!failed && <div className="msg coach"><div className="bub err">{failed}</div></div>}
-      <div ref={foot} />
     </div>
 
     <div className="composer">

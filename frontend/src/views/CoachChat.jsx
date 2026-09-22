@@ -96,7 +96,16 @@ export default function CoachChat() {
     })
   }, [job, pending, loading])
 
-  useEffect(() => { if (typeof endRef.current?.scrollIntoView === 'function') endRef.current.scrollIntoView({ block: 'end' }) }, [S.coach?.chat?.length, !!job, !!pending])
+  //// Neoffice — to the PAGE's end, not to the marker. `scrollIntoView` puts
+  //// the marker at the bottom of the viewport, which is behind the composer
+  //// fixed over it — measured at phone width, the last 62px of the newest
+  //// message sat under the composer. The page's own bottom padding is what
+  //// clears it, so the end of the page is the target.
+  useEffect(() => {
+    const el = document.scrollingElement
+    if (el) el.scrollTop = el.scrollHeight
+    else if (typeof endRef.current?.scrollIntoView === 'function') endRef.current.scrollIntoView({ block: 'end' })
+  }, [S.coach?.chat?.length, !!job, !!pending])
 
   if (!ready) return null
   const coach = S.coach || emptyCoach()
