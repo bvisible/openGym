@@ -77,8 +77,6 @@ const M = {
   //// endpoints only route to the right conversation. None of them takes a
   //// recipient: who receives is derived from who is asking.
   myCoach: '/api/method/neoffice_gym.api.contact.my_coach',
-  openChat: '/api/method/neoffice_gym.api.contact.open_chat',
-  sendToCoach: '/api/method/neoffice_gym.api.contact.send_to_coach',
   //// Neoffice — the conversation with the coach, ours: no recipient is ever
   //// named, the thread is resolved from the session. See api/chat.py.
   coachThread: '/api/method/neoffice_gym.api.chat.my_thread',
@@ -118,7 +116,11 @@ const M = {
  * Errors, exactly as it did against the old Node API.
  */
 export async function api(path, opts = {}) {
-  const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers)
+  //// Neoffice — a FormData body sets its OWN content type, boundary included.
+  //// Declaring application/json over it makes the browser send the multipart
+  //// bytes under the wrong header, and the server then finds no file at all.
+  const multipart = typeof FormData !== 'undefined' && opts.body instanceof FormData
+  const headers = Object.assign(multipart ? {} : { 'Content-Type': 'application/json' }, opts.headers)
   const method = (opts.method || 'GET').toUpperCase()
   //// Neoffice — Frappe rejects any write without this header. The token comes
   //// from the page boot; a session that outlived its token gets a 403 here,
@@ -216,17 +218,19 @@ export const challengeBoard = (challenge) =>
 export const announcements = () => api(M.announcements)
 export const openRoutines = () => api(M.openRoutines)
 export const myCoach = () => api(M.myCoach)
-export const openChat = () =>
-  api(M.openChat, { method: 'POST', body: '{}' })
-//// Neoffice — the member writes from the logbook and the message lands in the
-//// club's messenger. The text and nothing else: the recipient is derived from
-//// who is asking, like `openChat` above.
-export const sendToCoach = text =>
-  api(M.sendToCoach, { method: 'POST', body: JSON.stringify({ text }) })
 //// Neoffice — the member's own thread. No parameter names anybody.
 export const coachThread = () => api(M.coachThread)
-export const coachThreadPost = (text, attachment) =>
-  api(M.coachThreadPost, { method: 'POST', body: JSON.stringify({ text, attachment }) })
+//// Neoffice — a photo travels as a FILE, never as a path. The endpoint reads
+//// `photo` out of the request and nothing else: there is no argument that
+//// names a file on the server, so a member cannot point their own thread at
+//// one (neoffice_gym/api/chat.py, `_photo_in_the_request`).
+export const coachThreadPost = (text, photo) => {
+  if (!photo) return api(M.coachThreadPost, { method: 'POST', body: JSON.stringify({ text }) })
+  const form = new FormData()
+  form.append('text', text || '')
+  form.append('photo', photo, photo.name || 'photo.jpg')
+  return api(M.coachThreadPost, { method: 'POST', body: form })
+}
 export const wallet = () => api(M.wallet)
 export const myMembership = () => api(M.myMembership)
 //// A URL rather than a call: the PDF is opened by the browser, which does the

@@ -776,6 +776,11 @@ export const PT_BR_OVERRIDES = {
   'Ask a question without leaving the logbook': 'Faça uma pergunta sem sair do diário.',
   //// Neoffice — the standalone "write to your coach" screen (CoachThread.jsx, 4 new keys): 1 is a Brazilian override — pt.js's tu-form imperative and future subjunctive ("Pergunta... quiseres") become você + 3rd-person ("Pergunte... quiser") in Brazil — and the other 3 (the day name, the error fallback, and the header subtitle — none carry 2nd-person verb marking) read the same on both sides and stay inherited.
   'Nothing said yet. Ask what you like — your coach answers here.': 'Ainda sem mensagens. Pergunte o que quiser — o seu coach responde aqui.',
+  //// Neoffice — sending a photo to the coach (4 new keys): all four are Brazilian overrides — Brazil says "foto" where pt.js says "fotografia" throughout, and the size refusal also carries the tu/você imperative split ("Tira… envia" / "Tire… envie") already established for this feature. Inherited set unchanged.
+  'Add a photo': 'Adicionar uma foto',
+  'Remove the photo': 'Remover a foto',
+  'Only a photo can be sent here.': 'Aqui só é possível enviar uma foto.',
+  'That photo is too large. Take it again or send a smaller one.': 'Essa foto é muito grande. Tire outra ou envie uma menor.',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

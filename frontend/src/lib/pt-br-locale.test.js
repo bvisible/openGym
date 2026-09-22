@@ -101,7 +101,13 @@ describe('Brazilian Portuguese locale', () => {
 //// ("Pergunta... quiseres") become você + 3rd-person ("Pergunte... quiser") in
 //// Brazil — and the other 3 (the day name, the error fallback, the header
 //// subtitle) carry no 2nd-person verb marking and read the same on both sides.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(701)
+//// Recomputed for sending a photo to the coach (4 new keys): all four are
+//// overrides — Brazil says "foto" where pt.js says "fotografia" throughout,
+//// and the size refusal also carries the tu/você imperative split ("Tira…
+//// envia" / "Tire… envie") already established for this feature. Nothing new
+//// is inherited, so the hash does not move; only the override count does
+//// (701 → 705).
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(705)
     expect(inherited).toHaveLength(967)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list

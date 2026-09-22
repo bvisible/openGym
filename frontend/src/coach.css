@@ -190,6 +190,32 @@
 .send:disabled{opacity:.3}
 .composer-cap{max-width:560px;margin:4px auto 0;text-align:center;font-size:11px;color:var(--label-3)}
 
+/* //// Neoffice — LA CONVERSATION AVEC LE COACH (views/CoachThread.jsx).
+   It wears the shell above — .chat, .chat-hdr, .msgs, .bub, .composer — so
+   light and dark, the safe areas and the blurred title bar are already right.
+   Only what a conversation with a HUMAN adds lives here. */
+.chat-av.who{font-size:15px;font-weight:600;letter-spacing:.01em}
+.msg-day{
+  text-align:center;font-size:12px;color:var(--label-3);
+  margin:8px 0 2px;letter-spacing:.02em
+}
+/* Who spoke, inside the bubble: a club can have several coaches, and a member
+   is owed the name of the person answering them. Never on their own bubble. */
+.bub-who{font-size:12px;font-weight:600;color:var(--label-2);margin-bottom:3px}
+.bub-img{display:block;max-width:100%;border-radius:12px;margin:-3px 0 6px}
+.bub-img:only-child{margin-bottom:-3px}
+
+/* the photo waiting to go, above the composer */
+.photo-pick{max-width:560px;margin:0 auto 8px;position:relative;width:max-content}
+.photo-pick img{display:block;max-height:120px;max-width:180px;border-radius:12px}
+.photo-drop{
+  position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:99px;
+  background:var(--label);color:var(--bg);font-size:13px;
+  display:flex;align-items:center;justify-content:center
+}
+/* The camera sits where the send button sits, quiet until it is used. */
+.send.ghost{background:var(--surface);color:var(--label-2)}
+
 /* menu sheet rows reuse .lrow; the cadence sub-sheet reuses Section */
 .chat-menu .lrow-t{font-size:17px}
 

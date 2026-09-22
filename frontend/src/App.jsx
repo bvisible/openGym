@@ -58,6 +58,11 @@ import CoachSetup from './views/CoachSetup.jsx'
 // last known scrollY per route, so back-navigation can put the page where it was
 const scrollPositions = new Map()
 
+//// Neoffice — the screens that are a conversation: full height, their own
+//// title bar with a way back, and a composer fixed to the bottom. They hide
+//// the tab bar rather than share the bottom of the screen with it.
+const CONVERSATIONS = new Set(['/coach', '/coach-thread'])
+
 bindUI(useUI)   // lets the shared controls open sheets without importing the store at module scope
 
 // theme === 'system' follows the OS/browser preference instead of a fixed choice.
@@ -212,8 +217,11 @@ function Shell() {
           )}
         </ErrorBoundary>
       </div>
-      {/* The chat owns the bottom of the screen: its composer sits where the tabs would be. */}
-      {loc.pathname !== '/coach' && <TabBar onStart={startFlow} />}
+      {/* A conversation owns the bottom of the screen: its composer sits where
+          the tabs would be. Measured the hard way on /coach-thread — the send
+          and "help me word it" buttons started at y=802 and so did the tab
+          bar, exactly overlapped. */}
+      {!CONVERSATIONS.has(loc.pathname) && <TabBar onStart={startFlow} />}
       <RestTimer />
       <Modals />
       <Toast />

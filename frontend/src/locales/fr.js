@@ -1225,6 +1225,10 @@ export default {
   'Nothing said yet. Ask what you like — your coach answers here.': 'Rien de dit pour l’instant. Demandez ce que vous voulez : votre coach répond ici.',
   'This could not be read.': 'Impossible de lire cela.',
   'Yesterday': 'Hier',
+  'Add a photo': 'Ajouter une photo',
+  'Remove the photo': 'Retirer la photo',
+  'Only a photo can be sent here.': 'Seule une photo peut être envoyée ici.',
+  'That photo is too large. Take it again or send a smaller one.': 'Cette photo est trop lourde. Reprenez-la ou envoyez-en une plus légère.',
   'Your club answers here': 'Votre club répond ici',
   //// Neoffice — the logbook's sign-in screen.
   'Back to sign in': 'Revenir à la connexion',
