@@ -174,7 +174,10 @@ export default function CoachThread() {
         return <Fragment key={m.name}>
           {show && <div className="msg-day">{day}</div>}
           <div className={'msg ' + (m.mine ? 'user' : 'coach')}>
-            <div className="bub">
+            {/* //// A photo sent on its own IS the message: the bubble hugs it
+                //// instead of framing it, the way a phone shows a picture. A
+                //// photo with words keeps the bubble, since the words need it. */}
+            <div className={'bub' + (m.attachment && !m.body ? ' photo' : '')}>
               {!m.mine && <div className="bub-who">{m.senderName}</div>}
               {!!m.attachment && <img className="bub-img" src={m.attachment} alt="" />}
               {m.body}
