@@ -46,8 +46,16 @@ export const HTTP_PROVIDERS = Object.freeze({
   //// (neoffice_gym.api.coach_ai) that forwards it to Nora's model, counts the
   //// call for the club and never hands a key to the phone. Same wire shape as
   //// `compatible`; the base URL is the page's own origin.
+  //// Neoffice — added provider, and the only one SERVED BY THE CLIENT.
+  //// Its adapter lives in frontend/src/lib/coach-nora.js, not in
+  //// api/coach/core/adapters/, because the pipeline runs in the browser: the
+  //// journal is served from the same origin as the model's gateway, the club
+  //// pays for it, and the key never leaves the instance. `clientSide` is what
+  //// says so out loud — without it the pairing test below reads the absence
+  //// of a server adapter as a defect, which is how this suite carried a
+  //// permanent red.
   nora: Object.freeze({
-    label: 'Nora', runtime: 'HTTPS', http: true,
+    label: 'Nora', runtime: 'HTTPS', http: true, clientSide: true,
     apiKeyEnv: 'NORA_API_KEY', oauthEnv: null,
     defaultBase: null, baseUrl: true, keyOptional: true,
     defaultModel: 'nora',
@@ -56,6 +64,13 @@ export const HTTP_PROVIDERS = Object.freeze({
 });
 
 export const HTTP_PROVIDER_IDS = Object.freeze(Object.keys(HTTP_PROVIDERS));
+
+//// Neoffice — the providers whose adapter is NOT on this side. A caller that
+//// pairs providers with server adapters has to know they exist; a caller that
+//// dispatches a job on the server has to refuse them for the same reason.
+export const CLIENT_SIDE_PROVIDER_IDS = Object.freeze(
+  Object.keys(HTTP_PROVIDERS).filter(id => HTTP_PROVIDERS[id].clientSide === true)
+);
 
 /** The base URL a provider will actually be called at: the configured override, else the default. */
 export function baseUrlFor(id, cfg) {

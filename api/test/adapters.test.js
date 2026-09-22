@@ -13,11 +13,34 @@ const { adapterFor, default: ADAPTERS } = await import('../coach/adapters/index.
 const { LOCKDOWN } = await import('../coach/adapters/claude.js');
 const { argvFor } = await import('../coach/adapters/codex.js');
 const cfg = await import('../coach/config.js');
+//// Neoffice — a provider can be served by the CLIENT: its adapter lives in the
+//// journal's bundle, not in api/coach/adapters/. See providers.js.
+const { CLIENT_SIDE_PROVIDER_IDS } = await import('../coach/core/providers.js');
 
 test('every provider the config offers has an adapter, and vice versa', () => {
-  assert.deepEqual(Object.keys(ADAPTERS).sort(), Object.keys(cfg.PROVIDERS).sort());
-  for (const id of Object.keys(cfg.PROVIDERS)) assert.ok(adapterFor(id), `no adapter for "${id}"`);
+  //// Neoffice — rewritten. Upstream paired the two lists whole, which knows
+  //// two cases: a provider with a server adapter, and a bug. Ours has a
+  //// third — a provider the BROWSER serves — and the test read it as the
+  //// second, so this suite carried a permanent red. A red nobody can fix is
+  //// a red everybody stops reading, and the day it catches something real
+  //// nobody sees it.
+  ////
+  //// The pairing still holds, on the providers this side is responsible for.
+  const served = Object.keys(cfg.PROVIDERS).filter(id => !CLIENT_SIDE_PROVIDER_IDS.includes(id));
+  assert.deepEqual(Object.keys(ADAPTERS).sort(), served.sort());
+  for (const id of served) assert.ok(adapterFor(id), `no adapter for "${id}"`);
   assert.equal(adapterFor('not-a-provider'), null);
+});
+
+//// Neoffice — added: the exemption above must stay an exemption.
+test('a client-side provider is declared, and has no server adapter', () => {
+  //// Naming it here is the point: the list is a decision, not a hole. If a
+  //// provider is ever added to it by accident, this is where it shows.
+  assert.deepEqual([...CLIENT_SIDE_PROVIDER_IDS], ['nora']);
+  for (const id of CLIENT_SIDE_PROVIDER_IDS) {
+    assert.ok(cfg.PROVIDERS[id], `"${id}" is offered by the config`);
+    assert.equal(adapterFor(id), null, `"${id}" must not resolve to a server adapter`);
+  }
 });
 
 test('the Claude adapter is locked out of every tool the SDK could give it', () => {
