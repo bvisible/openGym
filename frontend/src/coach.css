@@ -206,8 +206,11 @@
    stretched to that reads as a poster instead of as something shown in
    passing. 240px is about what a phone messenger gives one. */
 .bub-img{display:block;width:100%;max-width:240px;border-radius:12px;margin:-3px 0 6px}
-.bub.photo{padding:3px;background:none}
-.bub.photo .bub-img{margin:0}
+/* Under `.msg` on purpose: the member's own bubble is coloured by
+   `.msg.user .bub`, three classes, which beats a two-class rule however late
+   it comes. Measured on screen — the frame stayed green. */
+.msg .bub.photo{padding:3px;background:none}
+.msg .bub.photo .bub-img{margin:0}
 .msg.coach .bub.photo{border-bottom-left-radius:15px}
 .msg.user .bub.photo{border-bottom-right-radius:15px}
 

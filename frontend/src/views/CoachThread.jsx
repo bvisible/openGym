@@ -179,7 +179,11 @@ export default function CoachThread() {
                 //// photo with words keeps the bubble, since the words need it. */}
             <div className={'bub' + (m.attachment && !m.body ? ' photo' : '')}>
               {!m.mine && <div className="bub-who">{m.senderName}</div>}
-              {!!m.attachment && <img className="bub-img" src={m.attachment} alt="" />}
+              {/* //// Scrolled again when the picture lands: a photo has no
+                  //// height until it is decoded, so the first scroll stopped
+                  //// short and the newest message sat below the fold. */}
+              {!!m.attachment && <img className="bub-img" src={m.attachment} alt=""
+                onLoad={() => foot.current?.scrollIntoView({ block: 'end' })} />}
               {m.body}
             </div>
             <div className="msg-t">{clock(m.at)}</div>
