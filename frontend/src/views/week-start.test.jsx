@@ -71,6 +71,10 @@ afterEach(() => {
 
 const segButton = label => [...host.querySelectorAll('.seg button')].find(b => b.textContent === label)
 const dayRows = () => [...host.querySelectorAll('.item .tt')].map(e => e.textContent)
+//// Neoffice — the week is one line until it is opened (#765): the day rows these
+//// tests read are upstream's full list, drawn once the member asks for it.
+const weekButton = () => [...host.querySelectorAll('button')].find(b => ['Edit', 'Details', 'Done', 'Less'].includes(b.textContent))
+const openWeek = () => act(() => { weekButton().click() })
 
 describe('Settings — week starts on', () => {
   const mount = () => act(() => root.render(<Settings />))
@@ -95,7 +99,8 @@ describe('Settings — week starts on', () => {
 })
 
 describe('Plan — the week schedule follows the setting', () => {
-  const mount = () => act(() => root.render(<Plan />))
+  //// Neoffice — opened, see openWeek above.
+  const mount = () => { act(() => root.render(<Plan />)); openWeek() }
 
   it('runs Monday to Sunday by default', () => {
     mount()
@@ -123,7 +128,8 @@ describe('Plan — the week schedule follows the setting', () => {
 })
 
 describe('Plan — inline per-day routine management (combine routines)', () => {
-  const mount = () => act(() => root.render(<Plan />))
+  //// Neoffice — opened, see openWeek above.
+  const mount = () => { act(() => root.render(<Plan />)); if (weekButton()?.textContent === 'Edit') openWeek() }
   const dayContainer = name => [...host.querySelectorAll('.item')].find(el => el.querySelector('.tt')?.textContent === name)
 
   beforeEach(() => {
@@ -159,5 +165,49 @@ describe('Plan — inline per-day routine management (combine routines)', () => 
     const tue = dayContainer('Tuesday')
     expect(tue.textContent).toContain('Rest')
     expect(tue.querySelectorAll('button[aria-label="Remove"]').length).toBe(0)
+  })
+})
+
+//// Neoffice — THE WEEK AS ONE LINE (#765). A club reported that planning by day
+//// « prend trop de place par rapport à son importance réelle »: many members never
+//// plan by day, and upstream drew seven rows — most of them « Rest » — before the
+//// routines. The line says the same thing in one row; the list opens on demand.
+describe('Plan — the week as one line', () => {
+  const mount = () => act(() => root.render(<Plan />))
+  const cells = () => [...host.querySelectorAll('.weekline-d')]
+
+  beforeEach(() => {
+    mocks.S.routines = [{ id: 'r1', name: 'Push', emoji: null, ex: [] }]
+  })
+
+  it('draws seven days on one line, and the full list only when asked', () => {
+    mocks.S.week = { 1: ['r1'] }
+    mount()
+    expect(cells()).toHaveLength(7)
+    expect(dayRows()).not.toContain('Monday')
+    expect(cells()[0].className).toContain('on')
+    expect(cells()[1].className).not.toContain('on')
+    openWeek()
+    //: `.item .tt` also reads the routine's own row under Monday.
+    expect(dayRows().filter(x => x !== 'Push')).toEqual(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+    expect(cells()).toHaveLength(0)
+  })
+
+  it('says nothing about the week to a coached member whose coach set no day', () => {
+    mocks.S.perms = { editPlan: false }
+    mocks.S.week = {}
+    mount()
+    expect(cells()).toHaveLength(0)
+    expect(host.textContent).not.toContain('Week schedule')
+  })
+
+  it('lets a coached member read the days, never change them', () => {
+    mocks.S.perms = { editPlan: false }
+    mocks.S.week = { 3: ['r1'] }
+    mount()
+    expect(weekButton().textContent).toBe('Details')
+    openWeek()
+    expect(dayRows()).toContain('Wednesday')
+    expect(host.querySelectorAll('button[aria-label="Remove"]')).toHaveLength(0)
   })
 })

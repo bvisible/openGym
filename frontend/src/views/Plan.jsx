@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
 import { DAYN, weekOrder, weekStartOf, uid, exCount } from '../lib/format.js'
@@ -41,6 +42,11 @@ export default function Plan() {
   //// Absent = allowed, so that an offline state composed before this field
   //// existed does not lock somebody's plan by accident.
   const mayEdit = S.perms ? S.perms.editPlan !== false : true
+  //// Neoffice — the week line (#765): which days carry a routine, and the full
+  //// upstream list only when the member asks for it.
+  const [weekOpen, setWeekOpen] = useState(false)
+  const routinesOn = d => [].concat(S.week[d] || []).map(id => S.routines.find(x => x.id === id)).filter(Boolean)
+  const plannedDays = weekOrder(weekStartOf(S)).filter(d => routinesOn(d).length)
   // Pull one routine off a weekday; drop the key when the day empties (never store []).
   const removeFromDay = (d, rid) => update(s => {
     const next = [].concat(s.week[d] || []).filter(id => id !== rid)
@@ -80,8 +86,36 @@ export default function Plan() {
     </button>}
 
     <div className="cols"><div>
-      <h4 className="sec">{t('Week schedule')}</h4>
-      <div className="list" style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* //// Neoffice — THE WEEK AS ONE LINE (#765). Upstream draws seven rows before
+           the routines, most of them « Rest »; a club reported that planning by day
+           « prend trop de place par rapport à son importance réelle » — many members
+           never do it. So the week is one line of seven cells (a day with a routine
+           shows its icon), and upstream's full list below opens on demand, its
+           controls untouched (and still behind mayEdit). A week with nothing on it,
+           in a plan the member may not edit, is not drawn at all. */}
+      {(plannedDays.length > 0 || mayEdit) && <div className="row between" style={{ marginBottom: 8 }}>
+        <h4 className="sec" style={{ margin: 0 }}>{t('Week schedule')}</h4>
+        {/* A member whose coach writes the plan reads the days, read-only: « Details ». */}
+        <button className="btn ghost sm" onClick={() => setWeekOpen(o => !o)}>{weekOpen ? (mayEdit ? t('Done') : t('Less')) : (mayEdit ? t('Edit') : t('Details'))}</button>
+      </div>}
+      {!weekOpen && plannedDays.length > 0 && <div className="weekline" role="list">
+        {weekOrder(weekStartOf(S)).map(d => {
+          const rs = routinesOn(d)
+          return <div key={d} role="listitem" className={'weekline-d' + (rs.length ? ' on' : '')}
+            title={t(DAYN[d]) + (rs.length ? ' — ' + rs.map(r => r.name).join(', ') : '')}
+            {...tappable(() => setWeekOpen(true))}>
+            <span className="weekline-l">{t(DAYN[d]).charAt(0)}</span>
+            {rs.length ? <Icon name={glyphOf(rs[0].emoji)} /> : <i />}
+            {rs.length > 1 && <b>{rs.length}</b>}
+          </div>
+        })}
+      </div>}
+      {!weekOpen && !plannedDays.length && mayEdit && <div className="weekline" role="list">
+        {weekOrder(weekStartOf(S)).map(d => <div key={d} role="listitem" className="weekline-d" title={t(DAYN[d])} {...tappable(() => setWeekOpen(true))}>
+          <span className="weekline-l">{t(DAYN[d]).charAt(0)}</span><i />
+        </div>)}
+      </div>}
+      {weekOpen && <div className="list" style={{ display: 'flex', flexDirection: 'column' }}>
         {weekOrder(weekStartOf(S)).map(d => {
           const dayRoutines = [].concat(S.week[d] || []).map(id => S.routines.find(x => x.id === id)).filter(Boolean)
           //// Neoffice — upstream's several-routines-per-day rows AND our mayEdit
@@ -110,7 +144,7 @@ export default function Plan() {
             </button>}
           </div>
         })}
-      </div>
+      </div>}
     </div><div>
       <div className="row between" style={{ marginTop: 22, marginBottom: 10 }}>
         <h4 className="sec" style={{ margin: 0 }}>{t('Routines')}</h4>

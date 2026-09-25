@@ -1637,3 +1637,23 @@ button.floor-chip { background: transparent; font: inherit; }
 .coach-cta-t span{font-size:13px;color:var(--label-2);line-height:1.35}
 .coach-cta-chev{color:var(--acc);font-size:15px;flex:none}
 
+
+/* //// Neoffice — the week as ONE line of seven days (#765). Upstream's seven rows
+   came before the routines, most of them « Rest »; a club reported the days take
+   far more room than they matter to most members. A day carrying a routine shows
+   its icon; the full list opens on demand. */
+.weekline { display: flex; gap: 6px; margin-bottom: 14px; }
+.weekline-d {
+  position: relative; flex: 1; min-width: 0; height: 52px; border-radius: 12px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  background: var(--surface); color: var(--label-3); cursor: pointer;
+}
+.weekline-d .weekline-l { font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+.weekline-d > i { display: block; width: 5px; height: 5px; border-radius: 50%; background: var(--surface-3); }
+.weekline-d.on { color: var(--label); background: color-mix(in srgb, var(--acc) 14%, var(--surface)); }
+.weekline-d.on svg { width: 18px; height: 18px; color: var(--acc); }
+.weekline-d > b {
+  position: absolute; top: 4px; right: 5px; font-size: 10px; font-weight: 600; line-height: 1;
+  color: var(--acc);
+}
+.weekline-d:active { transform: scale(.96); }
