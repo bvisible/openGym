@@ -2,7 +2,7 @@
 ////
 //// The image a member posts after a session.
 ////
-//// Asked for by Olympia on 2026-08-31, and framed by them as COMMERCIAL, not
+//// Asked for by the pilot club on 2026-08-31, and framed by them as COMMERCIAL, not
 //// as a gadget: *"c'est le membre qui fait la promotion du club"*. Which is
 //// why the club's name and logo are not decoration here — they are the point,
 //// and they are the only things the member cannot switch off.

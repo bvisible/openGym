@@ -3,7 +3,7 @@
 ////
 //// THE CLIENT'S ACTUAL REQUEST, AS A TEST.
 ////
-//// Olympia, 31.08: *"on a des données qui sont très techniques, trop
+//// The pilot club, 31.08: *"on a des données qui sont très techniques, trop
 //// techniques. Un débutant, ça peut lui faire peur […] ça a ce côté
 //// rédhibitoire."* Every other level test pins ONE rule or ONE screen. This
 //// one pins the PROMISE: at the simple and normal levels, the technical

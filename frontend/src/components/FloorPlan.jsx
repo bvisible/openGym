@@ -2,7 +2,7 @@
 ////
 //// The club's floor plan, as a member reads it.
 ////
-//// Asked for by Olympia on 2026-08-31: *"quand on clique sur un exercice,
+//// Asked for by the pilot club on 2026-08-31: *"quand on clique sur un exercice,
 //// puisse voir le plan de salle en bas, avec le numéro qui clignote — il se
 //// dit 'ok, c'est là que je dois aller'."*
 ////

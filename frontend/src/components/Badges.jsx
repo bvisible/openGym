@@ -2,7 +2,7 @@
 ////
 //// Badges, points, and what they buy.
 ////
-//// Asked for by Olympia on 2026-08-31, with the four categories the club
+//// Asked for by the pilot club on 2026-08-31, with the four categories the club
 //// switches on or off, and *"une partie points qui donnerait des avantages"*.
 ////
 //// LOCKED BADGES ARE SHOWN TOO, with what it takes under each. A trophy case

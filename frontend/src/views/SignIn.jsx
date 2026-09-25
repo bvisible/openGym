@@ -91,7 +91,7 @@ export default function SignIn() {
 
   return <div className="signin">
     {/* //// Neoffice — the club's own icon when it has one, the dumbbell
-        otherwise. Tested as Olympia Fitness on 2026-09-02: the sign-in screen
+        otherwise. Tested with a club's branding on 2026-09-02: the sign-in screen
         showed a dumbbell over "Fitness" while the home screen showed the club's
         name — two identities for one app, on the first screen a member sees. */}
     {/* //// Neoffice — the club's FULL logo when it has one (Gym Settings › Full

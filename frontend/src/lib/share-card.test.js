@@ -36,7 +36,7 @@ const LABELS = { done: 'Séance faite', duration: 'Durée', exercises: 'Exercice
                  volume: 'Poids soulevé', sets: 'Séries', records: 'Records' }
 const WORKOUT = { name: 'Haut du corps', date: '31 août', duration: '48 min',
                   exercises: 5, sets: 18, volume: 2400, records: 2 }
-const CLUB = { name: 'Olympia Fitness', logo: null }
+const CLUB = { name: 'Club Test Fitness', logo: null }
 
 describe('share card', () => {
   it('draws only what the member ticked', async () => {
@@ -59,7 +59,7 @@ describe('share card', () => {
   it('always carries the club, whatever the member ticked', async () => {
     // The whole point of the feature, in the client's framing.
     await drawShareCard({ workout: WORKOUT, club: CLUB, picked: new Set(), labels: LABELS })
-    expect(drawn).toContain('Olympia Fitness')
+    expect(drawn).toContain('Club Test Fitness')
     expect(drawn).toContain('Séance faite')
   })
 

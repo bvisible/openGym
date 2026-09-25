@@ -5,7 +5,7 @@ import React, { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('../lib/api.js', () => ({ BOOT: { app_title: 'Olympia', app_icon: null, lang: 'fr' }, login: vi.fn(), forgotPassword: vi.fn() }))
+vi.mock('../lib/api.js', () => ({ BOOT: { app_title: 'Club Test', app_icon: null, lang: 'fr' }, login: vi.fn(), forgotPassword: vi.fn() }))
 
 let root, host
 beforeEach(() => { globalThis.IS_REACT_ACT_ENVIRONMENT = true; vi.resetModules() })

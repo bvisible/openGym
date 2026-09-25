@@ -63,7 +63,7 @@ const render = async () => { installDom(); await act(async () => { root.render(R
 
 describe('the consent screen carries the club’s word', () => {
   it('shows the club’s sentences as they were written, before what the coach reads', async () => {
-    mocks.intro = 'Un coup de pouce entre deux séances avec votre coach Olympia.'
+    mocks.intro = 'Un coup de pouce entre deux séances avec votre coach du club.'
     await render()
     const word = container.querySelector('.ob-club-word')
     expect(word?.textContent).toBe(mocks.intro)

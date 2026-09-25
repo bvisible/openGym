@@ -307,6 +307,13 @@ export const resumeRenewal = () => api(M.resumeRenewal, { method: 'POST', body: 
 //// keeps `lib/remote.js` and `store/useStore.js` mergeable at the next upstream
 //// merge — the same choice already made for push (`pushSupported()` is false).
 export function setRemoteAuth() { /* no remote server here */ }
+//// Neoffice — upstream v1.3.8's subpath helper (#238), kept verbatim because its
+//// test imports it. Our calls go to Frappe's /api/method at the site root, which
+//// the journal served under /gym reaches as it is — nothing here uses it.
+export function appBase(loc = typeof location !== 'undefined' ? location : null) {
+  const path = (loc && loc.pathname) || '/'
+  return path.slice(0, path.lastIndexOf('/') + 1) || '/'
+}
 export async function pairRedeem() {
   throw new Error('Pairing is not available: this journal is served by your club instance.')
 }

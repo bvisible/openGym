@@ -8,7 +8,7 @@ import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const api = vi.hoisted(() => ({
-  BOOT: { app_title: 'Olympia', app_icon: null, lang: 'fr', user: { name: 'm@x.ch', full_name: 'Marie' }, membership: {} },
+  BOOT: { app_title: 'Club Test', app_icon: null, lang: 'fr', user: { name: 'm@x.ch', full_name: 'Marie' }, membership: {} },
   renewalOffer: vi.fn(),
   acceptRenewal: vi.fn(),
   logout: vi.fn(),

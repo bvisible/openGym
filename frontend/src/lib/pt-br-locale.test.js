@@ -107,11 +107,15 @@ describe('Brazilian Portuguese locale', () => {
 //// envia" / "Tire… envie") already established for this feature. Nothing new
 //// is inherited, so the hash does not move; only the override count does
 //// (701 → 705).
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(705)
-    expect(inherited).toHaveLength(967)
+//// Recomputed after the upstream v1.3.8 merge (2026-09-25): its new strings (weight
+//// decimals, the assisted-machine progression lines, « No bar », renaming a running
+//// workout) land in the inherited set as upstream ships them — 13 inherited, and the
+//// override count moves by one with upstream's own pt-BR block (705 → 706).
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(706)
+    expect(inherited).toHaveLength(980)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('a49a7bc6fa07bdf65f5e6dc38ab37e23d636cb2d7adf37ea907a5ff6d7af1d0e')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('769a86df110b61063cc9fd7a5ea1c72623af4f845295501f5c3dc88069bc3717')
   })
 
   test('does not leak European Portuguese UI terms', () => {

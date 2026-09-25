@@ -2,7 +2,7 @@
 ////
 //// A starting load for an exercise the member has never done.
 ////
-//// Asked for by Olympia on 2026-08-31, as the second use of the detail level:
+//// Asked for by the pilot club on 2026-08-31, as the second use of the detail level:
 //// *"les charges de départ (peut-être aussi)"*. Today a new exercise arrives
 //// at `weight: 0` and the member has to guess — which, in a room, means asking
 //// the person next to them or loading whatever is already on the bar.

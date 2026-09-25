@@ -2,7 +2,7 @@
 ////
 //// Which exercises a member is OFFERED, by detail level.
 ////
-//// Asked for by Olympia on 2026-08-31, alongside the three levels: *"filtrer
+//// Asked for by the pilot club on 2026-08-31, alongside the three levels: *"filtrer
 //// les exercices proposés"*. The catalogue is 1324 movements built by and for
 //// advanced lifters; a beginner opening it lands on hang power snatches next
 //// to sit-ups, with nothing telling them the two are not interchangeable.

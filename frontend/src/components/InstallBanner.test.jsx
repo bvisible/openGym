@@ -7,7 +7,7 @@ import React, { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('../lib/api.js', () => ({ BOOT: { app_title: 'Olympia', app_icon: '/files/olympia-icon-512.png' } }))
+vi.mock('../lib/api.js', () => ({ BOOT: { app_title: 'Club Test', app_icon: '/files/club-icon-512.png' } }))
 
 const IOS = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) Version/17.5 Mobile/15E148 Safari/604.1'
 let root, host
@@ -32,8 +32,8 @@ afterEach(async () => { await act(async () => { root?.unmount() }); document.bod
 describe('the add-to-home-screen card', () => {
   it('names the club and shows its icon, on a phone in the browser', async () => {
     const h = await mount({})
-    expect(h.textContent).toContain('Olympia')
-    expect(h.querySelector('.install-mark img')?.getAttribute('src')).toBe('/files/olympia-icon-512.png')
+    expect(h.textContent).toContain('Club Test')
+    expect(h.querySelector('.install-mark img')?.getAttribute('src')).toBe('/files/club-icon-512.png')
     expect(h.textContent).toContain('Install')
   })
 
