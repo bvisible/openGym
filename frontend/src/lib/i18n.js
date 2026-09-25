@@ -7,15 +7,17 @@ import { useSyncExternalStore } from 'react'
 //// Neoffice — upstream's list plus catalogueNameFor / setExerciseAliases /
 //// exerciseAliasOf / getNamesVersion: the member's own exercise names (an
 //// alias a coach or the member gave a machine) are resolved through here.
+//// And setClubExerciseNames: the club's names for library exercises (#766).
 import {
   LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, DATE_LOCALES, DERIVED_LOCALES,
   getLang, dateLocale, t, instrFor, exerciseNameFor, exerciseNameSearchText, catalogueNameFor, setExerciseAliases, exerciseAliasOf, getVersion, getNamesVersion,
-  baseLang, derivePack, _setLangState
+  setClubExerciseNames, baseLang, derivePack, _setLangState
 } from './i18n-core.js'
 
 export {
   LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, DATE_LOCALES, DERIVED_LOCALES,
-  getLang, dateLocale, t, instrFor, exerciseNameFor, exerciseNameSearchText, catalogueNameFor, setExerciseAliases, exerciseAliasOf, getNamesVersion
+  getLang, dateLocale, t, instrFor, exerciseNameFor, exerciseNameSearchText, catalogueNameFor, setExerciseAliases, exerciseAliasOf, getNamesVersion,
+  setClubExerciseNames
 }
 
 // Vite code-splits locale, instruction and exercise-name packs via import.meta.glob. They are

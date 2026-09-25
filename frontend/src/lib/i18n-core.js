@@ -99,6 +99,22 @@ export function setExerciseAliases(map) {
   aliasesKey = key
   aliasVersion++
 }
+//// Neoffice — the CLUB's names for library exercises (#766: « que tous les
+//// exercices portent le nom que je souhaite », per club, kept by every
+//// catalogue update). They arrive with the state (S.clubNames, composed by the
+//// server, never pushed back) and sit UNDER the member's own aliases and OVER
+//// the pack: what the club calls an exercise is its name here, unless the
+//// member chose theirs. Same version counter, so caches follow a rename.
+let clubNames = {}
+let clubNamesKey = ''
+export function setClubExerciseNames(map) {
+  const next = map || {}
+  const key = JSON.stringify(next)
+  if (key === clubNamesKey) return
+  clubNames = next
+  clubNamesKey = key
+  aliasVersion++
+}
 // What a cached name or search corpus must be keyed on: the language AND the
 // member's own names. A string, so two counters never collide.
 export const getNamesVersion = () => version + '.' + aliasVersion
@@ -109,7 +125,10 @@ export const exerciseNameFor = ex => {
   return catalogueNameFor(ex)
 }
 // The name without the member's alias — what the catalogue calls it.
+//// Neoffice — or what the CLUB calls it, when it renamed it (#766).
 export const catalogueNameFor = ex => {
+  const club = ex && clubNames[ex.id]
+  if (club) return club
   const translated = exerciseNames && ex && exerciseNames[ex.id]
   if (!translated) return ex?.n || ''
   //// Neoffice — French shows the translated name ALONE; upstream's pt-BR keeps
@@ -136,7 +155,9 @@ export const catalogueNameFor = ex => {
 export const exerciseNameSearchText = ex => {
   const translated = exerciseNames && ex && exerciseNames[ex.id]
   const alias = ex && aliases[ex.id]
-  const base = translated ? `${translated} ${ex.n}` : (ex?.n || '')
+  //// Neoffice — the club's name is searched too, and the pack's still is (#766).
+  const club = ex && clubNames[ex.id]
+  const base = [club, translated ? `${translated} ${ex.n}` : (ex?.n || '')].filter(Boolean).join(' ')
   return alias ? `${alias} ${base}` : base
 }
 

@@ -16,7 +16,7 @@ import { registerCustom } from '../lib/exercises.js'
 import { LANGS } from '../lib/i18n.js'
 //// Neoffice — from i18n-core, not i18n: tests mock '../lib/i18n.js' with a bare
 //// `t`, and a store that imports more from it breaks every one of them.
-import { setExerciseAliases } from '../lib/i18n-core.js'
+import { setExerciseAliases, setClubExerciseNames } from '../lib/i18n-core.js'
 import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
 import { guestAllowed } from '../lib/guest.js'
 import { MOBILE, initReminderSync, nativeLoad, nativeSave, onAppActive, syncReminder, writeAutoBackup } from '../lib/mobile.js'
@@ -269,6 +269,8 @@ export const useStore = create((set, get) => {
       if (e.alias && !(S.exAliases && S.exAliases[e.id])) S.exAliases = { ...(S.exAliases || {}), [e.id]: e.alias }
     }
     setExerciseAliases(S.exAliases)
+    //// Neoffice — the club's names for library exercises (#766), under the aliases.
+    setClubExerciseNames(S.clubNames)
     localStorage.setItem(KEY, JSON.stringify(S))
     set({ S })
     if (MOBILE) nativePersist()
@@ -471,7 +473,7 @@ export const useStore = create((set, get) => {
   }
 
   return {
-    S: (() => { const s = loadState(); registerCustom(s.customEx); setExerciseAliases(s.exAliases); return s })(),
+    S: (() => { const s = loadState(); registerCustom(s.customEx); setExerciseAliases(s.exAliases); setClubExerciseNames(s.clubNames); return s })(),
     user: (() => { try { return JSON.parse(localStorage.getItem('gym_user')) || null } catch { return null } })(),
     ready: false,
     // Server sync as the banner sees it (components/SyncBanner.jsx). Only meaningful signed in.
