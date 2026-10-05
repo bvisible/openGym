@@ -1765,6 +1765,12 @@ body.chips-dragging *{cursor:inherit}
 .gate-who { text-align: center; color: var(--label-3); font-size: 12px; margin-top: 22px; }
 .gate-plan { text-align: center; padding: 14px; margin: 0 0 12px; }
 .gate-plan-name { font-weight: 600; font-size: 17px; }
+/* //// Neoffice — the plans a member may renew onto, and the period the sheet says it opens (components/RenewalForm.jsx). */
+.gate-choices { border: 0; margin: 0 0 8px; padding: 0; text-align: left; }
+.gate-choices legend { padding: 0; margin: 0 0 6px; }
+.gate-choice { display: flex; gap: 10px; align-items: center; font-weight: 600; font-size: 16px; padding: 6px 0; }
+.gate-choice input { width: 20px; height: 20px; flex: none; accent-color: var(--acc); }
+.gate-period { margin-top: 6px; }
 .gate-terms { max-height: 34vh; overflow: auto; padding: 12px 14px; border: 1px solid var(--separator); border-radius: 12px; background: var(--surface); font-size: 14px; line-height: 1.45; margin: 0 0 12px; }
 .gate-accept { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; margin: 0 0 12px; }
 .gate-accept input { width: 20px; height: 20px; flex: none; margin-top: 1px; accent-color: var(--acc); }

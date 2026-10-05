@@ -1650,4 +1650,12 @@ export default {
   'Sent to your coach.': 'Elküldve az edzőjének.',
   'Ask a question without leaving the logbook': 'Kérdezzen anélkül, hogy elhagyná a naplót.',
   'Open the conversation': 'Nyissa meg a beszélgetést',
+  //// Neoffice — the renewal sheet says what is signed: when the new period starts and whether it renews by itself, and the plan to pick (components/RenewalForm.jsx).
+  'Starts today': 'Ma kezdődik',
+  'Starts on {0}': 'Kezdete: {0}',
+  'Then it renews by itself, period after period.': 'Ezután magától megújul, időszakról időszakra.',
+  'Until {0}': 'Eddig: {0}',
+  'Choose your plan': 'Válassza ki a csomagját',
+  'Your current membership ends on {0}.': 'Jelenlegi tagsága lejár: {0}.',
+  'Your membership ended on {0}.': 'Tagsága lejárt: {0}.',
 }

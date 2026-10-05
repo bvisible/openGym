@@ -1687,4 +1687,12 @@ export default {
   'Sent to your coach.': 'Отправлено твоему тренеру.',
   'Ask a question without leaving the logbook': 'Задай вопрос, не выходя из дневника.',
   'Open the conversation': 'Открыть переписку',
+  //// Neoffice — the renewal sheet says what is signed: when the new period starts and whether it renews by itself, and the plan to pick (components/RenewalForm.jsx).
+  'Starts today': 'Начинается сегодня',
+  'Starts on {0}': 'Начинается {0}',
+  'Then it renews by itself, period after period.': 'Затем он продлевается сам, период за периодом.',
+  'Until {0}': 'До {0}',
+  'Choose your plan': 'Выберите свой тариф',
+  'Your current membership ends on {0}.': 'Ваш текущий абонемент заканчивается {0}.',
+  'Your membership ended on {0}.': 'Ваш абонемент закончился {0}.',
 }

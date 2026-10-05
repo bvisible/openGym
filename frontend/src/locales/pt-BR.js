@@ -782,6 +782,13 @@ export const PT_BR_OVERRIDES = {
   'Remove the photo': 'Remover a foto',
   'Only a photo can be sent here.': 'Aqui só é possível enviar uma foto.',
   'That photo is too large. Take it again or send a smaller one.': 'Essa foto é muito grande. Tire outra ou envie uma menor.',
+  //// Neoffice — the renewal sheet says what is signed (7 new keys): 3 are Brazilian overrides — the European
+  //// clitic "renova-se sozinha" is not how Brazil says it, and Brazil says "inscrição" and drops the article
+  //// before "sua" where pt.js says "subscrição" and "A sua". The other four read the same on both sides and
+  //// stay inherited.
+  'Then it renews by itself, period after period.': 'Depois, ela se renova sozinha, período após período.',
+  'Your current membership ends on {0}.': 'Sua inscrição atual termina em {0}.',
+  'Your membership ended on {0}.': 'Sua inscrição terminou em {0}.',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

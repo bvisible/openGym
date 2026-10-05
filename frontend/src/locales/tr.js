@@ -1687,4 +1687,12 @@ export default {
   'Sent to your coach.': 'Koçuna gönderildi.',
   'Ask a question without leaving the logbook': 'Günlükten çıkmadan soru sor.',
   'Open the conversation': 'Sohbeti aç',
+  //// Neoffice — the renewal sheet says what is signed: when the new period starts and whether it renews by itself, and the plan to pick (components/RenewalForm.jsx).
+  'Starts today': 'Bugün başlar',
+  'Starts on {0}': '{0} tarihinde başlar',
+  'Then it renews by itself, period after period.': 'Ardından dönem dönem kendiliğinden yenilenir.',
+  'Until {0}': '{0} tarihine kadar',
+  'Choose your plan': 'Planınızı seçin',
+  'Your current membership ends on {0}.': 'Mevcut üyeliğiniz {0} tarihinde sona eriyor.',
+  'Your membership ended on {0}.': 'Üyeliğiniz {0} tarihinde sona erdi.',
 }

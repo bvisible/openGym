@@ -1658,4 +1658,12 @@ export default {
   'Sent to your coach.': 'ส่งถึงโค้ชของคุณแล้ว',
   'Ask a question without leaving the logbook': 'ถามคำถามได้โดยไม่ต้องออกจากสมุดบันทึก',
   'Open the conversation': 'เปิดการสนทนา',
+  //// Neoffice — the renewal sheet says what is signed: when the new period starts and whether it renews by itself, and the plan to pick (components/RenewalForm.jsx).
+  'Starts today': 'เริ่มวันนี้',
+  'Starts on {0}': 'เริ่ม {0}',
+  'Then it renews by itself, period after period.': 'จากนั้นจะต่ออายุเองโดยอัตโนมัติทุกรอบ',
+  'Until {0}': 'ถึง {0}',
+  'Choose your plan': 'เลือกแพ็กเกจของคุณ',
+  'Your current membership ends on {0}.': 'สมาชิกภาพปัจจุบันของคุณสิ้นสุด {0}',
+  'Your membership ended on {0}.': 'สมาชิกภาพของคุณสิ้นสุดแล้ว {0}',
 }

@@ -1687,4 +1687,12 @@ export default {
   'Sent to your coach.': '已发送给你的教练。',
   'Ask a question without leaving the logbook': '无需离开日记即可提问。',
   'Open the conversation': '打开对话',
+  //// Neoffice — the renewal sheet says what is signed: when the new period starts and whether it renews by itself, and the plan to pick (components/RenewalForm.jsx).
+  'Starts today': '今天开始',
+  'Starts on {0}': '自 {0} 起',
+  'Then it renews by itself, period after period.': '之后每个周期自动续期。',
+  'Until {0}': '至 {0}',
+  'Choose your plan': '请选择您的方案',
+  'Your current membership ends on {0}.': '您当前的会籍将于 {0} 结束。',
+  'Your membership ended on {0}.': '您的会籍已于 {0} 结束。',
 }

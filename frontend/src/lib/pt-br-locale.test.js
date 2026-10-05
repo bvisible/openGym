@@ -111,11 +111,15 @@ describe('Brazilian Portuguese locale', () => {
 //// decimals, the assisted-machine progression lines, « No bar », renaming a running
 //// workout) land in the inherited set as upstream ships them — 13 inherited, and the
 //// override count moves by one with upstream's own pt-BR block (705 → 706).
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(706)
-    expect(inherited).toHaveLength(980)
+//// Recomputed for the renewal sheet (7 new keys): 3 overrides — the European clitic "renova-se
+//// sozinha" and "subscrição" / "A sua" become "se renova sozinha" and "inscrição" / "Sua" in Brazil —
+//// and four (the two start lines, "Até {0}", "Escolha o seu plano") read the same on both sides and
+//// inherit: the override count moves 706 → 709, the inherited set 980 → 984.
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(709)
+    expect(inherited).toHaveLength(984)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('769a86df110b61063cc9fd7a5ea1c72623af4f845295501f5c3dc88069bc3717')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('7e503d2836adfd728a493fc58681b11ac3d0aef1b4ee7dc49a1fec0178317d7c')
   })
 
   test('does not leak European Portuguese UI terms', () => {

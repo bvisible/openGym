@@ -26,9 +26,20 @@ const fmtPlan = p => {
   const price = p.cost != null && p.currency ? `${p.cost} ${p.currency}` : ''
   return [p.label, price].filter(Boolean).join(' · ')
 }
+//// Neoffice — what a yes would open, said for the plan on screen (maintenance#936). The sheet used to show
+//// the date the CURRENT membership ends beside the plan, and the pilot club's member read « it ends the day it
+//// begins ». The server now answers, per plan, when the new period starts (`startsOn`), and either when it
+//// ends (`endsOn`) or that it carries on by itself (`rollsOn`), with the very dates the restart will use.
+const localToday = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+const startsLine = p => !p?.startsOn ? '' : p.startsOn === localToday() ? t('Starts today') : t('Starts on {0}', fmtDate(p.startsOn))
+const endsLine = p => !p?.startsOn ? '' : p.rollsOn ? t('Then it renews by itself, period after period.') : p.endsOn ? t('Until {0}', fmtDate(p.endsOn)) : ''
 
 export default function RenewalForm({ onDone, onCancel }) {
   const [offer, setOffer] = useState(null)
+  const [choice, setChoice] = useState(null)
   const [accepted, setAccepted] = useState(false)
   const [signature, setSignature] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -44,11 +55,15 @@ export default function RenewalForm({ onDone, onCancel }) {
 
   const needsSignature = offer ? offer.signatureRequired !== false : true
   const canSign = accepted && (!needsSignature || !!signature) && !busy
+  //// Neoffice — the plans the member may renew onto: their own first, then the ones the club offers. A server that
+  //// predates the choice sends none, and the sheet stays what it was.
+  const plans = offer?.plans || []
+  const picked = plans.find(p => p.name === choice) || plans.find(p => p.current) || plans[0] || null
 
   const sign = async () => {
     setBusy(true); setError(null)
     try {
-      const r = await acceptRenewal({ terms_accepted: 1, signature, terms_hash: offer?.termsHash })
+      const r = await acceptRenewal({ terms_accepted: 1, signature, terms_hash: offer?.termsHash, ...(plans.length > 1 ? { plan: picked.name } : {}) })
       onDone && onDone(r.message || r)
     } catch (e) {
       setError(e.message || String(e))
@@ -68,10 +83,25 @@ export default function RenewalForm({ onDone, onCancel }) {
       ? t('Read the terms, accept them and sign: your membership carries on without a break.')
       : t('Read the terms, accept them and sign: your membership restarts today.')}</p>
     <div className="card gate-plan">
-      <div className="gate-plan-name">{fmtPlan(offer.plan)}</div>
-      {offer.endedOn && <div className="small dim">{offer.why === 'ending'
-        ? t('Ends on {0}', fmtDate(offer.endedOn))
-        : t('Ended on {0}', fmtDate(offer.endedOn))}</div>}
+      {plans.length > 1
+        ? <fieldset className="gate-choices">
+          <legend className="small dim">{t('Choose your plan')}</legend>
+          {plans.map(p => <label key={p.name} className="gate-choice">
+            <input type="radio" name="renewal-plan" checked={picked.name === p.name} onChange={() => setChoice(p.name)} />
+            <span>{fmtPlan(p)}</span>
+          </label>)}
+        </fieldset>
+        : <div className="gate-plan-name">{fmtPlan(picked || offer.plan)}</div>}
+      {picked?.startsOn
+        ? <>
+          <div className="small gate-period">{[startsLine(picked), endsLine(picked)].filter(Boolean).join(' · ')}</div>
+          {offer.endedOn && <div className="small dim">{offer.why === 'ending'
+            ? t('Your current membership ends on {0}.', fmtDate(offer.endedOn))
+            : t('Your membership ended on {0}.', fmtDate(offer.endedOn))}</div>}
+        </>
+        : offer.endedOn && <div className="small dim">{offer.why === 'ending'
+          ? t('Ends on {0}', fmtDate(offer.endedOn))
+          : t('Ended on {0}', fmtDate(offer.endedOn))}</div>}
     </div>
     {offer.terms
       ? <div className="gate-terms" dangerouslySetInnerHTML={{ __html: offer.terms }} />

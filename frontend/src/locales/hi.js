@@ -1687,4 +1687,12 @@ export default {
   'Sent to your coach.': 'आपके कोच को भेज दिया गया।',
   'Ask a question without leaving the logbook': 'अपनी डायरी से बाहर गए बिना सवाल पूछें।',
   'Open the conversation': 'बातचीत खोलें',
+  //// Neoffice — the renewal sheet says what is signed: when the new period starts and whether it renews by itself, and the plan to pick (components/RenewalForm.jsx).
+  'Starts today': 'आज शुरू होता है',
+  'Starts on {0}': '{0} से शुरू होता है',
+  'Then it renews by itself, period after period.': 'इसके बाद यह हर अवधि अपने आप नवीनीकृत होती है।',
+  'Until {0}': '{0} तक',
+  'Choose your plan': 'अपना प्लान चुनें',
+  'Your current membership ends on {0}.': 'आपकी मौजूदा सदस्यता {0} को समाप्त होती है।',
+  'Your membership ended on {0}.': 'आपकी सदस्यता {0} को समाप्त हो गई।',
 }

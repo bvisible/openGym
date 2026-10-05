@@ -1687,4 +1687,12 @@ export default {
   'Sent to your coach.': '코치에게 보냈어요.',
   'Ask a question without leaving the logbook': '일지를 벗어나지 않고 질문해 보세요.',
   'Open the conversation': '대화 열기',
+  //// Neoffice — the renewal sheet says what is signed: when the new period starts and whether it renews by itself, and the plan to pick (components/RenewalForm.jsx).
+  'Starts today': '오늘 시작됩니다',
+  'Starts on {0}': '{0}에 시작됩니다',
+  'Then it renews by itself, period after period.': '이후에는 기간마다 자동으로 갱신됩니다.',
+  'Until {0}': '{0}까지',
+  'Choose your plan': '플랜을 선택하세요',
+  'Your current membership ends on {0}.': '현재 회원권은 {0}에 종료됩니다.',
+  'Your membership ended on {0}.': '회원권이 {0}에 종료되었습니다.',
 }
