@@ -5,6 +5,13 @@
 //// canvas is scaled to the device pixel ratio so the stroke stays crisp in the
 //// PNG the club keeps. `onChange(dataUrl | null)` fires after every stroke and
 //// on clear — null means "nothing drawn yet".
+//// Neoffice — the signature of a renewal opened from « My membership » is drawn INSIDE a bottom sheet
+//// (components/Modals.jsx), and the sheet swipes down to dismiss: a finger drawing downwards on the pad was
+//// taken for the sheet's own swipe — the sheet followed the finger, and a long stroke dismissed it (« the page
+//// scrolls instead of letting me sign », the pilot club, 05.10; reproduced with touch events on the real
+//// screen). Three things now keep the gesture on the pad: `data-nodrag` (the opt-out the sheet already honours
+//// for sliders), a native NON-passive touch listener that cancels the touch (React's own touch props are
+//// passive, and an iOS before 13 ignores `touch-action`), and `touch-action: none` on the whole pad (index.css).
 import React, { useEffect, useRef, useState } from 'react'
 import { t } from '../lib/i18n.js'
 
@@ -30,6 +37,18 @@ export default function SignaturePad({ onChange, height = 160 }) {
     ctx.lineJoin = 'round'
     ctx.strokeStyle = '#111'
   }, [height])
+
+  useEffect(() => {
+    const c = canvasRef.current
+    if (!c) return
+    const keep = e => e.preventDefault()
+    c.addEventListener('touchstart', keep, { passive: false })
+    c.addEventListener('touchmove', keep, { passive: false })
+    return () => {
+      c.removeEventListener('touchstart', keep)
+      c.removeEventListener('touchmove', keep)
+    }
+  }, [])
 
   const point = e => {
     const r = canvasRef.current.getBoundingClientRect()
@@ -66,7 +85,7 @@ export default function SignaturePad({ onChange, height = 160 }) {
     onChange?.(null)
   }
 
-  return <div className="sigpad">
+  return <div className="sigpad" data-nodrag>
     <canvas ref={canvasRef} className="sigpad-c" aria-label={t('Signature')}
       onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onPointerLeave={up} />
     {empty && <div className="sigpad-hint">{t('Sign here with your finger')}</div>}

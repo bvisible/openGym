@@ -1775,7 +1775,7 @@ body.chips-dragging *{cursor:inherit}
 .gate-accept { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; margin: 0 0 12px; }
 .gate-accept input { width: 20px; height: 20px; flex: none; margin-top: 1px; accent-color: var(--acc); }
 .gate-error { color: var(--red, #d33); text-align: center; font-size: 14px; }
-.sigpad { position: relative; border: 1px dashed var(--label-3); border-radius: 12px; background: #fff; overflow: hidden; }
+.sigpad { position: relative; border: 1px dashed var(--label-3); border-radius: 12px; background: #fff; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
 .sigpad-c { display: block; touch-action: none; }
 .sigpad-hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 14px; pointer-events: none; }
 .sigpad-clear { position: absolute; right: 8px; top: 8px; background: var(--surface-2); color: var(--label); border-radius: 999px; padding: 4px 10px; font-size: 12px; }
