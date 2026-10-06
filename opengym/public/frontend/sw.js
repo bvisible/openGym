@@ -116,6 +116,29 @@ async function cacheIfUsable(request, response) {
   return c.put(request, response)
 }
 
+//// Neoffice — offline: the exact page first (query string ignored — a `?v=`
+//// stamped asset is the same file), then the app shell for a navigation,
+//// nothing for anything else.
+async function fromCache(request) {
+  const hit = await caches.match(request, { ignoreSearch: true })
+  return hit || (request.mode === 'navigate' ? caches.match(SHELL) : undefined)
+}
+
+//// Neoffice — A SERVER THAT ANSWERS WITH AN ERROR IS NO BETTER THAN NO NETWORK.
+////
+//// Seen 2026-10-06 on an iPhone (simulator): the installed app, opened while
+//// the server restarted, showed the proxy's 502 page ("Sorry! We will be back
+//// soon.") in full screen, with no address bar and no reload button, until
+//// the app was killed. The cached shell was right there, but the fallback only
+//// ran when the network failed outright, and a 502 is an answer. A 5xx now
+//// gets the same fallback; with nothing cached, the server's own answer
+//// stands. A 4xx is the server's real answer (a missing page, a refusal) and
+//// passes through untouched.
+async function passOrFallBack(request, response) {
+  if (response.status < 500) return response
+  return (await fromCache(request)) || response
+}
+
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url)
   if (e.request.method !== 'GET' || url.origin !== location.origin) return
@@ -143,13 +166,7 @@ self.addEventListener('fetch', e => {
       const copy = res.clone()
       e.waitUntil(cacheIfUsable(e.request, copy))
     }
-    return res
-  }).catch(() =>
-    //// Neoffice — offline: the exact page first (query string ignored — a
-    //// `?v=` stamped asset is the same file), then the app shell for a
-    //// navigation, nothing for anything else.
-    caches.match(e.request, { ignoreSearch: true }).then(hit =>
-      hit || (e.request.mode === 'navigate' ? caches.match(SHELL) : undefined)
-    )
-  ))
+    //// Neoffice — a server error is answered like no network (passOrFallBack).
+    return passOrFallBack(e.request, res)
+  }).catch(() => fromCache(e.request)))
 })
