@@ -17,11 +17,11 @@
       "node_modules/@aparajita/capacitor-secure-storage/dist/esm/index.js"
     ]
   },
-  "_coach-BP-eRB-U.js": {
-    "file": "assets/coach-BP-eRB-U.js",
+  "_coach-BDAcIgGK.js": {
+    "file": "assets/coach-BDAcIgGK.js",
     "name": "coach",
     "imports": [
-      "_i18n-BQtLn63S.js",
+      "_i18n-pS4ngwNP.js",
       "_exercises-Du5_t1Gj.js",
       "_history-RuGGVsP6.js"
     ]
@@ -64,8 +64,8 @@
       "_exercises-Du5_t1Gj.js"
     ]
   },
-  "_i18n-BQtLn63S.js": {
-    "file": "assets/i18n-BQtLn63S.js",
+  "_i18n-pS4ngwNP.js": {
+    "file": "assets/i18n-pS4ngwNP.js",
     "name": "i18n",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
@@ -189,14 +189,14 @@
       "node_modules/jsqr/dist/jsQR.js"
     ]
   },
-  "_sheets-NzBoqFvQ.js": {
-    "file": "assets/sheets-NzBoqFvQ.js",
+  "_sheets-CfFY4RU_.js": {
+    "file": "assets/sheets-CfFY4RU_.js",
     "name": "sheets",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
-      "_i18n-BQtLn63S.js",
+      "_i18n-pS4ngwNP.js",
       "_preload-helper-BqjX9scX.js",
-      "_useUI-COxNwe5L.js",
+      "_useUI-Bo4YcRpz.js",
       "_exercises-Du5_t1Gj.js",
       "_coach-device-CtvU8-Gy.js",
       "_media-refs-CBisMdU5.js",
@@ -209,7 +209,7 @@
       "_onerm-BmMjJ2uH.js"
     ],
     "dynamicImports": [
-      "_useUI-COxNwe5L.js",
+      "_useUI-Bo4YcRpz.js",
       "src/lib/media-ingest.js",
       "src/lib/body-paths.js"
     ]
@@ -221,12 +221,12 @@
       "_history-RuGGVsP6.js"
     ]
   },
-  "_useUI-COxNwe5L.js": {
-    "file": "assets/useUI-COxNwe5L.js",
+  "_useUI-Bo4YcRpz.js": {
+    "file": "assets/useUI-Bo4YcRpz.js",
     "name": "useUI",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
-      "_i18n-BQtLn63S.js",
+      "_i18n-pS4ngwNP.js",
       "_preload-helper-BqjX9scX.js",
       "_exercises-Du5_t1Gj.js",
       "_coach-device-CtvU8-Gy.js",
@@ -236,31 +236,31 @@
       "_media-store-CrSabbB6.js"
     ],
     "dynamicImports": [
-      "_useUI-COxNwe5L.js",
-      "_sheets-NzBoqFvQ.js",
+      "_useUI-Bo4YcRpz.js",
+      "_sheets-CfFY4RU_.js",
       "src/lib/demoSeed.js",
       "_dist-Cawi-vbT.js",
       "node_modules/@capacitor/local-notifications/dist/esm/index.js"
     ]
   },
   "index.html": {
-    "file": "assets/index-CT46HkB1.js",
+    "file": "assets/index-B7pgscWl.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
-      "_i18n-BQtLn63S.js",
+      "_i18n-pS4ngwNP.js",
       "_preload-helper-BqjX9scX.js",
-      "_useUI-COxNwe5L.js",
+      "_useUI-Bo4YcRpz.js",
       "_exercises-Du5_t1Gj.js",
       "_coach-device-CtvU8-Gy.js",
       "_history-RuGGVsP6.js",
       "_mobile-BaHbtH4K.js",
-      "_sheets-NzBoqFvQ.js",
+      "_sheets-CfFY4RU_.js",
       "_onerm-BmMjJ2uH.js",
       "_scan-web-n6PT6YOj.js",
-      "_coach-BP-eRB-U.js",
+      "_coach-BDAcIgGK.js",
       "_categories-DiTqpEtb.js"
     ],
     "dynamicImports": [
@@ -560,30 +560,30 @@
     "isDynamicEntry": true
   },
   "src/lib/coach-demo.js": {
-    "file": "assets/coach-demo-Dys95vGg.js",
+    "file": "assets/coach-demo-CfgYijUd.js",
     "name": "coach-demo",
     "src": "src/lib/coach-demo.js",
     "isDynamicEntry": true,
     "imports": [
-      "_i18n-BQtLn63S.js",
+      "_i18n-pS4ngwNP.js",
       "_exercises-Du5_t1Gj.js",
       "_history-RuGGVsP6.js",
       "_onerm-BmMjJ2uH.js",
-      "_coach-BP-eRB-U.js"
+      "_coach-BDAcIgGK.js"
     ]
   },
   "src/lib/coach-local.js": {
-    "file": "assets/coach-local-50HGPUcb.js",
+    "file": "assets/coach-local-cFk6Fqhh.js",
     "name": "coach-local",
     "src": "src/lib/coach-local.js",
     "isDynamicEntry": true,
     "imports": [
-      "_i18n-BQtLn63S.js",
+      "_i18n-pS4ngwNP.js",
       "_preload-helper-BqjX9scX.js",
       "_exercises-Du5_t1Gj.js",
       "_coach-device-CtvU8-Gy.js",
       "_history-RuGGVsP6.js",
-      "_coach-BP-eRB-U.js",
+      "_coach-BDAcIgGK.js",
       "_categories-DiTqpEtb.js"
     ],
     "dynamicImports": [
@@ -630,7 +630,7 @@
     "isDynamicEntry": true
   },
   "src/locales/fr.js": {
-    "file": "assets/fr-Dyoa_AhN.js",
+    "file": "assets/fr--ylcBLTI.js",
     "name": "fr",
     "src": "src/locales/fr.js",
     "isDynamicEntry": true
