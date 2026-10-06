@@ -27,6 +27,8 @@ import { forgetCoach } from '../lib/coach-api.js'
 import { starterPlanSheet, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet, plateInventorySheet, menuSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
+//// Neoffice — the sync rows of the account block (upstream's ServerSync, kept for them).
+import { SyncRows } from '../components/ServerSync.jsx'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
 import { showsEffortSetting, showsEquipmentProfiles, showsRestPauseSetting } from '../lib/level-visibility.js'
 
@@ -225,8 +227,9 @@ export default function Settings() {
       <div style={{ flex: 1, marginInlineStart: 10 }}><h1>{t('Settings')}</h1></div>
     </div>
 
-    {/* //// Neoffice — upstream's server block (which server, account id, "Sync now", Disconnect) is
-        not shipped: the journal is served by the very Frappe instance it syncs with. */}
+    {/* //// Neoffice — upstream's server block is not shipped whole: the journal is served by the very
+        Frappe instance it syncs with, so no server address, account id or Disconnect. How things
+        stand and « Sync now » are, inside the account block below (ServerSync.SyncRows). */}
 
     {/* ---------- account (demo and mobile builds have nothing to sign in to) ---------- */}
     {!(MOBILE && user) && <Section title={MOBILE ? t('Your data') : DEMO ? t('Demo') : t('Account')}>
@@ -244,6 +247,8 @@ export default function Settings() {
             no passkey to create, no profile to pick. Signing out ends the
             Frappe session and leaves for /login. */}
         <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Signed in with your Neoffice account.')} />
+        {/* //// Neoffice — the sync state, « Sync now » and the changes kept for another account (upstream v1.3.9's Server & sync block) */}
+        <SyncRows />
         <Row icon="signOut" iconTint="var(--red)" title={t('Sign out')} danger onClick={() => confirmSheet({ title: t('Sign out?'), message: t('Your journal is saved first, then this device is signed out.'), confirmText: t('Sign out'), danger: true, onConfirm: async () => {
           //// Neoffice — upstream v1.3.9's sign-out refuses while this device holds changes the club's
           //// server has not seen ({ owed: true }): say so, and let the member go ahead — the changes are

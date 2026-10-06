@@ -206,6 +206,25 @@ describe('the web boot', () => {
   })
 })
 
+//// Neoffice — added: Frappe answers a request without a valid session with 403 (and a page that
+//// redirects to /login), never 401, measured on osiris. Read as an error, the line said « server
+//// error (HTTP 403) » where it means « sign in again ».
+describe('a session the club\'s server no longer accepts', () => {
+  it('a 403 on the pull is a session that ended, not a server error', async () => {
+    signedIn({ ...clone(DEF), _ts: 100, workouts: [workout('w1')] })
+    api.mockRejectedValue(httpError(403))
+    await useStore.getState().pullState()
+    expect(useStore.getState().sync).toMatchObject({ status: 'auth', lastError: { status: 403, code: 'auth' } })
+  })
+
+  it('a 500 is still a server error', async () => {
+    signedIn({ ...clone(DEF), _ts: 100, workouts: [workout('w1')] })
+    api.mockRejectedValue(httpError(500))
+    await useStore.getState().pullState()
+    expect(useStore.getState().sync).toMatchObject({ status: 'error', lastError: { status: 500, code: 'http' } })
+  })
+})
+
 describe('signing out never loses a change silently', () => {
   const owedCopy = () => {
     signedIn({ ...clone(DEF), _ts: 100, workouts: [workout('w1')] })

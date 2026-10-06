@@ -1960,12 +1960,17 @@ export default {
   'All synced': 'Tout est synchronisé',
   'Waiting to sync': 'En attente de synchronisation',
   'Offline — the server cannot be reached': 'Hors ligne — le serveur est injoignable',
-  'Not an openGym answer (HTTP {0})': 'Pas une réponse d\'openGym (HTTP {0})',
-  'Your server’s address answered with something other than openGym (HTTP {0}). Your changes are kept here.': 'L\'adresse de votre serveur a répondu avec autre chose qu\'openGym (HTTP {0}). Vos modifications restent ici.',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'Not an openGym answer (HTTP {0})': 'Réponse qui ne vient pas du club (HTTP {0})',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'Your server’s address answered with something other than openGym (HTTP {0}). Your changes are kept here.': 'La réponse ne venait pas du serveur du club (HTTP {0}) : un réseau Wi-Fi qui demande de se connecter ? Vos modifications restent sur cet appareil.',
   'Server error (HTTP {0})': 'Erreur du serveur (HTTP {0})',
-  'Your server answered with an error (HTTP {0}). Your changes are kept here.': 'Votre serveur a répondu par une erreur (HTTP {0}). Vos modifications restent ici.',
-  'The server refuses this browser': 'Le serveur refuse ce navigateur',
-  'Your server no longer accepts this browser. Your changes are kept here.': 'Votre serveur n\'accepte plus ce navigateur. Vos modifications restent ici.',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'Your server answered with an error (HTTP {0}). Your changes are kept here.': 'Le serveur du club a répondu par une erreur (HTTP {0}). Vos modifications restent sur cet appareil.',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'The server refuses this browser': 'Votre session a pris fin',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'Your server no longer accepts this browser. Your changes are kept here.': 'Votre session a pris fin : reconnectez-vous. Vos modifications restent sur cet appareil.',
   'This phone is no longer paired with your server. Your changes are kept here.': 'Ce téléphone n\'est plus associé à votre serveur. Vos modifications restent ici.',
   'The server refuses this phone': 'Le serveur refuse ce téléphone',
   'Your server no longer accepts this phone. Your changes are kept here.': 'Votre serveur n\'accepte plus ce téléphone. Vos modifications restent ici.',
@@ -1975,21 +1980,26 @@ export default {
   'Sign out anyway': 'Se déconnecter quand même',
   'Could not keep a copy of the changes on this device — nothing was removed.': 'Impossible de garder une copie des modifications sur cet appareil — rien n\'a été supprimé.',
   'Not everything is on your server yet': 'Votre serveur n\'a pas encore tout',
-  'Not on your server yet: {0}': 'Pas encore sur votre serveur : {0}',
-  'Some changes on this device have not reached your server.': 'Certaines modifications de cet appareil n\'ont pas encore atteint votre serveur.',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'Not on your server yet: {0}': 'Pas encore sur le serveur du club : {0}',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'Some changes on this device have not reached your server.': 'Certaines modifications de cet appareil n’ont pas encore atteint le serveur du club.',
   'Try again, or export a backup first. Going ahead anyway keeps a copy of these changes on this device until it connects to this server as this account again — then they are added back.': 'Réessayez, ou exportez d\'abord une sauvegarde. Si vous continuez quand même, une copie de ces modifications reste sur cet appareil jusqu\'à ce qu\'il se reconnecte à ce serveur avec ce compte — elles sont alors rajoutées.',
   'Syncing…': 'Synchronisation…',
   'Try again': 'Réessayer',
   'Last synced: {0}': 'Dernière synchronisation : {0}',
-  'Not synced with this server yet': 'Pas encore synchronisé avec ce serveur',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'Not synced with this server yet': 'Pas encore synchronisé avec le club',
   'Server & sync': 'Serveur et synchronisation',
   'Signed in as {0}': 'Connecté en tant que {0}',
   'Sync now': 'Synchroniser maintenant',
   'Your changes are kept here, and merged into your account once it is paired again.': 'Vos modifications restent ici et sont fusionnées avec votre compte dès que le téléphone est à nouveau associé.',
-  'Your changes are kept here, and merged into your account once you are signed in again.': 'Vos modifications restent ici et sont fusionnées avec votre compte dès que vous êtes à nouveau connecté.',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'Your changes are kept here, and merged into your account once you are signed in again.': 'Vos modifications restent sur cet appareil et rejoignent votre compte dès que vous êtes reconnecté.',
   'Changes kept for {0}': 'Modifications gardées pour {0}',
   'Added back when this device connects as that account again.': 'Rajoutées quand cet appareil se reconnecte avec ce compte.',
-  'The changes your server has not seen are kept on this device, and added back when it connects as this account again.': 'Les modifications que votre serveur n\'a pas encore sont gardées sur cet appareil, et rajoutées quand il se reconnecte avec ce compte.',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'The changes your server has not seen are kept on this device, and added back when it connects as this account again.': 'Les modifications que le serveur du club n’a pas reçues restent sur cet appareil, et sont ajoutées dès qu’il se reconnecte avec ce compte.',
   'This phone switches back to local-only and its copy of your account is removed. First it checks that your server has every change — if not, you choose what happens to them.': 'Ce téléphone repasse en mode local et la copie de votre compte en est supprimée. On vérifie d\'abord que votre serveur a toutes les modifications — sinon, vous choisissez ce qu\'elles deviennent.',
   'Your data is removed from this browser; your profile on the server keeps it. First it checks that the server has every change — if not, you choose what happens to them.': 'Vos données sont supprimées de ce navigateur ; votre profil sur le serveur les conserve. On vérifie d\'abord que le serveur a toutes les modifications — sinon, vous choisissez ce qu\'elles deviennent.',
   'Signs this profile out on every device, including this one. Phones paired with it are disconnected and have to be paired again. Your passkeys keep working — sign in with them again anytime.': 'Déconnecte ce profil sur tous les appareils, y compris celui-ci. Les téléphones associés sont déconnectés et devront être associés à nouveau. Vos passkeys continuent de fonctionner — reconnectez-vous avec quand vous voulez.',
@@ -2109,8 +2119,10 @@ export default {
   'Log the anchor lift to score this one.': 'Notez l’exercice de référence pour évaluer celui-ci.',
   'Not scored': 'Non évalué',
   'The server cannot be reached': 'Le serveur est injoignable',
-  'Your server cannot be reached — your changes are saved on this device and sync once it answers again.': 'Votre serveur est injoignable — vos modifications sont enregistrées sur cet appareil et seront synchronisées dès qu\'il répondra à nouveau.',
-  'Your server cannot be reached — showing the last copy synced with it.': 'Votre serveur est injoignable — affichage de la dernière copie synchronisée avec lui.',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'Your server cannot be reached — your changes are saved on this device and sync once it answers again.': 'Le serveur du club ne répond pas — vos modifications sont enregistrées sur cet appareil et partiront dès qu’il répondra.',
+  //// Neoffice — the club's server, in the club's words (components/ServerSync.jsx).
+  'Your server cannot be reached — showing the last copy synced with it.': 'Le serveur du club ne répond pas — affichage de la dernière copie synchronisée avec lui.',
   'Server address unknown': 'Adresse du serveur inconnue',
   'Pair again, or export a backup first. Going ahead anyway keeps a copy of these changes on this device until it connects to this server as this account again — then they are added back.': 'Associez à nouveau, ou exportez d\'abord une sauvegarde. Si vous continuez quand même, une copie de ces modifications reste sur cet appareil jusqu\'à ce qu\'il se reconnecte à ce serveur avec ce compte — elles sont alors rajoutées.',
   'Sign in again, or export a backup first. Going ahead anyway keeps a copy of these changes on this device until it connects to this server as this account again — then they are added back.': 'Reconnectez-vous, ou exportez d\'abord une sauvegarde. Si vous continuez quand même, une copie de ces modifications reste sur cet appareil jusqu\'à ce qu\'il se reconnecte à ce serveur avec ce compte — elles sont alors rajoutées.',

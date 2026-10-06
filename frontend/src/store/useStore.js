@@ -461,14 +461,17 @@ export const useStore = create((set, get) => {
     if (Object.keys(next).some(k => (k === 'lastError' ? !sameError(next[k], cur[k]) : next[k] !== cur[k]))) set({ sync: next })
   }
   const isNetworkError = e => e && e.status == null   // fetch itself failed, or gave up: no response at all
-  const refused = e => e?.status === 401 || e?.code === 'not-paired'
+  //// Neoffice — and 403: Frappe answers a request without a valid session with 403 (and a page that
+  //// redirects to /login), never 401, measured on osiris; a page whose CSRF token went stale gets
+  //// the same. Both mean « sign in again », not « the server is broken ».
+  const refused = e => e?.status === 401 || e?.status === 403 || e?.code === 'not-paired'
   // The server answered: whatever was wrong with the connection is over.
   const reached = (extra = {}) => setSync({ offline: false, auth: false, lastError: null, ...extra })
   // What a failed request says about the connection. A refused token and a phone without a
   // pairing are the same thing to the person holding it — the device has to be paired or signed
   // in again, and nothing on it is lost meanwhile.
   const failed = (e, extra = {}) => {
-    const lastError = { status: e?.status ?? 0, code: e?.code || (e?.status === 401 ? 'auth' : isNetworkError(e) ? 'network' : 'http') }
+    const lastError = { status: e?.status ?? 0, code: e?.code || (refused(e) ? 'auth' : isNetworkError(e) ? 'network' : 'http') }   //// Neoffice — refused(): 403 too, see above
     if (refused(e)) setSync({ auth: true, offline: false, lastError, ...extra })
     else if (isNetworkError(e)) setSync({ offline: true, lastError, ...extra })
     else setSync({ offline: false, lastError, ...extra })

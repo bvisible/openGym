@@ -182,7 +182,9 @@ function Shell() {
   //// Neoffice — and the sign-in screen too once the store has nobody, where upstream draws its
   //// <Login/>: a sign-out still owed that the server could not answer (store boot), another
   //// tab of this browser signing in or out. The page's boot named a member, the store does not.
-  if (BOOT.signed_in === false || (ready && !user && !isGuest)) return <div id="app"><SignIn /></div>
+  //// Neoffice — the connection line above the sign-in screen too: after a session that ended, it says
+  //// the changes this device still owes are kept here (components/SyncBanner.jsx, status 'auth').
+  if (BOOT.signed_in === false || (ready && !user && !isGuest)) return <div id="app"><SyncBanner /><SignIn /></div>
   //// Neoffice — signed in, but no valid membership: the club's message (and
   //// its renewal, when allowed) instead of the journal. See views/MembershipGate.jsx.
   if (BOOT.membership && BOOT.membership.blocked) return <div id="app"><MembershipGate /></div>
