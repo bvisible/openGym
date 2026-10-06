@@ -7,7 +7,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 const sheets = vi.hoisted(() => ({
   exConfigSheet: vi.fn(), exercisePicker: vi.fn(), glyphPicker: vi.fn(), confirmSheet: vi.fn(),
 }))
-vi.mock('../lib/api.js', () => ({ api: vi.fn(() => Promise.resolve({})) }))
+vi.mock('../lib/api.js', () => ({
+  //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import.
+  BOOT: {}, api: vi.fn(() => Promise.resolve({})) }))
 vi.mock('../sheets.jsx', () => sheets)
 vi.mock('../components/Media.jsx', () => ({ Thumb: ({ ex }) => <span data-thumb={ex.id} /> }))
 vi.mock('../components/BodyMap.jsx', () => ({ default: () => null }))

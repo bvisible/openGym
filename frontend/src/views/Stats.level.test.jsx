@@ -37,6 +37,8 @@ vi.mock('../lib/level.js', () => ({
 }))
 vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))
 vi.mock('../sheets.jsx', () => ({
+  //// Neoffice — upstream v1.3.9's « All weigh-ins » sheet, imported by Home.
+  weighInsSheet: () => {},
   bwSheet: () => {}, goalSheet: () => {}, calendarSheet: () => {}, workoutDetailSheet: () => {},
   WorkoutRow: () => React.createElement('div'), bwDeltaColor: () => 'inherit',
 }))

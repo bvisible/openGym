@@ -6,19 +6,21 @@
 export const LANGS = {
   en: 'English', de: 'Deutsch', 'de-CH': 'Deutsch (Schweiz)', es: 'Español', fr: 'Français',
   it: 'Italiano', pt: 'Português (Portugal)', 'pt-BR': 'Português (Brasil)', pl: 'Polski',
-  tr: 'Türkçe', ru: 'Русский', zh: '中文',
-  ko: '한국어', hi: 'हिन्दी', th: 'ไทย', hu: 'Magyar'
+  tr: 'Türkçe', ru: 'Русский', uk: 'Українська', zh: '中文',
+  ko: '한국어', hi: 'हिन्दी', th: 'ไทย', hu: 'Magyar', ar: 'العربية'
 }
-export const INSTR_LANGS = ['en', 'es', 'fr', 'it', 'tr', 'ru', 'zh', 'hi', 'pl', 'ko', 'pt-BR', 'hu']
-//// Neoffice — 'fr' added: our 1,324 French exercise names, moved into
-//// upstream's own mechanism (src/exercise-names/fr.js) rather than kept in a
-//// parallel one of ours. Same shape as pt-BR, so nothing else had to change.
-//// 'hu' is upstream's, added in v1.2.14 — both packs live side by side.
-export const EXERCISE_NAME_LANGS = ['pt-BR', 'fr', 'hu']
+export const INSTR_LANGS = ['en', 'es', 'fr', 'it', 'tr', 'ru', 'zh', 'hi', 'pl', 'ko', 'pt-BR', 'hu', 'ar']
+//// Neoffice — 'fr' is upstream's too since v1.3.9, but the pack behind it
+//// (src/exercise-names/fr.js) is OURS: 1,324 names in a gym's words, kept at
+//// the v1.3.9 merge instead of upstream's generated list. Same shape, same
+//// mechanism, so nothing else had to change.
+export const EXERCISE_NAME_LANGS = ['pt-BR', 'hu', 'de', 'es', 'ru', 'it', 'fr']
+// Languages rendered right-to-left; i18n.js setLang applies the direction from this.
+export const RTL_LANGS = new Set(['ar'])
 export const DATE_LOCALES = {
   en: 'en-GB', de: 'de-DE', 'de-CH': 'de-CH', es: 'es-ES', fr: 'fr-FR', it: 'it-IT',
   pt: 'pt-PT', 'pt-BR': 'pt-BR',
-  pl: 'pl-PL', tr: 'tr-TR', ru: 'ru-RU', zh: 'zh-CN', ko: 'ko-KR', hi: 'hi-IN', th: 'th-TH', hu: 'hu-HU'
+  pl: 'pl-PL', tr: 'tr-TR', ru: 'ru-RU', uk: 'uk-UA', zh: 'zh-CN', ko: 'ko-KR', hi: 'hi-IN', th: 'th-TH', hu: 'hu-HU', ar: 'ar-u-nu-latn'
 }
 
 // Locales derived from another language by a pure text transform rather than carried as their
@@ -61,6 +63,8 @@ let lang = 'en'                 // set only by _setLangState, called from i18n.j
 let dict = {}                   // current locale pack (empty = English fallback)
 let instr = null                // { exId: [steps] } for the current language, null = English
 let exerciseNames = null        // { exId: translated name }, null = original catalogue name
+let enParens = true               // whether translated names show the English original in parentheses
+let enOnly = false                // whether translated names are replaced entirely by the English original
 let version = 0                 // bumped on every setLang; drives the React subscription selector
 
 export const getLang = () => lang
@@ -77,7 +81,9 @@ export function t(s, ...args) {
 // Instructions for an exercise in the current language (English steps as fallback).
 export const instrFor = ex => (instr && instr[ex.id]) || ex.st || []
 
-// Built-in catalogue names are bilingual when a complete translated name pack is active.
+// Built-in catalogue names are bilingual when a translated name pack is active. A pack need not
+// be complete: German covers the equipment exercises and not the body-weight ones, and an
+// exercise the pack has no entry for keeps its English title, one exercise at a time.
 // User-created exercises have no entry in the pack and keep their exact chosen name.
 //// Neoffice — the member's own names for exercises ("Épaules" for a dip they
 //// never call a dip), and the display names a coach gives in a programme. Set
@@ -129,27 +135,54 @@ export const exerciseNameFor = ex => {
 export const catalogueNameFor = ex => {
   const club = ex && clubNames[ex.id]
   if (club) return club
+  // A language that chose "English names only" sees the canonical catalogue title, not the
+  // translation — and never the parenthetical either. Custom exercises keep their exact name.
+  if (enOnly) return ex?.n || ''
   const translated = exerciseNames && ex && exerciseNames[ex.id]
   if (!translated) return ex?.n || ''
-  //// Neoffice — French shows the translated name ALONE; upstream's pt-BR keeps
-  //// its "translated (English)" form, and its own tests pin that.
-  //// Why they differ: the pt-BR pack is a partial catalogue where the English
-  //// term is often the one a lifter actually says, so the bracket carries
-  //// information. Our French pack covers all 1,324 names, and on a phone
-  //// "Développé couché à la barre (Barbell Bench Press)" wraps onto two lines
-  //// in every list, in the timer and on the printed plan. Nothing is lost: the
-  //// SEARCH stays bilingual through exerciseNameSearchText() below, which is
-  //// where knowing the English name actually helps.
-  if (lang === 'fr') return translated
+  //// Neoffice — French shows the translated name ALONE by default (i18n.js setLang:
+  //// `enParens` defaults to false for French, true elsewhere); since v1.3.9 a member
+  //// can still ask for "translated (English)" in Settings. Why the default differs:
+  //// the pt-BR pack is a partial catalogue where the English term is often the one
+  //// a lifter actually says, so the bracket carries information. Our French pack
+  //// covers all 1,324 names, and on a phone "Développé couché à la barre (Barbell
+  //// Bench Press)" wraps onto two lines in every list, in the timer and on the
+  //// printed plan. Nothing is lost: the SEARCH stays bilingual through
+  //// exerciseNameSearchText() below, which is where knowing the English name helps.
   // Some names (Burpee, Pilates, brand/model terms) are the established term in the target
   // language too. Repeating an identical loanword in parentheses adds noise rather than
   // context. Compared in the active language's own casing rules, not hardcoded to one —
   // this only ever differs from ordinary casing for languages with locale-specific rules
   // (e.g. Turkish dotless i), which does not include any language shipped here today.
   return translated.toLocaleLowerCase(lang) === ex.n.toLocaleLowerCase('en')
+      || !enParens
     ? translated
     : `${translated} (${ex.n})`
 }
+
+// Exercise-name packs written in the language's own casing. German capitalises its nouns and
+// lower-cases the adjectives in front of them ("Assistiertes hängendes Knieheben"), which
+// title-casing on top would undo. Every other pack is stored lower-case, the way EXDB stores
+// the English names ("supino com barra"). Left without the title-casing English gets, those
+// read all lower-case in every list, card and history row. A new pack goes here only when it
+// carries real casing; i18n-core.test.js checks this list against the packs themselves.
+//// Neoffice — 'fr' too: our French pack (src/exercise-names/fr.js, kept at the v1.3.9 merge) is
+//// written in sentence case, the way a gym writes « Relevé de buste 3/4 ». Title-cased on top it
+//// read « Relevé De Buste 3/4 »; upstream's own French pack is lower-case, ours is not.
+export const CASED_NAME_LANGS = ['de', 'fr']
+
+// EXDB stores English names lower-case and the UI title-cases them with CSS. A pack in
+// CASED_NAME_LANGS carries its own casing and must not be cased again on top, so the class that
+// does the title-casing stays off its translated names. A lower-case pack is title-cased like
+// English. That is decided per exercise, not only per language: German covers only part of the
+// catalogue, and an exercise it has no entry for shows its lower-case English title, which still
+// needs the casing ("push-up" would otherwise sit between "Bankdrücken" and "Kniebeuge"). A custom
+// exercise has no pack entry either and keeps the casing it always had, and so does every
+// exercise while "English names only" is on, since exerciseNameFor then shows the English title.
+// Callers spread this onto the element that holds exerciseNameFor(ex)'s output, nothing else —
+// muscle and equipment labels next to it are t() strings and keep their own capitalize.
+export const exerciseNameClass = ex => (!enOnly && exerciseNames && ex && exerciseNames[ex.id]
+  && CASED_NAME_LANGS.includes(baseLang(lang)) ? '' : 'capitalize')
 
 // Search both the localized and canonical English title without changing persisted data.
 export const exerciseNameSearchText = ex => {
@@ -164,13 +197,16 @@ export const exerciseNameSearchText = ex => {
 // Called by i18n.js's setLang once the locale pack has been loaded — kept here rather than
 // exported as setLang because loading packs requires import.meta.glob, which is Vite-only.
 // `dict`, `instr` and `exerciseNames` may be null to reset to their English fallbacks.
-export function _setLangState(newLang, newDict, newInstr, newExerciseNames) {
+//// Neoffice — `showEn` defaults like lib/i18n.js setLang: names alone in French (see catalogueNameFor).
+export function _setLangState(newLang, newDict, newInstr, newExerciseNames, showEn = baseLang(newLang || '') !== 'fr', enOnlyFlag = false) {
   lang = LANGS[newLang] ? newLang : 'en'
   dict = lang === 'en' ? {} : (newDict || {})
   instr = lang === 'en' || !INSTR_LANGS.includes(baseLang(lang)) ? null : (newInstr || null)
   exerciseNames = lang === 'en' || !EXERCISE_NAME_LANGS.includes(baseLang(lang))
     ? null
     : (newExerciseNames || null)
+  enParens = !!showEn
+  enOnly = !!enOnlyFlag
   version++
   return version
 }

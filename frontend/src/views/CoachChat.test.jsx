@@ -9,7 +9,7 @@ import { todayISO } from '../lib/format.js'
 // The chat is where a plan is imported. These pin that the Import button applies the pending
 // plan through the store, writes the decision into the thread, and leaves today startable.
 const mocks = vi.hoisted(() => {
-  const state = { S: null, pending: null, job: null, community: false, nav: vi.fn(), toast: vi.fn(), openSheet: vi.fn(), refresh: vi.fn() }
+  const state = { S: null, pending: null, job: null, community: false, maxMessageLen: 2200, nav: vi.fn(), toast: vi.fn(), openSheet: vi.fn(), refresh: vi.fn() }
   state.storeSnapshot = () => ({
     S: state.S,
     user: { id: 'u1' },
@@ -34,7 +34,7 @@ vi.mock('../store/useUI.js', () => {
 })
 vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.nav }))
 vi.mock('../lib/coach-api.js', () => ({
-  useCoachStatus: () => ({ pending: mocks.pending, job: mocks.job, cap: null, loading: false, lastError: null, last: null, refresh: mocks.refresh }),
+  useCoachStatus: () => ({ pending: mocks.pending, job: mocks.job, cap: null, loading: false, lastError: null, last: null, refresh: mocks.refresh, maxMessageLen: mocks.maxMessageLen }),
   resolvePending: vi.fn(() => Promise.resolve({})),
   refinePlan: vi.fn(() => Promise.resolve({})),
   requestReview: vi.fn(() => Promise.resolve({})),
@@ -42,9 +42,13 @@ vi.mock('../lib/coach-api.js', () => ({
   cohortStats: vi.fn(() => Promise.resolve({ ok: false, enabled: true, sharing: false })),
   setCohortShare: vi.fn(() => Promise.resolve({ ok: true, sharing: true })),
   JOB_ERRORS: { internal: 'x' },
+  awaitedJob: () => null,
+  settleAwaited: vi.fn(),
 }))
 vi.mock('../sheets.jsx', () => ({ startFlow: vi.fn(), confirmSheet: vi.fn() }))
 vi.mock('../lib/api.js', () => ({
+  //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import.
+  BOOT: {},
   api: vi.fn(() => Promise.resolve({})),
   IS_APPLE: false, IS_ANDROID: false, BIO: 'biometrics',
   //: What the club lets the Coach do. Absent here on purpose: the screen must
@@ -151,6 +155,21 @@ describe('the Coach chat', () => {
     expect(container.querySelector('.composer textarea').disabled).toBe(true)
   })
 
+  it('caps the composer at the admin\'s configured message length, not the old 1000-char default (issue #267)', async () => {
+    await mount(null)
+    expect(container.querySelector('.composer textarea').getAttribute('maxLength')).toBe('2200')
+  })
+
+  it('falls back to 1000 while the status poll has not answered yet', async () => {
+    mocks.maxMessageLen = undefined
+    try {
+      await mount(null)
+      expect(container.querySelector('.composer textarea').getAttribute('maxLength')).toBe('1000')
+    } finally {
+      mocks.maxMessageLen = 2200
+    }
+  })
+
   it('applies the accepted subset of a review and logs it', async () => {
     mocks.S = state()
     await mount({ id: 'r1', kind: 'review', summary: 's', changes: [
@@ -196,6 +215,16 @@ describe('the Coach chat', () => {
     expect(mocks.S.coach.log.at(-1).score).toBe(8)
     expect(mocks.S.coach.chat.at(-1).kind).toBe('debrief')
     expect(mocks.S.coach.chat.at(-1).ref).toBe(mocks.S.coach.log.at(-1).id)
+  })
+
+  it('lays the plan’s week out from the day the week is set to start on', async () => {
+    const days = () => [...container.querySelectorAll('.pcard-wd')].map(d => d.textContent)
+    await mount({ id: 'p1', kind: 'create', bundle: bundle({ 0: 'x1', 1: 'x2' }) })
+    expect(days()).toEqual(['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'])
+    const sunday = state(); sunday.weekStart = 0
+    await mount({ id: 'p1', kind: 'create', bundle: bundle({ 0: 'x1', 1: 'x2' }) }, null, { S: sunday })
+    expect(days()).toEqual(['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'])
+    expect([...container.querySelectorAll('.pcard-wd.on')].map(d => d.textContent)).toEqual(['Su', 'Mo'])
   })
 
   it('offers the quick actions only when nothing is running', async () => {

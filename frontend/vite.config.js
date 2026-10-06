@@ -66,7 +66,14 @@ const swStamp = {
 // The version people are asked for in #install-help and on every bug report. Read from
 // package.json so it cannot drift from the release it was built in, and inlined at build
 // time so no runtime fetch is involved.
+//
+// APP_BUILD, when the build sets it, is appended as "1.3.8+<build>". A packaged build carries a
+// version its package.json cannot know — every image built between two releases reports the same
+// number, so the one question a bug report turns on, "which build were you running?", had no
+// answer from inside the app. Unset (the ordinary case, and every upstream build) it changes
+// nothing: the string is exactly package.json's version.
 const pkgVersion = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version
+const appVersion = process.env.APP_BUILD ? `${pkgVersion}+${process.env.APP_BUILD}` : pkgVersion
 
 export default defineConfig({
   //// Neoffice — happy-dom resolves a relative fetch against http://localhost:3000,
@@ -76,7 +83,7 @@ export default defineConfig({
   //// Neoffice — setupFiles added: Node 25's own empty `localStorage` global
   //// shadows happy-dom's (see vitest.setup.js).
   test: { environmentOptions: { happyDOM: { url: 'http://localhost:1/' } }, setupFiles: ['./vitest.setup.js'] },
-  define: { __APP_VERSION__: JSON.stringify(pkgVersion) },
+  define: { __APP_VERSION__: JSON.stringify(appVersion) },
   //// Neoffice — upstream v1.3.7 adds a `swStamp` plugin that names the service
   //// worker's cache after the build hash. Not taken: the worker Frappe serves is
   //// opengym/www/gym_sw.js, a static file no build rewrites, and the test in

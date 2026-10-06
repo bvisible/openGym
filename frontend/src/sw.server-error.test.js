@@ -91,7 +91,7 @@ describe.each(Object.entries(WORKERS))('%s — a server error is answered like n
 
   it('routes every network answer through the rule, and a failed network through the cache', () => {
     //// Defining the rule is not the same as calling it.
-    expect(SW).toMatch(/return passOrFallBack\(e\.request, res\)/)
-    expect(SW).toMatch(/\.catch\(\(\) => fromCache\(e\.request\)\)\)/)
+    expect(SW).toMatch(/resolve\(passOrFallBack\(e\.request, res\)\)/)
+    expect(SW).toMatch(/resolve\(fromCache\(e\.request\)\)/)
   })
 })

@@ -35,6 +35,10 @@ vi.mock('../store/useUI.js', () => {
 })
 vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))
 vi.mock('../lib/api.js', () => ({
+  //// Neoffice — what our Settings reads from lib/api.js (the coach, the wallet, classes, membership).
+  myCoach: vi.fn(() => Promise.resolve(null)), wallet: vi.fn(() => Promise.resolve(null)), classesMine: vi.fn(() => Promise.resolve([])), myMembership: vi.fn(() => Promise.resolve({ shown: false })),
+  //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import.
+  BOOT: {},
   api: vi.fn(), webauthnOK: () => false, passkeyLogin: vi.fn(), passkeyRegister: vi.fn(), IS_ANDROID: false,
   //// Neoffice — our store imports named helpers from api.js (the journal is
   //// served from Frappe and calls whitelisted methods). Absent from the mock
@@ -45,6 +49,8 @@ vi.mock('../lib/api.js', () => ({
   putState: vi.fn(() => Promise.resolve({})),
   logout: vi.fn(() => Promise.resolve({})),
   currentUser: () => null,
+  //// Neoffice — the page boot's session (lib/api.js): the owed sign-out is bound to it.
+  sessionMark: () => null, pageSignedIn: () => true, reloadJournal: () => {},
   setRemoteAuth: () => {},
   wallet: vi.fn(() => Promise.resolve({})), myMembership: vi.fn(() => Promise.resolve({ shown: false })),
   myCoach: vi.fn(() => Promise.resolve({})),

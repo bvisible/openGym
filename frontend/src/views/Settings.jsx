@@ -1,27 +1,30 @@
-import { useEffect, useRef, useState, forwardRef } from 'react'
+import { useEffect, useRef, useState, forwardRef, useSyncExternalStore } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore, DEF, hasData } from '../store/useStore.js'
 //// Neoffice — level helpers from lib/level.js, not the store: upstream's view tests mock the store.
 import { levelOf, isSimple } from '../lib/level.js'
 import { workoutControls } from '../lib/workout-controls.js'
-import { convertStateUnit } from '../lib/units.js'
+import { speedUnitOf } from '../lib/speed.js'
+import { copyText } from '../lib/clipboard.js'
 import { useUI } from '../store/useUI.js'
-import { ACCENTS, todayISO, localTZ, weekStartOf, MONDAY, SUNDAY } from '../lib/format.js'
+import { ACCENTS, ACCENT_NAMES, todayISO, localTZ, weekStartOf, MONDAY, SUNDAY, fmtPlate } from '../lib/format.js'
+import { inventoryFor, ownsPlates } from '../lib/plates.js'
 import { effortOf } from '../lib/history.js'
 //// Neoffice — passkeys are gone: the Frappe session is the sign-in, and the
 //// journal never had a user directory of its own here. IS_ANDROID stays (it
 //// only phrases a hint about the install prompt).
-import { IS_ANDROID, myCoach, wallet, classesMine, myMembership } from '../lib/api.js'
-import { unlock, playOnSilentSupported } from '../lib/sound.js'
+import { BOOT, IS_ANDROID, myCoach, wallet, classesMine, myMembership } from '../lib/api.js'
+import { unlock, playOnSilentSupported, vibrateSupported } from '../lib/sound.js'
 import { pushSupported, enablePush, disablePush, sendTestPush, syncPushSubscription } from '../lib/push.js'
 import { wakeLockSupported } from '../lib/wakelock.js'
-import { t, LANGS, INSTR_LANGS, dateLocale } from '../lib/i18n.js'
+import { t, LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, baseLang, dateLocale } from '../lib/i18n.js'   //// Neoffice — baseLang: the default of the English-name switch
+import { effectiveLang } from '../lib/default-lang.js'
 import { DEMO, REPO } from '../lib/demo.js'
-import { MOBILE, isAndroid, shareExport, syncReminder } from '../lib/mobile.js'
+import { MOBILE, isAndroid, shareExport, syncReminder } from '../lib/mobile.js'   //// Neoffice — MOBILE, isAndroid: our phone build's rows
+import { setRestAccent } from '../lib/rest-alert.js'
 import { checkForUpdate, downloadAndInstall } from '../lib/update.js'
 import { forgetCoach } from '../lib/coach-api.js'
-import { ConnectSheet } from './MobileOnboarding.jsx'
-import { starterPlanSheet, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet, menuSheet, askAddDeviceData } from '../sheets.jsx'
+import { starterPlanSheet, confirmSheet, importFromApp, importFromHevy, equipmentProfileSheet, plateInventorySheet, menuSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, TextField } from '../components/ui.jsx'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
@@ -32,7 +35,14 @@ export default function Settings() {
   const S = useStore(s => s.S)
   const user = useStore(s => s.user)
   const coachLocal = useStore(s => s.coachLocal)
-  const { update, replaceState, setUser, pullState, pushState, adoptProfile, signOut, signOutAll, resetDemo, disconnectServer } = useStore()
+  const config = useStore(s => s.config)
+  // What the app is showing, which for a profile that never picked a language is worked out on
+  // this device rather than stored (#303).
+  //// Neoffice — the site's language first (BOOT.lang), as App.jsx does: the two must agree, or the
+  //// language row would show another language than the one on screen.
+  const lang = S.lang || BOOT.lang || effectiveLang(S, config)
+  //// Neoffice — signOut: ours, it ends the Frappe session (store/useStore.js).
+  const { update, importConflict, importBackup, setUnit, resetEverything: resetAll, setUser, pullState, pushState, resetDemo, signOut } = useStore()
   const toast = useUI(s => s.toast)
   const fileRef = useRef(null)
   const importRef = useRef(null)
@@ -47,8 +57,8 @@ export default function Settings() {
       title: t('Convert to {0}?', v),
       subtitle: t('Every stored weight — logged sets, working weights, routine targets, body weight, bar weights — is in {0}. Convert the numbers, or keep them and only change the label?', S.unit),
       items: [
-        { icon: 'shuffle', label: t('Convert the numbers'), onClick: () => replaceState(convertStateUnit(useStore.getState().S, v)) },
-        { icon: 'pencil', label: t('Keep the numbers, change the label'), onClick: () => update(s => { s.unit = v }) },
+        { icon: 'shuffle', label: t('Convert the numbers'), onClick: () => setUnit(v) },
+        { icon: 'pencil', label: t('Keep the numbers, change the label'), onClick: () => setUnit(v, { convert: false }) },
       ],
     })
   }
@@ -126,8 +136,10 @@ export default function Settings() {
     }
   }
 
+  // Reads the store at the moment of the tap: the sheet that asks before a sign-out offers it too,
+  // and the copy it exports is the one that has not reached the server.
   const doExport = async () => {
-    const json = JSON.stringify(S, null, 2)
+    const json = JSON.stringify(useStore.getState().S, null, 2)
     const name = 'opengym-backup-' + todayISO() + '.json'
     // WKWebView can't download blob URLs — the native build hands the file to the share sheet.
     if (MOBILE) {
@@ -138,17 +150,39 @@ export default function Settings() {
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); URL.revokeObjectURL(a.href)
     toast(t('Backup exported'))
   }
-  const doImport = ev => {
+  //// Neoffice — upstream's v1.3.9 import, without the zip of photos and videos: they stay on the
+  //// member's phone and are never part of what the club's server sees (Jérémy, 06.10). A JSON
+  //// backup, and the server asked first: a workout logged since the backup was made, or on another
+  //// device, would be deleted by the replace, so the member may merge those in instead.
+  const doImport = async ev => {
     const f = ev.target.files[0]; if (!f) return
-    const rd = new FileReader()
-    rd.onload = () => {
-      try {
-        const data = JSON.parse(rd.result)
-        if (!data.workouts || !data.routines) throw new Error('not an openGym backup')
-        confirmSheet({ title: t('Import backup?'), message: t('This replaces all current data with the backup file.'), confirmText: t('Import'), danger: true, onConfirm: () => { replaceState(Object.assign(JSON.parse(JSON.stringify(DEF)), data), true); toast(t('Backup imported')) } })
-      } catch (e) { toast(t('Import failed: {0}', e.message)) }
+    ev.target.value = ''
+    let data   //// Neoffice — upstream's import check (v1.3.9), on our store
+    try {
+      data = JSON.parse(await f.text())   //// Neoffice — upstream's import check (v1.3.9), on our store
+      if (!data.workouts || !data.routines) throw new Error('not an openGym backup')
+    } catch (e) { toast(t('Import failed: {0}', e.message)); return }
+    const apply = mergeWith => { importBackup(data, { mergeWith }); toast(t('Backup imported')) }   //// Neoffice — upstream's import check (v1.3.9), on our store
+    const conflict = await importConflict(data)
+    if (conflict) {
+      const n = conflict.workouts
+      menuSheet({
+        title: t('Import backup?'),
+        subtitle: t(n === 1
+          ? 'The server has 1 workout that is not in this backup, logged since it was made or on another device. Replacing deletes it.'
+          : 'The server has {0} workouts that are not in this backup, logged since it was made or on another device. Replacing deletes them.', n),
+        items: [
+          { icon: 'trash', label: t('Replace anyway'), danger: true, onClick: () => apply(null) },
+          { icon: 'shuffle', label: t('Merge them in'), onClick: () => apply(conflict) },
+          { icon: 'xmark', label: t('Cancel'), onClick: () => {} },
+        ],
+      })
+      return
     }
-    rd.readAsText(f)
+    confirmSheet({
+      title: t('Import backup?'), message: t('This replaces all current data with the backup file.'), confirmText: t('Import'), danger: true,
+      onConfirm: () => apply(null)
+    })
   }
   //// Neoffice — signing in and out belongs to Frappe now, so the three
   //// handlers that lived here (passkey sign-in, passkey registration, "sign
@@ -171,12 +205,16 @@ export default function Settings() {
   const resetEverything = () => confirmSheet({
     title: t('Reset everything?'),
     message: user
+      //// Neoffice — no photos or videos to delete: they never reach the club's server.
       ? t('Deletes your plan, workouts and body weight from your profile on this server and on every signed-in device. This cannot be undone.')
       : t('Deletes your plan, workouts and body weight on this device. This cannot be undone.'),
     confirmText: t('Delete everything'), danger: true,
     onConfirm: () => {
+      //// Neoffice — the Coach is the club's Nora (lib/coach-api.js): forgetCoach() is its one door,
+      //// signed in or not. resetAll() is upstream's (v1.3.9): it stamps the empty copy with resetAt
+      //// and resetIds, so the server and the other devices drop exactly what was wiped.
       if (user || coachLocal?.mode === 'byok') forgetCoach().catch(() => {})
-      replaceState(JSON.parse(JSON.stringify(DEF)), true)
+      resetAll()
       nav('/home'); toast(t('All data reset'))
     },
   })
@@ -184,25 +222,18 @@ export default function Settings() {
   return <div className="narrow">
     <div className="hdr">
       <button className="iconbtn" onClick={() => nav('/home')} aria-label={t('Home')}><Icon name="chevronLeft" /></button>
-      <div style={{ flex: 1, marginLeft: 10 }}><h1>{t('Settings')}</h1></div>
+      <div style={{ flex: 1, marginInlineStart: 10 }}><h1>{t('Settings')}</h1></div>
     </div>
 
+    {/* //// Neoffice — upstream's server block (which server, account id, "Sync now", Disconnect) is
+        not shipped: the journal is served by the very Frappe instance it syncs with. */}
+
     {/* ---------- account (demo and mobile builds have nothing to sign in to) ---------- */}
-    <Section title={MOBILE ? (user ? t('Your server') : t('Your data')) : DEMO ? t('Demo') : t('Account')}>
-      {MOBILE ? (user ? <>
-        <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Synced with your openGym server.')} />
-        {user.admin && <Row icon="wrench" iconTint="var(--indigo)" title={t('Admin dashboard')} accessory="chevron" onClick={() => nav('/admin')} />}
-        <Row icon="signOut" iconTint="var(--red)" title={t('Disconnect')} danger onClick={() => confirmSheet({
-          title: t('Disconnect from your server?'),
-          message: t('Your data is synced to your server first, then this device switches back to local-only.'),
-          confirmText: t('Disconnect'), danger: true,
-          onConfirm: async () => { await disconnectServer(); nav('/home'); toast(t('Disconnected — back to local-only')) },
-        })} />
-      </> : <>
+    {!(MOBILE && user) && <Section title={MOBILE ? t('Your data') : DEMO ? t('Demo') : t('Account')}>
+      {MOBILE ? <>
+        {/* //// Neoffice — the phone build only: on the web the account is the club's */}
         <Row icon="lock" iconTint="var(--acc)" title={t('All data stays on this phone')} subtitle={t('No account, no cloud — back it up anytime with Export below.')} />
-        <Row icon="link" iconTint="var(--indigo)" title={t('Connect to my server')} subtitle={t('Sync this device to your own self-hosted openGym instead.')} accessory="chevron"
-          onClick={() => useUI.getState().openSheet(close => <ConnectSheet close={close} />)} />
-      </>) : DEMO ? <>
+      </> : DEMO ? <>
         <Row icon="sparkles" iconTint="var(--acc)" title={t('You’re in the demo')} subtitle={t('Example data, stored only in this browser — change anything you like.')} />
         <Row icon="reset" iconTint="var(--blue)" title={t('Reset demo data')} accessory="chevron"
           onClick={() => confirmSheet({ title: t('Reset demo data?'), message: t('Puts the example plan, workouts and weigh-ins back the way they started.'), confirmText: t('Reset'), onConfirm: () => { resetDemo(); nav('/home'); toast(t('Demo data reset')) } })} />
@@ -213,11 +244,22 @@ export default function Settings() {
             no passkey to create, no profile to pick. Signing out ends the
             Frappe session and leaves for /login. */}
         <Row icon="personCircle" iconTint="var(--grey)" title={user.name} subtitle={t('Signed in with your Neoffice account.')} />
-        <Row icon="signOut" iconTint="var(--red)" title={t('Sign out')} danger onClick={() => confirmSheet({ title: t('Sign out?'), message: t('Your journal is saved first, then this device is signed out.'), confirmText: t('Sign out'), danger: true, onConfirm: () => signOut() })} />
+        <Row icon="signOut" iconTint="var(--red)" title={t('Sign out')} danger onClick={() => confirmSheet({ title: t('Sign out?'), message: t('Your journal is saved first, then this device is signed out.'), confirmText: t('Sign out'), danger: true, onConfirm: async () => {
+          //// Neoffice — upstream v1.3.9's sign-out refuses while this device holds changes the club's
+          //// server has not seen ({ owed: true }): say so, and let the member go ahead — the changes are
+          //// kept aside on this device and come back at their next sign-in here.
+          const r = await signOut()
+          if (r?.owed && r.stashed === undefined) confirmSheet({
+            title: t('Sign out?'),
+            message: t('Some changes on this device have not reached your server.') + ' ' + t('The changes your server has not seen are kept on this device, and added back when it connects as this account again.'),
+            confirmText: t('Sign out anyway'), danger: true,
+            onConfirm: () => signOut({ force: true }),
+          })
+        } })} />
       </> : (
         <Row icon="lock" iconTint="var(--grey)" title={t('Signing in…')} />
       )}
-    </Section>
+    </Section>}
     {!user && !DEMO && !MOBILE && <p className="sect-f" style={{ marginTop: -18, marginBottom: 22 }}>{t('Guest mode — data lives only in this browser.')}</p>}
 
     {/* //// Neoffice — added: reaching your coach. Messaging is Raven, which
@@ -241,12 +283,26 @@ export default function Settings() {
     <Section title={t('General')} footer={t('Switching the unit offers to convert every stored weight.')}>
       <SelectRow
         icon="globe" iconTint="var(--blue)" title={t('Language')}
-        value={S.lang || 'en'} onChange={v => update(s => { s.lang = v })}
+        value={lang} onChange={v => update(s => { s.lang = v; s.langAuto = false })}
         options={Object.entries(LANGS).map(([k, name]) => ({
           value: k, label: name,
           subtitle: INSTR_LANGS.includes(k) ? null : t("Exercise instructions aren't available in this language yet — they stay in English."),
         }))}
       />
+      {EXERCISE_NAME_LANGS.includes(baseLang(lang)) && <>
+        <Row icon="dumbbell" iconTint="var(--purple)" title={t('English exercise names')}
+          subtitle={t('Show the English name in parentheses next to the translated one.')}>
+          {/* //// Neoffice — the same default as setLang: names alone in French, the English beside them elsewhere. */}
+          <Switch checked={S.enParens?.[baseLang(lang)] ?? baseLang(lang) !== 'fr'}
+            disabled={S.enOnly?.[baseLang(lang)] === true}
+            onChange={v => update(s => { s.enParens = { ...(s.enParens || {}), [baseLang(lang)]: v } })} />
+        </Row>
+        <Row icon="globe" iconTint="var(--purple)" title={t('English names only')}
+          subtitle={t('Replace the translated names with the original English ones.')}>
+          <Switch checked={S.enOnly?.[baseLang(lang)] === true}
+            onChange={v => update(s => { s.enOnly = { ...(s.enOnly || {}), [baseLang(lang)]: v } })} />
+        </Row>
+      </>}
       {/* //// Neoffice — the Classes tab in the bottom bar. Only shows up if
            the club actually RUNS classes: offering to hide something that does
            not exist makes people think they lost it. */}
@@ -261,6 +317,14 @@ export default function Settings() {
         <Segmented className="seg-inline"
           options={[{ value: 'kg', label: 'kg' }, { value: 'lb', label: 'lb' }]}
           value={S.unit} onChange={v => switchUnit(v)} />
+      </Row>
+      {/* Cardio speed (Discord "miles per hour"). Unlike the weight unit this converts nothing:
+          speeds stay stored in km/h and only what is shown and typed follows it (lib/speed.js).
+          Until chosen it follows the weight unit, so a profile in pounds already reads mph. */}
+      <Row icon="figureRun" iconTint="var(--teal)" title={t('Speed unit')}>
+        <Segmented className="seg-inline"
+          options={[{ value: 'kmh', label: 'km/h' }, { value: 'mph', label: 'mph' }]}
+          value={speedUnitOf(S)} onChange={v => update(s => { s.speedUnit = v })} />
       </Row>
       {/* Display only: one decimal reads fine for plate-loadable numbers, two for anyone whose
           per-side figure lands on .25 or .75, or who loads microplates (issue #139). Nothing is
@@ -282,6 +346,11 @@ export default function Settings() {
         subtitle={t('Show a card on Home with your membership QR codes.')}>
         <Switch checked={S.checkIn !== false} onChange={v => update(s => { s.checkIn = v })} />
       </Row>
+      {/* The Home summary is optional; hiding it leaves weight logging, history and Stats intact. */}
+      <Row icon="scale" iconTint="var(--green)" title={t('Body weight')}
+        subtitle={t('Show the body weight card on Home.')}>
+        <Switch checked={S.showWeightCard !== false} onChange={v => update(s => { s.showWeightCard = v })} />
+      </Row>
     </Section>
 
     {/* ---------- during a workout ---------- */}
@@ -301,6 +370,24 @@ export default function Settings() {
           value={['list', 'compact'].includes(S.workoutView) ? S.workoutView : 'cards'}
           onChange={v => update(s => { s.workoutView = v })} />
       </Row>
+      {/* Whose reps a planned session opens with (lib/session-start.js). The plan's by default:
+          the routine is what you said you would do, and history and progression decide the
+          weight. The other choice is the old behaviour, reps carried over from last time.
+          Absent (an older profile) reads as the plan. */}
+      <SelectRow icon="clipboard" iconTint="var(--acc)" title={t('Planned sessions start from')}
+        value={S.startFrom === 'last' ? 'last' : 'plan'} onChange={v => update(s => { s.startFrom = v })}
+        options={[
+          { value: 'plan', label: t('Your plan'), subtitle: t('The routine’s sets and reps. Your history decides the weight.') },
+          { value: 'last', label: t('Your last session'), subtitle: t('The reps you logged last time in that routine, carried over.') },
+        ]} />
+      {/* The line under each exercise that the rows are held against (#173). Tapping the line in
+          a workout switches it too; this is where the choice can be found without knowing that. */}
+      <SelectRow icon="history" iconTint="var(--blue)" title={t('Shown under each exercise')}
+        value={S.logRef === 'best' ? 'best' : 'last'} onChange={v => update(s => { s.logRef = v })}
+        options={[
+          { value: 'last', label: t('Last time'), subtitle: t('What you did the last time, in that routine.') },
+          { value: 'best', label: t('Best set'), subtitle: t('Your heaviest set of the exercise, from any workout.') },
+        ]} />
       {/* The lean workout screen keeps the sets and one "more" button per exercise; each switch
           brings one of the old always-visible button groups back for people who liked them. */}
       <Row icon="wrench" iconTint="var(--purple)" title={t('Workout controls')} accessory="chevron"
@@ -373,17 +460,31 @@ export default function Settings() {
           <Switch checked={!!S.soundOnSilent} onChange={v => update(s => { s.soundOnSilent = v })} />
         </Row>
       )}
+      {/* The buzz at the end of a rest or a hold and on a set tick, on its own switch like the
+          sound (Discord, asierlama). Not offered where there is nothing to buzz: iOS has no
+          navigator.vibrate. */}
+      {vibrateSupported() && (
+        <Row icon="bell" iconTint="var(--indigo)" title={t('Vibrate')}>
+          <Switch checked={S.vibrate !== false} onChange={v => update(s => { s.vibrate = v })} />
+        </Row>
+      )}
       <Row icon="sun" iconTint="var(--yellow)" title={t('Flash screen when timer ends')}>
         <Switch checked={!!S.timerFlash} onChange={v => update(s => { s.timerFlash = v })} />
       </Row>
+      <Row icon="timer" title={t('Keep timing after target')}
+        subtitle={t('Timed sets continue up to 15 extra minutes. Tap Done to log the actual duration.')}>
+        <Switch aria-label={t('Keep timing after target')} checked={!!S.timedSetOvertime}
+          onChange={v => update(s => { s.timedSetOvertime = v })} />
+      </Row>
       {/* Two names for the same judgement, so the column asks in the scale you already think in.
           The (i) sits before the control — you read it on the way to the choice, not after it. */}
+      {/* //// Neoffice — the effort setting at the levels that show it (lib/level-visibility.js) */}
       {showsEffortSetting(S) && <Row icon="target" iconTint="var(--purple)" title={t('Effort per set')}>
         <button className="helpbtn" aria-label={t('What are RIR and RPE?')} onClick={effortHelpSheet}><Icon name="info" /></button>
         <Segmented className="seg-inline"
           options={[{ value: 'none', label: t('Off') }, { value: 'rir', label: t('RIR') }, { value: 'rpe', label: t('RPE') }]}
           value={effortOf(S)} onChange={v => update(s => { s.effort = v; delete s.showRir })} />
-      </Row>}
+      </Row>}{/* //// Neoffice — closes the level gate above */}
     </Section>
 
     {(user || MOBILE) && <NotificationsCard S={S} update={update} toast={toast} />}
@@ -419,7 +520,7 @@ export default function Settings() {
         <div className="swatches">
           {Object.entries(ACCENTS).map(([k, c]) => (
             <button key={k} className={'swatch' + ((S.accent || 'lime') === k ? ' on' : '')}
-              style={{ background: c }} onClick={() => update(s => { s.accent = k })} aria-label={k} />
+              style={{ background: c }} onClick={() => { update(s => { s.accent = k }); setRestAccent(k) }} aria-label={t(ACCENT_NAMES[k] || k)} />
           ))}
         </div>
       </div>
@@ -435,13 +536,17 @@ export default function Settings() {
         subtitle={t('Pull your history with a Hevy Pro API key')}
         accessory="chevron" onClick={importFromHevy} />
       <Row icon="upload" iconTint="var(--blue)" title={t('Import backup')} accessory="chevron" onClick={() => fileRef.current.click()} />
+      {/* //// Neoffice — export and import as upstream, the reset below with our message */}
       <Row icon="download" iconTint="var(--blue)" title={t('Export backup (JSON)')} accessory="chevron" onClick={doExport} />
+      {/* 14 is AUTO_BACKUP_KEEP in lib/mobile.js, written out because the Settings tests mock
+          that module wholesale; mobile.autobackup.test.js pins the two together. */}
       {MOBILE && <Row icon="history" iconTint="var(--blue)" title={t('Auto-backup on changes')}
-        subtitle={t('Saves a dated copy to the Documents folder after finishing a workout or editing a routine — point a sync app at it, or copy it out by hand.')}>
+        subtitle={t('Saves a dated copy to Documents/openGym after finishing a workout or editing a routine, and keeps the newest {0} — point a sync app at that folder, or copy it out by hand.', 14)}>
         <Switch checked={!!S.autoBackup} onChange={v => update(s => { s.autoBackup = v })} />
       </Row>}
       <Row icon="trash" iconTint="var(--red)" title={t('Reset everything')} danger onClick={resetEverything} />
     </Section>
+    {/* //// Neoffice — the file input of the import above */}
     <input ref={fileRef} type="file" accept=".json,application/json" style={{ display: 'none' }} onChange={doImport} />
     {/* Reset after reading so picking the same file twice still fires onChange. */}
     <input ref={importRef} type="file" accept=".csv,.xml,text/csv,text/xml" style={{ display: 'none' }}
@@ -465,6 +570,7 @@ export default function Settings() {
         are on. */}
     <div className="dim small" style={{ textAlign: 'center', marginTop: 4, lineHeight: 1.6 }}>
       openGym v{__APP_VERSION__} · {t('free & open source (AGPL v3)')}<br />
+      {/* //// Neoffice — our fork's source, as AGPL asks */}
       <a href="https://github.com/bvisible/openGym" target="_blank" rel="noopener">source code</a> · exercise data: hasaneyldrm/exercises-dataset (MIT)<br />
       exercise images and animations © <a href="https://gymvisual.com/" target="_blank" rel="noopener">Gym visual</a>
     </div>
@@ -680,7 +786,12 @@ function EquipmentCard({ S, update }) {
       if (s.activeEquipId === p.id) s.activeEquipId = (s.equipProfiles[0] && s.equipProfiles[0].id) || null
     }),
   })
+  // The plates you own, per unit (lib/plates.js) — what the set rows' plate lines load from.
+  const plateSummary = ownsPlates(S)
+    ? inventoryFor(S).map(p => fmtPlate(p.w) + '×' + p.n).join(' · ') || t('None')
+    : t('Standard set — tap to count the pairs you own.')
   return <Section title={t('Equipment')} footer={t('Filters the exercise library and picker, and flags routine exercises that need something you don’t have in the active profile.')}>
+    <Row icon="plate" iconTint="var(--orange)" title={t('Plates')} subtitle={plateSummary} accessory="chevron" onClick={() => plateInventorySheet()} />
     {profiles.length > 0 && <Row icon="dumbbell" iconTint="var(--acc)" title={t('Filter by equipment')}>
       <Switch checked={!!S.equipFilterOn} onChange={v => update(s => { s.equipFilterOn = v })} />
     </Row>}

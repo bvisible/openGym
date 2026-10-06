@@ -100,7 +100,13 @@ const render = (Screen, level) => {
   const root = createRoot(host)
   mounted.push(root)
   act(() => root.render(React.createElement(Screen)))
-  return host.textContent || ''
+  //// Text node by text node, joined with spaces: `textContent` glues two neighbouring elements
+  //// together, and « Planned sessions start from » + « Your plan » read « fromYour », which
+  //// matched « myo » (seen at the v1.3.9 merge). A term is a word on screen, not a seam.
+  const walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT)
+  const parts = []
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) parts.push(n.nodeValue)
+  return parts.join(' ')
 }
 
 const found = (text, terms = JARGON) => terms.filter(term => new RegExp(term.replace(/[-\s]/g, '[-\\s]?'), 'i').test(text))

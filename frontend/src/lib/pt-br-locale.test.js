@@ -27,103 +27,24 @@ describe('Brazilian Portuguese locale', () => {
       .sort(byCodeUnit)
     const fingerprint = createHash('sha256').update(JSON.stringify(inherited)).digest('hex')
 
-    //// Neoffice — our numbers are higher than upstream's because our own
-    //// strings live in pt.js like every other locale, and pt-BR inherits them.
-    //// The guarantee this test exists for is untouched: a pt-PT wording that
-    //// changes without review still breaks the hash. Recomputed after the
-    //// v1.2.14 merge, whose new strings land in the inherited set.
-    //// Recompute with: node scripts/pt-br-inheritance-fingerprint.mjs
-//// Recomputed 31.08 for the seven accessibility labels: five are identical
-//// on both sides and stay inherited, "Next week"/"Next month" became
-//// pt-BR overrides ("próxima/próximo" rather than pt-PT's "seguinte").
-//// Recomputed again for the exercise level filter: four inherited, two
-//// overridden — "A mostrar" is the European progressive (Brazil uses the
-//// gerund) and "convém" is stiff there next to "combina comigo".
-//// Recomputed for the editing sheet: all five strings are identical on both
-//// sides ("Subir", "Descer", "Editar a sessão"…) and stay inherited.
-//// Recomputed for "Método de intensificação" — the client asked for the
-//// full phrase rather than "Intensificador", and it reads the same in
-//// Brazil.
-//// Recomputed for the session outline: three inherited, "em curso" became
-//// an override ("em andamento" is what Brazil says of something running).
-//// Recomputed for the add-to-home-screen card: seven overrides ("tela" for
-//// "ecrã", "aplicativo" for "aplicação", "Compartilhar" for "Partilhar" —
-//// the words the phone's own menus use in Brazil), four inherited.
-//// Recomputed for the password eye: two overrides ("senha", never Portugal's
-//// "palavra-passe").
-//// Recomputed for the 3-2-1 count: "Prepare-se" and "Toque para começar já"
-//// read the same on both sides and stay inherited.
-//// Recomputed for the membership gate's 17 strings (terms, signature, renewal,
-//// invoice): all stay inherited, none needed a pt-BR override.
-//// Recomputed for the rename-an-exercise, rest-per-exercise and floor-plan
-//// strings (16 new keys): all stay inherited, none needed a pt-BR override.
-//// Recomputed after the upstream v1.3.5 merge (2026-09-09), then once more for the
-//// coach questionnaire's 15 subtitles (three of them Brazilian overrides): upstream rewrote most
-//// of its pt-BR pack as explicit overrides (631 of theirs), and its new strings
-//// land in the inherited set; our own 24 overrides ride along.
-//// Recomputed after the upstream v1.3.7 merge (2026-09-17): upstream's v1.3.6
-//// pt-BR block (sign-in adoption, offline banner, progression step) adds 13
-//// overrides — 669 with ours — and the rest of its new strings inherit pt-PT.
-//// Recomputed for the Coach's busy/restarting outage messages (2 new keys): both
-//// are overrides, none inherited — each carries the "Try again" imperative that
-//// is tu in pt.js ("Tenta") and você in Brazil ("Tente"), and the restart line
-//// also carries the EU progressive/BR gerund split already established for this
-//// feature ("está a reiniciar" / "está reiniciando"). Inherited set unchanged, so
-//// the hash does not move; only the override count does (698 → 700).
-//// Recomputed for "My membership" (30 new keys): 12 are Brazilian overrides —
-//// "recepção" for Portugal's "receção", "aplicativo" for "aplicação",
-//// "inscrição" and "você" where pt-PT says "assinatura" and "tu" — and the
-//// other 18 (the invoice words, the billing intervals) read the same on both
-//// sides and stay inherited.
-//// Recomputed for paying an invoice (6 new keys): 3 overrides — Brazil says
-//// "com você" and "em instantes" where Portugal says "consigo" and "dentro de
-//// momentos" — and "Fatura {0}" / "Pagar {0}" read the same on both sides.
-//// Recomputed for renewing from the app (5 new keys): 3 overrides — Brazil
-//// dates things "em 5 de outubro" where Portugal says "a 5 de outubro", and
-//// the European clitic "se não o renovar" is not how Brazil says it.
-//// Recomputed for "settle it when the invoice reaches you": Brazil says it
-//// the same way Portugal does, so it inherits.
-//// Recomputed for stopping a renewal (4 new keys): 2 overrides — Brazil says
-//// "Cancelar a renovação" where Portugal says "Parar", and spells the way
-//// back "Voltar a renovar automaticamente".
-//// Recomputed for the club's AI switches (1 new key): "O seu clube" is the
-//// European form, but this file already overrides that turn of phrase where
-//// it matters, and the sentence itself reads the same in Brazil.
-//// Recomputed for explaining an exercise and writing to the coach (14 new
-//// keys): 9 overrides — pt.js runs the informal tu/te/ti forms and the EU
-//// progressive "está a + infinitive" through this whole feature, so Brazil's
-//// você + 3rd-person conjugation and gerund apply throughout, along with the
-//// "contactar"/"contatar" and "momentos"/"instantes" EU/BR spelling and word
-//// choice — and the other 5 (three person-neutral infinitives, two
-//// statements with no 2nd-person marking) read the same on both sides.
-//// Recomputed for the standalone "write to your coach" screen (CoachThread.jsx,
-//// 4 new keys): 1 override — pt.js's tu-form imperative and future subjunctive
-//// ("Pergunta... quiseres") become você + 3rd-person ("Pergunte... quiser") in
-//// Brazil — and the other 3 (the day name, the error fallback, the header
-//// subtitle) carry no 2nd-person verb marking and read the same on both sides.
-//// Recomputed for sending a photo to the coach (4 new keys): all four are
-//// overrides — Brazil says "foto" where pt.js says "fotografia" throughout,
-//// and the size refusal also carries the tu/você imperative split ("Tira…
-//// envia" / "Tire… envie") already established for this feature. Nothing new
-//// is inherited, so the hash does not move; only the override count does
-//// (701 → 705).
-//// Recomputed after the upstream v1.3.8 merge (2026-09-25): its new strings (weight
-//// decimals, the assisted-machine progression lines, « No bar », renaming a running
-//// workout) land in the inherited set as upstream ships them — 13 inherited, and the
-//// override count moves by one with upstream's own pt-BR block (705 → 706).
-//// Recomputed for the renewal sheet (7 new keys): 3 overrides — the European clitic "renova-se
-//// sozinha" and "subscrição" / "A sua" become "se renova sozinha" and "inscrição" / "Sua" in Brazil —
-//// and four (the two start lines, "Até {0}", "Escolha o seu plano") read the same on both sides and
-//// inherit: the override count moves 706 → 709, the inherited set 980 → 984.
-//// Recomputed for a different number of reps for each set (4 new keys): 1 override — "controle" for
-//// pt-PT's "controlo" — and three (the switch's title, its two explanations) read the same on both sides and
-//// inherit: the override count moves 709 → 710, the inherited set 984 → 987.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(710)
-    expect(inherited).toHaveLength(987)
-    // If this fails, review the changed keys and wording before accepting a new hash. From
+    // Every override names a real source string, so the two sets partition pt-PT's keys between
+    // them and the fingerprint below covers everything not overridden. A typo'd override key
+    // would otherwise sit in the file translating nothing.
+    const stray = Object.keys(PT_BR_OVERRIDES).filter(key => !(key in pt))
+    expect(stray, 'override keys that are not pt-PT keys').toEqual([])
+    expect(Object.keys(PT_BR_OVERRIDES).length + inherited.length).toBe(Object.keys(pt).length)
+    // …and each one really reaches the pack, whatever the spread order does.
+    for (const [key, value] of Object.entries(PT_BR_OVERRIDES)) expect(ptBR[key], key).toBe(value)
+
+    // The counts themselves are read off the pack rather than pinned here: a new UI string lands
+    // in pt.js and pt-BR.js together and moves both, and a number in a test that every new string
+    // has to be taught is a number nobody reads. What the numbers stood for is asserted above.
+    // If the hash fails, review the changed keys and wording before accepting a new one. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    //// Neoffice — the fingerprint recomputed for the per-set plan strings (see the note above): 710 overrides, 987 inherited.
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('7ea9d31c94a457a6841f6b75d7d4e72d00984a87633a8f5ec382a185cbdeac87')
+    //// Neoffice — our own strings live in pt.js like every other locale and pt-BR inherits them,
+    //// so the hash differs from upstream's. Recomputed after the v1.3.9 merge (1,030 overrides,
+    //// 1,047 inherited) with: node scripts/pt-br-inheritance-fingerprint.mjs
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('d460885915e0bf34ae6b9b9d15f383cc0b91b65e65494fdf3ab46893dfe94fc5')
   })
 
   test('does not leak European Portuguese UI terms', () => {
@@ -142,5 +63,14 @@ describe('Brazilian Portuguese locale', () => {
     expect(ptBR.soleus).toBe('sóleo')
     expect(ptBR.Unpair).toBe('Desvincular')
     expect(ptBR['Choose starter plan']).toBe('Escolha um plano inicial')
+    // The sign-in e-mail's strings are overridden, not inherited: pt-PT says palavra-passe and «».
+    expect(ptBR['Wrong name, e-mail or password.']).toBe('Nome, e-mail ou senha incorretos.')
+    expect(ptBR['Sign-in e-mail']).toBe('E-mail de login')
+    for (const key of ['Name or e-mail', 'Sign in with “{0}” instead of your name', '“{0}” is saved, but signs in only once this profile has a password.', 'Type it at “Sign in with password” instead of your profile name. Nothing is ever sent to it — a forgotten password is still reset by your admin.'])
+      expect(key in PT_BR_OVERRIDES, key).toBe(true)
+    // So are the backup import's warning (pt-PT says cópia and registado) and the sign-in hold's
+    // status (pt-PT says «À espera da tua resposta»).
+    for (const key of ['The server has 1 workout that is not in this backup, logged since it was made or on another device. Replacing deletes it.', 'The server has {0} workouts that are not in this backup, logged since it was made or on another device. Replacing deletes them.', 'Replace anyway', 'Merge them in', 'Waiting for your answer about this device’s workouts', 'Nothing syncs until you say whether this device’s workouts go into your profile — tap to answer.'])
+      expect(key in PT_BR_OVERRIDES, key).toBe(true)
   })
 })

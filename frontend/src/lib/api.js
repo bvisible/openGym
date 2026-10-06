@@ -12,6 +12,9 @@
 
 // Boot data injected by neoffice_gym/www/gym.py — the page hands us who we are
 // and the CSRF token, so the app never has to ask for either.
+//// Neoffice — for the one message api() writes itself (an answer that is not the server's).
+import { t } from './i18n-core.js'
+
 export const BOOT = (typeof window !== 'undefined' && window.gym_boot) || {}
 
 export const IS_APPLE = /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)
@@ -115,7 +118,17 @@ const M = {
  * unwrapped here so the rest of the app keeps seeing plain values and plain
  * Errors, exactly as it did against the old Node API.
  */
-export async function api(path, opts = {}) {
+//// Neoffice — upstream v1.3.9's limits, kept on Frappe. How long one request may take before it
+//// counts as no answer at all: a black-holed connection (a captive portal, a half-open socket, a
+//// phone between two networks) never settles on its own, and the store runs one push and one pull
+//// at a time, so a single hung request held every later sync behind it, silently. A GET is small;
+//// a write carries the whole profile over what may be a slow uplink. A caller that knows its
+//// request is slow on purpose passes its own `timeout` (0: none).
+const TIMEOUT_GET_MS = 20000
+const TIMEOUT_MS = 60000
+
+export async function api(path, options = {}) {
+  const { timeout, ...opts } = options || {}
   //// Neoffice — a FormData body sets its OWN content type, boundary included.
   //// Declaring application/json over it makes the browser send the multipart
   //// bytes under the wrong header, and the server then finds no file at all.
@@ -127,24 +140,47 @@ export async function api(path, opts = {}) {
   //// which the store already treats as "offline" and retries later.
   if (method !== 'GET' && BOOT.csrf_token) headers['X-Frappe-CSRF-Token'] = BOOT.csrf_token
 
-  const r = await fetch(path, Object.assign({ credentials: 'same-origin' }, opts, { headers }))
-  const data = await r.json().catch(() => ({}))
+  const ms = timeout != null ? timeout : method === 'GET' ? TIMEOUT_GET_MS : TIMEOUT_MS
+  const r = await bounded(path, Object.assign({ credentials: 'same-origin' }, opts, { headers }), ms)
+  //// Neoffice — upstream v1.3.9's rule, kept on Frappe: every whitelisted method answers a JSON
+  //// object, so a 2xx that is not one is somebody else answering (a captive portal on the club's
+  //// Wi-Fi, a proxy's sign-in page). Read as {}, as it was here, a push looked taken by the server:
+  //// the change was marked synced and the revision it stood on was lost.
+  let data = null
+  try { data = await r.json() } catch { data = null }
+  if (!data || typeof data !== 'object') data = null
   //// Neoffice — unwrapped here, ONCE, for the error path too: a whitelisted
   //// method that answers 409 (state.put on a stale revision) still comes back
   //// as {message: {…}}, and the store reads e.data.state whichever server
   //// sent it (upstream's Node server sends the bare object).
-  const payload = data && typeof data === 'object' && 'message' in data ? data.message : data
+  const payload = data && 'message' in data ? data.message : data
   if (!r.ok) {
     const e = new Error(serverMessage(data) || (payload && payload.error) || ('HTTP ' + r.status))
     e.status = r.status
     // The body rides along on the error: a 409 from the state endpoint carries the server's document.
-    e.data = payload
+    e.data = payload || {}
     throw e
   }
+  if (!data) throw Object.assign(new Error(t('The server answered with something other than openGym data.')), { status: r.status, code: 'bad-response', data: {} })
   return payload
 }
 
-/** Pull the human-readable half out of a Frappe error payload. */
+//// Neoffice — upstream's request(): one exchange, bounded by `ms`, and aborted when it is up. No
+//// status on the timeout, like a fetch that failed outright: to the store both mean the server
+//// could not be reached, and the device says it is offline instead of waiting for ever.
+async function bounded(url, init, ms) {
+  const ctl = typeof AbortController === 'function' ? new AbortController() : null
+  let timer = null
+  const expired = new Promise((_, reject) => {
+    if (ms > 0) timer = setTimeout(() => { if (ctl) ctl.abort(); reject(Object.assign(new Error(t('The server did not answer in time.')), { code: 'timeout', status: undefined })) }, ms)   //// Neoffice — upstream's request(), on our fetch
+  })
+  const answer = fetch(url, ctl ? Object.assign({}, init, { signal: ctl.signal }) : init)   //// Neoffice — upstream's request(), on our fetch
+  answer.catch(() => {})   // it may still settle after the timeout has answered; nobody is listening then
+  try { return await Promise.race([answer, expired]) }
+  finally { clearTimeout(timer) }
+}
+
+/** Pull the human-readable half out of a Frappe error payload. */   //// Neoffice — upstream's request(), on our fetch
 function serverMessage(data) {
   if (!data) return ''
   if (data._server_messages) {
@@ -176,6 +212,17 @@ export function currentUser() {
   if (!u || !u.name || u.name === 'Guest') return null
   return { id: u.name, name: u.full_name || u.name, lang: u.language || null }
 }
+
+//// Neoffice — which session this page was rendered for: a one-way fingerprint of it, written
+//// by neoffice_gym's www/gym.py (never the session id, which stays in its HttpOnly cookie).
+//// A sign-out that could not reach the server is owed for that session only
+//// (store/useStore.js, logoutOwed): a page rendered for another one, after a sign-in, voids it.
+export const sessionMark = () => (typeof BOOT.session === 'string' && BOOT.session) || null
+//// Neoffice — whether the server rendered this page for a session at all.
+export const pageSignedIn = () => BOOT.signed_in !== false
+//// Neoffice — have the server render the page again: once an owed sign-out lands, this page's
+//// boot still names the member it was rendered for, and only a new render says who is here.
+export const reloadJournal = () => { if (typeof window !== 'undefined') window.location.reload() }
 
 //// Neoffice — the three coaching calls. `accept` fires AFTER the merge:
 //// if the merge fails on the phone, the offer must still be there on the
@@ -258,7 +305,7 @@ export const deviceOf = (nav = typeof navigator !== 'undefined' ? navigator : nu
   if (/Macintosh/i.test(ua) && (nav.maxTouchPoints || 0) > 1) return 'mobile'
   return 'desktop'
 }
-export const signIn = (usr, pwd, device = deviceOf()) =>
+export const signIn = (usr, pwd, device = deviceOf()) =>   //// Neoffice — Frappe's login, posted from the journal's own screen
   api(M.login, { method: 'POST', body: JSON.stringify({ usr, pwd, device }) })
 export const rememberMe = () => api(M.rememberMe, { method: 'POST', body: '{}' })
 export const renewalOffer = () => api(M.renewalOffer)
@@ -314,7 +361,7 @@ export function appBase(loc = typeof location !== 'undefined' ? location : null)
   const path = (loc && loc.pathname) || '/'
   return path.slice(0, path.lastIndexOf('/') + 1) || '/'
 }
-export async function pairRedeem() {
+export async function pairRedeem() {   //// Neoffice — no pairing: the journal is a page of the club instance
   throw new Error('Pairing is not available: this journal is served by your club instance.')
 }
 
@@ -328,3 +375,12 @@ export const VAULT = IS_APPLE ? 'iCloud Keychain' : IS_ANDROID ? 'Google Passwor
 // API check produces a false negative (notably Chrome on iOS). The real create/get calls still run
 // only after the user chooses a passkey action and surface any genuine browser error there.
 export const webauthnOK = () => typeof window.PublicKeyCredential !== 'undefined'
+
+//// Neoffice — the two media transports upstream v1.3.9 imports from here
+//// (lib/media-sync.js). Photos and videos of members stay on their phone and
+//// never reach the club's server (Jérémy, 06.10: « ça doit rester en local »):
+//// the server's config carries no `media` block, so the app never offers to add
+//// one, and these refuse plainly instead of reaching a route that does not exist.
+const mediaDisabled = () => Object.assign(new Error('media-disabled'), { code: 'media-disabled', status: 0 })
+export const apiBlob = async () => { throw mediaDisabled() }
+export const apiUpload = () => Promise.reject(mediaDisabled())

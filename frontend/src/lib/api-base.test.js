@@ -2,7 +2,7 @@
 // Issue #238: openGym behind a reverse proxy that serves it under a subpath. The assets were
 // already relative; the API call was not, so it went to the proxy's own root where nothing
 // answers it. The base is read from where the app is being served.
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from 'vitest'   //// Neoffice — no beacon here (see below)
 import { appBase } from './api.js'
 
 const at = pathname => appBase({ pathname })
@@ -30,3 +30,6 @@ describe('the app knows where it is served from', () => {
     expect(at('')).toBe('/')
   })
 })
+
+//// Neoffice — upstream's "left" beacon tests are not kept: the live-presence heartbeat it
+//// served (POST /api/activity) is not shipped here (views/Workout.jsx), and lib/api.js has no beacon.

@@ -111,13 +111,14 @@ describe.each(Object.entries(WORKERS))('%s — the shell is cached only when som
     //// Defining cacheIfUsable is not the same as calling it. The handler's
     //// write for pages must go through it; a direct `c.put` next to it would
     //// pass every test above and cache the guest shell anyway.
-    expect(SW).toMatch(/e\.waitUntil\(cacheIfUsable\(e\.request, copy\)\)/)
+    expect(SW).toMatch(/const keep = cacheIfUsable\(e\.request, copy\)/)
+    expect(SW).toMatch(/e\.waitUntil\(keep\)/)
     expect(SW).not.toMatch(/caches\.open\(CACHE\)\.then\(c => c\.put\(e\.request, copy\)\)/)
   })
 
   it('never caches API responses', () => {
     // A stale session or a stale workout is worse than no answer.
-    expect(SW).toMatch(/url\.pathname\.startsWith\('\/api\/'\)\)\s*return/)
+    expect(SW).toMatch(/url\.pathname\.startsWith\('\/api\/'\)/)
   })
 
   it('changed its cache name, so what is already on phones is dropped', () => {
@@ -125,8 +126,9 @@ describe.each(Object.entries(WORKERS))('%s — the shell is cached only when som
     //// one. Without a new name the fix ships and the symptom stays: the
     //// signed-out shells already sitting on members' phones keep being served.
     //// v3 since the upstream v1.3.7 merge: the shell and its assets are now
-    //// precached at install, and what phones held under v2 goes with it.
-    expect(SW).toMatch(/const CACHE = 'opengym-rt-v3'/)
+    //// precached at install, and what phones held under v2 goes with it. v4 since
+    //// the v1.3.9 merge: the media moved to a cache of their own (MEDIA).
+    expect(SW).toMatch(/const CACHE = 'opengym-rt-v4'/)
   })
 
   it('precaches the shell through the same rule, never around it', () => {
@@ -134,7 +136,7 @@ describe.each(Object.entries(WORKERS))('%s — the shell is cached only when som
     //// is the rendered /gym — the very page the rule exists for — so the put
     //// must go through cacheIfUsable there too, or a worker installed during a
     //// signed-out moment would seed the cache with exactly the wrong shell.
-    expect(SW).toMatch(/await cacheIfUsable\(new Request\(SHELL\), res\)/)
+    expect(SW).toMatch(/await cacheIfUsable\(SHELL, new Response\(html/)
     expect(SW).not.toMatch(/c\.put\(SHELL/)
     expect(SW).not.toMatch(/c\.put\('index\.html'/)
   })

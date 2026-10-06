@@ -37,6 +37,8 @@ vi.mock('../store/useUI.js', () => {
 })
 vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))
 vi.mock('../lib/api.js', () => ({
+  //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import.
+  BOOT: {},
   api: vi.fn(), webauthnOK: () => false, passkeyLogin: vi.fn(), passkeyRegister: vi.fn(), IS_ANDROID: false,
   //// Neoffice — what our Settings sections read (MyClub, MyCoach): the club's wallet and the member's coach.
   wallet: vi.fn(async () => null), myCoach: vi.fn(async () => null), openChat: vi.fn(), classesMine: vi.fn(async () => []),

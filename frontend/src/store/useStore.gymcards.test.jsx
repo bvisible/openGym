@@ -2,7 +2,9 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('../lib/api.js', () => ({ api: vi.fn(), setRemoteAuth: vi.fn() }))
+vi.mock('../lib/api.js', () => ({
+  //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import.
+  BOOT: {}, api: vi.fn(), setRemoteAuth: vi.fn() }))
 
 import { DEF, useStore } from './useStore.js'
 

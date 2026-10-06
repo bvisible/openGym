@@ -4,8 +4,9 @@ import { useStore } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
 import { bindUI } from './components/ui.jsx'
 import { ACCENTS, setWeightDecimals } from './lib/format.js'
-import { setLang, useLang } from './lib/i18n.js'
-import { setPlayOnSilent } from './lib/sound.js'
+import { setLang, useLang, baseLang } from './lib/i18n.js'
+import { effectiveLang } from './lib/default-lang.js'
+import { setPlayOnSilent, setVibrate } from './lib/sound.js'
 import { setNav } from './lib/nav.js'
 import { initBackButton } from './lib/back.js'
 import { useWakeLock } from './lib/wakelock.js'
@@ -13,7 +14,7 @@ import { installViewportGuard } from './lib/viewport-guard.js'
 import { installChipDrag } from './lib/hchips.js'
 import { syncPushSubscription } from './lib/push.js'
 import { MOBILE } from './lib/mobile.js'
-import { startFlow } from './sheets.jsx'
+import { exitWorkoutEdit, startFlow } from './sheets.jsx'
 import Icon from './components/Icon.jsx'
 import SignIn from './views/SignIn.jsx'
 import MembershipGate from './views/MembershipGate.jsx'
@@ -45,6 +46,7 @@ import Assessments from './views/Assessments.jsx'
 import History from './views/History.jsx'
 import Library from './views/Library.jsx'
 import Muscles from './views/Muscles.jsx'
+import StructuralBalance from './views/StructuralBalance.jsx'
 import Settings from './views/Settings.jsx'
 //// Neoffice — added screen: the member's own membership and invoices.
 import Membership from './views/Membership.jsx'
@@ -86,9 +88,22 @@ function Shell() {
   // iOS: whether timer sounds get past the ring/silent switch (Settings → Sounds). Page-level,
   // so it is applied here on load and on change rather than at each beep.
   useEffect(() => { setPlayOnSilent(!!S.soundOnSilent) }, [S.soundOnSilent])
+  // Settings → Vibrate, the same way: one page-level switch rather than a check at each buzz.
+  useEffect(() => { setVibrate(S.vibrate !== false) }, [S.vibrate])
   const isGuest = useStore(s => s.isGuest())
   const langV = useLang()   // re-renders the whole shell when the language (pack) changes
   useEffect(() => { setNav(navigate) }, [navigate])
+  const lastEditPath = useRef(loc.pathname)
+  // Any in-app route exit, browser back included, returns to the persisted draft and asks for a
+  // save decision. Reload needs no prompt because the draft itself is already in local storage.
+  useEffect(() => {
+    const previous = lastEditPath.current
+    lastEditPath.current = loc.pathname
+    if (previous !== '/workout' || !S.active?.editingWorkoutId || loc.pathname === '/workout') return
+    const destination = loc.pathname + loc.search
+    navigate('/workout', { replace: true })
+    exitWorkoutEdit(() => navigate(destination, { replace: true }))
+  }, [loc.pathname, loc.search, S.active?.editingWorkoutId, navigate])
   useEffect(() => { applyPrefs(S.theme, S.accent) }, [S.theme, S.accent])
   // 'system' needs to react live if the OS theme flips while the app is open, not just on
   // the next mount — a fixed 'dark'/'light' choice never re-fires this since matchMedia
@@ -100,14 +115,18 @@ function Shell() {
     mql.addEventListener('change', onChange)
     return () => mql.removeEventListener('change', onChange)
   }, [S.theme, S.accent])
-  //// Neoffice — `BOOT.lang` as a fallback: before signing in there is NO
-  //// synced state at all, so `S.lang` is empty and the login screen used to
-  //// show up in English at a French-speaking club. The server, on the other
-  //// hand, knows the site's language — it passes it along in the guest boot.
-  useEffect(() => { setLang(S.lang || BOOT.lang || 'en') }, [S.lang])
+  //// Neoffice — `BOOT.lang` before upstream's own fallback (#303: the instance
+  //// default, then the browser): before signing in there is NO synced state at
+  //// all, and a French-speaking club's sign-in screen used to show up in English.
+  //// The server knows the site's language and passes it along in the guest boot.
+  //// No `?? true` on the English-names switch: setLang picks the default
+  //// (French: names alone, see lib/i18n.js).
+  const config = useStore(s => s.config)
+  const lang = S.lang || BOOT.lang || effectiveLang(S, config)
+  useEffect(() => { setLang(lang, S.enParens?.[baseLang(lang)], S.enOnly?.[baseLang(lang)] === true) }, [lang, S.enParens, S.enOnly])
   // Same shape as the language: a module-level display setting, pushed when it changes (#139).
   useEffect(() => { setWeightDecimals(S.wdec) }, [S.wdec])
-  useEffect(() => { document.documentElement.lang = S.lang || 'en' }, [langV, S.lang])
+  useEffect(() => { document.documentElement.lang = lang }, [langV, lang])
   // Forward navigation starts at the top; going back lands where you left off.
   // The position is recorded from scroll events rather than read at route
   // change, because by then a shorter page may already have clamped it.
@@ -124,6 +143,9 @@ function Shell() {
     if (MOBILE || !user || !ready) return
     syncPushSubscription().catch(() => {})
   }, [user?.id, ready])
+  //// Neoffice — upstream's device-link QR code (#95, v1.3.9) is not shipped: on
+  //// Neoffice a phone signs in through Frappe (views/SignIn.jsx), there is no
+  //// pairing of our own to redeem.
   useEffect(() => {
     const onScroll = () => {
       // Modals pins the body while a sheet is open; scrollY is 0 then, not a position.
@@ -150,14 +172,17 @@ function Shell() {
     return () => window.cancelAnimationFrame(frame)
   }, [loc.pathname, navType])
   // bound to the workout, not to the route — checking Stats mid-session keeps the screen on
-  useWakeLock(!!S.active && S.keepAwake !== false)
+  useWakeLock(!!S.active && !S.active.editingWorkoutId && S.keepAwake !== false)
 
   //// Neoffice — there IS now an unauthenticated state to render. `/gym` no
   //// longer sends the anonymous visitor to the desk's login page: it serves
   //// them the app, which shows its own login screen. What this changes is
   //// the appearance, not the authentication — the form posts to
   //// `/api/method/login`. See `views/SignIn.jsx`.
-  if (BOOT.signed_in === false) return <div id="app"><SignIn /></div>
+  //// Neoffice — and the sign-in screen too once the store has nobody, where upstream draws its
+  //// <Login/>: a sign-out still owed that the server could not answer (store boot), another
+  //// tab of this browser signing in or out. The page's boot named a member, the store does not.
+  if (BOOT.signed_in === false || (ready && !user && !isGuest)) return <div id="app"><SignIn /></div>
   //// Neoffice — signed in, but no valid membership: the club's message (and
   //// its renewal, when allowed) instead of the journal. See views/MembershipGate.jsx.
   if (BOOT.membership && BOOT.membership.blocked) return <div id="app"><MembershipGate /></div>
@@ -204,6 +229,7 @@ function Shell() {
           {/* //// Neoffice — see views/Assessments.jsx */}
           <Route path="/assessments" element={<Assessments />} />
               <Route path="/muscles" element={<Muscles />} />
+              <Route path="/structural-balance" element={<StructuralBalance />} />
               <Route path="/settings" element={<Settings />} />
               {/* //// Neoffice — "My membership". The screen gates itself on the
                   club's setting, so the route exists unconditionally: a member

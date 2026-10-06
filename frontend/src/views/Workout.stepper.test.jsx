@@ -69,6 +69,8 @@ vi.mock('../sheets.jsx', () => ({
 }))
 vi.mock('../components/Media.jsx', () => ({ default: () => null }))
 vi.mock('../lib/api.js', () => ({
+  //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import.
+  BOOT: {},
   api: vi.fn(() => Promise.resolve({})),
   IS_APPLE: false, IS_ANDROID: false, BIO: 'biometrics',
 }))

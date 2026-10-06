@@ -213,8 +213,12 @@ describe('progression moves the weight of a plan and nothing else', () => {
     const rows = applyPrescription(buildSets(st, cfg(), { step: 2.5 }), prescription, 2.5)
     expect(rows.map(r => r.r)).toEqual([6, 8, 10, 6, 8])
     expect(rows.every(r => r.w === 42.5)).toBe(true)
-    // …and through the session builder, which is what the app calls
-    const [entry] = buildSessionEntries(st, { id: 'r', name: 'P', ex: [cfg()] })
+    // …and through the session builder, which is what the app calls. Since v1.3.9 an exercise
+    // progresses per routine (upstream #216): a session from no routine is borrowed history, and
+    // the first time in a routine starts from its own target. So the session above is this
+    // routine's own, as it is when the app builds the next one.
+    const ownSt = { ...st, workouts: st.workouts.map(w => ({ ...w, routineId: 'r' })) }
+    const [entry] = buildSessionEntries(ownSt, { id: 'r', name: 'P', ex: [cfg()] })
     expect(entry.sets.map(s => [s.r, s.w])).toEqual([[6, 42.5], [8, 42.5], [10, 42.5], [6, 42.5], [8, 42.5]])
     expect(entry.target.sets).toBe(5)
     expect(entry.target.reps).toBe(6)
