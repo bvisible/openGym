@@ -115,11 +115,15 @@ describe('Brazilian Portuguese locale', () => {
 //// sozinha" and "subscrição" / "A sua" become "se renova sozinha" and "inscrição" / "Sua" in Brazil —
 //// and four (the two start lines, "Até {0}", "Escolha o seu plano") read the same on both sides and
 //// inherit: the override count moves 706 → 709, the inherited set 980 → 984.
-    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(709)
-    expect(inherited).toHaveLength(984)
+//// Recomputed for a different number of reps for each set (4 new keys): 1 override — "controle" for
+//// pt-PT's "controlo" — and three (the switch's title, its two explanations) read the same on both sides and
+//// inherit: the override count moves 709 → 710, the inherited set 984 → 987.
+    expect(Object.keys(PT_BR_OVERRIDES)).toHaveLength(710)
+    expect(inherited).toHaveLength(987)
     // If this fails, review the changed keys and wording before accepting a new hash. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('7e503d2836adfd728a493fc58681b11ac3d0aef1b4ee7dc49a1fec0178317d7c')
+    //// Neoffice — the fingerprint recomputed for the per-set plan strings (see the note above): 710 overrides, 987 inherited.
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('7ea9d31c94a457a6841f6b75d7d4e72d00984a87633a8f5ec382a185cbdeac87')
   })
 
   test('does not leak European Portuguese UI terms', () => {

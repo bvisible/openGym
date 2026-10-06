@@ -1658,4 +1658,9 @@ export default {
   'Choose your plan': 'Válassza ki a csomagját',
   'Your current membership ends on {0}.': 'Jelenlegi tagsága lejár: {0}.',
   'Your membership ended on {0}.': 'Tagsága lejárt: {0}.',
+  //// Neoffice — a different number of reps for each set (components/SetPlanFields.jsx, lib/set-plan.js): a pyramid, a ramp.
+  'Different reps per set': 'Különböző ismétlésszám sorozatonként',
+  'A pyramid, a ramp: one target for each set.': 'Piramis, rámpa: minden sorozatnak saját célja van.',
+  'Each set has its own target; add or remove sets with the Sets control above.': 'Minden sorozatnak saját célja van; sorozatot a fenti Sorozatok vezérlővel adhatsz hozzá vagy vehetsz el.',
+  'The plan sets the weights, so there is no automatic progression for this exercise.': 'A terv rögzíti a súlyokat, ezért ennél a gyakorlatnál nincs automatikus progresszió.',
 }

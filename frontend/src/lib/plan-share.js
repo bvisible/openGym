@@ -15,6 +15,8 @@ import { uid, todayISO, DAYN, weekOrder, weekStartOf, fmtNum, exCount } from './
 import { t, exerciseNameFor } from './i18n-core.js'
 import { convertWeight } from './units.js'
 import { MUSCLES, inMuscleOrder } from './muscles.js'
+//// Neoffice — a different target for each set (a pyramid): lib/set-plan.js, no upstream equivalent.
+import { cleanSetPlan, setPlanOf, setPlanLine } from './set-plan.js'
 
 const PLAN_FMT = 1
 const WEEK_DAYS = [1, 2, 3, 4, 5, 6, 0]   // every getDay() index; only the reader's own
@@ -43,6 +45,8 @@ function convertedExercise(e, sourceUnit, destinationUnit) {
   if (out.weight != null) out.weight = convertWeight(out.weight, sourceUnit, destinationUnit)
   // A timed increment is seconds, not a load. Rep-mode increments are load overrides.
   if (modeOf(out) === 'reps' && out.inc > 0) out.inc = convertWeight(out.inc, sourceUnit, destinationUnit)
+  //// Neoffice — and so does the load a per-set plan gives a set.
+  if (Array.isArray(out.setPlan)) out.setPlan = out.setPlan.map(p => (p && p.w > 0 ? { ...p, w: convertWeight(p.w, sourceUnit, destinationUnit) } : p))
   return out
 }
 
@@ -104,6 +108,10 @@ function cleanEx(e) {
   // silently — parsePlan's `dropped` counter only tracks exercises it cannot resolve at all.
   const intens = cleanIntensifier(e.intensifier)
   if (intens) o.intensifier = intens
+  //// Neoffice — a per-set plan is part of how the exercise is prescribed: without it a shared
+  //// 6 · 8 · 10 · 6 · 8 would arrive as 5 × 6. Only a valid one, consistent with `sets` and `reps`.
+  const plan = setPlanOf(e)
+  if (plan) o.setPlan = plan
   return o
 }
 
@@ -214,8 +222,11 @@ export function parsePlan(raw, destinationUnit = 'kg') {
       const intens = cleanIntensifier(e.intensifier)
       const rest = cleanRestSec(e.restSec)
       const warmRest = cleanRestSec(e.warmupRestSec)
-      const { warmupSets, intensifier, restSec, warmupRestSec, ...passthrough } = e
-      return convertedExercise({ ...passthrough, ...(warm ? { warmupSets: warm } : {}), ...(intens ? { intensifier: intens } : {}), ...(rest ? { restSec: rest } : {}), ...(warmRest ? { warmupRestSec: warmRest } : {}) }, sourceUnit || destination, destination)
+      //// Neoffice — a per-set plan is read the way it is written and cleaned the way it is read; one
+      //// that does not agree with `sets` and `reps` is dropped here, not carried into the planner.
+      const { warmupSets, intensifier, restSec, warmupRestSec, setPlan: incoming, ...passthrough } = e
+      const plan = setPlanOf({ ...e, setPlan: cleanSetPlan(incoming, { perSide: !!e.side }) })
+      return convertedExercise({ ...passthrough, ...(warm ? { warmupSets: warm } : {}), ...(intens ? { intensifier: intens } : {}), ...(rest ? { restSec: rest } : {}), ...(warmRest ? { warmupRestSec: warmRest } : {}), ...(plan ? { setPlan: plan } : {}) }, sourceUnit || destination, destination)
     })
   }))
   return {
@@ -297,6 +308,9 @@ function scheme(e, unit) {
     const body = `${e.min || 20} min @ ${fmtNum(e.speed || 8)} km/h`
     return sets > 1 ? `${sets} × ${body}` : body
   }
+  //// Neoffice — a per-set plan prints as its reps, set by set.
+  const asked = mode === 'reps' && setPlanOf(e)
+  if (asked) return setPlanLine(asked, { weight: e.weight, bodyweight: isBw(e), unit, fmt: fmtNum })
   let s = mode === 'time' ? `${sets} × ${fmtSec(e.sec || 45)}` : `${sets} × ${e.reps ?? 10}`
   if (e.weight) s += ` · ${isBw(e) ? '+' : ''}${fmtNum(e.weight)} ${unit}`
   // A printed plan is read at the rack, so the split earns its four characters.

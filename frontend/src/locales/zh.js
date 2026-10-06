@@ -1695,4 +1695,9 @@ export default {
   'Choose your plan': '请选择您的方案',
   'Your current membership ends on {0}.': '您当前的会籍将于 {0} 结束。',
   'Your membership ended on {0}.': '您的会籍已于 {0} 结束。',
+  //// Neoffice — a different number of reps for each set (components/SetPlanFields.jsx, lib/set-plan.js): a pyramid, a ramp.
+  'Different reps per set': '每组次数不同',
+  'A pyramid, a ramp: one target for each set.': '金字塔、爬坡：为每一组设定各自的目标。',
+  'Each set has its own target; add or remove sets with the Sets control above.': '每一组都有自己的目标；用上方的“组数”增加或减少组。',
+  'The plan sets the weights, so there is no automatic progression for this exercise.': '计划已固定重量，所以这个动作没有自动进阶。',
 }

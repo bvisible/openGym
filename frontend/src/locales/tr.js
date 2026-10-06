@@ -1695,4 +1695,9 @@ export default {
   'Choose your plan': 'Planınızı seçin',
   'Your current membership ends on {0}.': 'Mevcut üyeliğiniz {0} tarihinde sona eriyor.',
   'Your membership ended on {0}.': 'Üyeliğiniz {0} tarihinde sona erdi.',
+  //// Neoffice — a different number of reps for each set (components/SetPlanFields.jsx, lib/set-plan.js): a pyramid, a ramp.
+  'Different reps per set': 'Her sette farklı tekrar',
+  'A pyramid, a ramp: one target for each set.': 'Piramit, rampa: her set için ayrı bir hedef.',
+  'Each set has its own target; add or remove sets with the Sets control above.': 'Her setin kendi hedefi var; setleri yukarıdaki Set denetimiyle ekleyebilir veya çıkarabilirsin.',
+  'The plan sets the weights, so there is no automatic progression for this exercise.': 'Plan ağırlıkları belirler, bu yüzden bu egzersizde otomatik ilerleme yoktur.',
 }

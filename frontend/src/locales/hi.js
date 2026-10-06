@@ -1695,4 +1695,9 @@ export default {
   'Choose your plan': 'अपना प्लान चुनें',
   'Your current membership ends on {0}.': 'आपकी मौजूदा सदस्यता {0} को समाप्त होती है।',
   'Your membership ended on {0}.': 'आपकी सदस्यता {0} को समाप्त हो गई।',
+  //// Neoffice — a different number of reps for each set (components/SetPlanFields.jsx, lib/set-plan.js): a pyramid, a ramp.
+  'Different reps per set': 'हर सेट के लिए अलग रेप्स',
+  'A pyramid, a ramp: one target for each set.': 'पिरामिड या रैंप: हर सेट के लिए एक अलग लक्ष्य।',
+  'Each set has its own target; add or remove sets with the Sets control above.': 'हर सेट का अपना लक्ष्य होता है; ऊपर दिए सेट नियंत्रण से सेट जोड़ें या हटाएँ।',
+  'The plan sets the weights, so there is no automatic progression for this exercise.': 'प्लान वज़न तय करता है, इसलिए इस एक्सरसाइज़ में स्वचालित प्रोग्रेशन नहीं होता।',
 }

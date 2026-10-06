@@ -1666,4 +1666,9 @@ export default {
   'Choose your plan': 'เลือกแพ็กเกจของคุณ',
   'Your current membership ends on {0}.': 'สมาชิกภาพปัจจุบันของคุณสิ้นสุด {0}',
   'Your membership ended on {0}.': 'สมาชิกภาพของคุณสิ้นสุดแล้ว {0}',
+  //// Neoffice — a different number of reps for each set (components/SetPlanFields.jsx, lib/set-plan.js): a pyramid, a ramp.
+  'Different reps per set': 'จำนวนครั้งต่างกันในแต่ละเซ็ต',
+  'A pyramid, a ramp: one target for each set.': 'พีระมิดหรือแรมป์: ตั้งเป้าหมายแยกในแต่ละเซ็ต',
+  'Each set has its own target; add or remove sets with the Sets control above.': 'แต่ละเซ็ตมีเป้าหมายของตัวเอง เพิ่มหรือลดเซ็ตได้ที่ตัวปรับ “เซ็ต” ด้านบน',
+  'The plan sets the weights, so there is no automatic progression for this exercise.': 'แผนกำหนดน้ำหนักไว้แล้ว ท่านี้จึงไม่มีการเพิ่มน้ำหนักอัตโนมัติ',
 }

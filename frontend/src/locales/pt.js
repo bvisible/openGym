@@ -1695,4 +1695,9 @@ export default {
   'Choose your plan': 'Escolha o seu plano',
   'Your current membership ends on {0}.': 'A sua subscrição atual termina em {0}.',
   'Your membership ended on {0}.': 'A sua subscrição terminou em {0}.',
+  //// Neoffice — a different number of reps for each set (components/SetPlanFields.jsx, lib/set-plan.js): a pyramid, a ramp.
+  'Different reps per set': 'Repetições diferentes por série',
+  'A pyramid, a ramp: one target for each set.': 'Uma pirâmide, uma rampa: um objetivo para cada série.',
+  'Each set has its own target; add or remove sets with the Sets control above.': 'Cada série tem o seu próprio objetivo; acrescenta ou retira séries com o controlo Séries acima.',
+  'The plan sets the weights, so there is no automatic progression for this exercise.': 'O plano define os pesos, por isso este exercício não tem progressão automática.',
 }

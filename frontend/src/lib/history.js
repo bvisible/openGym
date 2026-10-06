@@ -16,6 +16,8 @@ const workRowsForMode = (entry = {}, mode = 'reps') => {
 // for the hook — and it re-exports this very `t` from core, so nothing changes here except what
 // gets dragged along behind it.
 import { t } from './i18n-core.js'
+//// Neoffice — a different target for each set (a pyramid): lib/set-plan.js, no upstream equivalent.
+import { setPlanOf, setPlanLine } from './set-plan.js'
 
 // How an exercise is logged (issue #16). This used to be derived from the body part alone,
 // which meant a plank or a farmer's carry could only be timed by filing it under cardio.
@@ -152,6 +154,10 @@ export function exLine(cfg, unit) {
   const load = cfg.weight ? ' · ' + (isBw(cfg) ? '+' : '') + fmtNum(cfg.weight) + ' ' + unit : ''
   if (mode === 'cardio') return `${n} × ${cfg.min || 20} min @ ${fmtNum(cfg.speed || 8)} km/h`
   if (mode === 'time') return `${n} × ${fmtSec(cfg.sec || 45)}${load}`
+  //// Neoffice — a per-set plan reads « 6 · 8 · 10 · 6 · 8 @ 60 kg », not « 5 × 6 · 60 kg »: the
+  //// flat line would tell a coach's pyramid as five sets of six.
+  const plan = setPlanOf(cfg)
+  if (plan) return setPlanLine(plan, { weight: cfg.weight, bodyweight: isBw(cfg), unit, fmt: fmtNum })
   // This is the line with room for it, so the split is spelled out: "3 × 16 · 8/side".
   const split = isPerSide(cfg) ? ' · ' + t('{0}/side', fmtNum(sideReps(cfg.reps))) : ''
   return `${n} × ${cfg.reps}${load}${split}`
@@ -407,6 +413,11 @@ function buildWorkSets(S, cfg, options = {}) {
     return sets
   }
   const conf = S.exWeights[cfg.id]
+  //// Neoffice — a per-set plan owns its rows. `n` is already its length (a plan that disagrees
+  //// with `sets` is not one, see setPlanOf); the reps of each row are the plan's — never "last
+  //// time's", which is what upstream v1.3.9 later does for every plan with its "plan owns the
+  //// reps" setting — and so is its weight when the plan gives one.
+  const plan = setPlanOf(cfg)
   for (let i = 0; i < n; i++) {
     const prev = prevAt(i)
     const usable = prev && prev.r > 0 ? prev : null
@@ -419,10 +430,13 @@ function buildWorkSets(S, cfg, options = {}) {
       ? (cfg.weight > 0 ? cfg.weight : (lastRegular && lastRegular.r > 0 ? lastRegular.w : cfg.weight))
       : preferLast && usable ? usable.w : (conf && conf.w > 0 ? conf.w : (usable ? usable.w : cfg.weight))
     const row = { w, r: usable ? usable.r : cfg.reps, done: false }
+    //// Neoffice — the plan's row, over what last time did (see above).
+    if (plan) { row.r = plan[i].r; if (plan[i].w > 0) row.w = plan[i].w }
     // A unilateral exercise logs each side on its own (issue #60): the row splits into L/R,
     // each seeded with half the total reps at the same weight. When "last time" was itself a
     // per-side set, carry its two sides over verbatim so an asymmetry you logged persists.
-    if (isPerSide(cfg)) sets.push(usable && isSideSet(usable) ? seedSideFromLast(row, usable) : makeSideSet(row))
+    //// Neoffice — except under a plan, whose reps are the ones asked for.
+    if (isPerSide(cfg)) sets.push(!plan && usable && isSideSet(usable) ? seedSideFromLast(row, usable) : makeSideSet(row))
     else sets.push(row)
   }
   return sets

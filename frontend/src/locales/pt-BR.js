@@ -789,6 +789,9 @@ export const PT_BR_OVERRIDES = {
   'Then it renews by itself, period after period.': 'Depois, ela se renova sozinha, período após período.',
   'Your current membership ends on {0}.': 'Sua inscrição atual termina em {0}.',
   'Your membership ended on {0}.': 'Sua inscrição terminou em {0}.',
+  //// Neoffice — a different number of reps for each set (4 new keys): one Brazilian override — "controle" for pt-PT's
+  //// "controlo" — the other three read the same on both sides and stay inherited.
+  'Each set has its own target; add or remove sets with the Sets control above.': 'Cada série tem seu próprio objetivo; adicione ou remova séries com o controle Séries acima.',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

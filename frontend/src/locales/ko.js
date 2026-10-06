@@ -1695,4 +1695,9 @@ export default {
   'Choose your plan': '플랜을 선택하세요',
   'Your current membership ends on {0}.': '현재 회원권은 {0}에 종료됩니다.',
   'Your membership ended on {0}.': '회원권이 {0}에 종료되었습니다.',
+  //// Neoffice — a different number of reps for each set (components/SetPlanFields.jsx, lib/set-plan.js): a pyramid, a ramp.
+  'Different reps per set': '세트마다 다른 횟수',
+  'A pyramid, a ramp: one target for each set.': '피라미드나 램프처럼 세트마다 목표를 따로 정해요.',
+  'Each set has its own target; add or remove sets with the Sets control above.': '세트마다 목표가 따로 있어요. 위의 세트 항목으로 세트를 추가하거나 빼세요.',
+  'The plan sets the weights, so there is no automatic progression for this exercise.': '플랜에서 무게를 정하므로 이 운동에는 자동 점진 증가가 없어요.',
 }

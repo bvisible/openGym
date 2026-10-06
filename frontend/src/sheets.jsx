@@ -50,6 +50,9 @@ import { estimate1RM, best1RM, is1RMRecord, REP_CAP } from './lib/onerm.js'
 import { exerciseHistory } from './lib/exercise-history.js'
 import { nextPrescription, applyPrescription, policyFor, defaultIncrement, POLICIES_FOR, POLICY_NAME, POLICY_DESC, MAX_BW_SETS, weightIncrement } from './lib/progression.js'
 import { normalizeRepRange } from './lib/rep-range.js'
+//// Neoffice — a different target for each set (a pyramid): lib/set-plan.js and components/SetPlanFields.jsx, no upstream equivalent.
+import { setPlanOf, cleanSetPlan, resizeSetPlan, evenSetPlan, unloadSetPlan, dropSetPlan, plannedWeights } from './lib/set-plan.js'
+import SetPlanFields from './components/SetPlanFields.jsx'
 import { MOBILE, shareExport, printHtml } from './lib/mobile.js'
 import { buildCompletedWorkout } from './lib/finish-workout.js'
 import { isWarmupRow, hasCompletedWork } from './lib/workout-model.js'
@@ -1450,9 +1453,17 @@ const progressionStepIsValid = (step, policy) =>
   policy === 'off' || (Number.isFinite(step) && step > 0)
 
 function ProgressionFields({ ex, mode, c, setC, routine, unit, perSide }) {
-  const options = POLICIES_FOR[mode] || ['off']
+  //// Neoffice — a per-set plan fixes the reps, so only the rules that move the weight are offered
+  //// (policyFor reads the others as linear), and a plan that fixes the weights has nothing to progress.
+  const planned = setPlanOf(c)
+  if (planned && plannedWeights(c)) return <>
+    <h4 className="sec">{t('Progression')}</h4>
+    <div className="small dim" style={{ marginBottom: 18 }}>{t('The plan sets the weights, so there is no automatic progression for this exercise.')}</div>
+  </>
+  const options = (POLICIES_FOR[mode] || ['off']).filter(p => !planned || p === 'off' || p === 'linear')
   if (options.length < 2) return null
-  const inherited = policyFor({ id: ex.id }, routine, mode)
+  //// Neoffice — the rule inherited as a plan reads it (double or Greyskull from the routine is linear for a per-set plan).
+  const inherited = policyFor({ id: ex.id, ...(planned ? { mode: 'reps', sets: c.sets, reps: c.reps, setPlan: c.setPlan } : {}) }, routine, mode)
   const active = policyFor({ ...c, id: ex.id }, routine, mode)
   const inc = progressionStepOf(c, mode, ex, unit)
   const invalid = !progressionStepIsValid(inc, active)
@@ -1469,7 +1480,9 @@ function ProgressionFields({ ex, mode, c, setC, routine, unit, perSide }) {
   return <>
     <h4 className="sec">{t('Progression')}</h4>
     <div className="sect-b" style={{ marginBottom: 8 }}>
-      <SelectRow title={t('Rule')} sheetTitle={t('Progression')} value={c.prog || ''} onChange={setRule}
+      {/* //// Neoffice — an explicit double / Greyskull rule is not one a per-set plan can follow (policyFor reads it as
+          //// linear): shown as the inherited rule rather than as the raw key it is stored under. */}
+      <SelectRow title={t('Rule')} sheetTitle={t('Progression')} value={planned && (c.prog === 'double' || c.prog === 'greyskull') ? '' : c.prog || ''} onChange={setRule}
         options={[{ value: '', label: t('Follow the routine ({0})', t(POLICY_NAME[inherited])) },
           ...options.map(p => ({ value: p, label: t(POLICY_NAME[p]) }))]} />
     </div>
@@ -1497,10 +1510,16 @@ function ProgressionFields({ ex, mode, c, setC, routine, unit, perSide }) {
   </>
 }
 
-function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
+//// Neoffice — `onSave` is wrapped below (a removed per-set plan is written out); the prop is renamed to let it keep its name.
+function ExConfig({ ex, existing, onSave: saveConfig, onDelete, close, routine, initial }) {
   const st = useStore(s => s.S)
   const cardio = isCardio(ex.id)
   const seed = existing || initial || defaultConfig(ex.id)
+  //// Neoffice — an exercise that HAD a per-set plan and is saved without one says so (`setPlan: null`).
+  //// The server keeps the plan of an exercise whose push does not mention it (that is how an app
+  //// that predates plans cannot flatten a coach's pyramid), so a removal has to be written out.
+  const hadPlan = Array.isArray(seed.setPlan)
+  const onSave = out => saveConfig(hadPlan && !out.setPlan ? { ...out, setPlan: null } : out)
   const [c, setC] = useState(() => {
     const cfg = { ...seed }
     return policyFor({ ...cfg, id: ex.id }, routine, modeOf({ ...cfg, id: ex.id })) === 'double'
@@ -1588,6 +1607,10 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
       // Every set in this exercise becomes a drop-set/rest-pause (buildSets stamps the rows) —
       // decided here, in the plan, not re-decided live each time you train it.
       if (c.intensifier && c.intensifier.type) out.intensifier = c.intensifier
+      //// Neoffice — a per-set plan IS the target: its length is the sets, its first entry the reps
+      //// (what an app that does not know the list shows), and it needs no rep range.
+      const asked = setPlanOf(c) && cleanSetPlan(c.setPlan, { perSide })
+      if (asked) { out.sets = asked.length; out.reps = asked[0].r; out.setPlan = asked; delete out.repsMin }
       onSave(out)
     }
   }
@@ -1623,13 +1646,17 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
         {/* Rest-pause always trains as exactly two rows — a warm-up at this rep count, then one
             rest-pause work set — so "Sets" has nothing left to mean and only invites a mismatch. */}
         {c.intensifier?.type !== 'restpause' &&
-          <Stepper label={t('Sets')} value={c.sets} step={1} decimal={false} onChange={v => setC(x => ({ ...x, sets: v }))} />}
-        {!double && <Stepper label={t('Reps')} value={c.reps} step={perSide ? 2 : 1} decimal={false} onChange={v => setC(x => ({ ...x, reps: v }))} />}
+          //// Neoffice — a per-set plan grows and shrinks with the sets (a new set asks what the last one asks).
+          <Stepper label={t('Sets')} value={c.sets} step={1} decimal={false} onChange={v => setC(x => (setPlanOf(x) ? resizeSetPlan(x, v) : { ...x, sets: v }))} />}
+        {!double && !setPlanOf(c) && <Stepper label={t('Reps')} value={c.reps} step={perSide ? 2 : 1} decimal={false} onChange={v => setC(x => ({ ...x, reps: v }))} />}
         {/* On bodyweight work the weight stepper is the click #32 is about, so it is not here
             until there is a belt to describe — see the added-weight row below. */}
         {!bw && <Stepper label={t('Weight ({0})', st.unit)} value={c.weight} step={2.5} onChange={v => setC(x => ({ ...x, weight: v }))} />}
       </>}
     </div>
+    {/* //// Neoffice — a different number of reps for each set. Not for rest-pause, which trains
+        //// as exactly two rows whatever the sets say. */}
+    {mode === 'reps' && c.intensifier?.type !== 'restpause' && <SetPlanFields c={c} setC={setC} perSide={perSide} bw={bw} unit={st.unit} />}
     {/* //// Neoffice — the suggestion SAYS WHERE IT COMES FROM, and is applied by
         //// a tap rather than pre-filled. A number that appears on its own reads
         //// as the app knowing something about the member's strength that it
@@ -1679,7 +1706,8 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
     {!cardio && <div className="sect-b" style={{ marginBottom: 8 }}>
       <Row icon="figureStrength" iconTint="var(--acc)" title={t('Bodyweight')}
         subtitle={bw ? t('No weight to enter — just log the reps.') : t('Ask for a weight on every set.')}>
-        <Switch checked={bw} onChange={v => setC(x => ({ ...x, bodyweight: v, weight: v ? 0 : x.weight }))} />
+        {/* //// Neoffice — bodyweight has no load to ask of a set: a per-set plan keeps its reps only. */}
+        <Switch checked={bw} onChange={v => setC(x => { const next = { ...x, bodyweight: v, weight: v ? 0 : x.weight }; return v ? unloadSetPlan(next) : next })} />
       </Row>
       {mode === 'reps' && <Row icon="shuffle" iconTint="var(--blue)" title={t('Reps per side')}
         subtitle={perSide ? t('You still log the total: {0} is {1} per side.', c.reps || 0, fmtNum(sideReps(c.reps))) : t('For lunges, single-arm rows and the like.')}>
@@ -1687,6 +1715,8 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
             total is a rep one side does not get. */}
         <Switch checked={perSide} onChange={v => setC(x => {
           const next = { ...x, side: v || undefined, reps: v ? Math.ceil((x.reps || 0) / 2) * 2 : x.reps }
+          //// Neoffice — a per-set plan keeps every total even too (and its first entry IS `reps`).
+          if (v && setPlanOf(x)) return evenSetPlan(next)
           return policyFor({ ...next, id: ex.id }, routine, 'reps') === 'double'
             ? { ...next, ...normalizeRepRange(next.reps, next.repsMin, v ? 2 : 1) }
             : next
@@ -1724,7 +1754,8 @@ function ExConfig({ ex, existing, onSave, onDelete, close, routine, initial }) {
       <div className="sect-b" style={{ marginBottom: 8 }}>
         <SelectRow title={t('Intensifier')} sheetTitle={t('Intensifier')} value={c.intensifier?.type || ''}
           onChange={v => setC(x => ({
-            ...x,
+            //// Neoffice — rest-pause has no sets to give different reps: a per-set plan leaves with it.
+            ...(v === 'restpause' ? dropSetPlan(x) : x),
             intensifier: !v ? undefined : v === 'dropset'
               ? { type: 'dropset', count: x.intensifier?.count || 1, pct: x.intensifier?.pct || 20 }
               // The activation set's own reps are whatever "Reps" above already says — a

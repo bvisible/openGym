@@ -20,6 +20,8 @@ import { modeOf, repStep, rerampWarmups, isBw, isPerSide, entryExcluded } from '
 import { EXIDX, isAssisted } from './exercises.js'
 import { isWarmupRow, isSideSet, syncSideAggregate, makeSideSet } from './workout-model.js'
 import { normalizeRepRange } from './rep-range.js'
+//// Neoffice — a different target for each set (a pyramid): lib/set-plan.js, no upstream equivalent.
+import { policyWithPlan, setPlanOf, withoutRepsOfPlan, goalFor } from './set-plan.js'
 
 export const POLICIES = ['off', 'linear', 'greyskull', 'double', 'time']
 
@@ -102,7 +104,10 @@ export function policyFor(cfg, routine, mode) {
   const m = mode || modeOf(cfg || {})
   const allowed = POLICIES_FOR[m] || ['off']
   const pick = (cfg && cfg.prog) || (routine && routine.prog) || (m === 'reps' ? 'linear' : 'off')
-  return allowed.includes(pick) ? pick : 'off'
+  //// Neoffice — a per-set plan fixes the reps of every set: a rule that moves the reps (double
+  //// progression, Greyskull) is read as linear, and a plan that fixes the weights too has nothing
+  //// to progress. Drop once upstream's own per-set targets (v1.3.12) carry their progression.
+  return policyWithPlan(cfg, m, allowed.includes(pick) ? pick : 'off')
 }
 
 const round1 = v => Math.round(v * 10) / 10
@@ -258,7 +263,8 @@ export function readSession(entry, fallback) {
     count: reps.length,                                   // the dimension bodyweight work grows (#33)
     low: reps.length ? Math.min(...reps) : 0,
     amrap: reps.length ? reps[reps.length - 1] : 0,       // Greyskull's final set
-    ok: goal > 0 && enough && reps.length > 0 && reps.every(r => r >= goal)
+    //// Neoffice — with a per-set plan each set is judged against ITS reps, not the first one's.
+    ok: goal > 0 && enough && reps.length > 0 && reps.every((r, i) => r >= goalFor(target, i, goal))
   }
 }
 
@@ -315,7 +321,14 @@ export function stallCount(sessions, policy) {
  * always answer "why this number?". A field the policy has no opinion on comes back
  * undefined and the caller keeps whatever the plan said.
  */
+//// Neoffice — what the plan owns is not the rule's to move: the reps and the number of sets of a
+//// per-set plan are taken out of whatever the rule answers (its weight stays).
 export function nextPrescription(S, cfg, routine) {
+  return withoutRepsOfPlan(cfg, prescriptionFor(S, cfg, routine))
+}
+
+// Upstream's `nextPrescription`, unchanged, under the name the wrapper above calls.
+function prescriptionFor(S, cfg, routine) {
   const mode = modeOf(cfg)
   const policy = policyFor(cfg, routine, mode)
   const unit = S.unit || 'kg'
@@ -357,6 +370,9 @@ export function nextPrescription(S, cfg, routine) {
   // *logged* weight, not the `bw` flag: a dip done with a belt has a load to progress and
   // belongs on the normal policies, and a barbell lift logged at 0 has nothing to add to.
   if (w <= 0) {
+    //// Neoffice — no load to move and the plan owns the reps: nothing to prescribe. Left to the rule
+    //// below it would say « go for 7 this time », which a pyramid cannot take.
+    if (setPlanOf(cfg)) return { policy, kind: 'off' }
     const goal = last.goal || cfg.reps || 0
     if (!last.ok || goal <= 0) return { policy, kind: 'hold', weight: 0, reps: goal || undefined, why: ['Bodyweight — same target again until every set is clean.'] }
     // A ceiling turns "+1 rep forever" into a plan (issue #33). Past the top of the range the
@@ -382,6 +398,9 @@ export function nextPrescription(S, cfg, routine) {
   const epleyDeload = () => {
     // Epley reads load as the work done; on an assistance machine it is the work taken away.
     if (assisted) return null
+    //// Neoffice — and it answers with a rep count the plan would not take: « use 8 reps ». A plan
+    //// falls back to the plain deload below, which moves the weight only.
+    if (setPlanOf(cfg)) return null
     if (mode !== 'reps' || (policy !== 'linear' && policy !== 'double')) return null
     const previous = last.target || {}
     const target = {
