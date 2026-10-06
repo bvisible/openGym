@@ -3,6 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<script>
+  // Set direction before first paint so an Arabic profile never flashes as LTR.
+  // The app re-applies this on every language change (lib/i18n.js setLang).
+  // i18n-core RTL_LANGS is the runtime source of truth — keep this list in sync.
+  try {
+    var s = JSON.parse(localStorage.getItem('gym_state_v1') || '{}');
+    var l = s.lang || ((navigator.language || '').slice(0, 2) === 'ar' ? 'ar' : 'en');
+    document.documentElement.lang = l;
+    document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+  } catch (e) {}
+</script>
 <title>openGym</title>
 <meta name="description" content="Personal gym & body weight tracker">
 <meta name="theme-color" content="#0c0e12">
@@ -16,9 +27,26 @@
 <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-180.png">
-  <script type="module" crossorigin src="/assets/opengym/frontend/assets/index-08rSkJ_V.js"></script>
+  <script type="module" crossorigin src="/assets/opengym/frontend/assets/index-CT46HkB1.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/rolldown-runtime-QTnfLwEv.js">
-  <link rel="stylesheet" crossorigin href="/assets/opengym/frontend/assets/index-C5qEdBuv.css">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/preload-helper-BqjX9scX.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/exercises-Du5_t1Gj.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-refs-CBisMdU5.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/history-RuGGVsP6.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/i18n-BQtLn63S.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/mobile-BaHbtH4K.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/coach-device-CtvU8-Gy.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-store-CrSabbB6.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/useUI-COxNwe5L.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/starter-C1yhipot.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-prefetch-dsNtNP9C.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-limits-Bru03sI7.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/onerm-BmMjJ2uH.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/sheets-NzBoqFvQ.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/scan-web-n6PT6YOj.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/coach-BP-eRB-U.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/categories-DiTqpEtb.js">
+  <link rel="stylesheet" crossorigin href="/assets/opengym/frontend/assets/index-DyCxovLu.css">
 </head>
 <body>
 <div id="root"></div>
