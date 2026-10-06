@@ -170,7 +170,8 @@ export default {
   '{0} sets': '{0} séries',
   'no sets': 'aucune série',
   'Delete workout?': 'Supprimer l’entraînement ?',
-  'This removes it from your history for good.': 'Elle sera retirée de votre historique pour de bon.',
+  //// Neoffice — « l'entraînement » is masculine: « Il sera retiré », not « Elle sera retirée ».
+  'This removes it from your history for good.': 'Il sera retiré de votre historique pour de bon.',
   'Workout deleted': 'Entraînement supprimé',
   'Delete workout': 'Supprimer l’entraînement',
   'Rename workout': 'Renommer l’entraînement',
