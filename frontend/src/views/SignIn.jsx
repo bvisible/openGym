@@ -26,12 +26,12 @@ export default function SignIn() {
   const [email, setEmail] = useState('')
   const [pwd, setPwd] = useState('')
   const [showPwd, setShowPwd] = useState(false)
-  const [souvenir, setSouvenir] = useState(true)
+  const [remember, setRemember] = useState(true)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState(null)
   const [note, setNote] = useState(null)
 
-  const entrer = async (e) => {
+  const submitSignIn = async (e) => {
     e.preventDefault()
     if (busy) return
     setErr(null); setBusy(true)
@@ -54,7 +54,7 @@ export default function SignIn() {
       //// default there is. The server, for its part, refuses to extend
       //// the session of an account that has desk access — see
       //// `api/session.py`.
-      if (souvenir) { try { await rememberMe() } catch (e) { /* the sign-in succeeded, that's what matters */ } }
+      if (remember) { try { await rememberMe() } catch (e) { /* the sign-in succeeded, that's what matters */ } }
 
       //// A full reload, not a React render: the page carries a CSRF token
       //// and the user's name, both set by the server at render time.
@@ -67,7 +67,7 @@ export default function SignIn() {
     }
   }
 
-  const oublie = async (e) => {
+  const submitForgot = async (e) => {
     e.preventDefault()
     if (busy) return
     setBusy(true); setErr(null)
@@ -113,7 +113,7 @@ export default function SignIn() {
       </Button>
     </> : mode === 'forgot' ? <>
       <p className="sub">{t('Enter your address and we will send you a link to choose a new password.')}</p>
-      <form onSubmit={oublie}>
+      <form onSubmit={submitForgot}>
         <label className="signin-f">
           <span>{t('Email address')}</span>
           <input type="email" autoComplete="email" required inputMode="email"
@@ -126,7 +126,7 @@ export default function SignIn() {
       <button className="signin-link" onClick={() => setMode('signin')}>{t('Back to sign in')}</button>
     </> : <>
       <p className="sub">{t('Your workouts. Your loads. Your journal.')}</p>
-      <form onSubmit={entrer}>
+      <form onSubmit={submitSignIn}>
         <label className="signin-f">
           <span>{t('Email address')}</span>
           {/* //// `autoComplete` and `inputMode` are what makes a password
@@ -155,7 +155,7 @@ export default function SignIn() {
         </label>
 
         <label className="signin-check">
-          <input type="checkbox" checked={souvenir} onChange={e => setSouvenir(e.target.checked)} />
+          <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
           <span>{t('Keep me signed in')}</span>
         </label>
 
