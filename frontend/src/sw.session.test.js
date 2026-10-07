@@ -127,8 +127,9 @@ describe.each(Object.entries(WORKERS))('%s — the shell is cached only when som
     //// signed-out shells already sitting on members' phones keep being served.
     //// v3 since the upstream v1.3.7 merge: the shell and its assets are now
     //// precached at install, and what phones held under v2 goes with it. v4 since
-    //// the v1.3.9 merge: the media moved to a cache of their own (MEDIA).
-    expect(SW).toMatch(/const CACHE = 'opengym-rt-v4'/)
+    //// the v1.3.9 merge: the media moved to a cache of their own (MEDIA). v5 since the v1.3.10 merge: a
+    //// fixed name keeps every build's files, so it moves at each merge and activate drops the old ones.
+    expect(SW).toMatch(/const CACHE = 'opengym-rt-v5'/)
   })
 
   it('precaches the shell through the same rule, never around it', () => {
