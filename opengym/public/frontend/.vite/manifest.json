@@ -215,7 +215,7 @@
     ]
   },
   "index.html": {
-    "file": "assets/index-DZaqgLq9.js",
+    "file": "assets/index-B6Vap-Fj.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -538,7 +538,7 @@
     "isDynamicEntry": true
   },
   "src/lib/coach-demo.js": {
-    "file": "assets/coach-demo-nFl_besQ.js",
+    "file": "assets/coach-demo-Cnh2Og7T.js",
     "name": "coach-demo",
     "src": "src/lib/coach-demo.js",
     "isDynamicEntry": true,
@@ -551,7 +551,7 @@
     ]
   },
   "src/lib/coach-local.js": {
-    "file": "assets/coach-local-CPjOgUX1.js",
+    "file": "assets/coach-local-BcexDS6C.js",
     "name": "coach-local",
     "src": "src/lib/coach-local.js",
     "isDynamicEntry": true,
