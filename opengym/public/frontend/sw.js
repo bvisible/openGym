@@ -5,11 +5,12 @@
    build's files are dropped on activate; the media cache (`MEDIA`) is kept across builds. */
 //// Neoffice — a FIXED name rather than upstream's `__BUILD__` stamp, on purpose: the worker
 //// Frappe serves (opengym/www/gym_sw.js) is a static file no build rewrites, and
-//// src/sw.session.test.js pins both copies to one name. v4 with the upstream v1.3.9 merge
-//// (2026-10-06): the media moved to a cache of their own (MEDIA), and the new name is what makes
-//// activate drop what phones held under v3 (v3: the shell precached at install, v1.3.7; v2: the
-//// signed-out-shell fix below; v1: upstream's).
-const CACHE = 'opengym-rt-v4'
+//// src/sw.session.test.js pins both copies to one name. A fixed name keeps the files of every
+//// build it held, so it moves at each upstream merge: activate then drops the previous build's.
+//// v5 with the upstream v1.3.10 merge (2026-10-08); v4 with v1.3.9 (2026-10-06: the media moved to a
+//// cache of their own, MEDIA); v3: the shell precached at install, v1.3.7; v2: the signed-out-shell
+//// fix below; v1: upstream's.
+const CACHE = 'opengym-rt-v5'
 //// Neoffice — where the app shell lives. Upstream serves index.html next to this worker; on
 //// Neoffice the shell is rendered by Frappe at /gym (see the header of opengym/www/gym_sw.js) and
 //// carries the member's boot payload.
