@@ -14,6 +14,18 @@ const CACHE = 'opengym-rt-v4'
 //// Neoffice the shell is rendered by Frappe at /gym (see the header of opengym/www/gym_sw.js) and
 //// carries the member's boot payload.
 const SHELL = 'index.html'
+//// Neoffice — where the journal's own files are (the icons a notification shows): next to this worker
+//// in the standalone build; under /assets/opengym/frontend/ on Neoffice, whose worker sits at the root.
+const ASSETS = ''
+//// Neoffice — the club's server keeps the browser's subscription (neoffice_gym api/push.py).
+const PUSH_SUBSCRIBE = '/api/method/neoffice_gym.api.push.subscribe'
+// Where the page leaves this browser's push device id (lib/push.js shareDeviceId) for the
+// pushsubscriptionchange handler below, which has no localStorage to read it from. Not a build
+// cache, so activate's sweep leaves it alone.
+const DEVICE_CACHE = 'opengym-device'
+const DEVICE_URL = '/opengym-device-id'
+//// Neoffice — and the session's CSRF token beside it (lib/push.js): Frappe refuses a POST without it.
+const CSRF_URL = '/opengym-csrf-token'
 
 /* Exercise media (img/, gif/) lives in a cache of its own that outlives builds (#281). It used to
    share the build's cache, so every update swept every animation along with the old bundle, and
@@ -38,6 +50,12 @@ const MEDIA_GUESS_BYTES = 64 * 1024
 // than after each one, and once when a new worker activates.
 const MEDIA_TRIM_EVERY = 20
 const isMediaPath = p => p.includes('/img/') || p.includes('/gif/')
+
+// The code the app loads only when it needs it (the photo and video ingest, the QR reader...),
+// listed by the build (vite.config.js, scripts/sw-stamp.mjs). Without it the first photo added
+// offline after an update had no ingest to run. Unstamped (a dev server, a test) it is empty.
+const LAZY = '__LAZY__'
+const lazyAssets = () => { try { const a = JSON.parse(LAZY); return Array.isArray(a) ? a : [] } catch { return [] } }
 
 // What the shell needs to boot without a network: index.html plus every script/style/icon it
 // references. Read from the served index.html so the list follows the build, not a hand-kept
@@ -72,6 +90,14 @@ async function precache() {
     await c.put(u, r)
   }))
   await Promise.all(refs.filter(u => !code.includes(u)).map(u => c.add(u).catch(() => {})))
+  // Best effort, like the icons: a chunk missing here is fetched when it is needed, as before, and
+  // must not keep a working build from installing. Fetched by hand for the same redirect reason.
+  await Promise.all(lazyAssets().filter(u => !code.includes(u)).map(async u => {
+    try {
+      const r = await fetch(u, { cache: 'no-cache' })
+      if (r.ok && !r.redirected) await c.put(u, r)
+    } catch { /* fetched on demand instead */ }
+  }))
   // The shell goes in last, so activate's guard — an index.html in THIS build's cache — means the
   // whole shell is there rather than just its first file.
   //// Neoffice — through the same rule as a runtime fetch: a shell rendered signed-out is not kept
@@ -92,7 +118,9 @@ self.addEventListener('activate', e => {
     // next load with a network.
     const c = await caches.open(CACHE)
     if (await c.match(SHELL)) {
-      const old = (await caches.keys()).filter(k => k !== CACHE && k !== MEDIA)
+      // DEVICE_CACHE holds this browser's device id (the push re-register below needs it): not a
+      // build, so an update never sweeps it.
+      const old = (await caches.keys()).filter(k => k !== CACHE && k !== MEDIA && k !== DEVICE_CACHE)
       // A build from before MEDIA existed kept its media in its own cache: move it across first,
       // so the first update to this worker does not cost what the device already had offline.
       await Promise.all(old.map(k => adoptMedia(k).catch(() => {})))
@@ -175,31 +203,50 @@ self.addEventListener('push', e => {
     // the previous notification with the same tag is closed by hand first.
     const tag = data.tag || 'opengym'
     try { for (const n of await self.registration.getNotifications({ tag })) n.close() } catch {}
+    //// Neoffice — the club's icon and the page a tap opens come with the notification (neoffice_gym
+    //// api/push.py `icon`, `url`); the journal's own icon otherwise.
     await self.registration.showNotification(data.title || 'openGym', {
       body: data.body || '',
-      icon: 'icon-512.png',
-      badge: 'icon-180.png',
+      icon: data.icon || ASSETS + 'icon-512.png',
+      badge: ASSETS + 'icon-180.png',
       tag,
-      renotify: true
+      renotify: true,
+      data: { url: data.url || null },
     })
   })())
 })
+//// Neoffice — the page the notification names (the journal), not the worker's own directory: from a
+//// worker at the site's root './' is the site's home, which an instance without a website answers with
+//// its maintenance page. A window already on that page is brought forward instead.
 self.addEventListener('notificationclick', e => {
   e.notification.close()
+  const url = new URL(e.notification.data?.url || SHELL, self.location.href)
   e.waitUntil(self.clients.matchAll({ type: 'window' }).then(clients => {
-    const c = clients.find(c => 'focus' in c)
-    return c ? c.focus() : self.clients.openWindow('./')
+    const c = clients.find(c => 'focus' in c && new URL(c.url).pathname.startsWith(url.pathname))
+    return c ? c.focus() : self.clients.openWindow(url.href)
   }))
 })
 // The push service rotated the subscription (key change, expiry): subscribe again with the same
-// server key and tell the server, so the row it holds keeps pointing at this browser.
+// server key and tell the server, so the row it holds keeps pointing at this browser. With the
+// device id the page registers with: without one, this browser's rest-timer alert goes to every
+// device of the account until the page's next boot sync sees the missing id and sends it again.
 self.addEventListener('pushsubscriptionchange', e => {
   e.waitUntil((async () => {
     const old = e.oldSubscription || (await self.registration.pushManager.getSubscription())
     const key = e.newSubscription?.options?.applicationServerKey || old?.options?.applicationServerKey
     if (!key) return
     const sub = e.newSubscription || await self.registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key })
-    await fetch('api/push/subscribe', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ subscription: sub.toJSON() }) }).catch(() => {})
+    const kept = url => caches.open(DEVICE_CACHE).then(c => c.match(url)).then(r => r ? r.text() : undefined).catch(() => undefined)
+    const deviceId = await kept(DEVICE_URL)
+    //// Neoffice — to the club's server, with the session's CSRF token the page left beside the device id:
+    //// Frappe refuses a POST without it. One from an older session is refused, and the page's next boot
+    //// registers the subscription itself (lib/push.js syncPushSubscription).
+    const csrf = await kept(CSRF_URL)
+    await fetch(PUSH_SUBSCRIBE, {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'content-type': 'application/json', ...(csrf ? { 'X-Frappe-CSRF-Token': csrf } : {}) },
+      body: JSON.stringify({ subscription: sub.toJSON(), device_id: deviceId }),
+    }).catch(() => {})
   })())
 })
 

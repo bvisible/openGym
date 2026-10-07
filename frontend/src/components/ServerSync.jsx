@@ -11,10 +11,12 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
-import { t } from '../lib/i18n.js'
+import { t, tn } from '../lib/i18n.js'
 import { fmtAgo, changeCount } from '../lib/format.js'
-//// Neoffice — no passkey, media-sync, sheets, ConnectSheet or PasswordAuth imports: not shipped here.
-import { MOBILE } from '../lib/mobile.js'
+//// Neoffice — no passkey, media-sync, ConnectSheet or PasswordAuth imports: not shipped here. Of the
+//// sheets, only the menu: the changes kept for another account are saved as a backup file (v1.3.10).
+import { MOBILE, shareExport } from '../lib/mobile.js'
+import { menuSheet } from '../sheets.jsx'
 import { DEMO } from '../lib/demo.js'
 import { Row } from './ui.jsx'
 //// Neoffice — the page rendered again by the server (lib/api.js), see signInAgain.
@@ -67,21 +69,21 @@ export function connectionView(sync, { mobile = MOBILE, online = isOnline() } = 
     case 'ok':
       return { tone: 'ok', icon: 'cloud', line: t('All synced'), banner: null, action: null }
     case 'pending':   // the sentence already says "tap to retry": no second word for it
-      return { tone: 'wait', icon: 'reset', line: t('Waiting to sync'), banner: t('Not synced yet — tap to retry.'), action: 'retry', label: null }
+      return { tone: 'wait', icon: 'reset', line: t('Waiting to sync'), banner: t('Not synced yet. Tap to retry.'), action: 'retry', label: null }
     // A sign-in's question about this device's workouts is still open (useStore adoptProfile):
     // nothing syncs until it is answered, and "retry" — Sync now — asks it again.
     case 'held':
-      return { tone: 'wait', icon: 'reset', line: t('Waiting for your answer about this device’s workouts'), banner: t('Nothing syncs until you say whether this device’s workouts go into your profile — tap to answer.'), action: 'retry', label: null }
+      return { tone: 'wait', icon: 'reset', line: t('Waiting for your answer about this device’s workouts'), banner: t('Nothing syncs until you say whether this device’s workouts go into your profile. Tap to answer.'), action: 'retry', label: null }
     case 'offline':
       if (online) return {
         tone: 'off', icon: 'cloudSlash', action: 'retry',
         line: err.code === 'timeout' ? t('The server did not answer in time.') : t('The server cannot be reached'),
-        banner: sync.pending ? t('Your server cannot be reached — your changes are saved on this device and sync once it answers again.') : t('Your server cannot be reached — showing the last copy synced with it.'),
+        banner: sync.pending ? t('Your server can’t be reached. Your changes are saved on this device and sync once it answers again.') : t('Your server can’t be reached. Showing the last copy synced with it.'),
       }
       return {
         tone: 'off', icon: 'cloudSlash', action: 'retry',
-        line: err.code === 'timeout' ? t('The server did not answer in time.') : t('Offline — the server cannot be reached'),
-        banner: sync.pending ? t('Offline — your changes are saved on this device and sync when you are back online.') : t('Offline — showing the last copy synced with the server.'),
+        line: err.code === 'timeout' ? t('The server did not answer in time.') : t('Offline. The server can’t be reached'),
+        banner: sync.pending ? t('Offline. Your changes are saved on this device and sync when you’re back online.') : t('Offline. Showing the last copy synced with the server.'),
       }
     case 'error':
       return err.code === 'bad-response'
@@ -96,8 +98,8 @@ export function connectionView(sync, { mobile = MOBILE, online = isOnline() } = 
         : { tone: 'bad', icon: 'lock', action: 'pair', line: t('The server refuses this phone'), banner: t('Your server no longer accepts this phone. Your changes are kept here.') }
     default:   // 'local': no server at all — chosen, so it is said quietly, but it is said
       return mobile
-        ? { tone: 'quiet', icon: 'lock', action: 'connect', line: t('On this phone only — not connected to a server'), banner: t('On this phone only — not connected to a server') }
-        : { tone: 'quiet', icon: 'lock', action: canSignIn() ? 'signin' : null, line: t('Guest mode — data lives only in this browser.'), banner: t('Guest mode — data lives only in this browser.') }
+        ? { tone: 'quiet', icon: 'lock', action: 'connect', line: t('On this phone only, not connected to a server'), banner: t('On this phone only, not connected to a server') }
+        : { tone: 'quiet', icon: 'lock', action: canSignIn() ? 'signin' : null, line: t('Guest mode: your data lives only in this browser.'), banner: t('Guest mode: your data lives only in this browser.') }
   }
 }
 
@@ -180,7 +182,21 @@ export function KeptChangesRows() {
     return () => { gone = true }
   }, [kept, user?.id, rev])
   if (DEMO) return null
+  // A copy kept for an account that may never come back here (its server lost it, or it was
+  // deleted) is saved as a backup file, to import into another profile with "Merge them in".
+  const save = async k => {
+    const state = await useStore.getState().keptState(k.server, k.uid)
+    if (!state) return
+    const json = JSON.stringify(state, null, 2)
+    const name = 'opengym-kept-' + String(k.name || k.uid).replace(/[^\w-]+/g, '_') + '-' + new Date().toISOString().slice(0, 10) + '.json'
+    if (MOBILE) { try { await shareExport(json, name); useUI.getState().toast(t('Backup exported')) } catch { /* share sheet dismissed */ } return }
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([json], { type: 'application/json' })); a.download = name; a.click()
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000)
+    useUI.getState().toast(t('Backup exported'))
+  }
   return rows.map(k => <Row key={(k.server || '') + '|' + k.uid} icon="history" iconTint="var(--orange)"
     title={t('Changes kept for {0}', k.name || k.uid)}
-    subtitle={(k.server ? hostOf(k.server) + ' · ' : '') + t('Added back when this device connects as that account again.')} />)
+    subtitle={(k.server ? hostOf(k.server) + ' · ' : '') + t('Added back when this device connects as that account again.')}
+    accessory="chevron"
+    onClick={() => menuSheet({ title: t('Changes kept for {0}', k.name || k.uid), items: [{ icon: 'download', label: t('Save as a backup file'), onClick: () => save(k) }] })} />)
 }

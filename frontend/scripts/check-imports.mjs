@@ -103,7 +103,9 @@ for (const file of files) {
 
   for (const [name, sources] of exportedBy) {
     if (known.has(name) || sources.has(file)) continue
-    if (new RegExp(`(?<![\\w$.])${name}\\s*\\(`).test(body)) {
+    //// Not after a word and a hyphen either: `color-mix(` in a style string is CSS, not a call of
+    //// lib/accent.js's mix() (upstream v1.3.10 exports one).
+    if (new RegExp(`(?<![\\w$.])(?<![A-Za-z]-)${name}\\s*\\(`).test(body)) {
       problems.push({ file: relative(SRC, file), name, from: relative(SRC, [...sources][0]) })
     }
   }

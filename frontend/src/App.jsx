@@ -3,11 +3,14 @@ import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation, useNavig
 import { useStore } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
 import { bindUI } from './components/ui.jsx'
-import { ACCENTS, setWeightDecimals } from './lib/format.js'
+import { setWeightDecimals } from './lib/format.js'
+import { accentValue, applyAccent } from './lib/accent.js'
 import { setLang, useLang, baseLang } from './lib/i18n.js'
 import { effectiveLang } from './lib/default-lang.js'
-import { setPlayOnSilent, setVibrate } from './lib/sound.js'
+import { setPlayOnSilent, setVibrate, setAlarmBuzzer } from './lib/sound.js'
+import { buzzAsAlarm } from './lib/rest-alert.js'
 import { setNav } from './lib/nav.js'
+import { setSystemBarsLight } from './lib/system-bars.js'
 import { initBackButton } from './lib/back.js'
 import { useWakeLock } from './lib/wakelock.js'
 import { installViewportGuard } from './lib/viewport-guard.js'
@@ -47,12 +50,14 @@ import History from './views/History.jsx'
 import Library from './views/Library.jsx'
 import Muscles from './views/Muscles.jsx'
 import StructuralBalance from './views/StructuralBalance.jsx'
-import Settings from './views/Settings.jsx'
+//// Neoffice — Settings through upstream's route (/settings and /settings/:page, v1.3.10).
+import { SettingsRoute } from './views/Settings.jsx'
 //// Neoffice — added screen: the member's own membership and invoices.
 import Membership from './views/Membership.jsx'
 //// Neoffice — the conversation with the coach, in the journal itself.
 import CoachThread from './views/CoachThread.jsx'
 //// Neoffice — no Admin.jsx: the club manages members in the Frappe desk (see the /admin note below).
+//// No ProgressPhotos (upstream v1.3.10): progress photos are not part of the club's journal (Jérémy, 07.10).
 import CoachChat from './views/CoachChat.jsx'
 import CoachIntake from './views/CoachIntake.jsx'
 import CoachSetup from './views/CoachSetup.jsx'
@@ -75,9 +80,10 @@ const resolveTheme = theme => theme === 'light' || theme === 'dark'
 function applyPrefs(theme, accent) {
   const de = document.documentElement
   de.dataset.theme = resolveTheme(theme)
-  de.dataset.accent = ACCENTS[accent] ? accent : 'lime'
+  applyAccent(de, accent, de.dataset.theme)
   const meta = document.querySelector('meta[name="theme-color"]')
   if (meta) meta.content = de.dataset.theme === 'light' ? '#f2f2f7' : '#000000'
+  if (MOBILE) setSystemBarsLight(de.dataset.theme === 'light')
 }
 
 function Shell() {
@@ -90,6 +96,9 @@ function Shell() {
   useEffect(() => { setPlayOnSilent(!!S.soundOnSilent) }, [S.soundOnSilent])
   // Settings → Vibrate, the same way: one page-level switch rather than a check at each buzz.
   useEffect(() => { setVibrate(S.vibrate !== false) }, [S.vibrate])
+  // Android app: "Vibrate when the phone is on silent" sends the end-of-rest buzz through the
+  // native side as an alarm (#375). buzzAsAlarm answers false off Android, so iOS buzzes as before.
+  useEffect(() => { setAlarmBuzzer(MOBILE && S.vibrate !== false && S.vibrateOnSilent ? buzzAsAlarm : null) }, [S.vibrate, S.vibrateOnSilent])
   const isGuest = useStore(s => s.isGuest())
   const langV = useLang()   // re-renders the whole shell when the language (pack) changes
   useEffect(() => { setNav(navigate) }, [navigate])
@@ -99,22 +108,26 @@ function Shell() {
   useEffect(() => {
     const previous = lastEditPath.current
     lastEditPath.current = loc.pathname
-    if (previous !== '/workout' || !S.active?.editingWorkoutId || loc.pathname === '/workout') return
+    // The live store, not this render's S: a save that just closed the editor may not have
+    // reached this render yet, and asking again would offer to delete the workout it saved.
+    if (previous !== '/workout' || !useStore.getState().S.active?.editingWorkoutId || loc.pathname === '/workout') return
     const destination = loc.pathname + loc.search
     navigate('/workout', { replace: true })
     exitWorkoutEdit(() => navigate(destination, { replace: true }))
   }, [loc.pathname, loc.search, S.active?.editingWorkoutId, navigate])
-  useEffect(() => { applyPrefs(S.theme, S.accent) }, [S.theme, S.accent])
+  // A preset key, or the user's own colour as '#rrggbb' (lib/accent.js), already checked.
+  const accent = accentValue(S)
+  useEffect(() => { applyPrefs(S.theme, accent) }, [S.theme, accent])
   // 'system' needs to react live if the OS theme flips while the app is open, not just on
   // the next mount — a fixed 'dark'/'light' choice never re-fires this since matchMedia
   // isn't consulted for those.
   useEffect(() => {
     if (S.theme !== 'system' || !window.matchMedia) return
     const mql = window.matchMedia('(prefers-color-scheme: dark)')
-    const onChange = () => applyPrefs(S.theme, S.accent)
+    const onChange = () => applyPrefs(S.theme, accent)
     mql.addEventListener('change', onChange)
     return () => mql.removeEventListener('change', onChange)
-  }, [S.theme, S.accent])
+  }, [S.theme, accent])
   //// Neoffice — `BOOT.lang` before upstream's own fallback (#303: the instance
   //// default, then the browser): before signing in there is NO synced state at
   //// all, and a French-speaking club's sign-in screen used to show up in English.
@@ -173,6 +186,17 @@ function Shell() {
   }, [loc.pathname, navType])
   // bound to the workout, not to the route — checking Stats mid-session keeps the screen on
   useWakeLock(!!S.active && !S.active.editingWorkoutId && S.keepAwake !== false)
+  // A running workout has the whole screen (v1.3.11): no tab bar, and the rest bar docks to the
+  // bottom edge in its place. Its header's ⌄ goes back to the app, where the tab bar's Resume
+  // brings it back.
+  const inWorkout = loc.pathname === '/workout' && !!S.active
+  useEffect(() => {
+    document.body.classList.toggle('no-tabbar', inWorkout)
+    return () => document.body.classList.remove('no-tabbar')
+  }, [inWorkout])
+  // The chat owns the bottom of the screen as well: its composer sits where the tabs would be.
+  // The first-launch card has no tabs either: they changed the route behind it.
+  const noTabs = inWorkout || loc.pathname === '/coach' || needsMobileOnboarding
 
   //// Neoffice — there IS now an unauthenticated state to render. `/gym` no
   //// longer sends the anonymous visitor to the desk's login page: it serves
@@ -207,10 +231,8 @@ function Shell() {
           {/* //// Neoffice — upstream draws <Login/> here for a signed-out visitor
               //// and its mobile onboarding; on Neoffice the sign-in screen is
               //// decided above from BOOT.signed_in (views/SignIn.jsx) and there is
-              //// no paired-server onboarding. The offline / not-synced banner is
-              //// upstream's (v1.3.6) and stays: a member in the club's basement
-              //// sees that their session is saved here and will sync. */}
-          {authed && <SyncBanner />}
+              //// no paired-server onboarding. The banner moved out of #app with
+              //// upstream v1.3.10 (below). */}
           {(
             <Routes>
               <Route path="/home" element={<Home />} />
@@ -232,7 +254,8 @@ function Shell() {
           <Route path="/assessments" element={<Assessments />} />
               <Route path="/muscles" element={<Muscles />} />
               <Route path="/structural-balance" element={<StructuralBalance />} />
-              <Route path="/settings" element={<Settings />} />
+              <Route path="/settings" element={<SettingsRoute />} />
+              <Route path="/settings/:page" element={<SettingsRoute />} />
               {/* //// Neoffice — "My membership". The screen gates itself on the
                   club's setting, so the route exists unconditionally: a member
                   who bookmarked it lands on a real answer, not on the home
@@ -255,11 +278,17 @@ function Shell() {
           )}
         </ErrorBoundary>
       </div>
+      {/* Outside #app: the view's fade-in animates a transform, and a fixed element inside it
+          would ride along with the page for the length of it. Decides for itself when to show.
+          //// Neoffice — once signed in: the sign-in screen draws its own (above). The offline /
+          //// not-synced banner is upstream's (v1.3.6): a member in the club's basement sees that
+          //// their session is saved here and will sync. */}
+      {authed && <SyncBanner />}
       {/* A conversation owns the bottom of the screen: its composer sits where
           the tabs would be. Measured the hard way on /coach-thread — the send
           and "help me word it" buttons started at y=802 and so did the tab
-          bar, exactly overlapped. */}
-      {!CONVERSATIONS.has(loc.pathname) && <TabBar onStart={startFlow} />}
+          bar, exactly overlapped. (//// Neoffice — /coach-thread is ours: CONVERSATIONS.) */}
+      {!noTabs && !CONVERSATIONS.has(loc.pathname) && <TabBar onStart={startFlow} />}
       <RestTimer />
       <Modals />
       <Toast />

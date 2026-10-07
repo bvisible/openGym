@@ -14,7 +14,7 @@ import { editCompletedSession } from '../lib/session-edit.js'
 import { lastEntryFor } from '../lib/history.js'
 import { EXDB } from '../lib/exercises.js'
 
-vi.mock('../lib/sound.js', () => ({ beep: vi.fn(), chime: vi.fn(), vibrate: vi.fn(), unlock: vi.fn() }))
+vi.mock('../lib/sound.js', () => ({ beep: vi.fn(), chime: vi.fn(), vibrate: vi.fn(), alertBuzz: vi.fn(), unlock: vi.fn() }))
 vi.mock('../lib/api.js', () => ({
   //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import.
   BOOT: {}, api: vi.fn(() => Promise.resolve({})), appBase: () => '/' }))
@@ -73,7 +73,7 @@ function renderTopSheet() {
   return sheetContainer
 }
 const openHeaderMenu = () => {
-  const more = container.querySelector('button[aria-label="Workout view"]')
+  const more = container.querySelector('button[aria-label="Workout options"]')
   expect(more).toBeTruthy()
   act(() => more.click())
   return renderTopSheet()

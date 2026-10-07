@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { parseHTML } from 'linkedom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import CoachChat from './CoachChat.jsx'
+import { CONSENT_VERSION } from '../lib/coach.js'   // the consent a fixture grants is the current one, whatever its number
 import { effectiveRoutine } from '../lib/history.js'
 import { todayISO } from '../lib/format.js'
 
@@ -47,12 +48,12 @@ vi.mock('../lib/coach-api.js', () => ({
 }))
 vi.mock('../sheets.jsx', () => ({ startFlow: vi.fn(), confirmSheet: vi.fn() }))
 vi.mock('../lib/api.js', () => ({
-  //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import.
-  BOOT: {},
   api: vi.fn(() => Promise.resolve({})),
   IS_APPLE: false, IS_ANDROID: false, BIO: 'biometrics',
-  //: What the club lets the Coach do. Absent here on purpose: the screen must
-  //: read "not said" as "allowed", or an older server would empty its menu.
+  //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import (it was
+  //// declared twice here, the first an empty one the second replaced). What the club lets the Coach
+  //// do is absent on purpose: the screen must read "not said" as "allowed", or an older server
+  //// would empty its menu.
   BOOT: { coach: {} },
 }))
 vi.mock('../coach.css', () => ({}))
@@ -75,7 +76,7 @@ const state = () => ({
   unit: 'kg', lang: 'en', customEx: [], workouts: [], bodyweight: [], exWeights: {},
   dayPlan: {}, routines: [], week: {},
   coach: {
-    consent: { agreedAt: '2026-07-01T00:00:00Z', version: 1 },
+    consent: { agreedAt: '2026-07-01T00:00:00Z', version: CONSENT_VERSION },
     profile: { goal: 'muscle', experience: 'new', daysPerWeek: 3, sessionMin: 60, preferredDays: [1, 3, 5], equipment: [] },
     log: [], snapshots: [], chat: [{ id: 'c1', role: 'user', kind: 'intake', at: 1 }], timings: []
   },

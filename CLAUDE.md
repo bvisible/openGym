@@ -3,21 +3,18 @@
 Carnet d'entraînement PWA, servi par Frappe sous `/gym`. Ce dépôt est un **fork**,
 pas un produit à nous : la moitié du travail consiste à rester mergeable.
 
-## ⚠️ L'amont est sur GitLab, pas sur GitHub
+## L'amont : `github.com/DuarteSantos8/openGym`
 
 | | |
 |---|---|
-| **Amont réel** | `https://gitlab.com/DuarteSantos8/opengym` — remote `upstream` |
-| Miroir identique | `https://gitea.com/DuarteSantos/openGym` (même arbre, mêmes SHA) |
-| Notre fork | `https://github.com/bvisible/openGym`, branche **`version-15`** (défaut) |
-| ⛔ **Piège** | `github.com/arvids-unavailable/openGym` est une **copie sans historique** — aucun ancêtre commun, dernier commit « asd », figée. Et le dépôt que son README cite (`DuarteSantos8/openGym` sur GitHub) **n'existe plus**. Notre fork en est parti par erreur ; rebasé sur GitLab le 2026-08-24, 50 commits d'écart rattrapés. |
-
-**Ne jamais repartir d'un dépôt GitHub pour cette app.** Le README amont dit
-lui-même « Source on GitLab » et ses badges de pipeline pointent là.
+| **Amont réel** | `https://github.com/DuarteSantos8/openGym` — remote `upstream`. Depuis 2026 c'est la maison du projet : son `CLAUDE.md` le dit, et `.github/workflows/mirror.yml` pousse `main` et les étiquettes `v*` vers GitLab. |
+| Miroir | `https://gitlab.com/DuarteSantos8/opengym` (avance rapide seulement, produit l'APK et les images) |
+| Notre fork | `https://github.com/bvisible/openGym`, branche **`version-15`** (défaut), **la seule** |
+| ⛔ **Piège** | `github.com/arvids-unavailable/openGym` est une **copie sans historique** — aucun ancêtre commun, dernier commit « asd », figée. Notre fork en est parti par erreur ; rebasé sur l'amont le 2026-08-24. |
 
 ```bash
-git fetch upstream          # gitlab.com/DuarteSantos8/opengym
-git log --oneline HEAD..upstream/main
+git fetch upstream --tags   # github.com/DuarteSantos8/openGym
+git log --oneline HEAD..v1.3.10
 ```
 
 ## Ce que le fork change, et pourquoi
@@ -29,7 +26,7 @@ donne la carte complète de la divergence. Les quatre familles :
 |---|---|---|
 | **Auth** | `lib/api.js`, suppression de `views/Login.jsx` et `views/Admin.jsx` | L'amont a son propre serveur Node avec annuaire maison, passkeys et cookie signé. Chez nous la **session Frappe EST l'authentification** : même origine, `/gym` renvoie déjà l'anonyme vers `/login`. |
 | **Endpoints** | `lib/api.js` | `neoffice_gym.api.state.get/put` au lieu de l'API Node. En-tête CSRF ajouté, `{message:…}` déballé. |
-| **Push** | `lib/push.js`, `store/useUI.js` | Pas de relais push : `frappe/push_notification` parle au relais Frappe Cloud, que nos instances n'ont pas. `pushSupported()` rend `false` — Settings masque alors toute la section, donc **aucun interrupteur qui ne fait rien**. Les notifications **locales** de l'amont (`maybeRestNotification`) sont conservées : elles couvrent le cas pour lequel le push existait. |
+| **Push** | `lib/push.js`, `store/useUI.js`, `opengym/www/gym_sw.js` | Le serveur du club envoie les notifications depuis le 07.10 (v1.3.10) : `neoffice_gym` `api/push.py` (abonnements, clé VAPID par instance, rappel du jour, rappel de séance manquée, test). `lib/push.js` parle à `/api/method/neoffice_gym.api.push.*` ; le jeton CSRF rejoint l'identifiant d'appareil dans le cache que lit le worker. L'alerte de fin de repos par push n'est **pas** envoyée (no-op nommé dans `useUI.js`) : le maintien d'écran et `maybeRestNotification` la couvrent. |
 | **Build** | `vite.config.js`, `.gitignore`, `opengym/` | Coquille d'app Frappe (`hooks.py`, `www/gym_sw.js`), build **commité** dans `opengym/public/frontend` — la flotte ne recompile jamais une SPA sur une instance. |
 
 ### Ce qu'on ne touche PAS
@@ -38,7 +35,12 @@ donne la carte complète de la divergence. Les quatre familles :
   L'amont ne le modifie jamais : à chaque merge, le prendre tel quel de notre côté.
 - **Le plugin Umami** de `vite.config.js` — conservé tel quel. Il ne s'injecte que si
   `VITE_UMAMI_SRC` **et** `VITE_UMAMI_ID` sont posés, donc un build Neoffice reste sans télémétrie.
-- **Les tests** — 346 sur 22 fichiers. Ils doivent passer avant tout push.
+- **Les tests** — tous (`npm --prefix frontend test`) doivent passer avant tout push.
+- **Les tests de l'amont** — un test qui parle d'une fonction que nous n'embarquons pas (appairage d'un
+  téléphone, passkeys, mot de passe du serveur Node) est supprimé, et dit ici ; un test du store garde le
+  protocole de l'amont grâce au double `frontend/src/store/upstream-api.double.js` (nos fonctions nommées
+  de `lib/api.js` sur les chemins `/api/data` de l'amont). Supprimés à la v1.3.10 :
+  `lib/api.pair-insecure.test.js` et `lib/api.pair-probe.test.js` (`pairRedeem` n'appaire rien chez nous).
 
 ## Le média n'est pas dans le dépôt
 
@@ -53,20 +55,21 @@ redistribution. C'est la raison du `.gitignore`, pas la taille.
 ## Procédure de merge amont
 
 Depuis le rebase du 2026-08-24, **les deux historiques ont un ancêtre commun** —
-`git merge-base version-15 upstream/main` rend un vrai commit présent des deux
-côtés. Un merge est donc devenu la bonne méthode, et la réapplication manuelle
-n'a plus lieu d'être.
+`git merge-base version-15 v1.3.10` rend un vrai commit présent des deux
+côtés. Un merge est donc la bonne méthode, et la réapplication manuelle
+n'a plus lieu d'être. On fusionne **l'étiquette de la version** (`v1.3.10`), pas `main`.
 
 ```bash
-git fetch upstream                                   # gitlab.com/DuarteSantos8/opengym
-git branch -f neoffice-pre-upstream-<date> version-15 && git push origin neoffice-pre-upstream-<date>
-git merge upstream/main                              # ← oui, un merge
+git fetch upstream --tags                            # github.com/DuarteSantos8/openGym
+git merge --no-ff v1.3.10                            # ← oui, un merge, sur version-15
 # résoudre : garder LEUR code, réappliquer NOS `//// Neoffice` par-dessus
 npm --prefix frontend ci && npm --prefix frontend test && npm --prefix frontend run build
 git add -A && git commit && git push origin version-15
 ```
 
-**Toujours pousser la branche filet AVANT** (`neoffice-pre-upstream-<date>`).
+**Pas de branche filet** (règle de la flotte : `version-15` seule, ni branche ni worktree) : l'état
+d'avant la fusion est le premier parent du commit de fusion. Faire la fusion dans un clone jetable,
+et ne pousser qu'une fois les tests verts.
 
 > **Historique de cette section.** Elle a longtemps dit « ne PAS faire
 > `git merge` : nos deux bases n'ont pas la même origine historique ». C'était

@@ -96,7 +96,7 @@ function Goals({ goals }) {
             {g.reached ? <span className="tag acc" style={{ marginLeft: 7 }}>{t('reached')}</span> : null}
           </div>
           <div className="small" style={{ whiteSpace: 'nowrap' }}>
-            <b>{g.current != null ? g.current : '—'}</b>
+            <b>{g.current != null ? g.current : '–'}</b>
             <span className="dim"> / {g.target}{g.unit}</span>
           </div>
         </div>

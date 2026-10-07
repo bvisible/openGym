@@ -11,7 +11,7 @@ import { bestWeightFor } from '../lib/history.js'
 //// holes: never on a search, never on something already used, one tap out.
 import { suitsLevel, levelFiltersExercises } from '../lib/exercise-level.js'
 import { fmtNum, exCount } from '../lib/format.js'
-import { t, exerciseNameFor, exerciseNameClass } from '../lib/i18n.js'
+import { t, tn, exerciseNameFor, exerciseNameClass } from '../lib/i18n.js'
 import { Thumb } from '../components/Media.jsx'
 import { exerciseDetailSheet, addToRoutineSheet, customExSheet, floorPlanSheet } from '../sheets.jsx'
 import Icon from '../components/Icon.jsx'
@@ -30,6 +30,9 @@ export default function Library() {
   const [shown, setShown] = useState(40)
   const bpStrip = useRef(null), eqStrip = useRef(null)
   const profile = activeProfile(S)
+  // Your own exercises, counted the way the list below shows them (allExercises puts every
+  // custom entry in front of the catalogue; deleting one removes it from customEx outright).
+  const ownCount = (S.customEx || []).filter(c => c && c.id).length
   //// Neoffice — upstream's searchExercises (typo tolerance on name words only) over the
   //// same corpus as matchExercise: the English name, the member's aliases and the
   //// club's names are all in it (exerciseNameSearchText).
@@ -56,18 +59,22 @@ export default function Library() {
   const narrowed = !!(q.trim() || bp || eqOn)
 
   return <>
-    <div className="hdr"><div><h1>{t('Exercises')}</h1><div className="sub">{t('{0} exercises with animations', EXDB.length)}</div></div>
+    <div className="hdr lib-hdr"><div><h1>{t('Exercises')}</h1></div>
       <div className="row" style={{ gap: 6 }}>
-        <Button size="sm" variant="tinted" icon="target" onClick={() => nav('/muscles')}>{t('By muscle')}</Button>
+        <Button size="sm" variant="tinted" icon="figureStrength" onClick={() => nav('/muscles')}>{t('By muscle')}</Button>
         {/* //// Neoffice — the room, from the list of what you do in it (2026-09-09). */}
         <button className="iconbtn" aria-label={t('Floor plan')} title={t('Floor plan')} onClick={() => floorPlanSheet()}><Icon name="map" /></button>
       </div>
+      <div className="sub lib-count">{ownCount
+        ? tn('{1} animated exercises + 1 of your own', '{1} animated exercises + {0} of your own', ownCount, EXDB.length)
+        : t('{0} exercises with animations', EXDB.length)}</div>
     </div>
-    <div className={'search' + (narrowed ? ' has-count' : '')} style={{ marginBottom: 10 }}><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
+    <div className={'search' + (narrowed ? ' has-count' : '') + (q ? ' has-clear' : '')} style={{ marginBottom: 10 }}><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" /><path d="m21 21-4.3-4.3" /></svg>
       <input className="input" placeholder={t('Search…')} value={q} onChange={e => { setQ(e.target.value); setShown(40) }} />
-      {narrowed && <span className="search-count" role="status" aria-label={exCount(f.length)}>{fmtNum(f.length)}</span>}</div>
+      {narrowed && <span className="search-count" role="status" aria-label={exCount(f.length)}>{fmtNum(f.length)}</span>}
+      {q && <button className="clear" onClick={() => { setQ(''); setShown(40) }} aria-label={t('Clear')}><Icon name="xmark" /></button>}</div>
     {profile && <div className="small dim row" style={{ margin: '-4px 2px 10px', gap: 6, alignItems: 'center' }}>
-      <Icon name="dumbbell" style={{ fontSize: 13 }} />
+      <Icon name="kettlebell" style={{ fontSize: 13 }} />
       {showAll ? t('Showing all equipment') : t('Showing what you have in "{0}"', profile.name)}
       <button className="chip nocap" style={{ marginInlineStart: 'auto', padding: '3px 10px', fontSize: 12 }} onClick={() => setShowAll(v => !v)}>
         {showAll ? t('Filter by "{0}"', profile.name) : t('Show all equipment')}
@@ -97,7 +104,7 @@ export default function Library() {
     </div>}
     <div className="list">
       <div className="item" {...tappable(() => customExSheet(null, ex => exerciseDetailSheet(ex), q.trim()))}>
-        <div className="thumb thumb-x"><Icon name="sparkles" /></div>
+        <div className="thumb thumb-x"><Icon name="plusCircle" /></div>
         <div className="grow"><div className="tt">{t('Create your own exercise')}</div><div className="ss">{t('name + body part, and a photo or video if you like')}</div></div><Icon name="plus" className="chev" />
       </div>
       {f.slice(0, shown).map(e => {

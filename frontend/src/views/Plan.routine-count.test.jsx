@@ -29,11 +29,13 @@ vi.mock('../store/useStore.js', () => {
 vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))
 vi.mock('../lib/mobile.js', () => ({ MOBILE: false, isAndroid: () => Promise.resolve(false), shareExport: vi.fn(), syncReminder: vi.fn() }))
 vi.mock('../sheets.jsx', () => ({
-  starterPlanSheet: vi.fn(), dayAssignSheet: vi.fn(), dayAddRoutineSheet: vi.fn(), planToolsSheet: vi.fn(),
+  starterPlanSheet: vi.fn(), dayAssignSheet: vi.fn(),
 }))
 
 let host, root
 beforeEach(() => {
+  //// Neoffice — Plan opens on Routines when nothing was chosen (#765); these tests are about Schedule.
+  localStorage.setItem('gym_plan_view', 'schedule')
   mocks.S = {
     unit: 'kg', workouts: [], exWeights: {}, week: {}, dayPlan: {},
     routines: [{ id: 'r1', name: 'Push', emoji: null, ex: [] }, { id: 'r2', name: 'Pull', emoji: null, ex: [] }],
@@ -47,17 +49,15 @@ afterEach(() => {
   host.remove()
 })
 
-//// Neoffice — the week is one line until it is opened (Plan.jsx, the week line): these
-//// day headers are upstream's full list, drawn once « Edit » is pressed.
-const openWeek = () => act(() => { [...host.querySelectorAll('button')].find(b => b.textContent === 'Edit').click() })
-const mount = () => { act(() => root.render(<Plan />)); openWeek() }
-const countOn = day => [...host.querySelectorAll('.item')].find(el => el.querySelector('.tt')?.textContent === day)?.querySelector('.small.dim')?.textContent
+const mount = () => act(() => root.render(<Plan />))
+// a single routine says how many exercises it has; a combined day says how many routines
+const countOn = day => host.querySelector(`.plan-day[aria-label="${day}"] .ss`)?.textContent
 
 describe('Plan — the day header counts its routines', () => {
-  it('uses the singular for one routine and the plural for more', () => {
+  it('names the exercises of a single routine, and counts the routines of a combined day', () => {
     mocks.S.week = { 1: ['r1'], 2: ['r1', 'r2'] }
     mount()
-    expect(countOn('Monday')).toBe('1 routine')
+    expect(countOn('Monday')).toBe('0 exercises')
     expect(countOn('Tuesday')).toBe('2 routines')
   })
 })

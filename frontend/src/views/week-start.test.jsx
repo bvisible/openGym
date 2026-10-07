@@ -37,14 +37,12 @@ vi.mock('../store/useUI.js', () => {
 })
 vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))
 vi.mock('../lib/api.js', () => ({
-  //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import.
-  BOOT: {},
   api: vi.fn(), webauthnOK: () => false, passkeyLogin: vi.fn(), passkeyRegister: vi.fn(), IS_ANDROID: false,
-  //// Neoffice — what our Settings sections read (MyClub, MyCoach): the club's wallet and the member's coach.
-  wallet: vi.fn(async () => null), myCoach: vi.fn(async () => null), openChat: vi.fn(), classesMine: vi.fn(async () => []),
-  myMembership: vi.fn(async () => ({ shown: false })),
+  //// Neoffice — BOOT (the page's boot data) and our screens' calls (coach, wallet, classes, membership),
+  //// read by Settings at import (lib/api.js).
+  BOOT: {}, myCoach: vi.fn(() => Promise.resolve(null)), openChat: vi.fn(), wallet: vi.fn(() => Promise.resolve(null)), classesMine: vi.fn(() => Promise.resolve([])), myMembership: vi.fn(() => Promise.resolve({ shown: false })),
 }))
-vi.mock('../lib/push.js', () => ({ pushSupported: () => false, enablePush: vi.fn(), disablePush: vi.fn(), sendTestPush: vi.fn() }))
+vi.mock('../lib/push.js', () => ({ pushSupported: () => false, enablePush: vi.fn(), disablePush: vi.fn(), sendTestPush: vi.fn(), syncPushSubscription: vi.fn(() => Promise.resolve(false)) }))
 vi.mock('../lib/wakelock.js', () => ({ wakeLockSupported: () => false }))
 vi.mock('../lib/mobile.js', () => ({ MOBILE: false, isAndroid: () => Promise.resolve(false), shareExport: vi.fn(), syncReminder: vi.fn() }))
 vi.mock('./MobileOnboarding.jsx', () => ({ ConnectSheet: () => null }))
@@ -58,6 +56,8 @@ globalThis.__APP_VERSION__ ??= 'test'
 
 let host, root
 beforeEach(() => {
+  //// Neoffice — Plan opens on Routines when nothing was chosen (#765); these tests are about Schedule.
+  localStorage.setItem('gym_plan_view', 'schedule')
   mocks.S = {
     unit: 'kg', restSec: 90, restPauseSec: 15, sound: false, effort: 'none',
     gifSize: 'full', workouts: [], routines: [], exWeights: {}, week: {}, dayPlan: {},
@@ -73,13 +73,9 @@ afterEach(() => {
 
 const segButton = label => [...host.querySelectorAll('.seg button')].find(b => b.textContent === label)
 const dayRows = () => [...host.querySelectorAll('.item .tt')].map(e => e.textContent)
-//// Neoffice — the week is one line until it is opened (#765): the day rows these
-//// tests read are upstream's full list, drawn once the member asks for it.
-const weekButton = () => [...host.querySelectorAll('button')].find(b => ['Edit', 'Details', 'Done', 'Less'].includes(b.textContent))
-const openWeek = () => act(() => { weekButton().click() })
 
 describe('Settings — week starts on', () => {
-  const mount = () => act(() => root.render(<Settings />))
+  const mount = () => act(() => root.render(<Settings page="plan" />))
 
   it('offers Monday and Sunday and writes the getDay() index', () => {
     mount()
@@ -101,20 +97,18 @@ describe('Settings — week starts on', () => {
 })
 
 describe('Plan — the week schedule follows the setting', () => {
-  //// Neoffice — opened, see openWeek above.
-  const mount = () => { act(() => root.render(<Plan />)); openWeek() }
+  const mount = () => act(() => root.render(<Plan />))
+  const planDays = () => [...host.querySelectorAll('.plan-day')].map(e => e.getAttribute('aria-label'))
 
   it('runs Monday to Sunday by default', () => {
     mount()
-    expect(dayRows().slice(0, 7)).toEqual(
-      ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
+    expect(planDays()).toEqual(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
   })
 
   it('runs Sunday to Saturday for a Sunday profile', () => {
     mocks.S.weekStart = 0
     mount()
-    expect(dayRows().slice(0, 7)).toEqual(
-      ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'])
+    expect(planDays()).toEqual(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'])
   })
 
   it('keeps a routine attached to its day, not to its position in the list', () => {
@@ -122,17 +116,16 @@ describe('Plan — the week schedule follows the setting', () => {
     mocks.S.week = { 0: 'r1' }        // Sunday
     mocks.S.weekStart = 0
     mount()
-    const rows = [...host.querySelectorAll('.item')]
-    expect(rows[0].querySelector('.tt').textContent).toBe('Sunday')
-    expect(rows[0].textContent).toContain('Push')
+    const rows = [...host.querySelectorAll('.plan-day')]
+    expect(rows[0].getAttribute('aria-label')).toBe('Sunday')
+    expect(rows[0].querySelector('.tt').textContent).toBe('Push')
     expect(rows[1].textContent).not.toContain('Push')
   })
 })
 
-describe('Plan — inline per-day routine management (combine routines)', () => {
-  //// Neoffice — opened, see openWeek above.
-  const mount = () => { act(() => root.render(<Plan />)); if (weekButton()?.textContent === 'Edit') openWeek() }
-  const dayContainer = name => [...host.querySelectorAll('.item')].find(el => el.querySelector('.tt')?.textContent === name)
+describe('Plan — a combined day (combine routines)', () => {
+  const mount = () => act(() => root.render(<Plan />))
+  const day = name => [...host.querySelectorAll('.plan-day')].find(el => el.getAttribute('aria-label') === name)
 
   beforeEach(() => {
     mocks.S.routines = [
@@ -141,75 +134,20 @@ describe('Plan — inline per-day routine management (combine routines)', () => 
     ]
   })
 
-  it('renders a sub-row per routine on a populated day, with the count hint', () => {
+  it('reads as one session with both names and the routine count', () => {
     mocks.S.week = { 1: ['r1', 'r2'] }
     mount()
-    const mon = dayContainer('Monday')
-    expect(mon.textContent).toContain('Push')
-    expect(mon.textContent).toContain('Core')
-    expect(mon.textContent).toContain('2 routines')
+    const mon = day('Monday')
+    expect(mon.querySelector('.tt').textContent).toBe('Push + Core')
+    expect(mon.querySelector('.ss').textContent).toBe('2 routines')
   })
 
-  it('✕ removes a routine, and drops the day key on the last removal', () => {
-    mocks.S.week = { 1: ['r1', 'r2'] }
-    mount()
-    const removeButtons = () => [...dayContainer('Monday').querySelectorAll('button[aria-label="Remove"]')]
-    act(() => { removeButtons()[1].dispatchEvent(new Event('click', { bubbles: true })) })
-    expect(mocks.S.week[1]).toEqual(['r1'])
-    mount()
-    act(() => { removeButtons()[0].dispatchEvent(new Event('click', { bubbles: true })) })
-    expect(mocks.S.week).not.toHaveProperty('1')
-  })
-
-  it('an empty day stays one tappable row', () => {
+  it('an empty day is a rest day, one tappable row', () => {
     mocks.S.week = {}
     mount()
-    const tue = dayContainer('Tuesday')
-    expect(tue.textContent).toContain('Rest')
-    expect(tue.querySelectorAll('button[aria-label="Remove"]').length).toBe(0)
-  })
-})
-
-//// Neoffice — THE WEEK AS ONE LINE (#765). A club reported that planning by day
-//// « prend trop de place par rapport à son importance réelle »: many members never
-//// plan by day, and upstream drew seven rows — most of them « Rest » — before the
-//// routines. The line says the same thing in one row; the list opens on demand.
-describe('Plan — the week as one line', () => {
-  const mount = () => act(() => root.render(<Plan />))
-  const cells = () => [...host.querySelectorAll('.weekline-d')]
-
-  beforeEach(() => {
-    mocks.S.routines = [{ id: 'r1', name: 'Push', emoji: null, ex: [] }]
-  })
-
-  it('draws seven days on one line, and the full list only when asked', () => {
-    mocks.S.week = { 1: ['r1'] }
-    mount()
-    expect(cells()).toHaveLength(7)
-    expect(dayRows()).not.toContain('Monday')
-    expect(cells()[0].className).toContain('on')
-    expect(cells()[1].className).not.toContain('on')
-    openWeek()
-    //: `.item .tt` also reads the routine's own row under Monday.
-    expect(dayRows().filter(x => x !== 'Push')).toEqual(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'])
-    expect(cells()).toHaveLength(0)
-  })
-
-  it('says nothing about the week to a coached member whose coach set no day', () => {
-    mocks.S.perms = { editPlan: false }
-    mocks.S.week = {}
-    mount()
-    expect(cells()).toHaveLength(0)
-    expect(host.textContent).not.toContain('Week schedule')
-  })
-
-  it('lets a coached member read the days, never change them', () => {
-    mocks.S.perms = { editPlan: false }
-    mocks.S.week = { 3: ['r1'] }
-    mount()
-    expect(weekButton().textContent).toBe('Details')
-    openWeek()
-    expect(dayRows()).toContain('Wednesday')
-    expect(host.querySelectorAll('button[aria-label="Remove"]')).toHaveLength(0)
+    const tue = day('Tuesday')
+    expect(tue.querySelector('.tt').textContent).toBe('Rest day')
+    expect(tue.getAttribute('role')).toBe('button')
+    expect(tue.querySelectorAll('button').length).toBe(0)
   })
 })

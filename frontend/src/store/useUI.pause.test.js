@@ -7,7 +7,7 @@ vi.mock('../lib/api.js', () => ({
   //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import.
   BOOT: {}, api: vi.fn(() => Promise.resolve({ ok: true })) }))
 const { beep, chime } = vi.hoisted(() => ({ beep: vi.fn(), chime: vi.fn() }))
-vi.mock('../lib/sound.js', () => ({ beep, chime, vibrate: vi.fn() }))
+vi.mock('../lib/sound.js', () => ({ beep, chime, vibrate: vi.fn(), alertBuzz: vi.fn() }))
 
 import { api } from '../lib/api.js'
 import { useUI } from './useUI.js'

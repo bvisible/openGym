@@ -42,10 +42,12 @@ describe('Brazilian Portuguese locale', () => {
     // If the hash fails, review the changed keys and wording before accepting a new one. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
     //// Neoffice — our own strings live in pt.js like every other locale and pt-BR inherits them,
-    //// so the hash differs from upstream's. Recomputed after the v1.3.9 merge (1,030 overrides,
-    //// 1,047 inherited), then on 07.10 for « 1 week streak » (« sequência de 1 semana », Brazilian
-    //// as well; 1,048 inherited), with: node scripts/pt-br-inheritance-fingerprint.mjs
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('752980e4761f561006f6451fab70724b83b426b9b60e97fbf0ab94285e4aff73')
+    //// so the hash differs from upstream's. Recomputed after the v1.3.10 merge (1,228 overrides,
+    //// 1,134 inherited): the three strings our screens still use that upstream dropped keep their
+    //// Brazilian override, and the four new ones that read the same in Brazil are inherited
+    //// (« {0} aula(s) restante(s) », « Conta e sincronização », « Contam além do ciclo. »), with:
+    //// node scripts/pt-br-inheritance-fingerprint.mjs
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('76aca6dce173bbcccfbecbd05d11d3ff05af6a3246f8852b1c805095b9e61e42')
   })
 
   test('does not leak European Portuguese UI terms', () => {
@@ -57,7 +59,7 @@ describe('Brazilian Portuguese locale', () => {
     expect(ptBR.Settings).toBe('Configurações')
     expect(ptBR['Delete workout']).toBe('Excluir treino')
     expect(ptBR.Superset).toBe('Superset')
-    expect(ptBR['Guest mode — data lives only in this browser.']).toContain('visitante')
+    expect(ptBR['Guest mode: your data lives only in this browser.']).toContain('visitante')
     expect(ptBR['Sign in with passkey']).toContain('chave de acesso')
     expect(ptBR.band).toBe('elástico')
     expect(ptBR['resistance band']).toBe('faixa elástica')
@@ -67,11 +69,11 @@ describe('Brazilian Portuguese locale', () => {
     // The sign-in e-mail's strings are overridden, not inherited: pt-PT says palavra-passe and «».
     expect(ptBR['Wrong name, e-mail or password.']).toBe('Nome, e-mail ou senha incorretos.')
     expect(ptBR['Sign-in e-mail']).toBe('E-mail de login')
-    for (const key of ['Name or e-mail', 'Sign in with “{0}” instead of your name', '“{0}” is saved, but signs in only once this profile has a password.', 'Type it at “Sign in with password” instead of your profile name. Nothing is ever sent to it — a forgotten password is still reset by your admin.'])
+    for (const key of ['Name or e-mail', 'Sign in with “{0}” instead of your name', '“{0}” is saved, but signs in only once this profile has a password.', 'Type it at “Sign in with password” instead of your profile name. We never send anything to it; a forgotten password is still reset by your admin.'])
       expect(key in PT_BR_OVERRIDES, key).toBe(true)
     // So are the backup import's warning (pt-PT says cópia and registado) and the sign-in hold's
     // status (pt-PT says «À espera da tua resposta»).
-    for (const key of ['The server has 1 workout that is not in this backup, logged since it was made or on another device. Replacing deletes it.', 'The server has {0} workouts that are not in this backup, logged since it was made or on another device. Replacing deletes them.', 'Replace anyway', 'Merge them in', 'Waiting for your answer about this device’s workouts', 'Nothing syncs until you say whether this device’s workouts go into your profile — tap to answer.'])
+    for (const key of ['The server has 1 workout that is not in this backup, logged since it was made or on another device. Replacing deletes it.', 'The server has {0} workouts that are not in this backup, logged since it was made or on another device. Replacing deletes them.', 'Replace anyway', 'Merge them in', 'Waiting for your answer about this device’s workouts', 'Nothing syncs until you say whether this device’s workouts go into your profile. Tap to answer.'])
       expect(key in PT_BR_OVERRIDES, key).toBe(true)
   })
 })

@@ -143,8 +143,9 @@ async function start(S, kind, opts) {
   //// where the calls are recorded; the phone-side cap is for a member's own key.
   if (d.mode !== 'nora') {
     const cap = await capState()
-    if (cap.used >= cap.limit) throw Object.assign(new Error(t('The Coach is resting — you have used today’s {0} runs on this phone.', cap.limit)), { status: 429, code: 'cap' })
+    if (cap.used >= cap.limit) throw Object.assign(new Error(t('The Coach is taking a breather. You’ve used today’s {0} runs on this phone.', cap.limit)), { status: 429, code: 'cap' })
   }
+
   await bumpDaily()
   job = { id: 'local-' + Date.now().toString(36), kind, state: 'running', startedAt: Date.now() }
   lastError = null

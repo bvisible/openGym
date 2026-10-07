@@ -10,7 +10,7 @@ import { DEF, useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
 import { EXIDX } from '../lib/exercises.js'
 
-vi.mock('../lib/sound.js', () => ({ beep: vi.fn(), vibrate: vi.fn(), unlock: vi.fn(), restOver: vi.fn() }))
+vi.mock('../lib/sound.js', () => ({ beep: vi.fn(), vibrate: vi.fn(), alertBuzz: vi.fn(), unlock: vi.fn(), restOver: vi.fn() }))
 vi.mock('../lib/api.js', () => ({
   //// Neoffice — BOOT: the page's boot data (lib/api.js), read by our screens at import.
   BOOT: {}, api: vi.fn(() => Promise.resolve({})) }))
@@ -208,7 +208,7 @@ describe('plate line under set rows', () => {
     document.body.appendChild(sc)
     const sr = createRoot(sc)
     act(() => sr.render(useUI.getState().sheets.at(-1).render(() => {})))
-    expect(sc.textContent).toContain('Details')
+    expect(sc.textContent).toContain('How to do it')
     expect(sc.textContent).not.toContain('Plate loading')
     act(() => sr.unmount()); sc.remove()
   })

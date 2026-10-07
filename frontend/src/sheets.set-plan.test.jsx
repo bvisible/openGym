@@ -123,7 +123,7 @@ describe('the exercise sheet, a different number of reps for each set', () => {
 
   it('reps per side keeps every set even', () => {
     const { host, onSave } = open({ sets: 3, reps: 7, setPlan: [{ r: 7 }, { r: 9 }, { r: 11 }] })
-    press(rowSwitch(host, 'Reps per side'))
+    press(rowSwitch(host, 'Per side'))   // upstream's title since v1.3.10
     expect([1, 2, 3].map(n => valueOf(host, 'Set ' + n))).toEqual(['8', '10', '12'])
     save(host)
     expect(onSave.mock.calls[0][0]).toMatchObject({ side: true, sets: 3, reps: 8 })
@@ -167,5 +167,53 @@ describe('the exercise sheet, a different number of reps for each set', () => {
     mounted.push(root)
     act(() => root.render(sheet.render(() => useUI.getState().closeSheet(sheet.id))))
     expect(rowSwitch(host, 'Different reps per set')).toBeUndefined()
+  })
+})
+
+//// Upstream's pyramid (v1.3.10, lib/pyramid.js) asks the same thing another way. One editor at a time:
+//// ours starts a list (the club's coaches write and read it), upstream's opens for an exercise that
+//// already is a pyramid, so it stays editable and can be turned off.
+describe('the exercise sheet, beside upstream’s pyramid sets', () => {
+  beforeEach(() => {
+    globalThis.IS_REACT_ACT_ENVIRONMENT = true
+    useUI.setState({ sheets: [] })
+    useStore.setState(s => ({ S: { ...s.S, unit: 'kg' } }))
+    document.body.innerHTML = ''
+  })
+  afterEach(() => {
+    act(() => { mounted.splice(0).forEach(root => root.unmount()) })
+  })
+
+  it('a flat exercise offers ours only', () => {
+    const { host } = open({ sets: 3, reps: 10 })
+    expect(rowSwitch(host, 'Different reps per set')).toBeTruthy()
+    expect(rowSwitch(host, 'Pyramid sets')).toBeUndefined()
+  })
+
+  it('a coach’s list offers ours only', () => {
+    const { host } = open({ sets: 5, reps: 6, setPlan: PYRAMID })
+    expect(rowSwitch(host, 'Different reps per set').getAttribute('aria-checked')).toBe('true')
+    expect(rowSwitch(host, 'Pyramid sets')).toBeUndefined()
+  })
+
+  it('a pyramid opens in upstream’s editor, and is saved as one, with no list of ours', () => {
+    const { host, onSave } = open({ sets: 4, reps: 12, pyramid: [12, 10, 8, 'max'] })
+    expect(rowSwitch(host, 'Pyramid sets').getAttribute('aria-checked')).toBe('true')
+    expect(rowSwitch(host, 'Different reps per set')).toBeUndefined()
+    save(host)
+    const out = onSave.mock.calls[0][0]
+    expect(out.pyramid).toEqual([12, 10, 8, 'max'])
+    expect(out.setPlan).toBeUndefined()
+  })
+
+  it('turned off, the pyramid keeps its switch until the sheet is saved, and ours waits', () => {
+    const { host, onSave } = open({ sets: 4, reps: 12, pyramid: [12, 10, 8, 6] })
+    press(rowSwitch(host, 'Pyramid sets'))
+    expect(rowSwitch(host, 'Pyramid sets').getAttribute('aria-checked')).toBe('false')
+    expect(rowSwitch(host, 'Different reps per set')).toBeUndefined()
+    save(host)
+    const out = onSave.mock.calls[0][0]
+    expect(out.pyramid).toBeUndefined()
+    expect(out).toMatchObject({ sets: 4, reps: 12 })
   })
 })

@@ -168,3 +168,6 @@ describe('signIn', () => {   //// Neoffice — our sign-in, through Frappe's log
     expect(seen.body).toEqual({ usr: 'a@b.c', pwd: 'secret', device: 'mobile' })
   })
 })
+
+//// Neoffice — upstream v1.3.10's `passkeyError` tests are not carried: passkeys are not ours (the
+//// Frappe session signs in), and api.js has no such function.

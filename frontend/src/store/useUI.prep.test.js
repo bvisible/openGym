@@ -56,14 +56,32 @@ describe('the 3-2-1 before a timed set', () => {
 })
 
 describe('what the work timer knows about the set it counts', () => {
-  it('carries the meta through the count to work.meta', () => {
-    useUI.getState().startWorkWithPrep(45, 'Planche', vi.fn(), 3, { entryIdx: 2, setIdx: 1 })
+  //// Since v1.3.10 that is upstream's `owner` ({ idx, i, id }), which a hold restored after a reload
+  //// is bound to again; our count hands it through to startWork.
+  it('carries the owner through the count to work.owner', () => {
+    useUI.getState().startWorkWithPrep(45, 'Planche', vi.fn(), 3, { idx: 2, i: 1, id: 'plank' })
     expect(useUI.getState().work).toBeNull()
     vi.advanceTimersByTime(3000)
-    expect(useUI.getState().work).toMatchObject({ total: 45, meta: { entryIdx: 2, setIdx: 1 } })
+    expect(useUI.getState().work).toMatchObject({ total: 45, owner: { idx: 2, i: 1, id: 'plank' } })
   })
-  it('is null when nothing was passed — a plain startWork stays as it was', () => {
+  it('has none when nothing was passed — a plain startWork stays as it was', () => {
     useUI.getState().startWork(30, 'x', vi.fn())
-    expect(useUI.getState().work.meta).toBeNull()
+    expect(useUI.getState().work.owner).toBeUndefined()
+  })
+  it('tells the screen once the hold has started, after the hold it displaced handed back its time', () => {
+    const order = []
+    useUI.getState().startWork(60, 'First', elapsed => order.push(['first done', elapsed]))
+    vi.advanceTimersByTime(5000)
+    useUI.getState().startWorkWithPrep(45, 'Second', vi.fn(), 3, null, () => order.push(['second started', useUI.getState().work?.label]))
+    expect(order).toEqual([])
+    vi.advanceTimersByTime(3000)
+    expect(order).toEqual([['first done', 8], ['second started', 'Second']])
+  })
+  it('a cancelled count never says it started', () => {
+    const onStart = vi.fn()
+    useUI.getState().startWorkWithPrep(45, 'Planche', vi.fn(), 3, null, onStart)
+    useUI.getState().cancelPrep()
+    vi.advanceTimersByTime(5000)
+    expect(onStart).not.toHaveBeenCalled()
   })
 })
