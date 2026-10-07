@@ -226,6 +226,7 @@ export default {
   'Welcome!': 'مرحبًا!',
   'Build my own plan': 'أنشئ خطتي بنفسي',
   '{0} week streak': '{0} أسابيع متتالية',
+  '1 week streak': '1 أسبوع متتالٍ',
   'this week': 'هذا الأسبوع',
   '{0} workout total': '{0} تمرين إجمالًا',
   '{0} workouts total': '{0} تمارين إجمالًا',

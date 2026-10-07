@@ -238,6 +238,7 @@ export default {
   'Five sets of five on the main barbell lifts.': 'ห้าเซ็ต เซ็ตละห้าครั้ง ในท่าบาร์เบลหลัก',
   'Build my own plan': 'สร้างแผนของตัวเอง',
   '{0} week streak': 'ต่อเนื่อง {0} สัปดาห์',
+  '1 week streak': 'ต่อเนื่อง 1 สัปดาห์',
   'this week': 'สัปดาห์นี้',
   '{0} workout total': 'รวมทั้งหมด {0} ครั้ง',
   '{0} workouts total': 'รวมทั้งหมด {0} ครั้ง',

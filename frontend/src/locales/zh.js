@@ -293,6 +293,7 @@ export default {
   'Five sets of five on the main barbell lifts.': '主要杠铃动作五组五次。',
   'Build my own plan': '创建自己的计划',
   '{0} week streak': '连续 {0} 周',
+  '1 week streak': '连续 1 周',
   'this week': '本周',
   '{0} workout total': '共 {0} 次训练',
   '{0} workouts total': '共 {0} 次训练',

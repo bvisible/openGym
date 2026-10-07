@@ -206,6 +206,7 @@ export default {
   'Load starter plan': 'Завантажити стартовий план',
   'Build my own plan': 'Створити свій план',
   '{0} week streak': 'серія: {0} тижн.',
+  '1 week streak': 'серія: 1 тижн.',
   'this week': 'цього тижня',
   '{0} workout total': 'усього тренувань: {0}',
   '{0} workouts total': 'усього тренувань: {0}',

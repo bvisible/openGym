@@ -238,6 +238,7 @@ export default {
   'Five sets of five on the main barbell lifts.': 'Öt ötös sorozat a fő rúdgyakorlatokon.',
   'Build my own plan': 'Saját terv készítése',
   '{0} week streak': '{0} hetes sorozat',
+  '1 week streak': '1 hetes sorozat',
   'this week': 'ezen a héten',
   '{0} workout total': 'összesen {0} edzés',
   '{0} workouts total': 'összesen {0} edzés',
