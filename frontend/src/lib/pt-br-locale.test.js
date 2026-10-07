@@ -43,8 +43,9 @@ describe('Brazilian Portuguese locale', () => {
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
     //// Neoffice — our own strings live in pt.js like every other locale and pt-BR inherits them,
     //// so the hash differs from upstream's. Recomputed after the v1.3.9 merge (1,030 overrides,
-    //// 1,047 inherited) with: node scripts/pt-br-inheritance-fingerprint.mjs
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('d460885915e0bf34ae6b9b9d15f383cc0b91b65e65494fdf3ab46893dfe94fc5')
+    //// 1,047 inherited), then on 07.10 for « 1 week streak » (« sequência de 1 semana », Brazilian
+    //// as well; 1,048 inherited), with: node scripts/pt-br-inheritance-fingerprint.mjs
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('752980e4761f561006f6451fab70724b83b426b9b60e97fbf0ab94285e4aff73')
   })
 
   test('does not leak European Portuguese UI terms', () => {
