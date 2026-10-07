@@ -374,7 +374,10 @@ export default function Home() {
         <div>
           <div className="row" style={{ gap: 7, fontSize: 22, fontWeight: 600, letterSpacing: '-.021em' }}>
             <Icon name="flame" style={{ color: 'var(--orange)' }} />
-            {t('{0} week streak', streakWeeks(S))}
+            {/* //// Neoffice — a streak of one week is singular where the language agrees the noun with the count:
+                //// « série de 1 semaines » read as a mistake to the pilot club (maintenance#1262). A locale
+                //// without the « 1 week streak » entry keeps the general sentence. */}
+            {streakWeeks(S) === 1 && t('1 week streak') !== '1 week streak' ? t('1 week streak') : t('{0} week streak', streakWeeks(S))}
           </div>
           <div className="muted small" style={{ marginTop: 2 }}>{wThisWeek}{plannedPerWeek ? ' / ' + plannedPerWeek : ''} {t('this week')} · {t(S.workouts.length === 1 ? '{0} workout total' : '{0} workouts total', S.workouts.length)}</div>
         </div>

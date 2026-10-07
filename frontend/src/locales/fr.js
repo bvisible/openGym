@@ -269,6 +269,8 @@ export default {
   'Five sets of five on the main barbell lifts.': 'Cinq séries de cinq sur les gros mouvements à la barre.',
   'Build my own plan': 'Créer mon propre plan',
   '{0} week streak': 'série de {0} semaines',
+  //// Neoffice — the streak of one week, in the singular (maintenance#1262).
+  '1 week streak': 'série de 1 semaine',
   'this week': 'cette semaine',
   '{0} workout total': '{0} entraînement au total',
   '{0} workouts total': '{0} entraînements au total',
