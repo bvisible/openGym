@@ -35,7 +35,11 @@ donne la carte complète de la divergence. Les quatre familles :
   L'amont ne le modifie jamais : à chaque merge, le prendre tel quel de notre côté.
 - **Le plugin Umami** de `vite.config.js` — conservé tel quel. Il ne s'injecte que si
   `VITE_UMAMI_SRC` **et** `VITE_UMAMI_ID` sont posés, donc un build Neoffice reste sans télémétrie.
-- **Les tests** — tous (`npm --prefix frontend test`) doivent passer avant tout push.
+- **Les tests** — tous (`npm --prefix frontend test`) doivent passer avant tout push. Ils comprennent
+  `scripts/check-undefined.mjs` (ESLint `no-undef` sur l'app et ses deux workers) : à la v1.3.10, une
+  résolution de conflit a gardé la ligne d'amont qui lit `needsMobileOnboarding` sans celle qui le définit,
+  et le carnet entier restait blanc ; ni le build ni les tests ne le voyaient. Après une fusion, ouvrir aussi
+  `/gym` dans un vrai navigateur.
 - **Les tests de l'amont** — un test qui parle d'une fonction que nous n'embarquons pas (appairage d'un
   téléphone, passkeys, mot de passe du serveur Node) est supprimé, et dit ici ; un test du store garde le
   protocole de l'amont grâce au double `frontend/src/store/upstream-api.double.js` (nos fonctions nommées

@@ -100,6 +100,10 @@ function Shell() {
   // native side as an alarm (#375). buzzAsAlarm answers false off Android, so iOS buzzes as before.
   useEffect(() => { setAlarmBuzzer(MOBILE && S.vibrate !== false && S.vibrateOnSilent ? buzzAsAlarm : null) }, [S.vibrate, S.vibrateOnSilent])
   const isGuest = useStore(s => s.isGuest())
+  //// Neoffice — upstream's first-launch card of the phone app (v1.3.10's noTabs reads it). This journal
+  //// is a page of the club's instance and shows no such card, but the store keeps the flag (false on the
+  //// web): without this line the whole app died on « needsMobileOnboarding is not defined ».
+  const needsMobileOnboarding = useStore(s => s.needsMobileOnboarding)
   const langV = useLang()   // re-renders the whole shell when the language (pack) changes
   useEffect(() => { setNav(navigate) }, [navigate])
   const lastEditPath = useRef(loc.pathname)
