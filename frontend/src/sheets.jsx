@@ -1088,7 +1088,11 @@ function ExerciseDetail({ ex, close }) {
     </div>
     {ex.desc && <div className="exnote">{ex.desc}</div>}
     {best > 0 && <div className="small row" style={{ marginBottom: 6, gap: 5 }}><Icon name="trophy" style={{ fontSize: 14, color: 'var(--yellow)' }} />{t('Best:')} <b className="accent" style={{ whiteSpace: 'nowrap' }}>{fmtNum(best)} {st.unit}</b>{last ? ` · ${t('last')} ${fmtDate(last.d)}: ${last.sets.map(s => setLabel(ex.id, s, last.target, speedUnitOf(st))).join(', ')}` : ''}</div>}
-    <Button variant="primary" icon="plus" style={{ margin: '10px 0 4px' }} onClick={() => addToRoutineSheet(ex)}>{t('Add to my plan')}</Button>
+    {/* //// Neoffice — adding to a routine changes the plan: not when the club writes it (S.perms.editPlan,
+        //// refused by the server's sync.apply_state), and the sheet says why instead of losing the button. */}
+    {st.perms?.editPlan !== false
+      ? <Button variant="primary" icon="plus" style={{ margin: '10px 0 4px' }} onClick={() => addToRoutineSheet(ex)}>{t('Add to my plan')}</Button>
+      : <div className="small muted" style={{ margin: '10px 0 4px', lineHeight: 1.45 }}>{t('Your coach writes your plan. You can train it and log your sets — the routines themselves are theirs to change.')}</div>}
     {/* //// Neoffice — "dips machin → épaules": the member's own name for it, on
         //// every screen. The catalogue name stays one line below. 2026-09-09. */}
     <Button icon="pencil" style={{ margin: '0 0 4px' }} onClick={() => { close(); renameExerciseSheet(ex) }}>{exerciseAliasOf(ex.id) ? t('Rename') : t('Give it my own name')}</Button>
