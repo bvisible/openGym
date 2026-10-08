@@ -2266,6 +2266,15 @@ button.floor-chip { background: transparent; font: inherit; }
    not, rather than squeezing "Fixed Week" onto two lines. */
 .plan-mode .seg-inline{flex:1 1 200px;min-width:0}
 .plan-mode .seg-inline button{white-space:nowrap}
+/* //// Neoffice — the title's own width decides when the control wraps. The row rule above
+   (`.lrow:has(.seg-inline) .lrow-m`) gives a title a basis of 0 and a floor of 150px, so a title
+   wider than that stayed beside the control and was painted over by it: "Votre façon de vous
+   entraîner" needs 218px and got 180px in a 640px column (upstream's own French, "Ta façon de
+   t’entraîner", too). With the text as its basis the control drops to its own line as soon as
+   both do not fit. A title wider than the whole row stays beside its icon (29px + the 12px gap)
+   and ends in an ellipsis, instead of leaving the icon alone on a line of its own. */
+.plan .plan-mode .lrow-m{flex:1 1 auto;min-width:0;max-width:calc(100% - 41px)}
+.plan .plan-mode .lrow-t{overflow:hidden;text-overflow:ellipsis}
 .plan-mode-locked{margin-inline-start:auto;text-align:end}
 .plan-sec-h{margin:22px 0 8px;gap:8px;flex-wrap:wrap}
 /* Long words (German "Hinzufügen") push the loop's buttons off a 320 px screen; they drop
