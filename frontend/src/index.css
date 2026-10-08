@@ -617,6 +617,13 @@ h4.sec{
   font-size:14px;font-weight:400;color:var(--label);text-transform:capitalize;
   letter-spacing:-.006em;transition:background var(--fast),color var(--fast);
 }
+/* //// Neoffice — a chip reads in sentence case, as .capitalize does: its first letter raised, never every
+   word. The packs write the catalogue's terms lowercase (they also sit mid-sentence: « Abdominaux · poids
+   du corps »), and word-by-word capitals made « Corps Entier », « Poids Du Corps », « Machine À Levier »
+   in the library's filters (seen in Chrome on 08.10). A chip is a block box, which ::first-letter needs;
+   a unit chip (.nocap) keeps its case. Right after the rule it corrects, which it beats on source order. */
+.chip{text-transform:none}
+.chip:not(.nocap)::first-letter{text-transform:uppercase}
 .chip:active{background:var(--surface-2)}
 .chip.on{background:var(--acc);color:var(--on-acc);font-weight:500}
 .chip.on .dim{color:color-mix(in srgb,var(--on-acc) 62%,transparent)}
@@ -1865,6 +1872,12 @@ body.no-tabbar.resting #toast{bottom:calc(100px + var(--sab))}
   /* two lines before the ellipsis: "Leg Day — in progress" grows past one line in hu/tr/th/pt-BR */
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;
 }
+/* //// Neoffice — first letter only, as .capitalize does: word-by-word capitals are English title
+   case, « Jour De Repos » in French (seen in Chrome on 08.10). Taken out of the rule above on 02.09
+   (fc5bcf53), the capitalize came back with upstream's rewrite of it, silently: a removed declaration
+   carries no marker. A rule of its own now, pinned by sentence-case.neoffice.test.js; the first
+   letter is raised by `.today-row .ttl::first-letter` near .capitalize. */
+.today-row .ttl{text-transform:none}
 
 /* Only where a pointer really hovers — on a phone :hover sticks to the row after the tap.
    Lighter than :active, which goes all the way to --surface-3, so the two stay distinct. */

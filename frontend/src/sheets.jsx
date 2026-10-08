@@ -1084,7 +1084,8 @@ function ExerciseDetail({ ex, close }) {
     </div>
     <Media ex={ex} />
     <div className="row" style={{ gap: 6, flexWrap: 'wrap', margin: '10px 0' }}>
-      {detailTags(ex).map(tg => <span key={tg.key} className={'tag' + (tg.acc ? ' acc' : '')}>{tg.icon && <Icon name={tg.icon} />}{tg.label}</span>)}
+      {/* //// Neoffice — the term in sentence case (span.capitalize): a tag is a flex box, which ::first-letter does not reach, and its own word-by-word capitalize made « Poids Du Corps ». */}
+      {detailTags(ex).map(tg => <span key={tg.key} className={'tag' + (tg.acc ? ' acc' : '')}>{tg.icon && <Icon name={tg.icon} />}<span className="capitalize">{tg.label}</span></span>)}
     </div>
     {ex.desc && <div className="exnote">{ex.desc}</div>}
     {best > 0 && <div className="small row" style={{ marginBottom: 6, gap: 5 }}><Icon name="trophy" style={{ fontSize: 14, color: 'var(--yellow)' }} />{t('Best:')} <b className="accent" style={{ whiteSpace: 'nowrap' }}>{fmtNum(best)} {st.unit}</b>{last ? ` · ${t('last')} ${fmtDate(last.d)}: ${last.sets.map(s => setLabel(ex.id, s, last.target, speedUnitOf(st))).join(', ')}` : ''}</div>}
@@ -1257,7 +1258,7 @@ function AddToRoutine({ ex, close }) {
       {st.routines.map(r => <div key={r.id} className="item" {...tappable(() => pick(r.id))}>
         <span className="lrow-i"><Icon name={glyphOf(r.emoji)} /></span>
         <div className="grow"><div className="tt">{r.name}</div><div className="ss">{exCount(r.ex.length)}</div></div>
-        {r.ex.some(e => e.id === ex.id) && <span className="tag">{t('already in')}</span>}<Icon name="plus" className="chev" />
+        {/* //// Neoffice — sentence case (span.capitalize): « Déjà Dedans » otherwise. */}{r.ex.some(e => e.id === ex.id) && <span className="tag"><span className="capitalize">{t('already in')}</span></span>}<Icon name="plus" className="chev" />
       </div>)}
       <div className="item" {...tappable(() => pick('_new'))}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="plusCircle" /></span>
         <div className="grow"><div className="tt">{t('New routine')}</div><div className="ss">{t('Create one and start with this exercise')}</div></div><Icon name="plus" className="chev" /></div>
@@ -1920,9 +1921,10 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
         turns into a translatable label. */}
     <div className="row" style={{ gap: 6, flexWrap: 'wrap', margin: '10px 0 14px' }}>
       {cardio && <span className="tag acc"><Icon name="figureRun" />{t('Cardio')}</span>}
-      <span className="tag">{t(MUSCLE_NAME[ex.tg] || ex.tg || ex.bp)}</span><span className="tag">{t(ex.eq)}</span>
+      {/* //// Neoffice — the term in sentence case (span.capitalize): a tag is a flex box, which ::first-letter does not reach, and its own word-by-word capitalize made « Poids Du Corps ». */}
+      <span className="tag"><span className="capitalize">{t(MUSCLE_NAME[ex.tg] || ex.tg || ex.bp)}</span></span><span className="tag"><span className="capitalize">{t(ex.eq)}</span></span>
       {!cardio && (ex.secondaries?.length ? ex.secondaries : smOf(ex)).filter(trainedBy(ex)).slice(0, 3)
-        .map((s, i) => <span key={i} className="tag dim">{t(MUSCLE_NAME[s] || s)}</span>)}
+        .map((s, i) => <span key={i} className="tag dim"><span className="capitalize">{t(MUSCLE_NAME[s] || s)}</span></span>)}
     </div>
     {ex.desc && <div className="exnote">{ex.desc}</div>}
     {!cardio && <div style={{ marginBottom: 14 }}>
@@ -3108,7 +3110,7 @@ function AddRoutineToSession({ close }) {
           {...tappable(disabled ? null : () => add(r))}>
           <span className="lrow-i"><Icon name={glyphOf(r.emoji)} /></span>
           <div className="grow"><div className="tt">{r.name}</div><div className="ss">{exCount(r.ex.length)}</div></div>
-          {already ? <span className="tag">{t('already added')}</span> : empty ? <span className="tag">{t('no exercises')}</span> : <Icon name="chevronRight" className="chev" />}
+          {/* //// Neoffice — sentence case (span.capitalize): « Aucun Exercice » otherwise. */}{already ? <span className="tag"><span className="capitalize">{t('already added')}</span></span> : empty ? <span className="tag"><span className="capitalize">{t('no exercises')}</span></span> : <Icon name="chevronRight" className="chev" />}
         </div>
       })}
     </div>

@@ -657,8 +657,9 @@ function ExerciseBlock({ entryIdx, compact, dense, editing, onToggle, onToggleSi
           chip — which halved the combined total for display — is gone: the split is no longer
           derived, it is what you enter. The tag only flags that this is per-side. */}
       {!cardio && isPerSide(cfg) && <span className="tag acc nocap"><Icon name="sides" />{t('Per side')}</span>}
-      {(ex.tg || ex.bp) && <span className="tag">{t(MUSCLE_NAME[ex.tg] || ex.tg || ex.bp)}</span>}
-      {ex.eq && <span className="tag">{t(ex.eq)}</span>}
+      {/* //// Neoffice — the term in sentence case (span.capitalize): a tag is a flex box, which ::first-letter does not reach, and its own word-by-word capitalize made « Poids Du Corps ». */}
+      {(ex.tg || ex.bp) && <span className="tag"><span className="capitalize">{t(MUSCLE_NAME[ex.tg] || ex.tg || ex.bp)}</span></span>}
+      {ex.eq && <span className="tag"><span className="capitalize">{t(ex.eq)}</span></span>}
       {best > 0 && <span className="tag nocap">{t('Best:')} {fmtNum(best)} {S.unit}</span>}
     </div>
     {/* Three notes can apply to one exercise and they are not interchangeable, so each keeps its
