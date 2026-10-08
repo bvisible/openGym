@@ -2400,4 +2400,9 @@ export default {
   'Off: the bar at the top is hidden. A dot on the Account tab still warns when syncing is stuck.': 'Выкл.: полоса сверху скрыта. Точка на вкладке «Аккаунт» всё равно предупредит, если синхронизация застряла.',
   'These count on top of the loop.': 'Они идут сверх круга.',
   'Your workout reminders, even when the journal is closed.': 'Твои напоминания о тренировках, даже если дневник закрыт.',
+  //// Neoffice — the Coach behind the club's plan lock, and two lines of its consent screen no pack had (08.10).
+  "Hi, I’m your Coach. Your club writes your plan, so I don’t change it.": "Привет, я ваш тренер. Ваш клуб составляет ваш план, поэтому я его не меняю.",
+  "Your club writes your plan, so the Coach does not change it.": "Ваш клуб составляет ваш план, поэтому ИИ-тренер его не меняет.",
+  "Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.": "Подходы, записанные за период разбора: веса, повторения, время, оценки усилия, продолжительность сессий и заметки о тренировках.",
+  "A few preferences": "Несколько настроек",
 }

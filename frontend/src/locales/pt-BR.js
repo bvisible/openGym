@@ -1339,6 +1339,11 @@ export const PT_BR_OVERRIDES = {
   'Workout controls': 'Controles durante o treino',
   'Off: the bar at the top is hidden. A dot on the Account tab still warns when syncing is stuck.': 'Desligado: a barra no topo fica oculta. Um ponto na aba Conta continua avisando quando a sincronização fica parada.',
   'Your workout reminders, even when the journal is closed.': 'Seus lembretes de treino, mesmo com o diário fechado.',
+  //// Neoffice — the Coach behind the club's plan lock, and two lines of its consent screen no pack had (08.10).
+  "Hi, I’m your Coach. Your club writes your plan, so I don’t change it.": "Oi, sou seu Treinador. Seu clube escreve seu plano, então não faço alterações nele.",
+  "Your club writes your plan, so the Coach does not change it.": "Seu clube escreve seu plano, então o treinador de IA não faz alterações nele.",
+  "Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.": "Séries registradas no período de revisão: pesos, repetições, tempos, avaliações de esforço, duração das sessões e suas notas da sessão.",
+  "A few preferences": "Algumas preferências",
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

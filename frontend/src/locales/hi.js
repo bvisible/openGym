@@ -2396,4 +2396,9 @@ export default {
   'Off: the bar at the top is hidden. A dot on the Account tab still warns when syncing is stuck.': 'बंद: ऊपर की पट्टी छिप जाती है। सिंक अटकने पर खाता टैब पर एक बिंदु फिर भी चेतावनी देता है।',
   'These count on top of the loop.': 'ये चक्र के अलावा गिने जाते हैं।',
   'Your workout reminders, even when the journal is closed.': 'आपके वर्कआउट अनुस्मारक, डायरी बंद होने पर भी।',
+  //// Neoffice — the Coach behind the club's plan lock, and two lines of its consent screen no pack had (08.10).
+  "Hi, I’m your Coach. Your club writes your plan, so I don’t change it.": "नमस्ते, मैं आपका कोच हूँ। आपकी योजना आपका क्लब बनाता है, इसलिए मैं उसे नहीं बदलता।",
+  "Your club writes your plan, so the Coach does not change it.": "आपकी योजना आपका क्लब बनाता है, इसलिए AI कोच उसे नहीं बदलता।",
+  "Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.": "समीक्षा अवधि में दर्ज किए गए सेट: वज़न, रेप्स, समय, मेहनत रेटिंग, आपके सत्र के नोट और सत्र कितनी देर चले।",
+  "A few preferences": "कुछ प्राथमिकताएँ",
 }

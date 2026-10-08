@@ -2328,4 +2328,9 @@ export default {
   'Off: the bar at the top is hidden. A dot on the Account tab still warns when syncing is stuck.': '關閉：隱藏頂端的提示列。同步卡住時，「帳號」分頁上的小圓點仍會提醒你。',
   'These count on top of the loop.': '這些在循環之外另計。',
   'Your workout reminders, even when the journal is closed.': '即使訓練日誌已關閉，依然發送你的訓練提醒。',
+  //// Neoffice — the Coach behind the club's plan lock, and two lines of its consent screen no pack had (08.10).
+  "Hi, I’m your Coach. Your club writes your plan, so I don’t change it.": "嗨，我是你的教練。你的計畫由你的俱樂部撰寫，所以我不會修改它。",
+  "Your club writes your plan, so the Coach does not change it.": "你的計畫由你的俱樂部撰寫，所以 AI 教練不會修改它。",
+  "Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.": "你在分析期間記錄的每一組：重量、次數、時間、自覺強度評分、每次訓練花費的時間，以及你的訓練總結筆記。",
+  "A few preferences": "幾項偏好設定",
 }

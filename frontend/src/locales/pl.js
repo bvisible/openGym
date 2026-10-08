@@ -2396,4 +2396,9 @@ export default {
   'Off: the bar at the top is hidden. A dot on the Account tab still warns when syncing is stuck.': 'Wyłączone: pasek u góry jest ukryty. Kropka na zakładce Konto nadal ostrzega, gdy synchronizacja utknie.',
   'These count on top of the loop.': 'Liczą się dodatkowo do pętli.',
   'Your workout reminders, even when the journal is closed.': 'Twoje przypomnienia o treningach, nawet gdy dziennik jest zamknięty.',
+  //// Neoffice — the Coach behind the club's plan lock, and two lines of its consent screen no pack had (08.10).
+  "Hi, I’m your Coach. Your club writes your plan, so I don’t change it.": "Cześć, jestem Twoim Trenerem. Twój klub pisze Twój plan, więc go nie zmieniam.",
+  "Your club writes your plan, so the Coach does not change it.": "Twój klub pisze Twój plan, więc trener AI go nie zmienia.",
+  "Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.": "Serie zapisane w okresie przeglądu: ciężary, powtórzenia, czasy, oceny wysiłku, czas trwania sesji i Twoje notatki do sesji.",
+  "A few preferences": "Kilka preferencji",
 }

@@ -2388,4 +2388,9 @@ export default {
   'Off: the bar at the top is hidden. A dot on the Account tab still warns when syncing is stuck.': 'عند الإيقاف: يُخفى الشريط في الأعلى. تبقى نقطة على تبويب الحساب تنبّهك عندما تتعثر المزامنة.',
   'These count on top of the loop.': 'تُحسب هذه إضافة إلى الدورة.',
   'Your workout reminders, even when the journal is closed.': 'تذكيرات تمارينك، حتى عندما يكون دفتر التدريب مغلقاً.',
+  //// Neoffice — the Coach behind the club's plan lock, and two lines of its consent screen no pack had (08.10).
+  "Hi, I’m your Coach. Your club writes your plan, so I don’t change it.": "مرحبًا، أنا مدربك. يكتب ناديك خطتك، لذلك لا أغيّرها.",
+  "Your club writes your plan, so the Coach does not change it.": "يكتب ناديك خطتك، لذلك لا يغيّرها مدرب الذكاء الاصطناعي.",
+  "Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.": "المجموعات التي سجلتها خلال فترة المراجعة: الأوزان والتكرارات والأوقات وتقييمات الجهد ومدة الجلسات وملاحظات الجلسة.",
+  "A few preferences": "بعض التفضيلات",
 }

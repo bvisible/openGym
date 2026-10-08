@@ -19,6 +19,8 @@ import { emptyCoach, coachAvailable, hasConsent, CONSENT_VERSION, CATEGORY_TEXT,
 import { requestPlan, disclosure, JOB_ERRORS } from '../lib/coach-api.js'
 import { DEMO } from '../lib/demo.js'
 import { MOBILE } from '../lib/mobile.js'
+//// Neoffice — BOOT.coach.can: what the Coach may do for this member (see `reconsentOnly`).
+import { BOOT } from '../lib/api.js'
 import Icon from '../components/Icon.jsx'
 import { Button, TextArea } from '../components/ui.jsx'
 import '../coach.css'
@@ -44,6 +46,11 @@ const EQUIPMENT = (() => {
   return Object.keys(count).sort((a, b) => count[b] - count[a]).slice(0, 14)
 })()
 
+//// Neoffice — what the Coach may do for this member, from the club's server: `changePlan` is
+//// false when the club writes this member's plan, `writePrograms` when the club does not let
+//// the Coach write plans. Absent reads as allowed, as on the chat (an older server).
+const coachCan = () => (BOOT.coach && BOOT.coach.can) || {}
+
 const QUICK_MIN = [30, 45, 60, 90]
 const toHHMM = min => String(Math.floor(min / 60)).padStart(2, '0') + ':' + String(min % 60).padStart(2, '0')
 const fromHHMM = v => { const [h, m] = String(v || '').split(':').map(Number); return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null }
@@ -62,7 +69,12 @@ export default function CoachIntake() {
   // An athlete who already answered the intake and only lacks the CURRENT consent (the wording
   // changed and CONSENT_VERSION moved) reads the new terms and goes back to the Coach. Without
   // this the redirect from the chat replayed all seven questions and ended in a new plan request.
-  const [reconsentOnly] = useState(() => !editing && !hasConsent(S) && !!S.coach?.profile)
+  //// Neoffice — and a member the Coach may not write a plan for (the club's switch, or the club
+  //// writing this member's plan: BOOT.coach.can) reads the terms and goes to the chat. The
+  //// questionnaire exists to build a plan: it followed the consent and ended on a refused request.
+  const may = coachCan()
+  const mayWrite = may.writePrograms !== false && may.changePlan !== false
+  const [reconsentOnly] = useState(() => !editing && !hasConsent(S) && (!!S.coach?.profile || !mayWrite))
   const STEPS = reconsentOnly ? ['consent'] : [...(needConsent ? ['consent'] : []), 'goal', 'experience', 'days', 'length', 'equipment', 'limits', 'extras']
   const [step, setStep] = useState(0)
   const [busy, setBusy] = useState(false)
@@ -242,6 +254,8 @@ function Choice({ on, icon, title, sub, onClick }) {
 /* The disclosure: what leaves, where to, who pays. Rendered from the same category list the
    payload is built from, so the promise on screen cannot drift from what actually goes. */
 function Consent({ onAgree, onDecline }) {
+  //// Neoffice — the club writes this member's plan: the Coach is not introduced as designing it.
+  const planLocked = coachCan().changePlan === false
   const config = useStore(s => s.config)
   const [info, setInfo] = useState(null)
   useEffect(() => { disclosure().then(setInfo).catch(() => {}) }, [])
@@ -258,7 +272,10 @@ function Consent({ onAgree, onDecline }) {
   return <>
     <div className="ob-eyebrow">{t('Before we start')}</div>
     <h1 className="ob-h">{t('Meet the Coach')}</h1>
-    <p className="ob-p">{t('It designs your plan from a few answers and adjusts it from what you actually log. It never changes anything without your say-so, and you can undo every change.')}</p>
+    {/* //// Neoffice — a member whose plan the club writes is not told the Coach designs it. */}
+    <p className="ob-p">{planLocked
+      ? t('Your club writes your plan, so the Coach does not change it.')
+      : t('It designs your plan from a few answers and adjusts it from what you actually log. It never changes anything without your say-so, and you can undo every change.')}</p>
     {/* //// Neoffice — the club's own word (Gym Settings → "The club's word to the member"),
         //// carried by the boot as `coach.intro`. A club sells coaching: it positions the AI
         //// as a help between two sessions with ITS coaches, in its own sentences. Its text,

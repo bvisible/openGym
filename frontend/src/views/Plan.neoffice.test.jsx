@@ -12,7 +12,7 @@ import { dayAssignSheet, menuSheet } from '../sheets.jsx'
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
 const mocks = vi.hoisted(() => {
-  const state = { S: null, nav: null }
+  const state = { S: null, nav: null, coach: false }
   state.snapshot = () => ({
     S: state.S,
     user: null,
@@ -31,7 +31,7 @@ vi.mock('../store/useStore.js', () => {
 })
 vi.mock('react-router-dom', () => ({ useNavigate: () => mocks.nav }))
 vi.mock('../lib/mobile.js', () => ({ MOBILE: false, isAndroid: () => Promise.resolve(false), shareExport: vi.fn(), syncReminder: vi.fn() }))
-vi.mock('../lib/coach.js', () => ({ coachAvailable: () => false }))
+vi.mock('../lib/coach.js', () => ({ coachAvailable: () => mocks.coach }))
 vi.mock('../sheets.jsx', () => ({
   starterPlanSheet: vi.fn(), dayAssignSheet: vi.fn(), menuSheet: vi.fn(), confirmSheet: vi.fn(),
   planHasRoutines: s => (s.routines || []).some(r => r.ex.length), exportPlanFile: vi.fn(), printWholePlan: vi.fn(), importPlanFile: vi.fn(),
@@ -42,6 +42,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   localStorage.removeItem('gym_plan_view')
   mocks.nav = vi.fn()
+  mocks.coach = false
   mocks.S = {
     unit: 'kg', workouts: [], exWeights: {}, week: { 1: ['r1'] }, dayPlan: {},
     routines: [
@@ -98,6 +99,21 @@ describe('Plan on Neoffice', () => {
     expect(labels).not.toContain('Import a plan file')
     expect(labels).not.toContain('Load starter plan')
     expect(labels).toContain('Export plan file')
+  })
+
+  it('behind the club’s lock, the Coach is not offered as designing the plan', () => {
+    //: Seen in Chrome on 08.10: the Plan menu promised « Conception de plans et bilans » to a
+    //: member whose plan the club writes. The Coach's server refuses those jobs for them now.
+    mocks.coach = true
+    const coachItem = () => {
+      act(() => host.querySelector('[aria-label="Plan options"]').click())
+      return menuSheet.mock.calls.at(-1)[0].items.filter(Boolean).find(i => i.label === 'Coach')
+    }
+    mount()
+    expect(coachItem().sub).toBe('Plan design and reviews, from your own training')
+    mocks.S.perms = { editPlan: false }
+    mount()
+    expect(coachItem().sub).toBe('Your club writes your plan, so the Coach does not change it.')
   })
 
   it('a member who may change their plan keeps every control', () => {

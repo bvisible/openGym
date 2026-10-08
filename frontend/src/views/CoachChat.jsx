@@ -64,7 +64,14 @@ export default function CoachChat() {
   //: something, never our not knowing.
   const may = (BOOT.coach && BOOT.coach.can) || {}
   const mayAdvise = may.advise !== false
-  const mayWrite = may.writePrograms !== false
+  //// Neoffice — the member's plan lock (`changePlan`, Gym Member Profile.member_can_edit_plan on
+  //// the club's server). When the club writes the plan, nothing that would change it is offered:
+  //// a review (a free message is asked as one), a routine to improve, a new plan, automatic
+  //// reviews, an undo. A workout debrief still is: it changes nothing. The server refuses those
+  //// jobs anyway; this says why instead of failing on send.
+  const mayChangePlan = may.changePlan !== false
+  const mayWrite = may.writePrograms !== false && mayChangePlan
+  const mayReview = mayAdvise && mayChangePlan
   //: The questionnaire exists to BUILD a plan. Where the club does not let the
   //: Coach write one, it is not a prerequisite — a member sent to fill it in
   //: would answer twelve questions and be refused at the end.
@@ -178,16 +185,18 @@ export default function CoachChat() {
   const menu = () => openSheet(close => <div className="chat-menu">
     <h3>{t('Coach')}</h3>
     <div className="sect-b">
-      {idle && mayAdvise && <Row icon="sparkles" iconTint="var(--acc)" title={t('Ask for a review')} subtitle={t('What would the Coach change after your last sessions?')} accessory="chevron" onClick={() => { close(); askReview() }} />}
+      {/* //// Neoffice — a review and a routine to improve change the plan: behind the member's plan lock too (mayReview). */}
+      {idle && mayReview && <Row icon="sparkles" iconTint="var(--acc)" title={t('Ask for a review')} subtitle={t('What would the Coach change after your last sessions?')} accessory="chevron" onClick={() => { close(); askReview() }} />}
       {idle && mayAdvise && !!lastWorkout && <Row icon="checkCircle" iconTint="var(--green)" title={t('Review my last workout')} subtitle={t('What went well, what to watch, what to do next time')} accessory="chevron" onClick={() => { close(); askDebrief() }} />}
-      {idle && mayAdvise && !!(S.routines || []).length && <Row icon="wrench" iconTint="var(--orange)" title={t('Improve a routine')} subtitle={t('Pick one; the Coach works on just that')} accessory="chevron" onClick={() => { close(); pickRoutine() }} />}
+      {idle && mayReview && !!(S.routines || []).length && <Row icon="wrench" iconTint="var(--orange)" title={t('Improve a routine')} subtitle={t('Pick one; the Coach works on just that')} accessory="chevron" onClick={() => { close(); pickRoutine() }} />}
       {community && <Row icon="person" iconTint="var(--teal)" title={t('Compare with others here')} subtitle={t('Anonymous medians from this instance')} accessory="chevron" onClick={() => { close(); showCohort() }} />}
       <Row icon="history" iconTint="var(--blue)" title={t('Everything the Coach proposed')} subtitle={t('Plans, suggestions and debriefs, kept')} accessory="chevron" onClick={() => { close(); showHistory() }} />
-      {/* //// Neoffice — behind what the club lets the AI coach do (mayWrite: build and change a plan; mayAdvise: reviews). */}
+      {/* //// Neoffice — behind what the club lets the AI coach do (mayWrite: build and change a plan; mayReview: reviews),
+          //// and the member's plan lock (both, and the undo, which puts routines back). */}
       {idle && mayWrite && <Row icon="clipboard" iconTint="var(--indigo)" title={t('Start a new plan')} subtitle={t('A fresh plan from your answers; your workouts stay')} accessory="chevron" onClick={() => { close(); askNewPlan() }} />}
       {mayWrite && <Row icon="pencil" iconTint="var(--indigo)" title={t('Edit my answers')} subtitle={t('Goal, days, equipment, limits')} accessory="chevron" onClick={() => closeThenNav(close, '/coach/intake?edit=1')} />}
-      {mayAdvise && <Row icon="clock" iconTint="var(--purple)" title={t('Automatic reviews')} subtitle={cadenceLabel(coach)} accessory="chevron" onClick={() => { close(); cadenceSheet(openSheet, update) }} />}
-      {canRevert(S) && <Row icon="reset" iconTint="var(--blue)" title={t('Undo the last Coach changes')} accessory="chevron" onClick={() => { close(); doRevert() }} />}
+      {mayReview && <Row icon="clock" iconTint="var(--purple)" title={t('Automatic reviews')} subtitle={cadenceLabel(coach)} accessory="chevron" onClick={() => { close(); cadenceSheet(openSheet, update) }} />}
+      {canRevert(S) && mayChangePlan && <Row icon="reset" iconTint="var(--blue)" title={t('Undo the last Coach changes')} accessory="chevron" onClick={() => { close(); doRevert() }} />}
     </div>
     <div style={{ height: 10 }} />
   </div>)
@@ -209,6 +218,8 @@ export default function CoachChat() {
     //: A free message is asked as a review, so it goes where the club's
     //: "advise" switch goes. Saying it in the box beats a refusal on send.
     : !mayAdvise ? t('Your club has not enabled this from the Coach.')
+    //// Neoffice — the club writes the member's plan: the box says so (a free message is asked as a review).
+    : !mayChangePlan ? t('Your club writes your plan, so the Coach does not change it.')
     : job ? t('Coach is thinking…') : t('Message the Coach…')
 
   return <div className="narrow chat">
@@ -223,7 +234,10 @@ export default function CoachChat() {
     </div>
 
     <div className="msgs">
-      <Bubble role="coach">{t('Hi, I’m your Coach. I build your plan from your answers and adjust it from what you actually log. Nothing changes until you say so.')}</Bubble>
+      {/* //// Neoffice — a member whose plan the club writes is not promised a plan the Coach builds. */}
+      <Bubble role="coach">{mayChangePlan
+        ? t('Hi, I’m your Coach. I build your plan from your answers and adjust it from what you actually log. Nothing changes until you say so.')
+        : t('Hi, I’m your Coach. Your club writes your plan, so I don’t change it.')}</Bubble>
 
       {(coach.chat || []).map(m => <Message key={m.id} m={m} S={S} profile={coach.profile} openSheet={openSheet} />)}
 
@@ -240,14 +254,16 @@ export default function CoachChat() {
 
     <div className="composer">
       {idle && !busy && <div className="chips-row">
-        {mayAdvise && <button className="qchip" onClick={askReview}><Icon name="sparkles" />{t('Review my training')}</button>}
+        {/* //// Neoffice — the plan lock too: a review and a routine to improve change the plan, a debrief does not. */}
+        {mayReview && <button className="qchip" onClick={askReview}><Icon name="sparkles" />{t('Review my training')}</button>}
         {mayAdvise && !!lastWorkout && <button className="qchip" onClick={askDebrief}><Icon name="checkCircle" />{t('Last workout')}</button>}
-        {mayAdvise && !!(S.routines || []).length && <button className="qchip" onClick={pickRoutine}><Icon name="wrench" />{t('Improve a routine')}</button>}
+        {mayReview && !!(S.routines || []).length && <button className="qchip" onClick={pickRoutine}><Icon name="wrench" />{t('Improve a routine')}</button>}
         {community && <button className="qchip" onClick={showCohort}><Icon name="person" />{t('Compare')}</button>}
       </div>}
       <div className="composer-in">
-        {/* //// Neoffice — upstream's message limit, and our club switch: no advice asked when the club closed it. */}
-        <textarea rows={1} value={text} maxLength={maxMessageLen || 1000} placeholder={placeholder} disabled={!!job || !mayAdvise}
+        {/* //// Neoffice — upstream's message limit, and our club switch: no advice asked when the club closed it,
+            //// nor when the club writes the member's plan (a free message is asked as a review). */}
+        <textarea rows={1} value={text} maxLength={maxMessageLen || 1000} placeholder={placeholder} disabled={!!job || !mayReview}
           onChange={e => setText(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send() } }} />
         <button className="send" onClick={send} disabled={!text.trim() || busy || !!job} aria-label={t('Send')}><Icon name="arrowUp" /></button>

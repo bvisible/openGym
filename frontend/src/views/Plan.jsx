@@ -166,7 +166,8 @@ export default function Plan() {
         //// Neoffice — importing or loading a plan changes it: behind the club's lock.
         mayEdit && { icon: 'download', label: t('Import a plan file'), onClick: () => fileRef.current?.click() },
         mayEdit && { icon: 'clipboard', label: t('Load starter plan'), onClick: starterPlanSheet },
-        showCoach && { icon: 'sparkles', label: t('Coach'), sub: t('Plan design and reviews, from your own training'), onClick: () => nav('/coach') },
+        //// Neoffice — behind the club's lock, the Coach neither designs nor reviews the plan: it says so.
+        showCoach && { icon: 'sparkles', label: t('Coach'), sub: mayEdit ? t('Plan design and reviews, from your own training') : t('Your club writes your plan, so the Coach does not change it.'), onClick: () => nav('/coach') },
       ],
     })
   }

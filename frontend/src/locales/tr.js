@@ -2396,4 +2396,9 @@ export default {
   'Off: the bar at the top is hidden. A dot on the Account tab still warns when syncing is stuck.': 'Kapalı: üstteki şerit gizlenir. Eşitleme takılırsa Hesap sekmesindeki bir nokta yine uyarır.',
   'These count on top of the loop.': 'Bunlar döngüye ek olarak sayılır.',
   'Your workout reminders, even when the journal is closed.': 'Günlük kapalıyken bile antrenman hatırlatıcıların.',
+  //// Neoffice — the Coach behind the club's plan lock, and two lines of its consent screen no pack had (08.10).
+  "Hi, I’m your Coach. Your club writes your plan, so I don’t change it.": "Merhaba, ben senin Koç’unum. Planını kulübün yazar, bu yüzden onu değiştirmem.",
+  "Your club writes your plan, so the Coach does not change it.": "Planını kulübün yazar, bu yüzden yapay zekâ koçu onu değiştirmez.",
+  "Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.": "İnceleme döneminde kaydettiğin setler: ağırlıklar, tekrarlar, süreler, efor puanları, antrenman notların ve seansların ne kadar sürdüğü.",
+  "A few preferences": "Birkaç tercih",
 }

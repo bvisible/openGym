@@ -2367,4 +2367,9 @@ export default {
   'Off: the bar at the top is hidden. A dot on the Account tab still warns when syncing is stuck.': 'ปิด: แถบด้านบนจะถูกซ่อน แต่จุดบนแท็บบัญชียังเตือนเมื่อการซิงค์ค้าง',
   'These count on top of the loop.': 'วันเหล่านี้นับเพิ่มจากการวนรอบ',
   'Your workout reminders, even when the journal is closed.': 'การเตือนออกกำลังกายของคุณ แม้ปิดสมุดบันทึกอยู่',
+  //// Neoffice — the Coach behind the club's plan lock, and two lines of its consent screen no pack had (08.10).
+  "Hi, I’m your Coach. Your club writes your plan, so I don’t change it.": "สวัสดี ฉันคือโค้ชของคุณ คลับของคุณเป็นผู้เขียนแผนของคุณ ฉันจึงไม่แก้ไขแผนนั้น",
+  "Your club writes your plan, so the Coach does not change it.": "คลับของคุณเป็นผู้เขียนแผนของคุณ โค้ช AI จึงไม่แก้ไขแผนนั้น",
+  "Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.": "เซ็ตที่คุณบันทึกในช่วงรีวิว ได้แก่ น้ำหนัก ครั้ง เวลา คะแนนความหนัก ระยะเวลาที่ใช้ในแต่ละเซสชัน และบันทึกประจำรอบของคุณ",
+  "A few preferences": "การตั้งค่าบางอย่าง",
 }

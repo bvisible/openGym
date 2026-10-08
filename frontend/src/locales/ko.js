@@ -2396,4 +2396,9 @@ export default {
   'Off: the bar at the top is hidden. A dot on the Account tab still warns when syncing is stuck.': '끄면 위쪽 막대가 숨겨집니다. 동기화가 멈추면 계정 탭의 점이 계속 알려 줍니다.',
   'These count on top of the loop.': '이 요일들은 순환과 별도로 더해져요.',
   'Your workout reminders, even when the journal is closed.': '일지가 닫혀 있어도 운동 리마인더를 받아요.',
+  //// Neoffice — the Coach behind the club's plan lock, and two lines of its consent screen no pack had (08.10).
+  "Hi, I’m your Coach. Your club writes your plan, so I don’t change it.": "안녕하세요, 당신의 코치예요. 계획은 클럽에서 작성하니까 저는 바꾸지 않아요.",
+  "Your club writes your plan, so the Coach does not change it.": "계획은 클럽에서 작성하니까 AI 코치는 바꾸지 않아요.",
+  "Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.": "검토 기간에 기록한 세트: 무게, 횟수, 시간, 강도 평가, 세션 소요 시간, 운동 메모.",
+  "A few preferences": "몇 가지 설정",
 }

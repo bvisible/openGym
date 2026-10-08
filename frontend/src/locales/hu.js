@@ -2359,4 +2359,9 @@ export default {
   'Off: the bar at the top is hidden. A dot on the Account tab still warns when syncing is stuck.': 'Kikapcsolva: a felső sáv rejtve marad. Ha a szinkronizálás elakad, egy pont a Fiók fülön továbbra is jelez.',
   'These count on top of the loop.': 'Ezek a kör mellett számítanak.',
   'Your workout reminders, even when the journal is closed.': 'Az edzés-emlékeztetőid, még ha a napló be is van zárva.',
+  //// Neoffice — the Coach behind the club's plan lock, and two lines of its consent screen no pack had (08.10).
+  "Hi, I’m your Coach. Your club writes your plan, so I don’t change it.": "Szia, én vagyok az Edződ. A tervedet a klubod írja, ezért nem módosítom.",
+  "Your club writes your plan, so the Coach does not change it.": "A tervedet a klubod írja, ezért az MI-edző nem módosítja.",
+  "Sets you logged in the review window: weights, reps, times, effort ratings, how long sessions took, and your session notes.": "Az áttekintési időszakban rögzített sorozatok: súlyok, ismétlések, idők, megerőltetés-értékelések, az edzések hossza és az edzésjegyzeteid.",
+  "A few preferences": "Néhány beállítás",
 }

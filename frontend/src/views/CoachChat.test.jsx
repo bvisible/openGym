@@ -276,6 +276,51 @@ describe('the Coach chat', () => {
     BOOT.coach = {}
   })
 
+  //// Neoffice — the member's plan lock (can.changePlan). Seen in Chrome on 08.10: a member whose
+  //// plan the club writes was offered a plan the Coach designs. The server refuses those jobs; the
+  //// screen offers none of them, says why, and keeps the workout debrief, which changes nothing.
+  it('offers nothing that would change a plan the club writes, and keeps the workout debrief', async () => {
+    const { BOOT } = await import('../lib/api.js')
+    //: A workout to debrief, a routine to improve, and a change the Coach made that could be undone.
+    const trained = () => {
+      const s = { ...state(), routines: [{ id: 'r1', name: 'Full body', ex: [] }], workouts: [{ id: 'w1', d: todayISO(), name: 'Full body', entries: [] }] }
+      s.coach = { ...s.coach, snapshots: [{ at: 1, proposalId: 'p0', label: '', routines: [], week: {} }] }
+      return s
+    }
+    const menu = async () => {
+      mocks.openSheet.mockClear()
+      await click(container.querySelector('button[aria-label="More"]'))
+      const sheet = document.createElement('div')
+      const sheetRoot = createRoot(sheet)
+      await act(async () => { sheetRoot.render(mocks.openSheet.mock.calls.at(-1)[0](() => {})) })
+      const titles = [...sheet.querySelectorAll('.lrow-t')].map(e => e.textContent)
+      await act(async () => { sheetRoot.unmount() })
+      return titles
+    }
+    //: First with the plan open: every one is there, so the locked case cannot pass for the wrong reason.
+    BOOT.coach = { can: { advise: true, writePrograms: true, changePlan: true } }
+    await mount(null, null, { S: trained() })
+    expect(byText(/Review my training/)).toBeTruthy()
+    expect(byText(/Improve a routine/)).toBeTruthy()
+    expect(byText(/Last workout/)).toBeTruthy()
+    expect(await menu()).toEqual(expect.arrayContaining(['Ask for a review', 'Improve a routine', 'Start a new plan', 'Automatic reviews', 'Review my last workout', 'Undo the last Coach changes']))
+
+    BOOT.coach = { can: { advise: true, writePrograms: false, changePlan: false } }
+    await mount(null, null, { S: trained() })
+    expect(byText(/Review my training/)).toBeFalsy()
+    expect(byText(/Improve a routine/)).toBeFalsy()
+    expect(byText(/Last workout/)).toBeTruthy()
+    const box = container.querySelector('textarea')
+    expect(box.disabled).toBe(true)
+    expect(box.placeholder).toBe('Your club writes your plan, so the Coach does not change it.')
+    expect(container.textContent).toContain('Your club writes your plan, so I don’t change it.')
+    expect(container.textContent).not.toContain('I build your plan')
+    const titles = await menu()
+    expect(titles).toContain('Review my last workout')
+    for (const gone of ['Ask for a review', 'Improve a routine', 'Start a new plan', 'Edit my answers', 'Automatic reviews', 'Undo the last Coach changes']) expect(titles).not.toContain(gone)
+    BOOT.coach = {}
+  })
+
   it('offers the comparison only when the instance allows it', async () => {
     await mount(null)
     expect(byText(/^Compare$/)).toBeFalsy()
