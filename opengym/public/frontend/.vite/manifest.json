@@ -215,7 +215,7 @@
     ]
   },
   "index.html": {
-    "file": "assets/index-B6Vap-Fj.js",
+    "file": "assets/index-BSo9_crq.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -246,7 +246,7 @@
       "_media-prefetch-eEMCbt7v.js"
     ],
     "css": [
-      "assets/index-BGJmPxQ_.css"
+      "assets/index-Cv8s8T_v.css"
     ]
   },
   "node_modules/@aparajita/capacitor-secure-storage/dist/esm/index.js": {
@@ -538,7 +538,7 @@
     "isDynamicEntry": true
   },
   "src/lib/coach-demo.js": {
-    "file": "assets/coach-demo-Cnh2Og7T.js",
+    "file": "assets/coach-demo-46m2Du_f.js",
     "name": "coach-demo",
     "src": "src/lib/coach-demo.js",
     "isDynamicEntry": true,
@@ -551,7 +551,7 @@
     ]
   },
   "src/lib/coach-local.js": {
-    "file": "assets/coach-local-BcexDS6C.js",
+    "file": "assets/coach-local-BEq1nYr_.js",
     "name": "coach-local",
     "src": "src/lib/coach-local.js",
     "isDynamicEntry": true,
