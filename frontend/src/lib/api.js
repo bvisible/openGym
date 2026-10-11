@@ -354,6 +354,7 @@ export const resumeRenewal = () => api(M.resumeRenewal, { method: 'POST', body: 
 //// keeps `lib/remote.js` and `store/useStore.js` mergeable at the next upstream
 //// merge — the same choice already made for push (`pushSupported()` is false).
 export function setRemoteAuth() { /* no remote server here */ }
+export function setAccessHeaders() { /* no Cloudflare Access token here: lib/cf-access.js sets it for a paired phone only */ }
 //// Neoffice — upstream v1.3.8's subpath helper (#238), kept verbatim because its
 //// test imports it. Our calls go to Frappe's /api/method at the site root, which
 //// the journal served under /gym reaches as it is — nothing here uses it.
@@ -370,6 +371,9 @@ export async function pairRedeem() {   //// Neoffice — no pairing: the journal
 //// Upstream fixed a false negative on Chrome for iOS here; no reason to lose it.
 export const BIO = IS_APPLE ? 'Face ID / Touch ID' : IS_ANDROID ? 'fingerprint or face unlock' : 'your fingerprint, face or PIN'
 export const VAULT = IS_APPLE ? 'iCloud Keychain' : IS_ANDROID ? 'Google Password Manager' : 'your password manager'
+//// Neoffice — upstream v1.4's same phrases in the UI language (they go into translated sentences); kept real, like the two above.
+export const bio = () => (IS_APPLE ? t('Face ID / Touch ID') : IS_ANDROID ? t('fingerprint or face unlock') : t('your fingerprint, face or PIN'))
+export const vault = () => (IS_APPLE ? t('iCloud Keychain') : IS_ANDROID ? t('Google Password Manager') : t('your password manager'))
 // PublicKeyCredential is the WebAuthn-specific capability signal. Do not also gate the UI on
 // navigator.credentials: some browsers expose WebAuthn while that generic Credential Management
 // API check produces a false negative (notably Chrome on iOS). The real create/get calls still run

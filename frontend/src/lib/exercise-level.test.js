@@ -107,6 +107,8 @@ describe('the real catalogue', () => {
     // pattern that quietly swallowed a third of the catalogue.
     const full = EXDB.filter(e => exerciseLevelOf(e) === 'full')
     expect(full.length).toBeGreaterThan(20)
-    expect(full.length).toBeLessThan(120)
+    //// v1.4.1 brought the catalogue from 1,324 to 5,632 exercises: the list is bounded by its share (under 120 of
+    //// 1,324 before, 158 of 5,632 after, 2.8%), not by a count that grows with the catalogue.
+    expect(full.length / EXDB.length).toBeLessThan(0.1)
   })
 })

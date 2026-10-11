@@ -5,6 +5,9 @@ import {
 } from './i18n-core.js'
 import { EXDB } from './exercises-data.js'
 import de from '../locales/de.js'
+//// Neoffice — French is shown as the club's names over the generated ones (lib/club-names.js); see the casing test.
+import clubFr from '../club-names/fr.js'
+import { layClubNames } from './club-names.js'
 
 describe('baseLang', () => {
   it('maps a derived locale to the language whose packs it loads', () => {
@@ -142,15 +145,22 @@ describe('title-casing per exercise-name pack', () => {
   const packFor = lang => packs[`../exercise-names/${lang}.js`]
   // Share of names that start with a lower-case letter. A lower-case pack still has a few that
   // start upper-case for a reason of their own (EZ-rudas, L-sit, SkiErg), German has none.
+  // Share of names that do not start with a capital. A script without case (Arabic, Devanagari,
+  // Thai, Han...) has nothing to title-case, so such a name counts as lower-case: the capitalize
+  // class stays on and does nothing to it.
   const lowerShare = names => {
-    const firsts = Object.values(names).map(n => [...n][0]).filter(c => c && c.toLocaleLowerCase() !== c.toLocaleUpperCase())
+    const firsts = Object.values(names).map(n => [...n][0]).filter(Boolean)
     return firsts.filter(c => c === c.toLocaleLowerCase()).length / firsts.length
   }
 
+  //// Neoffice — the pack as the app loads it: French is upstream's generated (lower-case) names with their first
+  //// letter raised and the club's names over them (lib/i18n.js setLang), which is why 'fr' is in CASED_NAME_LANGS.
+  const loadedPackFor = lang => (lang === 'fr' ? layClubNames(packFor('fr'), clubFr) : packFor(lang))
+
   it('lists exactly the packs written in their own casing', () => {
     for (const lang of EXERCISE_NAME_LANGS) {
-      expect(CASED_NAME_LANGS.includes(lang), `${lang}: ${Math.round(lowerShare(packFor(lang)) * 100)}% lower-case`)
-        .toBe(lowerShare(packFor(lang)) < 0.5)
+      expect(CASED_NAME_LANGS.includes(lang), `${lang}: ${Math.round(lowerShare(loadedPackFor(lang)) * 100)}% lower-case`)
+        .toBe(lowerShare(loadedPackFor(lang)) < 0.5)
     }
     for (const lang of CASED_NAME_LANGS) expect(EXERCISE_NAME_LANGS, lang).toContain(lang)
   })

@@ -148,12 +148,13 @@ export default function Plan() {
     try { localStorage.setItem(PLAN_VIEW_KEY, v) } catch { /* private mode: the view just isn't remembered */ }
   }
 
-  /* The Coach's way in from Plan. It used to be a banner over the week; it is the last entry of the
-     Plan menu now, gated by the same predicate every other Coach surface uses, so an instance
-     without the feature sees exactly the menu it would have without it. */
+  /* The Coach's way in from Plan: its own button in the header (a banner over the week was too
+     loud, the last entry of the share menu too hidden). Gated by the same predicate every other
+     Coach surface uses, so an instance without the feature sees exactly the header it would have
+     without it. */
   const showCoach = coachAvailable(config, user, { demo: DEMO, mobile: MOBILE, coachMode })
 
-  // Share, print, import, starter plans and the Coach: one menu behind the header button, so the
+  // Share, print, import and starter plans: one menu behind the header button, so the
   // two views below are only about the plan itself.
   const openMenu = () => {
     const has = planHasRoutines(S)
@@ -163,11 +164,10 @@ export default function Plan() {
       items: [
         { icon: 'share', label: t('Export plan file'), sub: t('A small file a friend can import into their own openGym. Routines only, none of your workouts or weigh-ins.'), disabled: !has, onClick: exportPlanFile },
         { icon: 'note', label: t('Print / Save as PDF'), disabled: !has, onClick: printWholePlan },
-        //// Neoffice — importing or loading a plan changes it: behind the club's lock.
+        //// Neoffice — importing or loading a plan changes it: behind the club's lock. The Coach has its own
+        //// button in the header since v1.4.1 (it said so here behind the lock; the Coach screen says it now).
         mayEdit && { icon: 'download', label: t('Import a plan file'), onClick: () => fileRef.current?.click() },
         mayEdit && { icon: 'clipboard', label: t('Load starter plan'), onClick: starterPlanSheet },
-        //// Neoffice — behind the club's lock, the Coach neither designs nor reviews the plan: it says so.
-        showCoach && { icon: 'sparkles', label: t('Coach'), sub: mayEdit ? t('Plan design and reviews, from your own training') : t('Your club writes your plan, so the Coach does not change it.'), onClick: () => nav('/coach') },
       ],
     })
   }
@@ -178,7 +178,10 @@ export default function Plan() {
   return <div className="narrow plan">
     <div className="hdr">
       <div><h1>{t('Plan')}</h1><div className="sub">{mode === 'rotation' ? t('Your routines in a loop') : t('Your weekly routine')}</div></div>
-      <button className="iconbtn" onClick={openMenu} aria-label={t('Plan options')} title={t('Plan options')}><Icon name="share" /></button>
+      <div className="hdr-actions">
+        {showCoach && <Button size="sm" variant="tinted" icon="sparkles" onClick={() => nav('/coach')}>{t('Coach')}</Button>}
+        <button className="iconbtn" onClick={openMenu} aria-label={t('Plan options')} title={t('Plan options')}><Icon name="share" /></button>
+      </div>
     </div>
     <input ref={fileRef} type="file" accept="application/json,.json" onChange={pickFile} hidden />
     {!mayEdit && <div className="card" style={{ padding: '11px 13px', marginBottom: 14, lineHeight: 1.45 }}>

@@ -42,12 +42,18 @@ describe('Brazilian Portuguese locale', () => {
     // If the hash fails, review the changed keys and wording before accepting a new one. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
     //// Neoffice — our own strings live in pt.js like every other locale and pt-BR inherits them,
-    //// so the hash differs from upstream's. Recomputed after the v1.3.10 merge (1,228 overrides,
-    //// 1,134 inherited): the three strings our screens still use that upstream dropped keep their
-    //// Brazilian override, and the four new ones that read the same in Brazil are inherited
-    //// (« {0} aula(s) restante(s) », « Conta e sincronização », « Contam além do ciclo. »), with:
+    //// so the hash differs from upstream's. Recomputed after the v1.4.1 merge (1,403 overrides,
+    //// 1,221 inherited): the 103 strings new since v1.3.10 that upstream left inherited stay
+    //// inherited (measurements, the 1RM formulas, back-off and triple progression, the new
+    //// equipment words and catalogue types), and none of ours is among them. With:
     //// node scripts/pt-br-inheritance-fingerprint.mjs
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('76aca6dce173bbcccfbecbd05d11d3ff05af6a3246f8852b1c805095b9e61e42')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('9a5b7a8e22f299071cfce23ee74db8fb57a6cb41c8b4d28fe868c6ce9292756b')
+  })
+
+  // pt-PT labelled Unpair 'Desfazer': Undo, in Portuguese (it is pt-BR's Undo), on the button that
+  // takes an exercise out of a superset. Neither pack may give Unpair a word either of them uses for Undo.
+  test('does not label Unpair with an Undo word in either Portuguese pack', () => {
+    for (const [name, pack] of [['pt', pt], ['pt-BR', ptBR]]) expect([pt.Undo, ptBR.Undo], name).not.toContain(pack.Unpair)
   })
 
   test('does not leak European Portuguese UI terms', () => {

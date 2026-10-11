@@ -1,125 +1,285 @@
-//// Neoffice — added file (no upstream equivalent).
-////
-//// What these tests protect, after the 2026-08-27 upstream merge: we used to
-//// carry our OWN translated-name mechanism (src/names/, applyExerciseNames
-//// mutating the shared catalogue, matchesExercise). Upstream then shipped the
-//// same feature done better — an accessor, no mutation — so we dropped ours and
-//// moved our French pack into theirs (src/exercise-names/fr.js).
-////
-//// Two things have to keep holding, and neither of them throws when it breaks:
-////   * `fr` stays registered in EXERCISE_NAME_LANGS. Drop it and every screen
-////     silently reverts to English names at a French-speaking club.
-////   * exerciseNameFor() returns the translated name ALONE. Upstream appends
-////     " (English name)"; on a phone that wraps onto two lines in every list,
-////     the timer and the printed plan. The search stays bilingual through
-////     exerciseNameSearchText(), which is where the English name earns its keep.
+import { afterEach, describe, expect, test } from 'vitest'
+import { readFileSync } from 'node:fs'
+import { EXDB } from './exercises-data.js'
+import V13_IDS from './catalogue-v13-ids.json' with { type: 'json' }
+import { checkName, stagedExercises } from '../../../scripts/de-name-rules.mjs'
+import {
+  EXERCISE_NAME_LANGS, _setLangState, derivePack, exerciseNameFor, exerciseNameSearchText
+} from './i18n-core.js'
 
-import { describe, it, expect, afterAll } from 'vitest'
-import { EXERCISE_NAME_LANGS, _setLangState, exerciseNameFor, exerciseNameSearchText } from './i18n-core.js'
-import { EXIDX, CATALOGUE, applyClubMedia, imgSrc, gifSrc, matchExercise } from './exercises.js'
-import frNames from '../exercise-names/fr.js'
+// Every translated-name pack, checked the same way. The packs are generated from
+// catalogue/i18n/<lang>.json and may be partial (anything missing shows the English title), so
+// coverage and the language rules below are pinned on the 1,324 entries of the v1.3 catalogue,
+// whose names were curated and reviewed. Names for the v1.4 additions only have to be well formed.
+const packs = import.meta.glob('../exercise-names/*.js', { eager: true, import: 'default' })
+const EXIDX = new Map(EXDB.map(exercise => [exercise.id, exercise]))
+const LEGACY_IDS = new Set(V13_IDS)
+const legacy = EXDB.filter(exercise => LEGACY_IDS.has(exercise.id))
+const catalogueNames = lang => {
+  const rows = JSON.parse(readFileSync(new URL(`../../../catalogue/i18n/${lang}.json`, import.meta.url), 'utf8'))
+  return Object.fromEntries(Object.entries(rows).filter(([, row]) => row.name).map(([id, row]) => [id, row.name]))
+}
 
-const ID = CATALOGUE[0].id
-const EN = CATALOGUE[0].n
+const MALE = /(?:^|[^\p{L}])male(?=$|[^\p{L}])/iu
+const FEMALE = /(?:^|[^\p{L}])female(?=$|[^\p{L}])/iu
 
-const speakFrench = () => _setLangState('fr', {}, null, frNames)
-const speakEnglish = () => _setLangState('en', {}, null, null)
+// What the v1.3 names were held to, per language.
+//   covers:   the v1.3 entries the pack translates in full
+//   keep:     [English, translated] — a qualifier or piece of equipment in the English title that
+//             has to survive translation, since it changes which exercise it is
+//   forbid:   words a name must not contain (English left untranslated, rejected calques)
+//   require:  a pattern every name has to match
+//   distinct: no two different v1.3 exercises share a name
+//   loanword: "burpee" is the local term too, so it shows without the English repeated
+const LANGS = {
+  // German ships as a stage: the equipment entries, without the body-weight ones and the ones
+  // awaiting native review. The naming rules live in scripts/de-name-rules.mjs, shared with
+  // the translator so a rule cannot drift between the two.
+  de: { covers: stagedExercises(legacy), check: checkName },
+  es: {
+    covers: legacy,
+    keep: [
+      [/assisted/iu, /asistid/iu],
+      [/weighted/iu, /(?:peso|lastre)/iu],
+      [MALE, /masculin/iu],
+      [FEMALE, /femenin/iu],
+      [/barbell/iu, /barra/iu],
+      [/dumbbell/iu, /mancuerna/iu],
+      [/kettlebell/iu, /kettlebell/iu],
+      [/smith/iu, /smith/iu],
+      [/stability ball/iu, /balón de estabilidad/iu],
+      [/medicine ball/iu, /balón medicinal/iu],
+      [/\bbands?\b/iu, /banda/iu],
+      [/\bcables?\b/iu, /polea/iu],
+    ],
+  },
+  fr: {
+    covers: legacy,
+    loanword: true,
+    forbid: /(?:^|[^\p{L}])(?:barbell|dumbbell|cable|stability ball|medicine ball|assisted|weighted)(?=$|[^\p{L}])/iu,
+    keep: [
+      [/assisted/iu, /assisté/iu],
+      [/weighted/iu, /lesté/iu],
+      [MALE, /masculin/iu],
+      [FEMALE, /féminin/iu],
+      [/barbell/iu, /barre/iu],
+      [/dumbbell/iu, /haltère/iu],
+      [/kettlebell/iu, /kettlebell/iu],
+      [/smith/iu, /multipower/iu],
+      [/stability ball/iu, /ballon de stabilité/iu],
+      [/exercise ball/iu, /ballon de stabilité/iu],
+      [/medicine ball/iu, /médecine-ball/iu],
+      [/cable/iu, /câble/iu],
+      [/band/iu, /élastique/iu],
+    ],
+  },
+  hu: { covers: legacy, distinct: true },
+  it: {
+    covers: legacy,
+    loanword: true,
+    forbid: /(?:^|[^\p{L}])(?:barbell|dumbbell|cable|stability ball|medicine ball|assisted|weighted)(?=$|[^\p{L}])/iu,
+    keep: [
+      [/assisted/iu, /assistit/iu],
+      [/weighted/iu, /con peso/iu],
+      [MALE, /maschil/iu],
+      [FEMALE, /femminil/iu],
+      [/barbell/iu, /bilancier/iu],
+      [/dumbbell/iu, /manubri/iu],
+      [/kettlebell/iu, /kettlebell/iu],
+      [/smith/iu, /multipower/iu],
+      [/stability ball/iu, /fitball/iu],
+      [/exercise ball/iu, /fitball/iu],
+      [/medicine ball/iu, /palla medica/iu],
+      [/band/iu, /fascia elastica/iu],
+    ],
+  },
+  pl: {
+    covers: legacy,
+    loanword: true,
+    distinct: true,
+    forbid: /(?:^|[^\p{L}])(?:barbell|dumbbell|cable|band|stability ball|exercise ball|medicine ball|assisted|weighted)(?=$|[^\p{L}])/iu,
+    keep: [
+      [/assisted/iu, /asyst|wspomag/iu],
+      [/weighted/iu, /obciąż/iu],
+      [MALE, /mężczyzn/iu],
+      [FEMALE, /kobiet/iu],
+      [/barbell/iu, /sztang/iu],
+      [/dumbbell/iu, /hantl/iu],
+      [/kettlebell/iu, /kettlebell/iu],
+      [/smith/iu, /smitha/iu],
+      [/stability ball/iu, /pił[kc]\p{L}* gimnastyczn/iu],
+      [/exercise ball/iu, /pił[kc]\p{L}* gimnastyczn/iu],
+      [/medicine ball/iu, /pił[kc]\p{L}* lekarsk/iu],
+      [/band/iu, /gum/iu],
+      [/ez[- ]bar/iu, /łaman/iu],
+      [/bosu/iu, /bosu/iu],
+      [/trap bar/iu, /trap bar/iu],
+    ],
+  },
+  'pt-BR': {
+    covers: legacy,
+    // European Portuguese where Brazil says it differently.
+    forbid: /(?:^|[^\p{L}])(?:abdómen|anca|gémeos|ecrã|ginásio|banda|piso|omoplata|pegada inversa|pegada invertida)(?=$|[^\p{L}])/iu,
+    keep: [
+      [/assisted/iu, /assistid/iu],
+      [/weighted/iu, /(?:peso|carga|lastro|ponderad)/iu],
+      [MALE, /masculin/iu],
+      [FEMALE, /feminin/iu],
+      [/barbell/iu, /barra/iu],
+      [/dumbbell/iu, /halter/iu],
+      [/kettlebell/iu, /kettlebell/iu],
+      [/smith/iu, /smith/iu],
+      [/stability ball/iu, /bola de estabilidade/iu],
+      [/medicine ball/iu, /bola medicinal/iu],
+    ],
+  },
+  ru: {
+    covers: legacy,
+    // Cyrillic somewhere in the title: a name left in English would otherwise pass every other
+    // check while showing "barbell bench press (barbell bench press)".
+    require: /\p{Script=Cyrillic}/u,
+    // Transliterated calques the glossary rejects in favour of the term gyms actually use.
+    forbid: /(?:^|[^\p{L}])(?:керл|завиток|череполом|хруст|сит-ап|пуш-ап|пул-ап|чин-ап|кеттлбелл|ассистированн\p{L}*|проповедник|мёртвая тяга)(?=$|[^\p{L}])/iu,
+    keep: [
+      // "ez bar"/"ez barbell" is the EZ bar, and an olympic barbell is named for the bar too,
+      // so a plain "barbell" is the only one that has to say штанга.
+      [/ez[\s-]bar/iu, /ez-гриф/iu],
+      [/(?<!ez[\s-])(?<!olympic )barbell/iu, /штанг/iu],
+      [/olympic barbell/iu, /(?:олимпийск|штанг)/iu],
+      [/dumbbell/iu, /гантел/iu],
+      [/kettlebell/iu, /гир/iu],
+      [/smith/iu, /смит/iu],
+      [/trap bar/iu, /трэп-гриф/iu],
+      [/stability ball/iu, /фитбол/iu],
+      [/medicine ball/iu, /медбол/iu],
+      [/assisted/iu, /(?:поддержк|самопомощ)/iu],
+      [/weighted/iu, /отягощен/iu],
+      [MALE, /муж/iu],
+      [FEMALE, /жен/iu],
+    ],
+  },
+}
 
-afterAll(speakEnglish)
-
-describe('the French exercise-name pack', () => {
-  it('is registered in upstream’s mechanism', () => {
-    expect(EXERCISE_NAME_LANGS).toContain('fr')
-  })
-
-  it('covers the whole catalogue, not a sample of it', () => {
-    const missing = CATALOGUE.filter(e => !frNames[e.id])
-    expect(missing.length, `${missing.length} exercises without a French name`).toBe(0)
-  })
-
-  it('translates a catalogue exercise once French is active', () => {
-    speakFrench()
-    expect(exerciseNameFor(EXIDX[ID])).toBe(frNames[ID])
-    expect(frNames[ID]).not.toBe(EN)
-  })
-
-  it('gives back the English name when the language has no pack', () => {
-    speakEnglish()
-    expect(exerciseNameFor(EXIDX[ID])).toBe(EN)
-  })
-
-  it('leaves a member’s own exercise exactly as they named it', () => {
-    speakFrench()
-    expect(exerciseNameFor({ id: 'custom-1', n: 'Ma machine' })).toBe('Ma machine')
-  })
+test('every curated language still ships a name pack, and every pack is enabled', () => {
+  for (const lang of Object.keys(LANGS)) expect(EXERCISE_NAME_LANGS, lang).toContain(lang)
+  for (const path of Object.keys(packs)) {
+    const lang = path.match(/([^/]+)\.js$/)[1]
+    expect(EXERCISE_NAME_LANGS, path).toContain(lang)
+  }
 })
 
-describe('exerciseNameFor', () => {
-  it('returns the translated name ALONE, without the English one in brackets', () => {
-    //// Neoffice — this is our one divergence in the mechanism, and the reason
-    //// is length: upstream renders "Développé couché à la barre (Barbell Bench
-    //// Press)" everywhere the name appears.
-    speakFrench()
-    const shown = exerciseNameFor(EXIDX[ID])
-    expect(shown).toBe(frNames[ID])
-    expect(shown).not.toContain('(')
-  })
-})
+for (const lang of EXERCISE_NAME_LANGS) {
+  describe(`${lang} exercise names`, () => {
+    const pack = packs[`../exercise-names/${lang}.js`]
+    const rules = LANGS[lang] || {}
+    // The rules hold the curated names: the v1.3 ones, for German only the reviewed stage.
+    const v13 = (rules.covers || legacy).filter(exercise => pack[exercise.id])
+    afterEach(() => _setLangState('en', {}, null, null))
 
-describe('the search stays bilingual', () => {
-  it('carries both the French and the English name', () => {
-    speakFrench()
-    const text = exerciseNameSearchText(EXIDX[ID])
-    expect(text).toContain(frNames[ID])
-    expect(text).toContain(EN)
-  })
+    test('is built from catalogue/i18n, for known exercises only, with non-empty names', () => {
+      expect(pack).toEqual(catalogueNames(lang))
+      for (const [id, name] of Object.entries(pack)) {
+        expect(EXIDX.has(id), `unknown exercise ${id}`).toBe(true)
+        expect(typeof name === 'string' && name.trim(), id).toBeTruthy()
+        expect(name, id).toBe(name.trim())
+      }
+    })
 
-  it('finds an exercise by its English name inside a French app', () => {
-    speakFrench()
-    const ex = CATALOGUE.find(e => /bench press/i.test(e.n))
-    expect(ex, 'no "bench press" in the catalogue').toBeTruthy()
-    expect(matchExercise(ex, 'bench press')).toBe(true)
-  })
+    if (rules.covers) {
+      test('covers the v1.3 catalogue', () => {
+        expect(rules.covers.length).toBeGreaterThan(0)
+        for (const exercise of rules.covers) expect(pack[exercise.id]?.trim(), exercise.id).toBeTruthy()
+      })
+    }
 
-  it('finds it by the French name too, accents or not', () => {
-    speakFrench()
-    const ex = CATALOGUE.find(e => /^Développé couché/i.test(frNames[e.id] || ''))
-    expect(ex, 'no "Développé couché" in the French pack').toBeTruthy()
-    expect(matchExercise(ex, 'developpe couche')).toBe(true)
-  })
+    if (rules.forbid || rules.require) {
+      test('leaves nothing untranslated in the v1.3 names', () => {
+        for (const exercise of v13) {
+          if (rules.forbid) expect(pack[exercise.id], exercise.id).not.toMatch(rules.forbid)
+          if (rules.require) expect(pack[exercise.id], exercise.id).toMatch(rules.require)
+        }
+      })
+    }
 
-  it('does not match just anything', () => {
-    speakFrench()
-    expect(matchExercise(EXIDX[ID], 'zzzznonexistent')).toBe(false)
-  })
-})
+    if (rules.keep) {
+      test('preserves identity-changing qualifiers and equipment in the v1.3 names', () => {
+        for (const exercise of v13) {
+          for (const [english, translated] of rules.keep) {
+            if (english.test(exercise.n)) expect(pack[exercise.id], `${exercise.id}: ${exercise.n}`).toMatch(translated)
+          }
+        }
+      })
+    }
 
-//// Neoffice — the club's own media. Same risk as the names: we mutate shared
-//// objects, and a malformed URL would render a broken image with no error.
-describe('applyClubMedia', () => {
-  it('replaces the image and the animation of a library exercise', () => {
-    applyClubMedia({ [ID]: { img: '/files/machine.jpg', gif: '/files/machine.gif' } })
-    expect(EXIDX[ID].img).toBe('/files/machine.jpg')
-    expect(imgSrc(EXIDX[ID])).toBe('/files/machine.jpg')
-    expect(gifSrc(EXIDX[ID])).toBe('/files/machine.gif')
-  })
+    if (rules.check) {
+      test('every v1.3 name obeys the naming rules', () => {
+        const broken = []
+        for (const exercise of v13) {
+          const violations = rules.check(exercise, pack[exercise.id])
+          if (violations.length) broken.push(`${exercise.id} "${pack[exercise.id]}": ${violations.map(v => v.rule).join(', ')}`)
+        }
+        expect(broken).toEqual([])
+      })
+    }
 
-  it('leaves everything else on the sheet alone', () => {
-    const before = EXIDX[ID].n
-    applyClubMedia({ [ID]: { img: '/files/x.jpg' } })
-    expect(EXIDX[ID].n).toBe(before)
-  })
+    if (rules.distinct) {
+      test('gives different v1.3 exercises different names', () => {
+        const seen = new Map()
+        for (const exercise of v13) {
+          const name = pack[exercise.id]
+          const other = seen.get(name)
+          if (other) expect(other.n, `${name}: ${other.id} vs ${exercise.id}`).toBe(exercise.n)
+          else seen.set(name, exercise)
+        }
+      })
+    }
 
-  it('ignores an id the library does not know', () => {
-    expect(() => applyClubMedia({ 'zzz-unknown': { img: '/files/x.jpg' } })).not.toThrow()
-  })
+    test('shows the translation first with the English title in parentheses, and can hide or replace it', () => {
+      // One whose name differs from the English, or the loanword rule below takes over.
+      const exercise = EXDB.find(e => pack[e.id] && pack[e.id].toLocaleLowerCase(lang) !== e.n.toLocaleLowerCase('en'))
+      const name = pack[exercise.id]
+      //// Neoffice — the parentheses are asked for here: a club's French opens with the name alone (i18n-core.js
+      //// _setLangState), the English beside it is a choice. Our own test of that default: club-exercise-names.test.js.
+      _setLangState(lang, {}, null, pack, true)
+      expect(exerciseNameFor(exercise)).toBe(`${name} (${exercise.n})`)
+      expect(exerciseNameSearchText(exercise)).toContain(name)
+      expect(exerciseNameSearchText(exercise)).toContain(exercise.n)
+      _setLangState(lang, {}, null, pack, false)
+      expect(exerciseNameFor(exercise)).toBe(name)
+      _setLangState(lang, {}, null, pack, true, true)
+      expect(exerciseNameFor(exercise)).toBe(exercise.n)
+    })
 
-  it('a bare file name stays a library one', () => {
-    const lib = CATALOGUE.find(e => e.img && !e.img.startsWith('/'))
-    expect(imgSrc(lib)).toContain('/assets/opengym/media/img/')
-  })
+    test('falls back to the English title, never translates custom exercises or changes other languages', () => {
+      const exercise = EXDB.find(e => pack[e.id])
+      const { [exercise.id]: _, ...without } = pack
+      _setLangState(lang, {}, null, without)
+      expect(exerciseNameFor(exercise)).toBe(exercise.n)
+      const custom = { id: 'custom-1', n: 'My own exercise' }
+      _setLangState(lang, {}, null, pack)
+      expect(exerciseNameFor(custom)).toBe('My own exercise')
+      _setLangState('en', {}, null, null)
+      expect(exerciseNameFor(exercise)).toBe(exercise.n)
+    })
 
-  it('null breaks nothing — an instance with no club media', () => {
-    expect(() => applyClubMedia(null)).not.toThrow()
+    if (rules.loanword) {
+      test('keeps loanword names without duplicating the English title', () => {
+        _setLangState(lang, {}, null, pack)
+        expect(exerciseNameFor(EXIDX.get('1160'))).toBe('burpee')
+      })
+    }
   })
+}
+
+// de-CH derives from the German pack by replacing ß with ss, so the base pack must be the ß one
+// or the Swiss locale derives nothing. A name written with ss there would pass every other test.
+test('de-CH derives the Swiss spelling from the German pack', () => {
+  const de = packs['../exercise-names/de.js']
+  const withSharpS = Object.entries(de).filter(([, name]) => name.includes('ß'))
+  expect(withSharpS.length).toBeGreaterThan(0)
+  const swiss = derivePack('de-CH', de)
+  for (const [id, name] of withSharpS) {
+    expect(swiss[id], id).toBe(name.replaceAll('ß', 'ss'))
+    expect(swiss[id], id).not.toContain('ß')
+  }
 })

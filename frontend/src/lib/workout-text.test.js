@@ -3,6 +3,9 @@ import { workoutText } from './workout-text.js'
 import { fmtDate } from './format.js'
 import { EXIDX } from './exercises.js'
 import { EXERCISE_NAME_LANGS, _setLangState, exerciseNameFor } from './i18n-core.js'
+//// Neoffice — French is shown as the club's names over the generated ones (lib/club-names.js).
+import clubFr from '../club-names/fr.js'
+import { layClubNames } from './club-names.js'
 
 // Discord 'Improvement ideas': a past workout copied as plain text to paste anywhere.
 describe('workoutText', () => {
@@ -106,10 +109,15 @@ describe('workoutText exercise names per language', () => {
     const expected = {
       de: 'Bankdrücken mit Langhantel', es: 'Press De Banca Con Barra', fr: 'Développé couché à la barre',
       it: 'Panca Piana Con Bilanciere', 'pt-BR': 'Supino Com Barra', ru: 'Жим Штанги Лёжа', hu: 'Fekvenyomás Rúddal',
+      pl: 'Wyciskanie Sztangi Na Ławce Płaskiej',
     }
     for (const lang of EXERCISE_NAME_LANGS) {
-      _setLangState(lang, {}, null, packs[`../exercise-names/${lang}.js`], false)
-      expect(nameLine(), lang).toBe(expected[lang])
+      //// Neoffice — French as the app loads it: the club's names over the generated ones (lib/club-names.js).
+      const pack = lang === 'fr' ? layClubNames(packs['../exercise-names/fr.js'], clubFr) : packs[`../exercise-names/${lang}.js`]
+      _setLangState(lang, {}, null, pack, false)
+      // Packs in a script without case (ar, hi, th, zh...) come out exactly as written.
+      const name = pack[w.entries[0].id]
+      expect(nameLine(), lang).toBe(expected[lang] ?? (name === name.toLocaleUpperCase() ? name : nameLine()))
     }
     _setLangState('en', {}, null, null)
     expect(nameLine()).toBe('Barbell Bench Press')

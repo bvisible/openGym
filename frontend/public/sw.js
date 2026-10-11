@@ -7,10 +7,10 @@
 //// Frappe serves (opengym/www/gym_sw.js) is a static file no build rewrites, and
 //// src/sw.session.test.js pins both copies to one name. A fixed name keeps the files of every
 //// build it held, so it moves at each upstream merge: activate then drops the previous build's.
-//// v5 with the upstream v1.3.10 merge (2026-10-08); v4 with v1.3.9 (2026-10-06: the media moved to a
+//// v6 with the upstream v1.4.1 merge (2026-10-11: clips played from the cache, the media folders renamed); v5 with v1.3.10 (2026-10-08); v4 with v1.3.9 (2026-10-06: the media moved to a
 //// cache of their own, MEDIA); v3: the shell precached at install, v1.3.7; v2: the signed-out-shell
 //// fix below; v1: upstream's.
-const CACHE = 'opengym-rt-v5'
+const CACHE = 'opengym-rt-v6'
 //// Neoffice — where the app shell lives. Upstream serves index.html next to this worker; on
 //// Neoffice the shell is rendered by Frappe at /gym (see the header of opengym/www/gym_sw.js) and
 //// carries the member's boot payload.
@@ -37,7 +37,7 @@ const CSRF_URL = '/opengym-csrf-token'
    Content-Length) the least recently used entries go first. The Cache API keeps entries in the
    order they were written, so a hit is written back once per worker lifetime to move it to the
    end: least recently used as far as this worker has seen, which is what "LRU-ish" means here.
-   The whole catalogue is about 140 MB, so the cap only bites for someone who has browsed most of
+   The whole catalogue is about 100 MB of stills and clips, so the cap only bites for someone who has browsed most of
    it. lib/media-prefetch.js fills this cache ahead for the exercises in the plan — in the app
    installed on the home screen only; a browser tab gets what it has shown and nothing more — and
    names it too, so a new name has to change there as well (sw-media.test.js pins the two
@@ -50,7 +50,9 @@ const MEDIA_GUESS_BYTES = 64 * 1024
 // Trimming lists the whole cache, so it runs after every MEDIA_TRIM_EVERY new entries rather
 // than after each one, and once when a new worker activates.
 const MEDIA_TRIM_EVERY = 20
-const isMediaPath = p => p.includes('/img/') || p.includes('/gif/')
+//// Neoffice — and where Frappe serves the media (opengym/public/media/{still,clip}, lib/exercises.js): upstream's
+//// /exercise-media/ is its own nginx's path. The old img/ and gif/ stay, for what an earlier build cached.
+const isMediaPath = p => p.includes('/exercise-media/') || p.includes('/media/still/') || p.includes('/media/clip/') || p.includes('/img/') || p.includes('/gif/')
 
 // The code the app loads only when it needs it (the photo and video ingest, the QR reader...),
 // listed by the build (vite.config.js, scripts/sw-stamp.mjs). Without it the first photo added
@@ -169,9 +171,34 @@ async function trimMedia() {
   }
 }
 
+// A <video> asks for its clip in byte ranges. The network's 206 cannot be cached (cache.put
+// refuses a partial answer), so a clip was never kept; and a whole 200 handed to a range request
+// is a clip iOS Safari will not play. So the cache holds the whole file, fetched without a Range,
+// and a range request is answered with a 206 cut from it. One range, the only kind a player asks
+// for; anything else gets the whole file.
+const rangeOf = req => (req.headers && typeof req.headers.get === 'function' && req.headers.get('range')) || ''
+async function slice(res, range) {
+  const m = /^bytes=(\d*)-(\d*)$/.exec(range.trim())
+  const type = res.headers.get('content-type') || 'application/octet-stream'
+  const body = await res.arrayBuffer()
+  const size = body.byteLength
+  let start = m && m[1] !== '' ? Number(m[1]) : NaN
+  let end = m && m[2] !== '' ? Number(m[2]) : size - 1
+  if (m && m[1] === '' && m[2] !== '') { start = Math.max(0, size - Number(m[2])); end = size - 1 }
+  if (!m || !Number.isFinite(start)) return new Response(body, { status: 200, headers: { 'content-type': type, 'content-length': String(size), 'accept-ranges': 'bytes' } })
+  if (start >= size || end < start) return new Response(null, { status: 416, headers: { 'content-range': 'bytes */' + size } })
+  end = Math.min(end, size - 1)
+  return new Response(body.slice(start, end + 1), {
+    status: 206,
+    statusText: 'Partial Content',
+    headers: { 'content-type': type, 'content-length': String(end - start + 1), 'content-range': `bytes ${start}-${end}/${size}`, 'accept-ranges': 'bytes' }
+  })
+}
+
 // URLs written back this worker lifetime; see MEDIA above.
 const touched = new Set()
 function media(e) {
+  const range = rangeOf(e.request)
   return caches.open(MEDIA).then(c => c.match(e.request).then(hit => {
     if (hit) {
       if (!touched.has(e.request.url)) {
@@ -179,13 +206,16 @@ function media(e) {
         const copy = hit.clone()
         e.waitUntil(c.put(e.request, copy).catch(() => {}))
       }
-      return hit
+      return range ? slice(hit, range) : hit
     }
-    return fetch(e.request).then(res => {
-      if (realMedia(res)) {
+    // The whole file for a range request: the one answer that can be kept.
+    return fetch(range ? e.request.url : e.request).then(res => {
+      const whole = range ? res.status === 200 : true
+      if (whole && realMedia(res)) {
         touched.add(e.request.url)
         const copy = res.clone()
-        e.waitUntil(c.put(e.request, copy).then(() => { if (++mediaPuts >= MEDIA_TRIM_EVERY) { mediaPuts = 0; return trimMedia() } }).catch(() => {}))
+        e.waitUntil(c.put(e.request.url, copy).then(() => { if (++mediaPuts >= MEDIA_TRIM_EVERY) { mediaPuts = 0; return trimMedia() } }).catch(() => {}))
+        if (range) return slice(res, range)
       }
       return res
     })

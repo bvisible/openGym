@@ -59,6 +59,7 @@ import CoachThread from './views/CoachThread.jsx'
 //// Neoffice — no Admin.jsx: the club manages members in the Frappe desk (see the /admin note below).
 //// No ProgressPhotos (upstream v1.3.10): progress photos are not part of the club's journal (Jérémy, 07.10).
 import CoachChat from './views/CoachChat.jsx'
+import Measurements from './views/Measurements.jsx'
 import CoachIntake from './views/CoachIntake.jsx'
 import CoachSetup from './views/CoachSetup.jsx'
 
@@ -173,9 +174,14 @@ function Shell() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
   useLayoutEffect(() => {
+    const first = pathRef.current === null
     const samePath = pathRef.current === loc.pathname
     pathRef.current = loc.pathname
-    if (navType !== 'POP') { window.scrollTo(0, 0); return }
+    // A fresh load arrives as a POP with nothing remembered. It goes to the top like any new
+    // route — now, not a frame later: that frame landed on top of a scroll a view made on mount
+    // (the superset card centring its row, views/Workout.jsx), and a smooth scroll cut off by a
+    // scrollTo is simply gone.
+    if (navType !== 'POP' || first) { window.scrollTo(0, 0); return }
     // A POP that stays on the route we are on is not a back-navigation: it is the history
     // entry a sheet pushed (Modals.jsx, #63) being unwound as the sheet closes. Nothing new
     // mounted, Modals puts the page back where it was itself, and a view that scrolled on
@@ -258,6 +264,8 @@ function Shell() {
           <Route path="/assessments" element={<Assessments />} />
               <Route path="/muscles" element={<Muscles />} />
               <Route path="/structural-balance" element={<StructuralBalance />} />
+              {/* //// Neoffice — no /progress-photos route (upstream v1.3.10): see the import above. */}
+              <Route path="/measurements" element={<Measurements />} />
               <Route path="/settings" element={<SettingsRoute />} />
               <Route path="/settings/:page" element={<SettingsRoute />} />
               {/* //// Neoffice — "My membership". The screen gates itself on the

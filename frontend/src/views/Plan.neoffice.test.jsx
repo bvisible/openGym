@@ -101,19 +101,25 @@ describe('Plan on Neoffice', () => {
     expect(labels).toContain('Export plan file')
   })
 
-  it('behind the club’s lock, the Coach is not offered as designing the plan', () => {
-    //: Seen in Chrome on 08.10: the Plan menu promised « Conception de plans et bilans » to a
-    //: member whose plan the club writes. The Coach's server refuses those jobs for them now.
+  it('behind the club’s lock, the Plan menu promises no plan design: the Coach is the header button, and its screen says the rest', () => {
+    //: Seen in Chrome on 08.10: the Plan menu promised « Conception de plans et bilans » to a member whose
+    //: plan the club writes. Since v1.4.1 the Coach is a button of its own in the header, with no promise
+    //: written on it; what the Coach will not do for such a member is said by its own screen
+    //: (CoachIntake.plan-lock.neoffice.test.jsx), and the Coach's server refuses those jobs for them.
     mocks.coach = true
-    const coachItem = () => {
+    const menuLabels = () => {
       act(() => host.querySelector('[aria-label="Plan options"]').click())
-      return menuSheet.mock.calls.at(-1)[0].items.filter(Boolean).find(i => i.label === 'Coach')
+      return menuSheet.mock.calls.at(-1)[0].items.filter(Boolean).map(i => i.label)
     }
+    const coachButton = () => [...host.querySelectorAll('.hdr-actions button')].find(b => b.textContent.trim() === 'Coach')
     mount()
-    expect(coachItem().sub).toBe('Plan design and reviews, from your own training')
+    expect(menuLabels()).not.toContain('Coach')
+    expect(coachButton()).toBeTruthy()
     mocks.S.perms = { editPlan: false }
     mount()
-    expect(coachItem().sub).toBe('Your club writes your plan, so the Coach does not change it.')
+    expect(menuLabels()).not.toContain('Coach')
+    act(() => coachButton().click())
+    expect(mocks.nav).toHaveBeenCalledWith('/coach')
   })
 
   it('a member who may change their plan keeps every control', () => {

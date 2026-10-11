@@ -11,7 +11,9 @@ import { POLICY_NAME, POLICY_DESC } from './progression.js'
 import { DAYN, DAYS } from './format.js'
 
 const TABLES = {
-  CATEGORY_TEXT: Object.values(CATEGORY_TEXT).flat(),
+  //// v1.4 made each entry a function (t() runs at render, in the language then active): called here, in English,
+  //// it hands back the English strings the packs are keyed by.
+  CATEGORY_TEXT: Object.values(CATEGORY_TEXT).flatMap(v => (typeof v === 'function' ? v() : v)).flat(),
   MUSCLE_NAME: Object.values(MUSCLE_NAME),
   POLICY_NAME: Object.values(POLICY_NAME),
   POLICY_DESC: Object.values(POLICY_DESC),
