@@ -1615,8 +1615,8 @@ export default {
   'Enter a positive step to use this progression rule.': 'Saisissez un pas positif pour utiliser cette règle de progression.',
   'Level of detail': 'Niveau de détail',
   'Simple': 'Simple',
-  //// Neoffice — the verb of the Focus view's button (« Terminer la série »): the level that used to be called « Complet » is « Avancé » now.
-  'Complete': 'Terminer',
+  //// Neoffice — the verb of the Focus view's set button, « Valider » (« Terminer » is the workout's own button, right above it); the level that used to be called « Complet » is « Avancé » now.
+  'Complete': 'Valider',
   'Where to find it': 'Où le trouver',
   'out of order': 'hors service',
   'Badges': 'Badges',

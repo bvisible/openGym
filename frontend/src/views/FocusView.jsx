@@ -269,8 +269,9 @@ export default function FocusView({
 
       <div className="focus-context">
         <div className="focus-tags">
-          {mode === 'cardio' && <span className="tag acc">{t('Cardio')}</span>}
-          {isSideSet(set) && <span className="tag acc">{t('Per side')}</span>}
+          {/* //// Neoffice — nocap on the two tags that carry a phrase: « Par côté », not « Par Côté ». */}
+          {mode === 'cardio' && <span className="tag acc nocap">{t('Cardio')}</span>}
+          {isSideSet(set) && <span className="tag acc nocap">{t('Per side')}</span>}
           {/* //// Neoffice — the term in sentence case (span.capitalize): a tag capitalises word by word, « Poids Du Corps ». */}
           {(ex.tg || ex.bp) && <span className="tag"><span className="capitalize">{t(ex.tg || ex.bp)}</span></span>}
           {ex.eq && <span className="tag"><span className="capitalize">{t(ex.eq)}</span></span>}

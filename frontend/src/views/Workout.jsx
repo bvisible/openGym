@@ -1966,8 +1966,9 @@ function ActiveWorkout() {
               <span className="row" style={{ gap: 6 }}>
                 {reopened && <button className="chip" aria-expanded="true" aria-controls={'workout-unit-' + u.join('-')}
                   onClick={() => setUnitOpen(u.join('-'), false)}>{t('Fold away')}</button>}
+                {/* //// Neoffice — nocap: « En cours », not « En Cours ». */}
                 {isCur
-                  ? <span className="tag acc">{t('Current')}</span>
+                  ? <span className="tag acc nocap">{t('Current')}</span>
                   : <button className="chip" onClick={() => focusUnit(u[0])}>{t('Set current')}</button>}
               </span>
             </div>
