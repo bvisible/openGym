@@ -83,7 +83,7 @@ import { weeklyWeights } from './lib/bodyweight.js'
 import { workoutText } from './lib/workout-text.js'
 import { workoutCardModel, layoutWorkoutCard, drawWorkoutCard, viewAspect, CARD_FONT } from './lib/workout-card.js'
 import { copyText } from './lib/clipboard.js'
-import { showsIntensifier, showsWarmupRamp } from './lib/level-visibility.js'
+import { showsIntensifier, showsWarmupRamp, showsFailureControl, showsBackoffControl, showsTripleProgression } from './lib/level-visibility.js'
 import FloorPlanFor from './components/FloorPlan.jsx'
 import FloorPlanSheet from './components/FloorPlanSheet.jsx'
 //// Neoffice — see the same note in store/useStore.js: i18n-core, so mocks of i18n.js keep working.
@@ -1880,6 +1880,9 @@ const climbsRange = policy => policy === 'double' || policy === 'triple'
 const setsMaxOf = c => Math.max(Math.max(1, Math.round(c.sets) || 1), Math.min(MAX_TRIPLE_SETS, Math.round(c.setsMax) || 0))
 
 function ProgressionFields({ ex, mode, c, setC, routine, unit, perSide, bw }) {
+  //// Neoffice — the detail level decides whether back-off sets and triple progression are offered; an exercise already on
+  //// either keeps its control (lib/level-visibility.js).
+  const S = useStore(s => s.S)
   //// Neoffice — a per-set plan fixes the reps, so only the rules that move the weight are offered
   //// (policyFor reads the others as linear), and a plan that fixes the weights has nothing to progress.
   const planned = setPlanOf(c)
@@ -1890,13 +1893,13 @@ function ProgressionFields({ ex, mode, c, setC, routine, unit, perSide, bw }) {
   // Triple progression adds sets and then load. Bodyweight work with nothing added already climbs
   // reps and then sets on its own (the rep ceiling below), and has no load to finish the cycle
   // with, so it is not offered there.
-  const options = (POLICIES_FOR[mode] || ['off']).filter(p => (!planned || p === 'off' || p === 'linear') && (p !== 'triple' || !bw || c.weight > 0 || c.prog === 'triple'))
+  const options = (POLICIES_FOR[mode] || ['off']).filter(p => (!planned || p === 'off' || p === 'linear') && (p !== 'triple' || (showsTripleProgression(S, c) && (!bw || c.weight > 0 || c.prog === 'triple'))))
   if (options.length < 2) return null
   //// Neoffice — the rule inherited as a plan reads it (double or Greyskull from the routine is linear for a per-set plan).
   const inherited = policyFor({ id: ex.id, ...(planned ? { mode: 'reps', sets: c.sets, reps: c.reps, setPlan: c.setPlan } : {}) }, routine, mode)
   const active = policyFor({ ...c, id: ex.id }, routine, mode)
   const inc = progressionStepOf(c, mode, ex, unit)
-  const canBackoff = backoffOffered(c, mode, ex, bw)
+  const canBackoff = backoffOffered(c, mode, ex, bw) && showsBackoffControl(S, c)
   const backoff = canBackoff && c.backoff === true
   const invalid = !progressionStepIsValid(inc, active, backoff)
   // "26 → 24 → 22 kg": what the sets will open at, from the weight and step typed above.
@@ -2300,7 +2303,8 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
       {/* The last work set of every session is marked as taken to failure, like Greyskull's
           final AMRAP set (workout-model isFailureSet, history.js applyFailurePlan). A pyramid
           already has its Max set for that. */}
-      {!pyramid && <Row icon="gauge" iconTint="var(--purple)" title={t('Last set to failure')}
+      {/* //// Neoffice — a technique to be taught: the Advanced level, or an exercise that already plans it. */}
+      {!pyramid && showsFailureControl(st, c.lastToFailure === true) && <Row icon="gauge" iconTint="var(--purple)" title={t('Last set to failure')}
         subtitle={c.lastToFailure ? t('The last set goes until nothing is left, and counts as all-out effort unless you rate it.') : t('Plan the final set as an all-out one.')}>
         <Switch checked={c.lastToFailure === true} onChange={v => setC(x => ({ ...x, lastToFailure: v || undefined }))} />
       </Row>}

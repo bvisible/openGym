@@ -47,7 +47,7 @@ import { bestSetFor } from '../lib/exercise-history.js'
 import { isWarmupRow, isFailureSet, toggleFailure, isDropSet, isRestPauseSet, dropsOf, clustersOf, addDrop, addCluster, removeDropAt, removeClusterAt, setDropAt, setClusterAt, nextDropWeight, nextBurstReps, isSideSet, makeSideSet, setSideField, toggleSide, addSideDrop, removeSideDropAt, setSideDropAt, addSideCluster, removeSideClusterAt, setSideClusterAt, WEIGHT_ORIGIN_MANUAL } from '../lib/workout-model.js'
 import { canMoveActiveWorkoutUnit, moveActiveWorkoutUnit, canMoveActiveWorkoutEntry, moveActiveWorkoutEntry } from '../lib/active-workout-order.js'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
-import { showsSupersetControl, showsSetIntensifierChips, showsInSessionWarmup } from '../lib/level-visibility.js'
+import { showsSupersetControl, showsSetIntensifierChips, showsInSessionWarmup, showsFailureControl } from '../lib/level-visibility.js'
 import { nextOpenSet, workoutKeyAction } from '../lib/workout-keys.js'
 import { MUSCLE_NAME } from '../lib/muscles.js'
 import FocusView from './FocusView.jsx'
@@ -469,7 +469,8 @@ function ExerciseBlock({ entryIdx, compact, dense, editing, onToggle, onToggleSi
           // Taken to failure: a toggle with its check, like the menu's other on/off rows. It counts
           // as RIR 0 wherever effort is read, unless a rating was logged on the set. A timed
           // per-side pair is one set, so both halves get it.
-          !warm && mode !== 'cardio' && { icon: 'gauge', label: t('Taken to failure'), sub: t('Nothing left in the tank'), on: isFailureSet(s), onClick: () => toggleFailureAt(i) },
+          //// Neoffice — a technique to be taught: the Advanced level, or an exercise that already plans or logs it (lib/level-visibility.js).
+          !warm && mode !== 'cardio' && showsFailureControl(S, entry.target?.lastToFailure === true || entry.sets.some(isFailureSet)) && { icon: 'gauge', label: t('Taken to failure'), sub: t('Nothing left in the tank'), on: isFailureSet(s), onClick: () => toggleFailureAt(i) },
         ] },
         { title: t('Add to this set'), items: [
           //// Neoffice — same gate as the chips: intensifiers are offered from the Complete level, kept once a row carries some.

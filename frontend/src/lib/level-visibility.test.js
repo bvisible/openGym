@@ -13,6 +13,7 @@ import {
   showsBodyMap, showsEffortHistogram, showsEquipmentProfiles, showsEstimated1RM,
   showsEffortSetting, showsIntensifier, showsSupersetControl, showsWarmupRamp,
   showsSetIntensifierChips, showsInSessionWarmup, showsRestPauseSetting,
+  showsFailureControl, showsBackoffControl, showsTripleProgression, showsOneRmFormula,
 } from './level-visibility.js'
 
 const FULL = { level: 'full' }
@@ -162,5 +163,40 @@ describe('the rest-pause setting', () => {
     // Same exception as everywhere: they changed it, so they know what it is.
     expect(showsRestPauseSetting({ ...SIMPLE, restPauseSec: 30 })).toBe(true)
     expect(showsRestPauseSetting({ ...SIMPLE, restPauseSec: 15 })).toBe(false)
+  })
+})
+
+//// v1.4: the four techniques upstream added.
+describe('v1.4 controls — hidden for a beginner, never from under what is in use', () => {
+  it('hides failure, back-off sets, triple progression and the 1RM formula at the simple level', () => {
+    expect(showsFailureControl(SIMPLE, false)).toBe(false)
+    expect(showsBackoffControl(SIMPLE, {})).toBe(false)
+    expect(showsTripleProgression(SIMPLE, {})).toBe(false)
+    expect(showsOneRmFormula(SIMPLE)).toBe(false)
+  })
+
+  it('offers failure, back-off sets and triple progression only at the full level', () => {
+    for (const S of [SIMPLE, NORMAL]) {
+      expect(showsFailureControl(S, false)).toBe(false)
+      expect(showsBackoffControl(S, {})).toBe(false)
+      expect(showsTripleProgression(S, {})).toBe(false)
+    }
+    expect(showsFailureControl(FULL, false)).toBe(true)
+    expect(showsBackoffControl(FULL, {})).toBe(true)
+    expect(showsTripleProgression(FULL, {})).toBe(true)
+  })
+
+  it('offers the 1RM formula from the normal level, like the estimate it feeds', () => {
+    expect(showsOneRmFormula(NORMAL)).toBe(true)
+    expect(showsOneRmFormula(FULL)).toBe(true)
+  })
+
+  it('keeps each control where it is already in use', () => {
+    expect(showsFailureControl(SIMPLE, true)).toBe(true)
+    expect(showsBackoffControl(SIMPLE, { backoff: true })).toBe(true)
+    expect(showsBackoffControl(SIMPLE, { backoff: false })).toBe(false)
+    expect(showsTripleProgression(SIMPLE, { prog: 'triple' })).toBe(true)
+    expect(showsTripleProgression(SIMPLE, { prog: 'double' })).toBe(false)
+    expect(showsOneRmFormula({ level: 'simple', oneRmFormula: 'brzycki' })).toBe(true)
   })
 })

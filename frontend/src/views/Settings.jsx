@@ -46,7 +46,7 @@ import BackupFolderRow, { useBackupFolder, autoBackupSubtitle } from '../compone
 import { SyncRows } from '../components/ServerSync.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, SearchField } from '../components/ui.jsx'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
-import { showsEffortSetting, showsEquipmentProfiles, showsRestPauseSetting } from '../lib/level-visibility.js'
+import { showsEffortSetting, showsEquipmentProfiles, showsRestPauseSetting, showsOneRmFormula } from '../lib/level-visibility.js'
 import { PAGES, ROOT_GROUPS, pageVisible, searchSettings, pageTrail } from './settings-pages.js'
 
 /* Settings (v1.3.11). The root is one screen: an account card, eleven rows that each open a page
@@ -362,7 +362,7 @@ export default function Settings({ page = null, find = null, via = null }) {
   //// detail, the club's classes), so the search offers only what the page draws.
   const ctx = {
     user, mobile: MOBILE, android, demo: DEMO, wakeOK, hasMedia: false, pwOn: false, webauthn: false,
-    restPause: showsRestPauseSetting(S), effort: showsEffortSetting(S), equipment: showsEquipmentProfiles(S),
+    restPause: showsRestPauseSetting(S), effort: showsEffortSetting(S), equipment: showsEquipmentProfiles(S), oneRmFormula: showsOneRmFormula(S),
     classes: !MOBILE && !DEMO && S.perms?.classes !== false, mayEdit,
     sound: !!S.sound, playOnSilent: playOnSilentSupported(), canVibrate, vibrate: S.vibrate !== false,
     profiles: (S.equipProfiles || []).length > 0, nameLang: EXERCISE_NAME_LANGS.includes(baseLang(lang)),
@@ -678,7 +678,8 @@ export default function Settings({ page = null, find = null, via = null }) {
         </Row>
         {/* Which formula turns a set into an estimated 1RM (Discord, #155): the exercise page,
             the 1RM chart and records all follow it. Formula names are people, not words. */}
-        <SelectRow icon="chart" iconTint="var(--teal)" title={t('1RM formula')}
+        {/* //// Neoffice — from the Normal level, like the estimate it feeds (lib/level-visibility.js). */}
+        {showsOneRmFormula(S) && <SelectRow icon="chart" iconTint="var(--teal)" title={t('1RM formula')}
           value={formulaOf(S)} onChange={v => update(s => { s.oneRmFormula = v })}
           options={[
             { value: 'epley', label: 'Epley', subtitle: t('The common one. A bit generous at higher reps.') },
@@ -689,7 +690,7 @@ export default function Settings({ page = null, find = null, via = null }) {
             { value: 'wathan', label: 'Wathan' },
             { value: 'lander', label: 'Lander' },
             { value: 'weighted', label: t('Blend of all'), subtitle: t('Averages seven formulas and reads your RIR when you log it.') },
-          ]} />
+          ]} />}
       </Section>
     </>,
 

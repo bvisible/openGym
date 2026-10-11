@@ -91,3 +91,26 @@ export const showsInSessionWarmup = (S, hasWarmups) =>
  */
 export const showsRestPauseSetting = (S, defaultSec = 15) =>
   atLeast(S, 'full') || Number((S && S.restPauseSec) ?? defaultSec) !== defaultSec
+
+//// ─── what v1.4 added ───────────────────────────────────────────────────────
+//// Upstream's v1.4 brought four techniques a beginner was never taught. Same
+//// shape as the rest, same exception: a plan, an exercise or a set that already
+//// carries one keeps its control, so nobody is trapped with a setting they can
+//// no longer reach. Found by reading the merge, not by the pilot club — the
+//// point of keeping the rules in one place.
+
+/** "Last set to failure" on an exercise config and "Taken to failure" in a set's
+ *  menu. Training until nothing is left is a technique, and it changes how the
+ *  effort is read (a failure set counts as RIR 0): taught before the switch
+ *  means anything. `inUse` = this exercise plans it, or one of its sets carries it. */
+export const showsFailureControl = (S, inUse) => atLeast(S, 'full') || Boolean(inUse)
+
+/** Back-off sets on an exercise config: lighter sets after the top one. */
+export const showsBackoffControl = (S, config) => atLeast(S, 'full') || Boolean(config && config.backoff === true)
+
+/** Triple progression among the progression rules (sets first, then load). */
+export const showsTripleProgression = (S, config) => atLeast(S, 'full') || Boolean(config && config.prog === 'triple')
+
+/** The 1RM formula in Settings. From `normal`, like the estimated 1RM curve it
+ *  feeds; kept once the member has chosen one, whatever the level. */
+export const showsOneRmFormula = S => atLeast(S, 'normal') || Boolean(S && S.oneRmFormula)

@@ -8,7 +8,7 @@ import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { PAGES, PAGE_IDS, ROOT_GROUPS, SEARCH, pageVisible, searchSettings, pageTrail, fold } from './settings-pages.js'
 //// Neoffice — the level of detail's rules, for the search's own view of a page (ctxNow below).
-import { showsEffortSetting, showsEquipmentProfiles, showsRestPauseSetting } from '../lib/level-visibility.js'
+import { showsEffortSetting, showsEquipmentProfiles, showsRestPauseSetting, showsOneRmFormula } from '../lib/level-visibility.js'
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
@@ -190,7 +190,7 @@ describe('the search lands on a row', () => {
     reminderOn: !!mocks.S.reminder?.on, nudge: !!mocks.S.reminder?.nudge, autoBackup: !!mocks.S.autoBackup,
     synced: !!mocks.sync, installTip: !mocks.MOBILE, hasMedia: false, wakeOK: true,
     //// Neoffice — the rows our pages show or hide, read the way views/Settings.jsx reads them.
-    restPause: showsRestPauseSetting(mocks.S), effort: showsEffortSetting(mocks.S), equipment: showsEquipmentProfiles(mocks.S),
+    restPause: showsRestPauseSetting(mocks.S), effort: showsEffortSetting(mocks.S), equipment: showsEquipmentProfiles(mocks.S), oneRmFormula: showsOneRmFormula(mocks.S),
     classes: !mocks.MOBILE && mocks.S.perms?.classes !== false, mayEdit: true,
   })
   for (const [name, setUp] of Object.entries(scenarios)) it(name, async () => {

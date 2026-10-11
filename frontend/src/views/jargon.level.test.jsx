@@ -50,13 +50,17 @@ const JARGON = [
   'rest-pause', 'rest pause', 'myo',
   'superset',
   'tonnage', 'monotonie',             // the load-management readings
+  //// v1.4's techniques (lib/level-visibility.js): back-off sets, failure, triple progression.
+  'back-off', 'séries dégressives',
+  'taken to failure', 'jusqu.à l.échec',
+  'triple progression',
 ]
 
 //// "1RM" is the one term the levels treat differently, so it is listed apart:
 //// the estimated max IS offered from `normal` up (a member past their first
 //// weeks wants to know roughly what they could lift, and the label says
 //// "estimé"). It must still be absent at `simple`.
-const JARGON_SIMPLE_ONLY = ['1RM']
+const JARGON_SIMPLE_ONLY = ['1RM', 'Brzycki', 'Lombardi']   //// Neoffice — the formulas come with the estimate, from `normal`
 
 //// A member with real history, so the screens have something to draw and the
 //// jargon has every chance to appear. A blank state would pass this test for
