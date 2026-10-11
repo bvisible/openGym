@@ -2691,4 +2691,7 @@ export default {
   'Your sports watch, calling you back.': 'आपकी स्पोर्ट्स घड़ी आपको वापस बुला रही है।',
   'Coach wants you back on the bar.': 'कोच आपको बार पर वापस चाहते हैं।',
   'Gentle, for headphones or a quiet room.': 'धीमी, हेडफ़ोन या शांत कमरे के लिए।',
+  //// Neoffice — the two badges of the Focus view that upstream writes in English whatever the language (views/FocusView.jsx).
+  'Rest {0}s': 'आराम {0} सेकंड',
+  '{0} Reps': '{0} रेप्स',
 }

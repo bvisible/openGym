@@ -2689,4 +2689,7 @@ export default {
   'Your workout reminders, even when the journal is closed.': 'জার্নাল বন্ধ থাকলেও আপনার ওয়ার্কআউটের রিমাইন্ডার আসবে।',
   'Hi, I’m your Coach. Your club writes your plan, so I don’t change it.': 'হ্যালো, আমি আপনার কোচ। আপনার ক্লাব আপনার প্ল্যান লেখে, তাই আমি সেটি বদলাই না।',
   'Your club writes your plan, so the Coach does not change it.': 'আপনার ক্লাব আপনার প্ল্যান লেখে, তাই কোচ সেটি বদলায় না।',
+  //// Neoffice — the two badges of the Focus view that upstream writes in English whatever the language (views/FocusView.jsx).
+  'Rest {0}s': 'বিশ্রাম {0} সে',
+  '{0} Reps': '{0} রেপ',
 }

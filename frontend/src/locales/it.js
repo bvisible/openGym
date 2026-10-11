@@ -2691,4 +2691,7 @@ export default {
   'Your sports watch, calling you back.': 'Il tuo orologio sportivo ti richiama.',
   'Coach wants you back on the bar.': 'Il coach ti vuole di nuovo al bilanciere.',
   'Gentle, for headphones or a quiet room.': 'Delicato, per le cuffie o una stanza silenziosa.',
+  //// Neoffice — the two badges of the Focus view that upstream writes in English whatever the language (views/FocusView.jsx).
+  'Rest {0}s': 'Riposo {0} s',
+  '{0} Reps': '{0} rip',
 }

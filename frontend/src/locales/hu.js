@@ -2653,4 +2653,7 @@ export default {
   'Your sports watch, calling you back.': 'A sportórád visszahív.',
   'Coach wants you back on the bar.': 'Az edző visszavár a rúdhoz.',
   'Gentle, for headphones or a quiet room.': 'Halk, fülhallgatóhoz vagy csendes helyre.',
+  //// Neoffice — the two badges of the Focus view that upstream writes in English whatever the language (views/FocusView.jsx).
+  'Rest {0}s': 'Pihenő {0} mp',
+  '{0} Reps': '{0} ism',
 }

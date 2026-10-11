@@ -2697,4 +2697,7 @@ export default {
   'Your sports watch, calling you back.': 'Ваши спортивные часы зовут вас обратно.',
   'Coach wants you back on the bar.': 'Тренер ждёт вас обратно у штанги.',
   'Gentle, for headphones or a quiet room.': 'Тихий, для наушников или спокойного зала.',
+  //// Neoffice — the two badges of the Focus view that upstream writes in English whatever the language (views/FocusView.jsx).
+  'Rest {0}s': 'Отдых {0} с',
+  '{0} Reps': '{0} повт',
 }

@@ -2609,4 +2609,7 @@ export default {
   'Your sports watch, calling you back.': '你的運動手錶在叫你回來。',
   'Coach wants you back on the bar.': '教練等你回到槓鈴前。',
   'Gentle, for headphones or a quiet room.': '輕柔，適合耳機或安靜的房間。',
+  //// Neoffice — the two badges of the Focus view that upstream writes in English whatever the language (views/FocusView.jsx).
+  'Rest {0}s': '休息 {0} 秒',
+  '{0} Reps': '{0} 下',
 }

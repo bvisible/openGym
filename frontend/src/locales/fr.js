@@ -1615,7 +1615,8 @@ export default {
   'Enter a positive step to use this progression rule.': 'Saisissez un pas positif pour utiliser cette règle de progression.',
   'Level of detail': 'Niveau de détail',
   'Simple': 'Simple',
-  'Complete': 'Complet',
+  //// Neoffice — the verb of the Focus view's button (« Terminer la série »): the level that used to be called « Complet » is « Avancé » now.
+  'Complete': 'Terminer',
   'Where to find it': 'Où le trouver',
   'out of order': 'hors service',
   'Badges': 'Badges',
@@ -2776,4 +2777,7 @@ export default {
   'Your sports watch, calling you back.': 'Votre montre de sport vous rappelle.',
   'Coach wants you back on the bar.': 'Le Coach vous veut de retour à la barre.',
   'Gentle, for headphones or a quiet room.': 'Tout doux, pour un casque ou une pièce calme.',
+  //// Neoffice — the two badges of the Focus view that upstream writes in English whatever the language (views/FocusView.jsx).
+  'Rest {0}s': 'Repos {0} s',
+  '{0} Reps': '{0} reps',
 }

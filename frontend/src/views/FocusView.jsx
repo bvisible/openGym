@@ -73,8 +73,9 @@ function Prescription({ entry, setIdx, unit, fallbackRest, children }) {
   const rpe = target.rpeMin > 0
     ? `RPE ${fmtNum(target.rpeMin)}${target.rpeMax > target.rpeMin ? `–${fmtNum(target.rpeMax)}` : ''}`
     : ''
-  const rest = target.restSec > 0 ? `Rest ${target.restSec}s` : fallbackRest > 0 ? `Rest ${fallbackRest}s` : ''
-  const badges = [reps && `${reps} Reps`, load, rpe, rest, target.tempo].filter(Boolean)
+  //// Neoffice — upstream writes these two badges in English whatever the language; here they are translated.
+  const rest = target.restSec > 0 ? t('Rest {0}s', target.restSec) : fallbackRest > 0 ? t('Rest {0}s', fallbackRest) : ''
+  const badges = [reps && t('{0} Reps', reps), load, rpe, rest, target.tempo].filter(Boolean)
 
   return <div className="focus-prescription">
     <span className="focus-badge focus-progress">{setIdx + 1}/{entry.sets.length}</span>
@@ -270,8 +271,9 @@ export default function FocusView({
         <div className="focus-tags">
           {mode === 'cardio' && <span className="tag acc">{t('Cardio')}</span>}
           {isSideSet(set) && <span className="tag acc">{t('Per side')}</span>}
-          {(ex.tg || ex.bp) && <span className="tag">{t(ex.tg || ex.bp)}</span>}
-          {ex.eq && <span className="tag">{t(ex.eq)}</span>}
+          {/* //// Neoffice — the term in sentence case (span.capitalize): a tag capitalises word by word, « Poids Du Corps ». */}
+          {(ex.tg || ex.bp) && <span className="tag"><span className="capitalize">{t(ex.tg || ex.bp)}</span></span>}
+          {ex.eq && <span className="tag"><span className="capitalize">{t(ex.eq)}</span></span>}
         </div>
         {entry.target?.note && <div className="focus-note">{entry.target.note}</div>}
         {pinnedNote && <div className="focus-note pinned"><Icon name="flag" />{t('From {0}:', fmtDate(pinnedNote.d, true))} {pinnedNote.note}</div>}

@@ -9,7 +9,10 @@
 .focus-superset-nav button:disabled{opacity:.3}
 .focus-card{padding:16px;border-radius:var(--r-lg);background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--acc-line)}
 .focus-card-header{display:flex;align-items:center;gap:6px;padding-bottom:12px;border-bottom:var(--hair) solid var(--sep)}
-.focus-card-header h2{flex:1;font-size:20px;line-height:1.2;text-transform:capitalize}
+/* //// Neoffice — first letter only, as .capitalize does in index.css: word-by-word capitals are English title case,
+   and read « Relevé De Buste 3/4 » on a French name. */
+.focus-card-header h2{flex:1;font-size:20px;line-height:1.2;text-transform:none}
+.focus-card-header h2::first-letter{text-transform:uppercase}
 .focus-warmup{font-size:16px}
 /* The set on screen is taken to failure: the same purple "F" the set rows wear. */
 .focus-failure{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 4px;border-radius:10px;background:var(--purple);color:#fff;font-size:12px;font-weight:700}

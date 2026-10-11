@@ -43,11 +43,12 @@ describe('Brazilian Portuguese locale', () => {
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
     //// Neoffice — our own strings live in pt.js like every other locale and pt-BR inherits them,
     //// so the hash differs from upstream's. Recomputed after the v1.4.1 merge (1,403 overrides,
-    //// 1,221 inherited): the 103 strings new since v1.3.10 that upstream left inherited stay
+    //// 1,223 inherited): the 103 strings new since v1.3.10 that upstream left inherited stay
     //// inherited (measurements, the 1RM formulas, back-off and triple progression, the new
-    //// equipment words and catalogue types), and none of ours is among them. With:
+    //// equipment words and catalogue types), and two of ours join them: the Focus view's badges
+    //// « Descanso {0} s » and « {0} reps », which read the same in Brazil. With:
     //// node scripts/pt-br-inheritance-fingerprint.mjs
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('9a5b7a8e22f299071cfce23ee74db8fb57a6cb41c8b4d28fe868c6ce9292756b')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('e97fbd126327381e85e4fdc81504affc828276d1b82f94a4594e05f3c691c997')
   })
 
   // pt-PT labelled Unpair 'Desfazer': Undo, in Portuguese (it is pt-BR's Undo), on the button that
