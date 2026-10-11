@@ -44,17 +44,26 @@ donne la carte complète de la divergence. Les quatre familles :
   téléphone, passkeys, mot de passe du serveur Node) est supprimé, et dit ici ; un test du store garde le
   protocole de l'amont grâce au double `frontend/src/store/upstream-api.double.js` (nos fonctions nommées
   de `lib/api.js` sur les chemins `/api/data` de l'amont). Supprimés à la v1.3.10 :
-  `lib/api.pair-insecure.test.js` et `lib/api.pair-probe.test.js` (`pairRedeem` n'appaire rien chez nous).
+  `lib/api.pair-insecure.test.js` et `lib/api.pair-probe.test.js` (`pairRedeem` n'appaire rien chez nous) ;
+  à la v1.4.1 : `lib/api.pair-http.test.js`, `lib/cf-access.test.js` (Cloudflare Access d'un téléphone appairé),
+  `components/ServerSync.leave.test.jsx` (la feuille « quitter le serveur ») et deux blocs de `views/Workout.test.jsx`
+  (le signal « parti » du battement de présence, retiré de `Workout.jsx`).
 
-## Le média n'est pas dans le dépôt
+## Le média n'est ni dans le dépôt, ni dans son historique
 
-`opengym/public/media/` est **gitignoré** (1 324 jpg + 1 324 gif, ~500 Mo). L'instance les
-télécharge avec `scripts/fetch-media.sh`, comme le `docker compose up` de l'amont le fait.
-Les fichiers sont nommés `<id>-<hash>.{jpg,gif}` et le dataset porte les deux noms.
+Depuis la v1.4.0 l'amont porte ses visuels dans son propre dépôt : `catalogue/media/still/*.webp` et
+`catalogue/media/clip/*.mp4`, 180 px, 190 Mo, © Gym visual. Chez nous `opengym/public/media/{still,clip}/` est
+**gitignoré**, et **aucun commit de notre historique ne les porte** : l'import de l'amont les retire (voir plus
+bas), parce qu'un fichier poussé dans un dépôt public n'en sort plus. L'instance les met en place avec
+`scripts/fetch-media.sh` (clone partiel de l'étiquette amont, ces deux dossiers seulement), servis par Frappe
+sur `/assets/opengym/media/still/` et `/clip/` (`lib/exercises.js`, `gym_sw.js`). Avant la v1.4.0 : `img/` et
+`gif/` (1 324 jpg + gif), que le serveur du club sait encore lire.
 
-⚠️ **La licence des visuels n'est pas celle du code.** Le code est AGPL-3.0 ; les images
-viennent d'un jeu de données tiers dont la licence interdit la revente et la
-redistribution. C'est la raison du `.gitignore`, pas la taille.
+⚠️ **La licence des visuels n'est pas celle du code.** Le code est AGPL-3.0 ; les visuels sont © Gym visual et
+l'amont les tient sous licence pour lui (`catalogue/media/NOTICE.md`) : les servir aux membres d'un club qui
+paie est un usage commercial que cette licence n'étend pas à nous sans accord. Décision de Jérémy du 11.10 :
+« on regarde les licences après ». D'ici là le média n'est posé que sur osiris (développement et démonstration),
+jamais commité, jamais sur une instance cliente.
 
 ## Procédure de merge amont
 
@@ -63,13 +72,26 @@ Depuis le rebase du 2026-08-24, **les deux historiques ont un ancêtre commun** 
 côtés. Un merge est donc la bonne méthode, et la réapplication manuelle
 n'a plus lieu d'être. On fusionne **l'étiquette de la version** (`v1.3.10`), pas `main`.
 
+**Depuis la v1.4.0, on ne fusionne PAS l'étiquette de l'amont telle quelle** : elle tire dans notre historique
+public les 190 Mo de visuels sous licence, pour toujours (`~/GitHub/openGym` contient les étiquettes brutes,
+avec le média : ne jamais en fusionner ni pousser depuis là). On réécrit d'abord la plage, sans ces deux
+dossiers, avec `scripts/import-upstream-range.py`, puis on fusionne la référence ainsi produite :
+
 ```bash
 git fetch upstream --tags                            # github.com/DuarteSantos8/openGym
-git merge --no-ff v1.3.10                            # ← oui, un merge, sur version-15
+# <ancienne> = l'étiquette déjà fusionnée ; --base-filtered = NOTRE copie d'elle : le 2e parent du dernier
+# commit de fusion amont (pour la v1.4.1 : fb2dbbc5^2 = 17a2807e)
+python3 scripts/import-upstream-range.py . v1.4.1 v1.5.0 refs/tags/up-v1.5.0-filtered --base-filtered 17a2807e
+git merge --no-ff --no-commit up-v1.5.0-filtered     # ← un merge, sur version-15, dans un clone jetable
 # résoudre : garder LEUR code, réappliquer NOS `//// Neoffice` par-dessus
 npm --prefix frontend ci && npm --prefix frontend test && npm --prefix frontend run build
-git add -A && git commit && git push origin version-15
+git commit && git tag -d up-v1.5.0-filtered          # la référence filtrée ne se pousse jamais (une étiquette, pas une branche)
 ```
+
+Le script prouve ce qu'il fait : il refuse (et supprime la référence) si un seul objet de média reste
+atteignable depuis les commits recréés. Il garde auteurs, dates et messages ; les signatures GPG ne
+survivent pas à une réécriture (c'est pourquoi pas `git filter-repo`, qui change aussi le hash de la base).
+Premier import filtré : v1.3.10 → v1.4.1, le 11.10 (note du coffre `Neoffice/Fitness-Coaching/84-…`).
 
 **Pas de branche filet** (règle de la flotte : `version-15` seule, ni branche ni worktree) : l'état
 d'avant la fusion est le premier parent du commit de fusion. Faire la fusion dans un clone jetable,
@@ -92,6 +114,17 @@ et ne pousser qu'une fois les tests verts.
 - **`locales/*.js`** — leurs nouvelles chaînes + nos surcharges. Les deux, jamais
   l'un à la place de l'autre.
 - **`instr/fr.js`** — NOTRE version, toujours (7 710 consignes vouvoyées).
+- **`exercise-names/*.js`** — ceux de l'amont, tels quels (générés par `scripts/catalogue/build.mjs`, « do not
+  edit »). Nos 1 324 noms français, dans les mots d'une salle (« à la poulie »), sont dans `club-names/fr.js` et
+  posés par-dessus au chargement (`lib/i18n.js` → `lib/club-names.js`, qui lève aussi la première lettre des noms
+  générés, puisque `fr` est dans `CASED_NAME_LANGS`). Après chaque merge, régénérer la copie du serveur :
+  `node scripts/export-club-names.mjs fr > ../neoffice_gym/neoffice_gym/data/exercise_names_fr.json` (à commiter
+  là-bas) avant de relancer `import_exercise_library()`.
+- **`locales/fr.js`** — notre mise en page et notre vouvoiement : les clés que nous avions réécrites gardent notre
+  texte ; celles que l'amont a changées ou ajoutées (en tutoiement) sont réécrites au vouvoiement par Haiku
+  (sous-agent `model: haiku`, lot de ~190 clés avec l'ancien texte en regard) ; les clés que l'amont a retirées
+  partent aussi de notre pack (`check-locales` exige les mêmes clés partout). Une langue neuve de l'amont (v1.4 :
+  `bn`) reçoit les chaînes de NOS écrans, traduites de la même façon. `npm --prefix frontend run i18n` le prouve.
 - Partout ailleurs : **leur code**, avec nos `////` réappliqués par-dessus.
 
 > L'amont a son propre `CLAUDE.md`, qui décrit SON projet (docker, api, mcp,
