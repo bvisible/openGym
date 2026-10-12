@@ -2685,7 +2685,9 @@ export default {
   'rehab': 'rééducation',
   'Any type': 'Tout type',
   'Suggest a fix for this exercise': 'Suggérer une correction pour cet exercice',
-  'Back-off sets': 'Séries dégressives',
+  //// Neoffice — « dégressive » already names the drop set (« Série dégressive », « Ajouter une série dégressive »): this setting, each set one step
+  //// lighter than the one before, says « allégées » so the two do not read as one thing on the same screen. Upstream's French says « dégressives » for both.
+  'Back-off sets': 'Séries allégées',
   'Each set one step lighter than the one before. The weight above is the first set.': 'Chaque série un palier plus légère que la précédente. Le poids ci-dessus est celui de la première série.',
   'Sets open at {0}. The first set goes up when every set reaches its reps, and the rest follow it.': 'Les séries commencent à {0}. La première série monte quand chaque série atteint ses répétitions, et les autres suivent.',
   'The first set goes up when every set reaches its reps, and the rest follow it.': 'La première série monte quand chaque série atteint ses répétitions, et les autres suivent.',

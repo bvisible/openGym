@@ -51,7 +51,7 @@ const JARGON = [
   'superset',
   'tonnage', 'monotonie',             // the load-management readings
   //// v1.4's techniques (lib/level-visibility.js): back-off sets, failure, triple progression.
-  'back-off', 'séries dégressives',
+  'back-off', 'séries dégressives', 'séries allégées',
   'taken to failure', 'jusqu.à l.échec',
   'triple progression',
 ]
