@@ -89,94 +89,145 @@ describe('buildNudgeNotifications (mobile)', () => {
   })
 })
 
-//// Neoffice — THE CLUB'S RULE (S.perms.nudge = { enabled, after, once }, Gym Settings), the table the neoffice_gym fork mirrors in Python
-//// (tests/test_training_day.py `test_nudge_for_club_rule_table`): THE SAME CASES, THE SAME ANSWERS. Keep them in step.
+//// Neoffice — THE CLUB'S RULE (S.perms.nudge = { enabled, after, once }, Gym Settings): the table the neoffice_gym fork mirrors in Python
+//// (neoffice_gym/tests/test_training_day.py, `TestTheClubsOwnNudgeRule`): THE SAME CASES, WITH THE SAME DATES AND THE SAME ANSWERS. The phone's
+//// local notifications and the server's pushes must read a club's rule alike; keep the two in step.
 ////
 //// d = the number of missed PLANNED days in a row since the last workout, today included.
 ////   no club object (an older server, a journal not signed in to a club, the mobile build) : nudge on d = 1, 2, 3   (upstream's back-off)
-////   { enabled: false }                                                                      : never
-////   { enabled: true, after: N, once: true  }  (once is the default)                         : only on d == N
-////   { enabled: true, after: N, once: false }                                                : on d = N, N + 1, N + 2 (at most three)
-////   `after` is clamped to 2..8 (4 when it is not a number); an object that does not say `enabled` is read as no object.
-//// Excused days (a note on them) are neither missed nor a break in the chain; unplanned days are skipped without breaking it; a logged
-//// workout resets the count. Look-back: 28 days with a club rule (14 without).
+////   a club object that does not switch it on (enabled false, missing, `{}`)               : never
+////   { enabled: true, after: N, once: true  }  (once is the default)                       : only on d == N
+////   { enabled: true, after: N, once: false }                                              : on d = N, N + 1, N + 2 (at most three)
+////   `after` is a whole number of at least 1, 4 otherwise. Excused days (a note on them) are neither missed nor a break in the chain; unplanned
+////   days are skipped without breaking it; a logged workout starts the count again; a member who never trained, and a chain no workout closes
+////   inside 56 days, are never nudged.
+////
+////  case                                        club                        last workout  day asked        d   nudge
+////  A  once, after 4, daily                     on, 4, once                 2026-09-01    09-02 .. 09-09   1..8  only on 09-05 (d = 4)
+////  B  not once, after 4, daily                 on, 4, repeat               2026-09-01    09-02 .. 09-09   1..8  09-05, 09-06, 09-07 (d = 4, 5, 6)
+////  C  after 2 (the smallest), daily            on, 2, once                 2026-09-01    09-02 .. 09-05   1..4  only on 09-03
+////  D  the club switched it off                 off, 4, once                2026-09-01    09-02 .. 09-09   1..8  never
+////  E  an excused day is no miss and breaks nothing   on, 4, once            2026-09-01    09-03 sick       09-06 is d = 4
+////  F  Mon / Wed / Fri, unplanned days skipped  on, 4, once                 2026-09-04    09-07 .. 09-16   1..4  only on Mon 09-14 (d = 4)
+////  G  a workout starts the count again         on, 4, once                 09-01, 09-03  09-04 .. 09-09   1..6  only on 09-07 (d = 4)
+////  H  a member who never trained               on, 4, once                 none          any day          -     never
+////  I  a chain no workout closes inside 56 days on, 4 / 5, once             2026-06-01    weekly, 07-06 .. 09-07  5th Monday only, never again
+////  I2 sparse pinned dates, chain cut by the horizon   on, 5, once        2026-06-01    09-05            -     never (counted short)
 describe('nudgeFor — the club\'s rule (the table the server mirrors)', () => {
-  // Planned EVERY day, last workout Sunday 2026-09-06: d = 1 is Monday 2026-09-07, d = 10 is Wednesday 2026-09-16.
-  const everyDay = { 0: 'push', 1: 'push', 2: 'push', 3: 'push', 4: 'push', 5: 'push', 6: 'push' }
-  const daily = (over = {}) => S({ week: everyDay, workouts: [w('2026-09-06')], ...over })
-  const days = Array.from({ length: 10 }, (_, i) => `2026-09-${String(7 + i).padStart(2, '0')}`)   // d = 1..10
-  const answers = (state, club) => days.map(iso => !!nudgeFor(state, iso, club))
   const T = true, F = false
+  const DAILY = { 0: 'push', 1: 'push', 2: 'push', 3: 'push', 4: 'push', 5: 'push', 6: 'push' }
+  const daily = (over = {}) => S({ week: DAILY, ...over })
+  const ON_4_ONCE = { enabled: true, after: 4, once: true }
+  const sept = d => `2026-09-${String(d).padStart(2, '0')}`
+  const asked = (state, club, days) => days.map(d => !!nudgeFor(state, sept(d), club))
+  const range = (from, to) => Array.from({ length: to - from }, (_, i) => from + i)           // Python's range(from, to)
 
-  it('table — planned every day, no workout since the 6th: d = 1..10', () => {
-    expect(answers(daily(), undefined)).toEqual([T, T, T, F, F, F, F, F, F, F])                                    // legacy
-    expect(answers(daily(), { enabled: true, after: 4, once: true })).toEqual([F, F, F, T, F, F, F, F, F, F])
-    expect(answers(daily(), { enabled: true, after: 4 })).toEqual([F, F, F, T, F, F, F, F, F, F])                 // once is the default
-    expect(answers(daily(), { enabled: true, after: 4, once: false })).toEqual([F, F, F, T, T, T, F, F, F, F])
-    expect(answers(daily(), { enabled: true, after: 2, once: true })).toEqual([F, T, F, F, F, F, F, F, F, F])
-    expect(answers(daily(), { enabled: true, after: 8, once: true })).toEqual([F, F, F, F, F, F, F, T, F, F])
-    expect(answers(daily(), { enabled: false, after: 4, once: true })).toEqual([F, F, F, F, F, F, F, F, F, F])
+  it('A — once: only on the day the count is reached', () => {
+    expect(asked(daily({ workouts: [w('2026-09-01')] }), ON_4_ONCE, range(2, 10))).toEqual([F, F, F, T, F, F, F, F])
+  })
+
+  it('B — not once: it is sent on three planned days from the count', () => {
+    expect(asked(daily({ workouts: [w('2026-09-01')] }), { enabled: true, after: 4, once: false }, range(2, 10))).toEqual([F, F, F, T, T, T, F, F])
+  })
+
+  it('C — the smallest count is the second missed session', () => {
+    expect(asked(daily({ workouts: [w('2026-09-01')] }), { enabled: true, after: 2, once: true }, range(2, 6))).toEqual([F, T, F, F])
+  })
+
+  it('D — a club that did not switch it on sends none: off, no `enabled`, an empty object', () => {
+    const state = daily({ workouts: [w('2026-09-01')] })
+    for (const club of [{ enabled: false, after: 4, once: true }, { after: 4, once: true }, {}]) {
+      expect(asked(state, club, range(2, 10)), JSON.stringify(club)).toEqual([F, F, F, F, F, F, F, F])
+    }
+  })
+
+  it('E — an excused day is not missed and does not break the chain', () => {
+    const state = daily({ workouts: [w('2026-09-01')], dayNotes: { '2026-09-03': { tag: 'sick', _ts: 1 } } })
+    expect(asked(state, ON_4_ONCE, range(2, 10))).toEqual([F, F, F, F, T, F, F, F])
+    expect(nudgeFor(state, '2026-09-03', ON_4_ONCE)).toBeNull()                                   // the sick day itself is never nudged
+  })
+
+  it('F — days with nothing planned are skipped without breaking the chain (Mon / Wed / Fri)', () => {
+    const state = S({ workouts: [w('2026-09-04')] })
+    const due = range(7, 17).filter(d => nudgeFor(state, sept(d), ON_4_ONCE))
+    expect(due).toEqual([14])
+    expect(nudgeFor(state, '2026-09-08', ON_4_ONCE)).toBeNull()                                   // Tuesday plans nothing: nothing to miss
+  })
+
+  it('G — a workout starts the count again', () => {
+    expect(asked(daily({ workouts: [w('2026-09-01'), w('2026-09-03')] }), ON_4_ONCE, range(4, 10))).toEqual([F, F, F, T, F, F])
+  })
+
+  it('H — a member who never trained is never nudged by a club\'s rule', () => {
+    expect(asked(daily(), ON_4_ONCE, range(2, 10))).toEqual([F, F, F, F, F, F, F, F])
+    expect(asked(daily(), { enabled: true, after: 2, once: false }, range(2, 10))).toEqual([F, F, F, F, F, F, F, F])
+  })
+
+  it('I — a chain no workout closes inside the horizon is never nudged', () => {
+    const state = S({ week: { 1: 'push' }, workouts: [w('2026-06-01')] })                        // a Monday, trained once
+    const club = { enabled: true, after: 5, once: true }
+    const mondays = ['2026-06-08', '2026-06-15', '2026-06-22', '2026-06-29', '2026-07-06', '2026-07-13', '2026-08-03', '2026-09-07']
+    expect(mondays.map(d => !!nudgeFor(state, d, club))).toEqual([F, F, F, F, T, F, F, F])
+    // two months later it would be the fifth miss of a weekly count cut at the horizon: it must not be sent again
+    expect(nudgeFor(state, '2026-09-14', club)).toBeNull()
+    expect(nudgeFor(daily({ workouts: [w('2026-06-01')] }), '2026-09-05', ON_4_ONCE)).toBeNull()
+  })
+
+  it('I2 — a sparse plan cut by the horizon would be counted short, so it is not nudged', () => {
+    // sessions pinned on a few dates only (`dayPlan`): inside the 56 days before 09-05 there are four of them, the fifth miss of a count cut
+    // at the horizon, while the chain since the last workout (06-01) is longer
+    const pins = Object.fromEntries(['2026-07-01', '2026-07-15', '2026-08-01', '2026-08-15', '2026-09-01', '2026-09-05'].map(d => [d, 'push']))
+    const state = S({ week: {}, dayPlan: pins, workouts: [w('2026-06-01')] })
+    expect(nudgeFor(state, '2026-09-05', { enabled: true, after: 5, once: true })).toBeNull()
+    // closed inside the horizon (last workout 2026-08-20, then the pins of 09-01 and 09-05): d = 2, counted
+    const close = S({ week: {}, dayPlan: pins, workouts: [w('2026-08-20')] })
+    expect(nudgeFor(close, '2026-09-05', { enabled: true, after: 2, once: true })).toEqual(['push'])
+  })
+
+  it('the club object is read tolerantly: `after` is a whole number of at least 1, 4 otherwise; `once` is true unless it says otherwise', () => {
+    const state = daily({ workouts: [w('2026-09-01')] })
+    for (const club of [{ enabled: true }, { enabled: true, after: '4' }, { enabled: true, after: 0 }, { enabled: true, after: true }, { enabled: true, after: 3.5 }]) {
+      expect(asked(state, club, range(2, 10)), JSON.stringify(club)).toEqual([F, F, F, T, F, F, F, F])
+    }
+    expect(asked(state, { enabled: true, after: 4, once: null }, range(2, 7))).toEqual([F, F, F, T, F])
+  })
+
+  it('no club object is the journal\'s own rule, unchanged', () => {
+    const state = S({ workouts: [w('2026-09-04')] })
+    expect(nudgeFor(state, '2026-09-07', undefined)).toEqual(['push'])
+    expect(nudgeFor(state, '2026-09-11', null)).toEqual(['push'])
+    expect(nudgeFor(state, '2026-09-14')).toBeNull()
   })
 
   it('what comes back is the routine to nudge about, as upstream\'s does', () => {
-    expect(nudgeFor(daily(), '2026-09-10', { enabled: true, after: 4, once: true })).toEqual(['push'])
+    expect(nudgeFor(daily({ workouts: [w('2026-09-06')] }), '2026-09-10', ON_4_ONCE)).toEqual(['push'])
   })
 
-  it('`after` is clamped to 2..8 and falls back to 4; an object with no `enabled` is no object', () => {
-    expect(answers(daily(), { enabled: true, after: 1, once: true })).toEqual(answers(daily(), { enabled: true, after: 2, once: true }))
-    expect(answers(daily(), { enabled: true, after: 99, once: true })).toEqual(answers(daily(), { enabled: true, after: 8, once: true }))
-    expect(answers(daily(), { enabled: true, after: 'x', once: true })).toEqual(answers(daily(), { enabled: true, after: 4, once: true }))
-    expect(answers(daily(), { enabled: true, once: true })).toEqual(answers(daily(), { enabled: true, after: 4, once: true }))
-    expect(answers(daily(), {})).toEqual(answers(daily(), undefined))
-    expect(answers(daily(), null)).toEqual(answers(daily(), undefined))
-  })
-
-  it('an excused day is not a miss and does not count: 4 misses in a row means 4 days that were not excused', () => {
-    const notes = { '2026-09-08': { tag: 'sick', _ts: 1 } }
-    const s = daily({ dayNotes: notes })
-    // 07 (1) · 08 excused · 09 (2) · 10 (3) · 11 (4) · 12 (5)
-    expect(['2026-09-07', '2026-09-08', '2026-09-09', '2026-09-10', '2026-09-11', '2026-09-12'].map(iso => !!nudgeFor(s, iso, { enabled: true, after: 4, once: true })))
-      .toEqual([F, F, F, F, T, F])
-  })
-
-  it('a workout resets the count', () => {
-    const s = daily({ workouts: [w('2026-09-06'), w('2026-09-10')] })
-    const club = { enabled: true, after: 4, once: true }
-    // 11 (1) · 12 (2) · 13 (3) · 14 (4) · 15 (5)
-    expect(['2026-09-11', '2026-09-12', '2026-09-13', '2026-09-14', '2026-09-15'].map(iso => !!nudgeFor(s, iso, club))).toEqual([F, F, F, T, F])
-    expect(!!nudgeFor(s, '2026-09-11')).toBe(true)                                // upstream's: the first miss after a workout is nudged
-  })
-
-  it('unplanned days are skipped without breaking the chain: Monday, Wednesday, Friday plan, last workout Friday the 4th', () => {
-    const s = S({ workouts: [w('2026-09-04')] })                                  // week: Mon / Wed / Fri
-    const club = { enabled: true, after: 4, once: true }
-    // misses: Mon 07 (1) · Wed 09 (2) · Fri 11 (3) · Mon 14 (4) · Wed 16 (5)
-    expect(['2026-09-07', '2026-09-09', '2026-09-11', '2026-09-14', '2026-09-16'].map(iso => !!nudgeFor(s, iso, club))).toEqual([F, F, F, T, F])
-    // Tuesday is not a planned day: never a nudge, whatever the count
-    expect(nudgeFor(s, '2026-09-08', club)).toBeNull()
-    expect(nudgeFor(s, '2026-09-15', club)).toBeNull()
-  })
-
-  it('looks 28 days back with a club rule: a count of 8 on a plan of one session a week is still found', () => {
-    const weekly = S({ week: { 1: 'push' }, workouts: [w('2026-08-03')] })      // Mondays only
-    const club = { enabled: true, after: 4, once: true }
-    // Mondays after the 3rd of August: 10 (1) · 17 (2) · 24 (3) · 31 (4) — 28 days back from the 31st reaches the 3rd
-    expect(nudgeFor(weekly, '2026-08-31', club)).toEqual(['push'])
-    expect(nudgeFor(weekly, '2026-08-24', club)).toBeNull()
-    expect(nudgeFor(weekly, '2026-09-07', club)).toBeNull()
+  it('every table row as one grid: planned every day, no workout since the 6th, d = 1..10', () => {
+    const state = daily({ workouts: [w('2026-09-06')] })
+    const days = Array.from({ length: 10 }, (_, i) => sept(7 + i))
+    const grid = club => days.map(iso => !!nudgeFor(state, iso, club))
+    expect(grid(undefined)).toEqual([T, T, T, F, F, F, F, F, F, F])                                // legacy: d = 1..3
+    expect(grid({ enabled: true, after: 4, once: true })).toEqual([F, F, F, T, F, F, F, F, F, F])
+    expect(grid({ enabled: true, after: 4 })).toEqual([F, F, F, T, F, F, F, F, F, F])               // once is the default
+    expect(grid({ enabled: true, after: 4, once: false })).toEqual([F, F, F, T, T, T, F, F, F, F])
+    expect(grid({ enabled: true, after: 8, once: true })).toEqual([F, F, F, F, F, F, F, T, F, F])
+    expect(grid({ enabled: false, after: 4, once: true })).toEqual([F, F, F, F, F, F, F, F, F, F])
   })
 
   it('clubNudgeOf and nudgeAllowed say the same thing the table does', () => {
     expect(clubNudgeOf(undefined)).toBeNull()
-    expect(clubNudgeOf({})).toBeNull()
+    expect(clubNudgeOf(null)).toBeNull()
+    expect(clubNudgeOf({})).toEqual({ off: true })
     expect(clubNudgeOf({ enabled: false })).toEqual({ off: true })
     expect(clubNudgeOf({ enabled: true, after: 5, once: false })).toEqual({ off: false, after: 5, once: false })
     expect(clubNudgeOf({ enabled: true })).toEqual({ off: false, after: 4, once: true })
     expect(nudgeAllowed({})).toBe(true)
     expect(nudgeAllowed({ perms: {} })).toBe(true)
-    expect(nudgeAllowed({ perms: { nudge: {} } })).toBe(true)
+    expect(nudgeAllowed({ perms: { nudge: null } })).toBe(true)
     expect(nudgeAllowed({ perms: { nudge: { enabled: true } } })).toBe(true)
     expect(nudgeAllowed({ perms: { nudge: { enabled: false } } })).toBe(false)
+    expect(nudgeAllowed({ perms: { nudge: {} } })).toBe(false)
   })
 })
 

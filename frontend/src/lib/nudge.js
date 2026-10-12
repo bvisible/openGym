@@ -30,11 +30,10 @@ import { excusedOn } from './day-notes.js'
 export const NUDGE_TONES = ['friendly', 'guilt', 'drill']
 export const NUDGE_MAX_MISSES = 3
 export const NUDGE_LOOKBACK_DAYS = 14
-//// Neoffice — how far back a club's rule counts missed days: a club may ask for up to 8 missed sessions in a row, which on a plan of
-//// three a week is about a month.
-export const NUDGE_CLUB_LOOKBACK_DAYS = 28
-export const NUDGE_CLUB_AFTER_MIN = 2
-export const NUDGE_CLUB_AFTER_MAX = 8
+//// Neoffice — a club's rule counts back to the last workout, however long ago, up to this many days (8 weeks: a club may ask for 8 missed
+//// sessions in a row, which on a plan of one a week is two months). Not « once »: the nudge goes on this many planned days.
+export const NUDGE_CLUB_HORIZON_DAYS = 56
+export const NUDGE_CLUB_REPEATS = 3
 const EVENING = 20 * 60, LATEST = 21 * 60 + 30, AFTER_REMINDER = 120
 
 export const NUDGE_COPY = {
@@ -101,21 +100,25 @@ function missed(S, iso) {
   return ids
 }
 
-//// Neoffice — the club's rule, from S.perms.nudge = { enabled, after, once } (Gym Settings: the missed-day relance). Three answers:
-////   · no object at all (an older server, a journal not signed in to a club, the mobile build) → null: upstream's rule, unchanged;
-////   · { enabled: false } → { off: true }: the club sends no relance, whatever a member's own switch says;
-////   · { enabled: true, after, once } → the club's numbers (after clamped to 2..8, 4 when it is not a number; once unless it is false).
-//// An object that says nothing about `enabled` is read as no object: a malformed answer does not silence anyone.
+//// Neoffice — the club's rule, from S.perms.nudge = { enabled, after, once } (Gym Settings: the missed-day relance), read the way the server
+//// reads it (neoffice_gym api/training_day.py `nudge_for` and `_club_nudge_due`): the phone's own notifications and the server's pushes
+//// must never disagree. Two answers:
+////   · no object at all (null / undefined: an older server, a journal not signed in to a club, the mobile build) → null: upstream's rule;
+////   · an object → the club's rule: `enabled` not true (an object that does not say it included) → { off: true }, the club sends none,
+////     whatever a member's own switch says; else { off: false, after, once } with `after` a whole number of at least 1 (4 otherwise: a
+////     string, 0, a boolean, a fraction) and `once` true unless it says otherwise. The server keeps `after` inside 2..8 before it sends it.
 export function clubNudgeOf(club) {
-  if (!club || typeof club !== 'object') return null
-  if (club.enabled === false) return { off: true }
-  if (club.enabled !== true) return null
-  const n = Math.round(Number(club.after))
-  const after = Number.isFinite(n) ? Math.min(NUDGE_CLUB_AFTER_MAX, Math.max(NUDGE_CLUB_AFTER_MIN, n)) : 4
-  return { off: false, after, once: club.once !== false }
+  if (club == null) return null
+  const c = typeof club === 'object' && !Array.isArray(club) ? club : {}
+  if (!c.enabled) return { off: true }
+  return {
+    off: false,
+    after: Number.isInteger(c.after) && c.after >= 1 ? c.after : 4,
+    once: c.once == null ? true : Boolean(c.once),
+  }
 }
-/** Whether a member is offered the relance at all: not when the club switched it off (S.perms.nudge.enabled === false). */
-export const nudgeAllowed = S => !(S && S.perms && S.perms.nudge && S.perms.nudge.enabled === false)
+/** Whether a member is offered the relance at all: not when the club sends none (S.perms.nudge is there and does not switch it on). */
+export const nudgeAllowed = S => { const rule = clubNudgeOf(S && S.perms ? S.perms.nudge : undefined); return !(rule && rule.off) }
 
 /**
  * The routine ids to nudge about on `iso`, or null: not a missed day, or already 3 missed days in
@@ -124,8 +127,10 @@ export const nudgeAllowed = S => !(S && S.perms && S.perms.nudge && S.perms.nudg
  *
  * //// Neoffice — `club` (S.perms.nudge, see clubNudgeOf) replaces the back-off by the club's own count. With d = the number of missed
  * planned days in a row since the last workout, TODAY INCLUDED: the club off → never; once (the default) → only on d == after;
- * not once → on d = after, after + 1, after + 2 (at most three). No `club` → upstream's: d = 1, 2, 3. The same table, case for case, is
- * api/training_day.py's `nudge_for` in neoffice_gym and this file's test.
+ * not once → on d = after, after + 1, after + 2 (at most three). No `club` → upstream's: d = 1, 2, 3. A member who never trained, and a
+ * chain no workout closes inside NUDGE_CLUB_HORIZON_DAYS, are never nudged by a club's rule: cut at the horizon the count would stop
+ * growing and « once » would repeat every week. The same table, case for case, is api/training_day.py's `nudge_for` in neoffice_gym
+ * (tests/test_training_day.py `TestTheClubsOwnNudgeRule`) and this file's test.
  */
 export function nudgeFor(state, iso, club) {
   const rule = clubNudgeOf(club)
@@ -134,15 +139,27 @@ export function nudgeFor(state, iso, club) {
   const ids = missed(S, iso)
   if (!ids.length) return null
   const last = S.workouts.reduce((m, w) => (typeof w.d === 'string' && w.d < iso && w.d > m ? w.d : m), '')
-  const lookback = rule ? NUDGE_CLUB_LOOKBACK_DAYS : NUDGE_LOOKBACK_DAYS
+  if (rule) return clubDue(S, iso, last, rule) ? ids : null
   let misses = 0
   let d = dayBefore(iso)
-  for (let i = 0; i < lookback && d > last; i++, d = dayBefore(d)) {
-    if (missed(S, d).length && ++misses >= NUDGE_MAX_MISSES && !rule) return null
+  for (let i = 0; i < NUDGE_LOOKBACK_DAYS && d > last; i++, d = dayBefore(d)) {
+    if (missed(S, d).length && ++misses >= NUDGE_MAX_MISSES) return null
   }
-  if (!rule) return ids
+  return ids
+}
+
+//// Neoffice — whether the club's rule asks for a nudge on `iso`, a missed planned day (the caller checked it); `last` = the last workout before it.
+function clubDue(S, iso, last, rule) {
+  if (!last) return false
+  let misses = 0
+  let d = dayBefore(iso)
+  for (let i = 0; i < NUDGE_CLUB_HORIZON_DAYS && d > last; i++, d = dayBefore(d)) {
+    if (missed(S, d).length) misses++
+  }
+  // the horizon cut the chain before the last workout: the count would be short, and wrong for good
+  if (d > last) return false
   const n = misses + 1
-  return (rule.once ? n === rule.after : n >= rule.after && n <= rule.after + 2) ? ids : null
+  return rule.once ? n === rule.after : n >= rule.after && n < rule.after + NUDGE_CLUB_REPEATS
 }
 
 /** The day's line index: by date, so a day keeps its line and consecutive days rotate. */
