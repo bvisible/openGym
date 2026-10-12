@@ -31,7 +31,7 @@ const MAP_MAX_HEIGHT = 560
  * summary's muscle map for this one session (levelsOf over loadOfWorkouts), null when no set
  * reached a muscle the map can show — a card of only cardio has nothing to shade.
  */
-export function workoutCardModel(w, { unit, nameOf }) {
+export function workoutCardModel(w, { unit, nameOf, brand }) {
   const entries = w.entries || []
   const sets = entries.reduce((n, e) => n + (e.sets || []).reduce((m, s) => m + (isWarmupRow(s) ? 0 : doneUnits(s)), 0), 0)
   // New bests in the order the sheet lists the exercises, each named once — a combined session
@@ -58,6 +58,9 @@ export function workoutCardModel(w, { unit, nameOf }) {
     ],
     records: records.map(r => r.name),
     levels: MUSCLES.some(m => levels[m] > 0) ? levels : null,
+    //// Neoffice — the club signs the card. Upstream writes its own product name in the footer; a member who shares the
+    //// picture would advertise the software, not the club they train at. Empty = upstream's name, as before.
+    brand: typeof brand === 'string' ? brand.trim() : '',
   }
 }
 
@@ -188,7 +191,9 @@ export function layoutWorkoutCard(model, { measure, rtl = false, width = CARD_WI
 
   y += 64
   const height = Math.max(MIN_HEIGHT, Math.round(y + 34 + PAD))
-  items.push({ kind: 'text', text: 'openGym', x: start, y: height - PAD, size: 34, weight: 700, color: 'acc' })
+  //// Neoffice — the club's name (model.brand), cut to one line, in place of upstream's own; see workoutCardModel.
+  const [signature] = wrapText(model.brand || 'openGym', inner, s => measure(s, 700, 34), 1)
+  items.push({ kind: 'text', text: signature, x: start, y: height - PAD, size: 34, weight: 700, color: 'acc' })
   return { width, height, rtl, items }
 }
 

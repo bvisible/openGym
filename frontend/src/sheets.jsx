@@ -3149,7 +3149,11 @@ function ShareWorkoutImage({ w, nameOf, close }) {
   const st = useStore(s => s.S)
   const update = useStore(s => s.update)
   const withMap = st.shareMap !== false
-  const model = useMemo(() => workoutCardModel(w, { unit: st.unit, nameOf }), [w, st.unit])
+  //// Neoffice — the card is signed with the club's app title (the server's gym_boot.app_title, as the install banner and
+  //// the sign-in screen read it), not upstream's product name. Read off window rather than imported from lib/api.js:
+  //// the view tests replace that module, and a share sheet has no business failing for want of a title.
+  const clubTitle = (typeof window !== 'undefined' && window.gym_boot && window.gym_boot.app_title) || ''
+  const model = useMemo(() => workoutCardModel(w, { unit: st.unit, nameOf, brand: clubTitle }), [w, st.unit, clubTitle])
   // The last picture stays up while the next one is drawn, so the toggle never blanks the sheet.
   const [img, setImg] = useState(null)
   const [busy, setBusy] = useState(false)
