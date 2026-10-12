@@ -7,13 +7,13 @@
       "_definitions-BtaagZmP.js"
     ]
   },
-  "_coach-device-CmhTb3Z9.js": {
-    "file": "assets/coach-device-CmhTb3Z9.js",
+  "_coach-device-BTyire2C.js": {
+    "file": "assets/coach-device-BTyire2C.js",
     "name": "coach-device",
     "imports": [
       "_preload-helper-BqjX9scX.js",
       "_exercises-BV0nhMH0.js",
-      "_mobile-yC7ndujT.js"
+      "_mobile-Dyi23zbc.js"
     ],
     "dynamicImports": [
       "node_modules/@aparajita/capacitor-secure-storage/dist/esm/index.js"
@@ -133,12 +133,12 @@
     "file": "assets/media-refs-CBisMdU5.js",
     "name": "media-refs"
   },
-  "_media-store-BL94ieTd.js": {
-    "file": "assets/media-store-BL94ieTd.js",
+  "_media-store-BPumgFJ1.js": {
+    "file": "assets/media-store-BPumgFJ1.js",
     "name": "media-store",
     "imports": [
       "_media-refs-CBisMdU5.js",
-      "_mobile-yC7ndujT.js",
+      "_mobile-Dyi23zbc.js",
       "_media-store-fs-BUhtShKa.js"
     ]
   },
@@ -156,8 +156,8 @@
       "node_modules/@capacitor/app/dist/esm/index.js"
     ]
   },
-  "_mobile-yC7ndujT.js": {
-    "file": "assets/mobile-yC7ndujT.js",
+  "_mobile-Dyi23zbc.js": {
+    "file": "assets/mobile-Dyi23zbc.js",
     "name": "mobile",
     "imports": [
       "_preload-helper-BqjX9scX.js",
@@ -188,20 +188,20 @@
     "file": "assets/rolldown-runtime-QTnfLwEv.js",
     "name": "rolldown-runtime"
   },
-  "_sheets-DZe0XpPy.js": {
-    "file": "assets/sheets-DZe0XpPy.js",
+  "_sheets-BIPtMoxP.js": {
+    "file": "assets/sheets-BIPtMoxP.js",
     "name": "sheets",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
       "_i18n-BlLwJu2c.js",
       "_preload-helper-BqjX9scX.js",
-      "_useUI-CVNmttd1.js",
+      "_useUI-B0yvPY5o.js",
       "_exercises-BV0nhMH0.js",
-      "_coach-device-CmhTb3Z9.js",
+      "_coach-device-BTyire2C.js",
       "_media-refs-CBisMdU5.js",
       "_history-BPR-O4tZ.js",
-      "_mobile-yC7ndujT.js",
-      "_media-store-BL94ieTd.js",
+      "_mobile-Dyi23zbc.js",
+      "_media-store-BPumgFJ1.js",
       "_media-store-fs-BUhtShKa.js",
       "_starter-BYZE9fXs.js",
       "_media-prefetch-BGtZOCpp.js",
@@ -209,7 +209,7 @@
       "_onerm-DkNlZCeM.js"
     ],
     "dynamicImports": [
-      "_useUI-CVNmttd1.js",
+      "_useUI-B0yvPY5o.js",
       "src/lib/media-ingest.js",
       "src/lib/body-paths.js"
     ]
@@ -222,31 +222,31 @@
       "_history-BPR-O4tZ.js"
     ]
   },
-  "_useUI-CVNmttd1.js": {
-    "file": "assets/useUI-CVNmttd1.js",
+  "_useUI-B0yvPY5o.js": {
+    "file": "assets/useUI-B0yvPY5o.js",
     "name": "useUI",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
       "_i18n-BlLwJu2c.js",
       "_preload-helper-BqjX9scX.js",
       "_exercises-BV0nhMH0.js",
-      "_coach-device-CmhTb3Z9.js",
+      "_coach-device-BTyire2C.js",
       "_media-refs-CBisMdU5.js",
       "_history-BPR-O4tZ.js",
-      "_mobile-yC7ndujT.js",
-      "_media-store-BL94ieTd.js"
+      "_mobile-Dyi23zbc.js",
+      "_media-store-BPumgFJ1.js"
     ],
     "dynamicImports": [
       "_dist-Cawi-vbT.js",
       "node_modules/@capacitor/app/dist/esm/index.js",
-      "_useUI-CVNmttd1.js",
-      "_sheets-DZe0XpPy.js",
+      "_useUI-B0yvPY5o.js",
+      "_sheets-BIPtMoxP.js",
       "src/lib/demoSeed.js",
       "node_modules/@capacitor/local-notifications/dist/esm/index.js"
     ]
   },
   "index.html": {
-    "file": "assets/index-DLpW0Dl_.js",
+    "file": "assets/index-ZyaIvE4f.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -254,13 +254,13 @@
       "_rolldown-runtime-QTnfLwEv.js",
       "_i18n-BlLwJu2c.js",
       "_preload-helper-BqjX9scX.js",
-      "_useUI-CVNmttd1.js",
+      "_useUI-B0yvPY5o.js",
       "_exercises-BV0nhMH0.js",
-      "_coach-device-CmhTb3Z9.js",
+      "_coach-device-BTyire2C.js",
       "_media-refs-CBisMdU5.js",
       "_history-BPR-O4tZ.js",
-      "_mobile-yC7ndujT.js",
-      "_sheets-DZe0XpPy.js",
+      "_mobile-Dyi23zbc.js",
+      "_sheets-BIPtMoxP.js",
       "_starter-BYZE9fXs.js",
       "_onerm-DkNlZCeM.js"
     ],
@@ -653,7 +653,7 @@
     "isDynamicEntry": true
   },
   "src/lib/coach-demo.js": {
-    "file": "assets/coach-demo-eJgO7bTX.js",
+    "file": "assets/coach-demo-hHKV1NdR.js",
     "name": "coach-demo",
     "src": "src/lib/coach-demo.js",
     "isDynamicEntry": true,
@@ -666,7 +666,7 @@
     ]
   },
   "src/lib/coach-local.js": {
-    "file": "assets/coach-local-BUGDqXtk.js",
+    "file": "assets/coach-local-BIA16Y67.js",
     "name": "coach-local",
     "src": "src/lib/coach-local.js",
     "isDynamicEntry": true,
@@ -674,7 +674,7 @@
       "_i18n-BlLwJu2c.js",
       "_preload-helper-BqjX9scX.js",
       "_exercises-BV0nhMH0.js",
-      "_coach-device-CmhTb3Z9.js",
+      "_coach-device-BTyire2C.js",
       "_history-BPR-O4tZ.js",
       "index.html"
     ],
@@ -683,7 +683,7 @@
     ]
   },
   "src/lib/demoSeed.js": {
-    "file": "assets/demoSeed-BToaFwNO.js",
+    "file": "assets/demoSeed-WalX5yVc.js",
     "name": "demoSeed",
     "src": "src/lib/demoSeed.js",
     "isDynamicEntry": true,
@@ -694,13 +694,13 @@
     ]
   },
   "src/lib/media-ingest.js": {
-    "file": "assets/media-ingest-EeGREHl0.js",
+    "file": "assets/media-ingest-B6K7Fq_3.js",
     "name": "media-ingest",
     "src": "src/lib/media-ingest.js",
     "isDynamicEntry": true,
     "imports": [
       "_media-refs-CBisMdU5.js",
-      "_media-store-BL94ieTd.js",
+      "_media-store-BPumgFJ1.js",
       "_media-store-fs-BUhtShKa.js",
       "_media-limits--jtE1OOr.js"
     ]
