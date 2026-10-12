@@ -31,8 +31,11 @@ donne la carte complète de la divergence. Les quatre familles :
 
 ### Ce qu'on ne touche PAS
 
-- **`frontend/src/instr/fr.js`** — 7 710 consignes d'exercice, traduites et **vouvoyées**.
-  L'amont ne le modifie jamais : à chaque merge, le prendre tel quel de notre côté.
+- **`frontend/src/instr/fr.js`** et **`frontend/src/exercise-desc/fr.js`** — les consignes d'exercice (étapes) et
+  leurs descriptions d'une ou deux phrases, en français et **vouvoyées**. L'amont n'a que l'anglais pour les
+  descriptions et pour les étapes des exercices nés en v1.4 (4 308) : tout le reste est à nous. L'amont ne touche jamais
+  `instr/fr.js` (à chaque merge, le prendre tel quel de notre côté) et n'a pas `exercise-desc/fr.js`. Ce que la nouvelle
+  version ajoute se traduit après le merge : voir « Traduire le catalogue » plus bas.
 - **Le plugin Umami** de `vite.config.js` — conservé tel quel. Il ne s'injecte que si
   `VITE_UMAMI_SRC` **et** `VITE_UMAMI_ID` sont posés, donc un build Neoffice reste sans télémétrie.
 - **Les tests** — tous (`npm --prefix frontend test`) doivent passer avant tout push. Ils comprennent
@@ -113,7 +116,11 @@ et ne pousser qu'une fois les tests verts.
   garder les nôtres, y ajouter leurs nouveautés.
 - **`locales/*.js`** — leurs nouvelles chaînes + nos surcharges. Les deux, jamais
   l'un à la place de l'autre.
-- **`instr/fr.js`** — NOTRE version, toujours (7 710 consignes vouvoyées).
+- **`instr/fr.js`**, **`exercise-desc/fr.js`** — NOTRE version, toujours (consignes et descriptions vouvoyées, pour tout le
+  catalogue). Après le merge, traduire ce que la nouvelle version ajoute (« Traduire le catalogue » ci-dessous) ;
+  `lib/catalogue-coverage.neoffice.test.js` reste rouge tant qu'un exercice n'a pas ses deux textes en français.
+- **`lib/workout-card.js`** — la carte de partage d'une séance est signée du nom du club (`model.brand`, lu dans
+  `window.gym_boot.app_title` par `ShareWorkoutImage` de `sheets.jsx`), pas de « openGym » : à rejouer si l'amont réécrit la carte.
 - **`exercise-names/*.js`** — ceux de l'amont, tels quels (générés par `scripts/catalogue/build.mjs`, « do not
   edit »). Nos 1 324 noms français, dans les mots d'une salle (« à la poulie »), sont dans `club-names/fr.js` et
   posés par-dessus au chargement (`lib/i18n.js` → `lib/club-names.js`, qui lève aussi la première lettre des noms
@@ -130,6 +137,33 @@ et ne pousser qu'une fois les tests verts.
 > L'amont a son propre `CLAUDE.md`, qui décrit SON projet (docker, api, mcp,
 > website). Il est écrasé par celui-ci à chaque merge — le lire avec
 > `git show upstream/main:CLAUDE.md` quand on a besoin de leur carte.
+
+## Traduire le catalogue (consignes et descriptions)
+
+L'amont livre les étapes et les descriptions des exercices en anglais, et ses étapes françaises pour une partie
+seulement du catalogue ; à la v1.4.1 il a 5 632 exercices, nous en avions traduit 1 324. Un membre français ne doit pas
+lire d'anglais au milieu d'une fiche : après chaque merge qui ajoute des exercices, on traduit l'écart.
+**Haiku seulement** (sous-agents `model: haiku`, règle de la maison pour toute traduction).
+
+```bash
+cd frontend
+node scripts/translation-batches.mjs fr /tmp/gym-translation   # écrit steps-batch-NN.jsonl (150 exercices), desc-batch-NN.jsonl (250),
+                                                               # + les références de vocabulaire ; affiche ce qui manque
+# un sous-agent Haiku par lot, avec scripts/translation-prompts/steps-fr.md ou desc-fr.md (NN = le numéro du lot)
+node scripts/translation-merge.mjs fr /tmp/gym-translation     # contrôle (ids, nombre d'étapes, vide, tutoiement…), puis écrit
+                                                               # instr/fr.js et exercise-desc/fr.js (jamais sur un échec dur)
+npm test                                                       # dont lib/catalogue-coverage.neoffice.test.js
+```
+
+- **Des lots de 150 exercices pour les étapes, de 250 pour les descriptions** : au-delà, la réponse ne tient plus dans un
+  seul message et l'agent la coupe en fragments qu'il doit réassembler (400 descriptions : 16 minutes et 266 000 jetons,
+  contre 7 minutes pour 150 étapes).
+- Chaque ligne d'un lot porte le **nom affiché** de l'exercice : le traducteur reprend le mot du nom pour l'engin (« au
+  câble » ou « à la poulie »), pour que la fiche ne dise pas deux choses.
+- Un défaut dans le nom d'amont (« au rouleau » pour un ballon de stabilité, vu en traduisant) se corrige dans
+  `club-names/fr.js`, pas dans les étapes.
+- Ne jamais coller un texte traduit à la main dans `instr/fr.js` : `translation-merge.mjs` garde l'ordre des clés de
+  `instr/en.js` et normalise les apostrophes.
 
 ## Le service worker vit à la racine, pas sous /gym/
 
