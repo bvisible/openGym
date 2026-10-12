@@ -114,3 +114,40 @@ describe('the workout screen at each detail level', () => {
     expect(text).toContain('+ Drop')
   })
 })
+
+//// Neoffice — the exercise menu of the live session (the « ⋯ » of an exercise) at each level: plate loading comes from Normal up, and at
+//// Simple the line under « Exercise settings » no longer names progression, since the sheet it opens no longer holds it (12.10).
+describe('the exercise menu at each detail level', () => {
+  const menuOf = (level, extra = {}) => {
+    at(level, plainSession())
+    if (Object.keys(extra).length) act(() => { useStore.setState(s => ({ S: { ...s.S, ...extra } })) })
+    const more = [...document.querySelectorAll('button.iconbtn')].find(b => b.getAttribute('aria-label') === 'More')
+    act(() => { more.click() })
+    const sheet = useUI.getState().sheets.at(-1)
+    const box = document.createElement('div')
+    document.body.appendChild(box)
+    const root = createRoot(box)
+    mounted.push(root)
+    act(() => root.render(sheet.render(() => {})))
+    const rows = [...box.querySelectorAll('.menu-item')].map(r => [r.querySelector('.tt')?.textContent, r.querySelector('.ss')?.textContent])
+    return { titles: rows.map(r => r[0]), subOf: title => rows.find(r => r[0] === title)?.[1] }
+  }
+
+  it('Simple: no plate loading, and nothing on « Exercise settings » that names progression', () => {
+    const m = menuOf('simple')
+    expect(m.titles).toContain('Exercise settings')
+    expect(m.titles).not.toContain('Plate loading')
+    expect(m.subOf('Exercise settings') || '').not.toMatch(/progression/i)
+  })
+
+  it.each(['normal', 'full'])('%s: plate loading is offered, and the settings line says what the sheet holds', level => {
+    const m = menuOf(level)
+    expect(m.titles).toContain('Plate loading')
+    expect(m.subOf('Exercise settings')).toMatch(/progression/i)
+  })
+
+  it('Simple keeps plate loading for an exercise that has a bar weight of its own', () => {
+    const m = menuOf('simple', { barWeights: { squat: 15 } })
+    expect(m.titles).toContain('Plate loading')
+  })
+})

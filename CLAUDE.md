@@ -29,6 +29,25 @@ donne la carte complète de la divergence. Les quatre familles :
 | **Push** | `lib/push.js`, `store/useUI.js`, `opengym/www/gym_sw.js` | Le serveur du club envoie les notifications depuis le 07.10 (v1.3.10) : `neoffice_gym` `api/push.py` (abonnements, clé VAPID par instance, rappel du jour, rappel de séance manquée, test). `lib/push.js` parle à `/api/method/neoffice_gym.api.push.*` ; le jeton CSRF rejoint l'identifiant d'appareil dans le cache que lit le worker. L'alerte de fin de repos par push n'est **pas** envoyée (no-op nommé dans `useUI.js`) : le maintien d'écran et `maybeRestNotification` la couvrent. |
 | **Build** | `vite.config.js`, `.gitignore`, `opengym/` | Coquille d'app Frappe (`hooks.py`, `www/gym_sw.js`), build **commité** dans `opengym/public/frontend` — la flotte ne recompile jamais une SPA sur une instance. |
 
+### Ce que le club règle, et que le carnet applique
+
+Un club décide de la densité de son carnet et de ses rappels dans `Gym Settings` (plugin privé) ; le carnet lit ces
+choix dans `S.perms`, que le serveur écrit à chaque synchronisation. **Une clé absente veut dire « comme avant »** :
+un serveur plus ancien que le carnet ne change rien.
+
+| Sujet | Fichiers | Règle |
+|---|---|---|
+| **Niveau de détail** (Simple / Normal / Avancé) | `lib/level-visibility.js`, `sheets.jsx`, `views/Workout.jsx`, `views/FocusView.jsx`, `views/RoutineEdit.jsx` | Quatre contrôles montent au niveau Normal : le plan de séries (« Reps différentes par série »), « Par côté », le chargement des disques, la progression (règle de l'exercice et de la routine, routine de décharge). Au niveau Simple ils restent pour ce qui en porte déjà un (une règle écrite, une barre à soi) : on cache le CONTRÔLE, jamais la DONNÉE. |
+| **Rappel de jour manqué** | `lib/nudge.js` (`nudgeFor(état, date, club)`, `clubNudgeOf`, `nudgeAllowed`), `lib/mobile.js`, `views/Settings.jsx`, `views/settings-pages.js` | Lit `S.perms.nudge = {enabled, after, once}`. d = jours PRÉVUS manqués d'affilée depuis la dernière séance, aujourd'hui compris (jour excusé : ni manqué ni rupture ; jour sans séance prévue : sauté ; une séance remet à zéro ; 28 jours de recul avec une règle du club, 14 sans). Éteint : jamais. Allumé et `once` : seulement quand d vaut `after`. Allumé sans `once` : d de `after` à `after + 2`. Clé absente : l'ancien rappel, d de 1 à 3. Les lignes de réglage du rappel disparaissent quand le club l'a éteint. **La règle jumelle est `neoffice_gym` `api/training_day.py::nudge_for` : les deux se tiennent alignées sur la même table de cas.** |
+| **Progression par défaut** | `lib/progression.js` (`clubAutoProgression`, `policyFor(…, S)`), `views/RoutineEdit.jsx` | `S.perms.autoProgression === false` : « Pas de progression automatique » pour un exercice ou une routine sans règle à eux. Clé absente : progression linéaire, comme avant. |
+| **Un réglage du club arrive sur un téléphone déjà synchronisé** | `lib/sync-merge.js` (`takeServerOwned`), `store/useStore.js` (`mergeInto`) | `perms`, `club` et `clubPicks` sont au serveur : à chaque tirage on prend sa copie. La fusion par `_ts` donne l'égalité à l'appareil, donc un réglage changé au club n'arrivait jamais sur un téléphone qui avait déjà tiré. **Côté serveur, la révision (`current_rev`) doit bouger quand `Gym Settings` change**, sinon le téléphone ne tire pas. |
+| **Accueil** | `components/RecentWorkouts.jsx`, `lib/recent-workouts.js`, `views/Home.jsx` | « Derniers entraînements » : les trois dernières séances, chacune avec son bouton « Partager », et « Tout » vers l'historique, après la carte de la semaine. Sans plan : une ligne (« Bienvenue ! » et deux petits boutons) à la place de la grande carte ; une rotation vide est une ligne, non une carte. |
+| **Partager une séance en un geste** | `sheets.jsx` (`WorkoutRow({ w, onClick, onShare })`, `shareWorkoutImageSheet`), `views/Stats.jsx`, `views/History.jsx` | Chaque ligne de séance (Accueil, Statistiques, Historique, jour du calendrier) a un bouton « Partager » qui ouvre la même feuille que « Partager en image » du détail. |
+| **Choix du club dans le sélecteur d'exercice** | `sheets.jsx` (`exercisePicker`) | Les exercices choisis par le club passent en tête de la liste (partition stable), dans la liste entière et dans la recherche. |
+
+⚠️ **Aucune de ces fonctions n'ajoute une chaîne à traduire** : elles reprennent des clés existantes, parce que
+`npm run i18n` exige chaque clé dans les 18 langues. Une clé neuve se traduit dans les 18 (Haiku seulement).
+
 ### Ce qu'on ne touche PAS
 
 - **`frontend/src/instr/fr.js`** et **`frontend/src/exercise-desc/fr.js`** — les consignes d'exercice (étapes) et

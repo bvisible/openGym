@@ -17,6 +17,8 @@ import { weightIncrement, stepWeight } from '../lib/progression.js'
 import { speedUnitOf, toSpeed, fromSpeed } from '../lib/speed.js'
 import { effortPickerSheet, exerciseDetailSheet, exerciseHistorySheet, exerciseNoteSheet, menuSheet, barWeightSheet } from '../sheets.jsx'
 import { baseWeightFor, inventoryFor, loadKindFor, rowLoad } from '../lib/plates.js'
+//// Neoffice — what the detail level shows (lib/level-visibility.js): the exercise menu offers neither progression nor plate loading at Simple.
+import { showsPlateLoading, showsProgressionControls } from '../lib/level-visibility.js'
 import { ownedWeightsFor, stepOwned } from '../lib/dumbbells.js'
 import Icon from '../components/Icon.jsx'
 import { Button, Stepper } from '../components/ui.jsx'
@@ -226,9 +228,10 @@ export default function FocusView({
       { icon: 'pencil', label: entry.note ? t('Edit note') : t('Add note'), onClick: () => exerciseNoteSheet(entryIdx) },
       { icon: 'info', label: t('Details'), onClick: () => exerciseDetailSheet(exOr(entry.id)) },
       { icon: 'history', label: t('History'), onClick: () => exerciseHistorySheet(entry.id) },
-      { icon: 'chartLine', label: t('Progression settings'), onClick: onProgressionSettings },
+      //// Neoffice — the same gates as the live session's menu (lib/level-visibility.js): no progression, no plate loading at Simple.
+      showsProgressionControls(S, entry.target) && { icon: 'chartLine', label: t('Progression settings'), onClick: onProgressionSettings },
       onNoProg && { icon: 'pause', label: t('Don’t count for progression'), sub: t('This exercise, this session only'), on: entry.noProg === true, onClick: () => onNoProg(entry.noProg !== true) },
-      mode === 'reps' && { icon: 'plate', label: t('Plate loading'), onClick: () => barWeightSheet(entry.id, { ...(entry.target || {}), id: entry.id }) },
+      mode === 'reps' && showsPlateLoading(S, entry.id) && { icon: 'plate', label: t('Plate loading'), onClick: () => barWeightSheet(entry.id, { ...(entry.target || {}), id: entry.id }) },
       onPairPrev && { icon: 'link', label: t('Make superset with previous'), onClick: onPairPrev },
       onPairNext && { icon: 'link', label: t('Make superset with next'), onClick: onPairNext },
       { icon: 'shuffle', label: t('Swap exercise'), onClick: onSwap, disabled: busy },

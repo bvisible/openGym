@@ -15,6 +15,8 @@ import LineChart from '../components/LineChart.jsx'
 import Icon from '../components/Icon.jsx'
 import InstallBanner from '../components/InstallBanner.jsx'
 import QueueRow from '../components/QueueRow.jsx'
+//// Neoffice — « Recent workouts » on Home, each with a visible Share button (components/RecentWorkouts.jsx).
+import RecentWorkouts from '../components/RecentWorkouts.jsx'
 import { queueOf, queueView, weekTally, pinState } from '../lib/queue.js'
 import { scheduleModeOf } from '../lib/rotation.js'
 import { useConnectionTrouble } from '../components/SyncBanner.jsx'
@@ -198,6 +200,9 @@ export default function Home() {
   // in a coach week, the queue's sessions and your own days together (lib/queue.js weekTally).
   const { done: doneThisWeek, planned: plannedPerWeek } = weekTally(S, todayISO())
   const bwPoints = S.bodyweight.slice(-30).map(b => ({ t: b.t || new Date(b.d).getTime(), y: b.w, d: b.d }))
+  //// Neoffice — no routine and nothing running: the plan's set-up is ONE compact row below (it used to be a big « Welcome! » card,
+  //// and a second « No rotation yet » block inside the week card, on the screen a member opens the app on).
+  const noPlan = !S.routines.length && !S.active
 
   // today's session shown right under the week strip
   const onToday = () => { if (S.active) nav('/workout'); else if (todayRoutines.length) startFlow(effectiveRoutineIds(S, todayISO())); else dayOverrideSheet(todayISO()) }
@@ -299,9 +304,10 @@ export default function Home() {
       {/* A coach week runs by order, not by weekday, so its progress row stands in for the
           seven dots (components/QueueRow.jsx). The today row below stays as it is: the queue's
           next session reaches it through effectiveRoutineIds like any planned routine. */}
-      {rotating ? (queue ? <QueueRow S={S} today={todayISO()} onStart={onQueueStart} managed={managedQueue} /> : <div className="empty">
-        {t('No rotation yet. Add routines to it in Plan.')}
-        <div style={{ marginTop: 10 }}><Button size="sm" variant="tinted" onClick={() => nav('/plan')}>{t('Set up in Plan')}</Button></div>
+      {/* //// Neoffice — the empty rotation as one line with its button, and not at all when the compact plan row below already says it. */}
+      {rotating ? (queue ? <QueueRow S={S} today={todayISO()} onStart={onQueueStart} managed={managedQueue} /> : noPlan ? null : <div className="row between small muted" style={{ gap: 10, alignItems: 'center', padding: '2px 0 10px' }}>
+        <span>{t('No rotation yet. Add routines to it in Plan.')}</span>
+        <Button size="sm" variant="tinted" onClick={() => nav('/plan')}>{t('Set up in Plan')}</Button>
       </div>) : <>
         <div className="row between" style={{ marginBottom: 8 }}>
           <button className="iconbtn" style={{ width: 30, height: 30, fontSize: 15 }} onClick={() => setWeekOffset(w => w - 1)} aria-label={t('Previous week')}><Icon name="chevronLeft" /></button>
@@ -347,6 +353,9 @@ export default function Home() {
       </div>}
     </div>
 
+    {/* //// Neoffice — the last three sessions, each with a visible Share button: sharing a session is one tap from the home screen. */}
+    <RecentWorkouts S={S} nav={nav} />
+
     {/* Jump to the gym check-in cards (QR membership codes). Shown here as a quick tap on
         arrival at the gym; folds away per user via the "Gym check-in" switch in Settings. */}
     {S.checkIn !== false && (
@@ -364,15 +373,15 @@ export default function Home() {
       </div>
     )}
 
-    {!S.routines.length && !S.active && (
-      <div className="card">
-        <div className="row" style={{ gap: 10, marginBottom: 6 }}>
-          <span className="lrow-i"><Icon name="calendar" /></span>
-          <div className="big" style={{ fontSize: 22 }}>{t('Welcome!')}</div>
+    {/* //// Neoffice — one compact row, below the recent workouts when there are some: a title and two small buttons. Upstream's
+        //// big « Welcome! » card took most of the screen on an account that had nothing to show yet. */}
+    {noPlan && (
+      <div className="card plan-compact">
+        <div className="plan-compact-row">
+          <div className="plan-compact-title">{t('Welcome!')}</div>
+          <Button size="sm" variant="primary" icon="clipboard" onClick={starterPlanSheet}>{t('Load starter plan')}</Button>
+          <Button size="sm" onClick={() => nav('/plan')}>{t('Build my own plan')}</Button>
         </div>
-        <div className="muted small" style={{ marginBottom: 12 }}>{t('Set up your weekly routine to get going, or grab a ready-made starter plan.')}</div>
-        <Button variant="primary" icon="clipboard" onClick={starterPlanSheet}>{t('Load starter plan')}</Button>
-        <div style={{ height: 8 }} /><Button onClick={() => nav('/plan')}>{t('Build my own plan')}</Button>
       </div>
     )}
 

@@ -28,7 +28,8 @@ import { POLICIES_FOR, POLICY_NAME, POLICY_DESC } from '../lib/progression.js'
 import BodyMap from '../components/BodyMap.jsx'
 import { loadOfRoutine, rankOf, MUSCLE_NAME } from '../lib/muscles.js'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
-import { showsSupersetControl } from '../lib/level-visibility.js'
+import { showsSupersetControl, showsProgressionControls } from '../lib/level-visibility.js'
+import { clubAutoProgression } from '../lib/progression.js'
 
 export const ROUTINE_LONG_PRESS_MS = 380
 export const ROUTINE_DRAG_SLOP = 8
@@ -476,7 +477,10 @@ export default function RoutineEdit() {
   //// Neoffice — the rule the progression engine applies (lib/progression.js policyFor): a value it
   //// does not know is no progression. The row showed such a value raw (« none », written by the
   //// club's server for its sample program) over the description of linear progression.
-  const policy = r.prog ? (POLICIES_FOR.reps.includes(r.prog) ? r.prog : 'off') : 'linear'
+  //// Neoffice — what a routine with no rule of its own applies is the club's default (S.perms.autoProgression, lib/progression.js).
+  const policy = r.prog ? (POLICIES_FOR.reps.includes(r.prog) ? r.prog : 'off') : (clubAutoProgression(S) ? 'linear' : 'off')
+  //// Neoffice — the routine's progression rule and its « Deload routine » row are the progression section: from the Normal level up, kept once the routine has a rule or is a deload routine.
+  const showProg = showsProgressionControls(S, r)
 
   return <div className="narrow">
     <div className="hdr">
@@ -498,35 +502,37 @@ export default function RoutineEdit() {
       <div className="small muted">{t('Your coach writes your plan. You can train it and log your sets — the routines themselves are theirs to change.')}</div>
     </div>}
 
-    <div className="sect-b" style={{ marginBottom: 16 }}>
-      {/* //// Neoffice — the rule as the engine reads it (`policy`), and as text when the club writes the plan. */}
-      {mayEdit
-        ? <SelectRow icon="chartLine" title={t('Progression')} sheetTitle={t('Progression')}
-          value={policy} onChange={v => update(s => { s.routines.find(x => x.id === id).prog = v })}
-          options={POLICIES_FOR.reps.map(p => ({ value: p, label: t(POLICY_NAME[p]), subtitle: t(POLICY_DESC[p]) }))} />
-        : <Row icon="chartLine" title={t('Progression')} value={t(POLICY_NAME[policy])} />}
-      {/* Two controls that read alike and are not (issue #294). Progression picks how this
-          routine's own targets move, and "No automatic progression" keeps them where they are.
-          This switch decides whether the routine's workouts count at all: a deload routine's
-          sessions open at its own numbers and are never the baseline the next regular session
-          progresses from (session-start.js, history.js entryExcluded). */}
-      {/* //// Neoffice — when the club writes the plan: shown only when on, without its switch. */}
-      {(mayEdit || r.excludeFromProgression === true) && <Row icon="chartLineSlash" iconTint="var(--orange)" title={t('Deload routine')}
-        subtitle={t('Its workouts do not count toward progression. They still show in history and statistics.')}>
-        {mayEdit && <Switch checked={r.excludeFromProgression === true} onChange={v => update(s => {
-          const routine = s.routines.find(x => x.id === id)
-          if (v) routine.excludeFromProgression = true
-          else delete routine.excludeFromProgression
-          //// Neoffice — the switch is drawn only when the member may edit (mayEdit).
-        })} />}
-      </Row>}
-    </div>
-    <div className="small dim" style={{ margin: '-10px 2px 16px' }}>
-      {r.excludeFromProgression
-        ? t('A deload routine opens at the numbers set here, so the progression above does not apply to it.') + ' ' + t('The next regular target continues from the last included workout.')
-        //// Neoffice — the rule as the engine reads it (`policy`), not the raw value.
-        : t(POLICY_DESC[policy]) + ' ' + t('Applies to every exercise in this routine that does not set its own rule.')}
-    </div>
+    {showProg && <>
+      <div className="sect-b" style={{ marginBottom: 16 }}>
+        {/* //// Neoffice — the rule as the engine reads it (`policy`), and as text when the club writes the plan. */}
+        {mayEdit
+          ? <SelectRow icon="chartLine" title={t('Progression')} sheetTitle={t('Progression')}
+            value={policy} onChange={v => update(s => { s.routines.find(x => x.id === id).prog = v })}
+            options={POLICIES_FOR.reps.map(p => ({ value: p, label: t(POLICY_NAME[p]), subtitle: t(POLICY_DESC[p]) }))} />
+          : <Row icon="chartLine" title={t('Progression')} value={t(POLICY_NAME[policy])} />}
+        {/* Two controls that read alike and are not (issue #294). Progression picks how this
+            routine's own targets move, and "No automatic progression" keeps them where they are.
+            This switch decides whether the routine's workouts count at all: a deload routine's
+            sessions open at its own numbers and are never the baseline the next regular session
+            progresses from (session-start.js, history.js entryExcluded). */}
+        {/* //// Neoffice — when the club writes the plan: shown only when on, without its switch. */}
+        {(mayEdit || r.excludeFromProgression === true) && <Row icon="chartLineSlash" iconTint="var(--orange)" title={t('Deload routine')}
+          subtitle={t('Its workouts do not count toward progression. They still show in history and statistics.')}>
+          {mayEdit && <Switch checked={r.excludeFromProgression === true} onChange={v => update(s => {
+            const routine = s.routines.find(x => x.id === id)
+            if (v) routine.excludeFromProgression = true
+            else delete routine.excludeFromProgression
+            //// Neoffice — the switch is drawn only when the member may edit (mayEdit).
+          })} />}
+        </Row>}
+      </div>
+      <div className="small dim" style={{ margin: '-10px 2px 16px' }}>
+        {r.excludeFromProgression
+          ? t('A deload routine opens at the numbers set here, so the progression above does not apply to it.') + ' ' + t('The next regular target continues from the last included workout.')
+          //// Neoffice — the rule as the engine reads it (`policy`), not the raw value.
+          : t(POLICY_DESC[policy]) + ' ' + t('Applies to every exercise in this routine that does not set its own rule.')}
+      </div>
+    </>}
 
     {missingCount > 0 && <div className="card" style={{ marginBottom: 16, borderColor: 'var(--orange)' }}>
       <div className="row" style={{ gap: 8, alignItems: 'center' }}>

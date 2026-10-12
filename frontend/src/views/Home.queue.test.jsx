@@ -17,6 +17,8 @@ vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))
 vi.mock('../sheets.jsx', () => ({
   starterPlanSheet: vi.fn(), bwSheet: vi.fn(), goalSheet: vi.fn(), dayOverrideSheet: vi.fn(),
   calendarSheet: vi.fn(), startFlow: vi.fn(), bwDeltaColor: () => '',
+  //// Neoffice — Home's « Recent workouts » (components/RecentWorkouts.jsx) draws the sheet's own row; these tests are about the plan.
+  WorkoutRow: () => null, workoutDetailSheet: vi.fn(), shareWorkoutImageSheet: vi.fn(),
 }))
 
 const routines = [

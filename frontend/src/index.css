@@ -1060,6 +1060,15 @@ body.chips-dragging *{cursor:inherit}
 .pp-label-before{inset-inline-start:10px}
 .pp-label-after{inset-inline-end:10px}
 .wrow-media .icn{font-size:13px}
+/* //// Neoffice — the Share button of a workout row (WorkoutRow onShare): visible, small, and its own tap target beside the row's. */
+.wrow-share{display:inline-flex;align-items:center;gap:5px;flex:none;border:0;cursor:pointer;font:inherit;font-size:13px;font-weight:500;line-height:1;padding:7px 10px;border-radius:99px;background:var(--acc-soft);color:var(--acc)}
+.wrow-share .icn{font-size:15px}
+.wrow-share:active{opacity:.7}
+/* //// Neoffice — Home's plan set-up as one compact row (a title and two small buttons) in place of the two big cards. */
+.plan-compact{padding:12px 14px}
+.plan-compact .plan-compact-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.plan-compact .plan-compact-title{flex:1 1 auto;min-width:0;font-weight:600;font-size:16px}
+.plan-compact .btn.sm{padding:6px 11px;font-size:13px}
 .mviewer{
   position:absolute;inset:0;background:#000;color:#fff;display:flex;flex-direction:column;
   padding:var(--sat) 0 var(--sab);animation:pop-fade .2s var(--ease);

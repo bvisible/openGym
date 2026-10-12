@@ -14,6 +14,7 @@ import {
   showsEffortSetting, showsIntensifier, showsSupersetControl, showsWarmupRamp,
   showsSetIntensifierChips, showsInSessionWarmup, showsRestPauseSetting,
   showsFailureControl, showsBackoffControl, showsTripleProgression, showsOneRmFormula,
+  showsSetPlanControl, showsPerSideControl, showsPlateLoading, showsProgressionControls,
 } from './level-visibility.js'
 
 const FULL = { level: 'full' }
@@ -198,5 +199,53 @@ describe('v1.4 controls — hidden for a beginner, never from under what is in u
     expect(showsTripleProgression(SIMPLE, { prog: 'triple' })).toBe(true)
     expect(showsTripleProgression(SIMPLE, { prog: 'double' })).toBe(false)
     expect(showsOneRmFormula({ level: 'simple', oneRmFormula: 'brzycki' })).toBe(true)
+  })
+})
+
+//// Neoffice — the four things taken out of an exercise's settings at Simple (12.10): « different reps
+//// per set », « per side », plate loading and the progression section. They come back from Normal up, and stay for whoever uses them.
+describe('simple level — the exercise settings carry reps, sets, weight, rest and bodyweight only', () => {
+  it('hides the four controls on a plain exercise, shows them from Normal up', () => {
+    expect(showsSetPlanControl(SIMPLE, false)).toBe(false)
+    expect(showsPerSideControl(SIMPLE, false)).toBe(false)
+    expect(showsPlateLoading(SIMPLE, '0009')).toBe(false)
+    expect(showsProgressionControls(SIMPLE, {})).toBe(false)
+    for (const S of [NORMAL, FULL]) {
+      expect(showsSetPlanControl(S, false)).toBe(true)
+      expect(showsPerSideControl(S, false)).toBe(true)
+      expect(showsPlateLoading(S, '0009')).toBe(true)
+      expect(showsProgressionControls(S, {})).toBe(true)
+    }
+  })
+
+  it('a member who has set nothing sees the club\'s default, and the club\'s default is the whole screen', () => {
+    // nothing chosen, nothing sent: upstream's full journal, as for every other gate
+    for (const S of [{}, { level: null }, { perms: {} }]) {
+      expect(showsSetPlanControl(S, false)).toBe(true)
+      expect(showsProgressionControls(S, {})).toBe(true)
+    }
+    // a club whose default level is simple, and a member who never chose their own
+    const club = { level: null, perms: { defaultLevel: 'simple' } }
+    expect(showsPerSideControl(club, false)).toBe(false)
+    expect(showsPerSideControl({ ...club, level: 'normal' }, false)).toBe(true)
+  })
+
+  it('hide the control, never the data: what an exercise already uses stays reachable at Simple', () => {
+    expect(showsSetPlanControl(SIMPLE, true)).toBe(true)
+    expect(showsPerSideControl(SIMPLE, true)).toBe(true)
+    // plate loading: a bar weight of its own, or its own way of loading, for THAT exercise only
+    expect(showsPlateLoading({ ...SIMPLE, barWeights: { '0009': 25 } }, '0009')).toBe(true)
+    expect(showsPlateLoading({ ...SIMPLE, barWeights: { '0009': 0 } }, '0009')).toBe(true)
+    expect(showsPlateLoading({ ...SIMPLE, loadKind: { '0009': { k: 'single', _ts: 1 } } }, '0009')).toBe(true)
+    expect(showsPlateLoading({ ...SIMPLE, barWeights: { '0009': 25 } }, '0025')).toBe(false)
+    expect(showsPlateLoading({ ...SIMPLE, barWeights: {}, loadKind: {} }, '0009')).toBe(false)
+    expect(showsPlateLoading(SIMPLE, undefined)).toBe(false)
+    // progression: a rule, a step, a deload, back-off sets, or a deload routine
+    for (const config of [{ prog: 'double' }, { prog: 'off' }, { inc: 2.5 }, { deloadFactor: 0.8 }, { backoff: true }, { excludeFromProgression: true }]) {
+      expect(showsProgressionControls(SIMPLE, config)).toBe(true)
+    }
+    for (const config of [{}, { inc: 0 }, { inc: -1 }, { prog: '' }, { backoff: false }, { excludeFromProgression: false }, null, undefined]) {
+      expect(showsProgressionControls(SIMPLE, config)).toBe(false)
+    }
   })
 })

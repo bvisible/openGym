@@ -114,3 +114,33 @@ export const showsTripleProgression = (S, config) => atLeast(S, 'full') || Boole
 /** The 1RM formula in Settings. From `normal`, like the estimated 1RM curve it
  *  feeds; kept once the member has chosen one, whatever the level. */
 export const showsOneRmFormula = S => atLeast(S, 'normal') || Boolean(S && S.oneRmFormula)
+
+//// ─── what the simple level no longer carries in an exercise's settings (12.10) ─────────────
+//// The sheet a member opens on an exercise should hold, at Simple, what a first week needs:
+//// reps or time, sets, weight, rest, bodyweight. Four things move up to Normal:
+//// « different reps per set », « per side », plate loading and the
+//// progression section (rule, step, deload). Same shape as everything above, same exception:
+//// the CONTROL leaves, never the DATA — an exercise that already uses one keeps it, so nobody is
+//// trapped with a setting they can no longer reach. A program written at the desk, or by the
+//// member at a higher level, therefore looks the same at every level.
+
+/** « Different reps per set » (a pyramid, a ramp) on an exercise config.
+ *  `inUse` = the exercise already carries a per-set plan. */
+export const showsSetPlanControl = (S, inUse) => atLeast(S, 'normal') || Boolean(inUse)
+
+/** « Per side » on an exercise config. `inUse` = the exercise IS per side, by its own config or
+ *  by what it is (a lunge, a single-arm row): the switch stays where it is on. */
+export const showsPerSideControl = (S, inUse) => atLeast(S, 'normal') || Boolean(inUse)
+
+/** Plate loading: the section of the exercise sheet, the editor of the exercise's detail sheet and
+ *  the entry of the live session's exercise menu. Kept once this exercise has a bar weight of its
+ *  own or its own way of loading (`S.barWeights`, `S.loadKind`). The plate line under each set,
+ *  which the club's plates and the exercise's defaults draw, is an output, not a control. */
+export const showsPlateLoading = (S, exId) => atLeast(S, 'normal')
+  || (Boolean(exId) && (S?.loadKind?.[exId] != null || typeof S?.barWeights?.[exId] === 'number'))
+
+/** The progression section of an exercise (rule, step, deload) and the routine's own rule row.
+ *  `config` = the exercise's config or the routine: kept when it carries a rule of its own, a
+ *  step, a deload, back-off sets, or is a deload routine. */
+export const showsProgressionControls = (S, config) => atLeast(S, 'normal')
+  || Boolean(config && (config.prog || config.inc > 0 || config.deloadFactor != null || config.backoff === true || config.excludeFromProgression === true))

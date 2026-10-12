@@ -47,7 +47,7 @@ import { bestSetFor } from '../lib/exercise-history.js'
 import { isWarmupRow, isFailureSet, toggleFailure, isDropSet, isRestPauseSet, dropsOf, clustersOf, addDrop, addCluster, removeDropAt, removeClusterAt, setDropAt, setClusterAt, nextDropWeight, nextBurstReps, isSideSet, makeSideSet, setSideField, toggleSide, addSideDrop, removeSideDropAt, setSideDropAt, addSideCluster, removeSideClusterAt, setSideClusterAt, WEIGHT_ORIGIN_MANUAL } from '../lib/workout-model.js'
 import { canMoveActiveWorkoutUnit, moveActiveWorkoutUnit, canMoveActiveWorkoutEntry, moveActiveWorkoutEntry } from '../lib/active-workout-order.js'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
-import { showsSupersetControl, showsSetIntensifierChips, showsInSessionWarmup, showsFailureControl } from '../lib/level-visibility.js'
+import { showsSupersetControl, showsSetIntensifierChips, showsInSessionWarmup, showsFailureControl, showsPlateLoading, showsProgressionControls } from '../lib/level-visibility.js'
 import { nextOpenSet, workoutKeyAction } from '../lib/workout-keys.js'
 import { MUSCLE_NAME } from '../lib/muscles.js'
 import FocusView from './FocusView.jsx'
@@ -428,9 +428,11 @@ function ExerciseBlock({ entryIdx, compact, dense, editing, onToggle, onToggleSi
         { icon: 'info', label: t('How to do it'), onClick: () => exerciseDetailSheet(ex) },
       ] },
       { title: t('Settings'), items: [
-        onProgressionSettings && { icon: 'slider', label: t('Exercise settings'), sub: guidance ? t(guidance.policyLabel) : t('Sets, reps, rest, progression'), onClick: onProgressionSettings },
+        //// Neoffice — the settings sheet no longer holds progression at Simple (lib/level-visibility.js), so the line under the entry does not name it there.
+        onProgressionSettings && { icon: 'slider', label: t('Exercise settings'), sub: showsProgressionControls(S, entry.target) ? (guidance ? t(guidance.policyLabel) : t('Sets, reps, rest, progression')) : undefined, onClick: onProgressionSettings },
         onRest && { icon: 'timer', label: t('Rest timer'), sub: restSub, onClick: onRest },
-        plateLoading && { icon: 'plate', label: t('Plate loading'), sub: loadSummary, onClick: () => barWeightSheet(entry.id, cfg) },
+        //// Neoffice — plate loading is offered from the Normal level, kept once this exercise has a bar weight or a way of loading of its own (lib/level-visibility.js).
+        plateLoading && showsPlateLoading(S, entry.id) && { icon: 'plate', label: t('Plate loading'), sub: loadSummary, onClick: () => barWeightSheet(entry.id, cfg) },
         routineUpdate && { icon: 'clipboard', label: t('Update routine'), sub: routineUpdate.sub, onClick: routineUpdate.run },
       ] },
       { title: t('Order and supersets'), items: [

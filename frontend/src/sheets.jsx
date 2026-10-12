@@ -83,7 +83,7 @@ import { weeklyWeights } from './lib/bodyweight.js'
 import { workoutText } from './lib/workout-text.js'
 import { workoutCardModel, layoutWorkoutCard, drawWorkoutCard, viewAspect, CARD_FONT } from './lib/workout-card.js'
 import { copyText } from './lib/clipboard.js'
-import { showsIntensifier, showsWarmupRamp, showsFailureControl, showsBackoffControl, showsTripleProgression } from './lib/level-visibility.js'
+import { showsIntensifier, showsWarmupRamp, showsFailureControl, showsBackoffControl, showsTripleProgression, showsSetPlanControl, showsPerSideControl, showsPlateLoading, showsProgressionControls } from './lib/level-visibility.js'
 import FloorPlanFor from './components/FloorPlan.jsx'
 import FloorPlanSheet from './components/FloorPlanSheet.jsx'
 //// Neoffice — see the same note in store/useStore.js: i18n-core, so mocks of i18n.js keep working.
@@ -1196,7 +1196,8 @@ function ExerciseDetail({ ex, close }) {
       <Button icon="pencil" style={{ flex: 1 }} onClick={() => { close(); customExSheet(ex) }}>{t('Edit')}</Button>
       <Button variant="danger" icon="trash" style={{ flex: 1 }} onClick={() => deleteCustomEx(ex, close)}>{t('Delete')}</Button>
     </div>}
-    {modeOf({ id: ex.id }) === 'reps' && <>
+    {/* //// Neoffice — the same gate as the exercise sheet's (lib/level-visibility.js). */}
+    {modeOf({ id: ex.id }) === 'reps' && showsPlateLoading(st, ex.id) && <>
       <h4 className="sec">{t('Plate loading')}</h4>
       <BarWeightEditor ex={ex} extra={t('You still log the total weight. This only feeds the plate line under each set.')} />
     </>}
@@ -1618,7 +1619,11 @@ function ExercisePicker({ onPick, title, close, like }) {
     ? eqPicked.filter(e => suitsLevel(st, e, usage[e.id] || favorites.has(e.id) || picks.has(e.id)))
     : eqPicked
   const ranked = q.trim() ? sortYoursFirst(levelPicked, st, usage) : sortFavouritesFirst(levelPicked, st)
-  const f = bp === SAME ? sameMuscleFirst(ranked, likeEx) : ranked
+  //// Neoffice — the club's picks lead what the filters left, in the unfiltered list and in a search alike (a stable partition: the
+  //// order of each half is the ranking above). Not on the same-muscle list, where the kit comes first, nor where the list already is
+  //// the member's own (chosen, favourites) or the picks themselves.
+  const clubFirst = list => (picks.size && bp !== '★' && bp !== '☆' && bp !== CLUB_PICKS ? [...list.filter(e => picks.has(e.id)), ...list.filter(e => !picks.has(e.id))] : list)
+  const f = bp === SAME ? sameMuscleFirst(ranked, likeEx) : clubFirst(ranked)
   const hiddenByLevel = levelOn ? eqPicked.length - levelPicked.length : 0
   const chosenCount = Object.keys(usage).length
   const favCount = (st.favEx || []).length
@@ -1896,8 +1901,8 @@ function ProgressionFields({ ex, mode, c, setC, routine, unit, perSide, bw }) {
   const options = (POLICIES_FOR[mode] || ['off']).filter(p => (!planned || p === 'off' || p === 'linear') && (p !== 'triple' || (showsTripleProgression(S, c) && (!bw || c.weight > 0 || c.prog === 'triple'))))
   if (options.length < 2) return null
   //// Neoffice — the rule inherited as a plan reads it (double or Greyskull from the routine is linear for a per-set plan).
-  const inherited = policyFor({ id: ex.id, ...(planned ? { mode: 'reps', sets: c.sets, reps: c.reps, setPlan: c.setPlan } : {}) }, routine, mode)
-  const active = policyFor({ ...c, id: ex.id }, routine, mode)
+  const inherited = policyFor({ id: ex.id, ...(planned ? { mode: 'reps', sets: c.sets, reps: c.reps, setPlan: c.setPlan } : {}) }, routine, mode, S)
+  const active = policyFor({ ...c, id: ex.id }, routine, mode, S)
   const inc = progressionStepOf(c, mode, ex, unit)
   const canBackoff = backoffOffered(c, mode, ex, bw) && showsBackoffControl(S, c)
   const backoff = canBackoff && c.backoff === true
@@ -1918,7 +1923,7 @@ function ProgressionFields({ ex, mode, c, setC, routine, unit, perSide, bw }) {
     // to failure" on too, unless it was already decided. Only the sheet's draft: nothing is
     // written until Save, and a plan saved before stays what it was.
     if (v === 'greyskull' && next.lastToFailure == null) next.lastToFailure = true
-    const picked = policyFor({ ...next, id: ex.id }, routine, mode)
+    const picked = policyFor({ ...next, id: ex.id }, routine, mode, S)
     // Triple progression opens with room for two more sets, the usual 3 to 5.
     if (picked === 'triple' && !(next.setsMax > 0)) next.setsMax = Math.min(MAX_TRIPLE_SETS, Math.max(1, Math.round(next.sets) || 1) + 2)
     return climbsRange(picked)
@@ -2001,7 +2006,7 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
     // A session's target carries the meaning of its dumbbell weight as a stamp (lib/dumbbells.js);
     // one that only repeats the exercise's own default is not the slot's choice, so it is not kept.
     if (cfg.dbLoad != null && dbLoadOf(cfg.dbLoad) === dbLoadFor(st, ex.id)) delete cfg.dbLoad
-    return climbsRange(policyFor({ ...cfg, id: ex.id }, routine, modeOf({ ...cfg, id: ex.id })))
+    return climbsRange(policyFor({ ...cfg, id: ex.id }, routine, modeOf({ ...cfg, id: ex.id }), st))
       ? { ...cfg, ...normalizeRepRange(cfg.reps, cfg.repsMin, isPerSide(cfg) ? 2 : 1) }
       : cfg
   })
@@ -2014,7 +2019,7 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
   // Pyramid sets: one rep target per set, in place of the flat Sets × Reps (CONTEXT.md).
   const pyramid = mode === 'reps' && isPyramid({ ...c, mode })
   const setPyramidAt = (i, v) => setC(x => ({ ...x, pyramid: x.pyramid.map((p, j) => (j === i ? v : p)) }))
-  const progressionPolicy =policyFor({ ...c, id: ex.id }, routine, mode)
+  const progressionPolicy =policyFor({ ...c, id: ex.id }, routine, mode, st)
   const progressionStepInvalid = !progressionStepIsValid(progressionStepOf(c, mode, ex, st.unit), progressionPolicy, c.backoff === true && backoffOffered(c, mode, ex, bw))
   //// Neoffice — a starting load for an exercise never done before. Offered
   //// only while the weight is still 0: the moment the member types a number,
@@ -2024,14 +2029,14 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
   const startHint = (!cardio && !bw && !c.weight && mode !== 'cardio')
     ? suggestStartingLoad(st, ex.id)
     : null
-  const activePolicy = policyFor({ ...c, id: ex.id }, routine, mode)
+  const activePolicy = policyFor({ ...c, id: ex.id }, routine, mode, st)
   // Both climb a range: the flat Reps stepper gives way to "Reps from" / "Reps up to".
   const ranged = mode === 'reps' && climbsRange(activePolicy)
   const triple = mode === 'reps' && activePolicy === 'triple'
   // Keep whatever the other mode already had (sets, weight) and fill only what is missing.
   const setMode = m => setC(x => {
     const next = { ...defaultConfig(ex.id, m), ...x, mode: m }
-    return m === 'reps' && climbsRange(policyFor({ ...next, id: ex.id }, routine, 'reps'))
+    return m === 'reps' && climbsRange(policyFor({ ...next, id: ex.id }, routine, 'reps', st))
       ? { ...next, ...normalizeRepRange(next.reps, next.repsMin, isPerSide(next) ? 2 : 1) }
       : next
   })
@@ -2170,7 +2175,8 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
         //// per-set editor at a time. Ours is the one a list starts from, because it is the one the
         //// club's coaches write and read (Gym Routine Exercise.set_targets); upstream's opens only for
         //// an exercise that already is a pyramid (a plan file, a shared plan), so it stays editable. */}
-    {mode === 'reps' && c.intensifier?.type !== 'restpause' && !pyramid && !c.pyramidDraft && <SetPlanFields c={c} setC={setC} perSide={perSide} bw={bw} unit={st.unit} />}
+    {/* //// Neoffice — from the Normal level up, kept once the exercise carries a per-set plan (lib/level-visibility.js). */}
+    {mode === 'reps' && c.intensifier?.type !== 'restpause' && !pyramid && !c.pyramidDraft && showsSetPlanControl(st, setPlanOf(c)) && <SetPlanFields c={c} setC={setC} perSide={perSide} bw={bw} unit={st.unit} />}
     {/* //// Neoffice — the suggestion SAYS WHERE IT COMES FROM, and is applied by
         //// a tap rather than pre-filled. A number that appears on its own reads
         //// as the app knowing something about the member's strength that it
@@ -2279,7 +2285,8 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
         {/* //// Neoffice — bodyweight has no load to ask of a set: a per-set plan keeps its reps only. */}
         <Switch checked={bw} onChange={v => setC(x => { const next = { ...x, bodyweight: v, weight: v ? 0 : x.weight }; return v ? unloadSetPlan(next) : next })} />
       </Row>
-      {mode !== 'cardio' && <Row icon="sides" iconTint="var(--blue)" title={t('Per side')}
+      {/* //// Neoffice — from the Normal level up; an exercise that IS per side keeps its switch (lib/level-visibility.js). */}
+      {mode !== 'cardio' && showsPerSideControl(st, perSide) && <Row icon="sides" iconTint="var(--blue)" title={t('Per side')}
         subtitle={mode === 'time'
           ? (perSide
             ? tn('{0} set becomes {1}: one on each side, {2}s held every time.', '{0} sets become {1}: one on each side, {2}s held every time.', c.sets || 0, (c.sets || 0) * 2, c.sec || 0)
@@ -2293,7 +2300,7 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
           const next = { ...x, side: v || undefined, reps: v ? Math.ceil((x.reps || 0) / 2) * 2 : x.reps }
           //// Neoffice — a per-set plan keeps every total even too (and its first entry IS `reps`).
           if (v && setPlanOf(x)) return evenSetPlan(next)
-          return climbsRange(policyFor({ ...next, id: ex.id }, routine, 'reps'))
+          return climbsRange(policyFor({ ...next, id: ex.id }, routine, 'reps', st))
             ? { ...next, ...normalizeRepRange(next.reps, next.repsMin, v ? 2 : 1) }
             : next
         })} />
@@ -2391,13 +2398,15 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
     </>}
     {/* How the weight is plate-loaded and what the bar weighs — per exercise, not per plan, so
         it sits apart from the config fields above and writes straight to S.barWeights/S.loadKind. */}
-    {mode === 'reps' && <>
+    {/* //// Neoffice — from the Normal level up; an exercise with a bar weight or a way of loading of its own keeps it (lib/level-visibility.js). */}
+    {mode === 'reps' && showsPlateLoading(st, ex.id) && <>
       <h4 className="sec">{t('Plate loading')}</h4>
       <BarWeightEditor ex={ex} cfg={c} extra={t('Applies to this exercise everywhere, not just this plan.')} />
     </>}
     {pyramid
       ? <div className="small dim" style={{ marginBottom: 18 }}>{t('Weight is up to you: pyramid sets are not progressed automatically.')}</div>
-      : <ProgressionFields ex={ex} mode={mode} c={c} setC={setC} routine={routine} unit={st.unit} perSide={perSide} bw={bw} />}
+      //// Neoffice — from the Normal level up; an exercise with a rule, a step or a deload of its own keeps the section (lib/level-visibility.js).
+      : showsProgressionControls(st, c) ? <ProgressionFields ex={ex} mode={mode} c={c} setC={setC} routine={routine} unit={st.unit} perSide={perSide} bw={bw} /> : null}
     <textarea className="input" rows={3} maxLength={500} style={{ marginBottom: 18 }}
       placeholder={t('Note (optional): loading cues, "bar only, then +1 plate/side each set", anything worth remembering')}
       value={c.note || ''} onChange={e => setC(x => ({ ...x, note: e.target.value }))} />
@@ -3195,6 +3204,14 @@ function ShareWorkoutImage({ w, nameOf, close }) {
     <Button variant="primary" icon="share" disabled={!img?.blob || busy} onClick={share}>{t('Share')}</Button>
   </>
 }
+//// Neoffice — the share-as-image sheet of a saved workout, opened straight from a list row (Home, Stats, History)
+//// without going through its detail sheet: the same card, the same sheet. `w` may be the row's copy; the saved
+//// record is the one the card reads, as in the detail sheet.
+export function shareWorkoutImageSheet(w) {
+  const rec = S().workouts.find(x => sameWorkout(x, w)) || w
+  const nameOf = e => (EXIDX[e.id] ? exerciseNameFor(EXIDX[e.id]) : (e.n || e.id))
+  ui().openSheet(c2 => <ShareWorkoutImage w={rec} nameOf={nameOf} close={c2} />)
+}
 async function workoutCardImage(model, { map, body }) {
   const root = getComputedStyle(document.documentElement)
   const css = (name, fallback) => root.getPropertyValue(name).trim() || fallback
@@ -3270,7 +3287,7 @@ function Calendar({ start, close }) {
       title={note ? dayNoteLine(note, t) : undefined} onClick={() => {
       if (!ws) { close(); dayOverrideSheet(iso); return }
       if (ws.length === 1) { close(); workoutDetailSheet(ws[0]); return }
-      close(); ui().openSheet(c2 => <><h3>{fmtDate(iso, true)}</h3><div className="list">{ws.map(w => <WorkoutRow key={w.id} w={w} onClick={() => { c2(); workoutDetailSheet(w) }} />)}</div></>)
+      close(); ui().openSheet(c2 => <><h3>{fmtDate(iso, true)}</h3><div className="list">{ws.map(w => <WorkoutRow key={w.id} w={w} onClick={() => { c2(); workoutDetailSheet(w) }} onShare={w2 => { c2(); shareWorkoutImageSheet(w2) }} />)}</div></>)
     }}><span>{d}</span><i className={dotCls} /></button>)
   }
   return <>
@@ -3294,7 +3311,9 @@ function Calendar({ start, close }) {
 export const calendarSheet = start => ui().openSheet(close => <Calendar start={start} close={close} />)
 
 /* shared small workout row (used in lists) */
-export function WorkoutRow({ w, onClick }) {
+//// Neoffice — `onShare`: a visible « Share » button on the row (the share-as-image sheet of this workout), for the lists where
+//// a member looks at their last sessions; a tap on the row itself still opens the detail.
+export function WorkoutRow({ w, onClick, onShare }) {
   const st = useStore(s => s.S)
   const glyph = glyphOf((st.routines.find(r => r.id === w.routineId) || {}).emoji)
   const mediaN = workoutMediaCount(w)
@@ -3304,6 +3323,7 @@ export function WorkoutRow({ w, onClick }) {
       <div className="ss">{[fmtDate(w.d, true), ...durPart(w.end - w.start), tn('{0} set', '{0} sets', setsDone(w)), fmtVol(w.vol, st.unit)].join(' · ')}</div></div>
     {mediaN > 0 && <span className="wrow-media" title={tn('{0} photo or video', '{0} photos or videos', mediaN)} aria-label={tn('{0} photo or video', '{0} photos or videos', mediaN)}><Icon name="image" />{mediaN}</span>}
     {w.prs && w.prs.length > 0 && <span className="pr"><Icon name="trophy" />{w.prs.length} PR</span>}
+    {onShare && <button type="button" className="wrow-share" aria-label={t('Share as image')} onClick={e => { e.stopPropagation(); onShare(w) }}><Icon name="share" /><span>{t('Share')}</span></button>}
     <Icon name="chevronRight" className="chev" />
   </div>
 }
