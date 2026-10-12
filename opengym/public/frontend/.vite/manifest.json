@@ -49,8 +49,8 @@
       "_exercises-BV0nhMH0.js"
     ]
   },
-  "_i18n-DBEA0KUM.js": {
-    "file": "assets/i18n-DBEA0KUM.js",
+  "_i18n-CvTdumpR.js": {
+    "file": "assets/i18n-CvTdumpR.js",
     "name": "i18n",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
@@ -110,7 +110,8 @@
       "src/exercise-names/zh-TW.js",
       "src/exercise-names/zh.js",
       "src/club-names/fr.js",
-      "src/exercise-desc/en.js"
+      "src/exercise-desc/en.js",
+      "src/exercise-desc/fr.js"
     ]
   },
   "_media-limits--jtE1OOr.js": {
@@ -187,14 +188,14 @@
     "file": "assets/rolldown-runtime-QTnfLwEv.js",
     "name": "rolldown-runtime"
   },
-  "_sheets-CEe66kWz.js": {
-    "file": "assets/sheets-CEe66kWz.js",
+  "_sheets-DbdR9nrC.js": {
+    "file": "assets/sheets-DbdR9nrC.js",
     "name": "sheets",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
-      "_i18n-DBEA0KUM.js",
+      "_i18n-CvTdumpR.js",
       "_preload-helper-BqjX9scX.js",
-      "_useUI-BcFCciBi.js",
+      "_useUI-BrG0oRxR.js",
       "_exercises-BV0nhMH0.js",
       "_coach-device-SU0w97Og.js",
       "_media-refs-CBisMdU5.js",
@@ -208,7 +209,7 @@
       "_onerm-DkNlZCeM.js"
     ],
     "dynamicImports": [
-      "_useUI-BcFCciBi.js",
+      "_useUI-BrG0oRxR.js",
       "src/lib/media-ingest.js",
       "src/lib/body-paths.js"
     ]
@@ -221,12 +222,12 @@
       "_history-BPR-O4tZ.js"
     ]
   },
-  "_useUI-BcFCciBi.js": {
-    "file": "assets/useUI-BcFCciBi.js",
+  "_useUI-BrG0oRxR.js": {
+    "file": "assets/useUI-BrG0oRxR.js",
     "name": "useUI",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
-      "_i18n-DBEA0KUM.js",
+      "_i18n-CvTdumpR.js",
       "_preload-helper-BqjX9scX.js",
       "_exercises-BV0nhMH0.js",
       "_coach-device-SU0w97Og.js",
@@ -238,28 +239,28 @@
     "dynamicImports": [
       "_dist-Cawi-vbT.js",
       "node_modules/@capacitor/app/dist/esm/index.js",
-      "_useUI-BcFCciBi.js",
-      "_sheets-CEe66kWz.js",
+      "_useUI-BrG0oRxR.js",
+      "_sheets-DbdR9nrC.js",
       "src/lib/demoSeed.js",
       "node_modules/@capacitor/local-notifications/dist/esm/index.js"
     ]
   },
   "index.html": {
-    "file": "assets/index-G0VXPWZm.js",
+    "file": "assets/index-BVQFu8x0.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
-      "_i18n-DBEA0KUM.js",
+      "_i18n-CvTdumpR.js",
       "_preload-helper-BqjX9scX.js",
-      "_useUI-BcFCciBi.js",
+      "_useUI-BrG0oRxR.js",
       "_exercises-BV0nhMH0.js",
       "_coach-device-SU0w97Og.js",
       "_media-refs-CBisMdU5.js",
       "_history-BPR-O4tZ.js",
       "_mobile-D_nsDaOT.js",
-      "_sheets-CEe66kWz.js",
+      "_sheets-DbdR9nrC.js",
       "_starter-BYZE9fXs.js",
       "_onerm-DkNlZCeM.js"
     ],
@@ -451,6 +452,12 @@
     "file": "assets/en-B_U-spcQ.js",
     "name": "en",
     "src": "src/exercise-desc/en.js",
+    "isDynamicEntry": true
+  },
+  "src/exercise-desc/fr.js": {
+    "file": "assets/fr-DFafEiKs.js",
+    "name": "fr",
+    "src": "src/exercise-desc/fr.js",
     "isDynamicEntry": true
   },
   "src/exercise-names/ar.js": {
@@ -646,12 +653,12 @@
     "isDynamicEntry": true
   },
   "src/lib/coach-demo.js": {
-    "file": "assets/coach-demo-C7-qs1SO.js",
+    "file": "assets/coach-demo-DX162hES.js",
     "name": "coach-demo",
     "src": "src/lib/coach-demo.js",
     "isDynamicEntry": true,
     "imports": [
-      "_i18n-DBEA0KUM.js",
+      "_i18n-CvTdumpR.js",
       "_exercises-BV0nhMH0.js",
       "_history-BPR-O4tZ.js",
       "_onerm-DkNlZCeM.js",
@@ -659,12 +666,12 @@
     ]
   },
   "src/lib/coach-local.js": {
-    "file": "assets/coach-local-Cpaqs1Ox.js",
+    "file": "assets/coach-local-RrJ8_lKK.js",
     "name": "coach-local",
     "src": "src/lib/coach-local.js",
     "isDynamicEntry": true,
     "imports": [
-      "_i18n-DBEA0KUM.js",
+      "_i18n-CvTdumpR.js",
       "_preload-helper-BqjX9scX.js",
       "_exercises-BV0nhMH0.js",
       "_coach-device-SU0w97Og.js",
@@ -676,7 +683,7 @@
     ]
   },
   "src/lib/demoSeed.js": {
-    "file": "assets/demoSeed-BVip6n5y.js",
+    "file": "assets/demoSeed-D31tEFBS.js",
     "name": "demoSeed",
     "src": "src/lib/demoSeed.js",
     "isDynamicEntry": true,
