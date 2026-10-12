@@ -17,6 +17,7 @@
 //           most). After 3 of them the nudge goes quiet until the next workout is logged, so a
 //           break never turns into a daily nag. No counter is stored anywhere: it is read off
 //           the plan and the log, so the server and the phone agree without syncing anything.
+//           //// Neoffice — a CLUB may set its own rule instead (S.perms.nudge, Gym Settings): see nudgeFor.
 //
 // Copy: three tones, one title and four lines each. The line is chosen by the date, so a day
 // always gets the same one and consecutive days rotate. Keys are the English source strings;
@@ -29,6 +30,11 @@ import { excusedOn } from './day-notes.js'
 export const NUDGE_TONES = ['friendly', 'guilt', 'drill']
 export const NUDGE_MAX_MISSES = 3
 export const NUDGE_LOOKBACK_DAYS = 14
+//// Neoffice — how far back a club's rule counts missed days: a club may ask for up to 8 missed sessions in a row, which on a plan of
+//// three a week is about a month.
+export const NUDGE_CLUB_LOOKBACK_DAYS = 28
+export const NUDGE_CLUB_AFTER_MIN = 2
+export const NUDGE_CLUB_AFTER_MAX = 8
 const EVENING = 20 * 60, LATEST = 21 * 60 + 30, AFTER_REMINDER = 120
 
 export const NUDGE_COPY = {
@@ -95,22 +101,48 @@ function missed(S, iso) {
   return ids
 }
 
+//// Neoffice — the club's rule, from S.perms.nudge = { enabled, after, once } (Gym Settings: the missed-day relance). Three answers:
+////   · no object at all (an older server, a journal not signed in to a club, the mobile build) → null: upstream's rule, unchanged;
+////   · { enabled: false } → { off: true }: the club sends no relance, whatever a member's own switch says;
+////   · { enabled: true, after, once } → the club's numbers (after clamped to 2..8, 4 when it is not a number; once unless it is false).
+//// An object that says nothing about `enabled` is read as no object: a malformed answer does not silence anyone.
+export function clubNudgeOf(club) {
+  if (!club || typeof club !== 'object') return null
+  if (club.enabled === false) return { off: true }
+  if (club.enabled !== true) return null
+  const n = Math.round(Number(club.after))
+  const after = Number.isFinite(n) ? Math.min(NUDGE_CLUB_AFTER_MAX, Math.max(NUDGE_CLUB_AFTER_MIN, n)) : 4
+  return { off: false, after, once: club.once !== false }
+}
+/** Whether a member is offered the relance at all: not when the club switched it off (S.perms.nudge.enabled === false). */
+export const nudgeAllowed = S => !(S && S.perms && S.perms.nudge && S.perms.nudge.enabled === false)
+
 /**
  * The routine ids to nudge about on `iso`, or null: not a missed day, or already 3 missed days in
  * a row since the last workout (back-off). Workouts dated after `iso` are not looked at, so the
  * phone can ask about future dates and get the back-off of a break that simply goes on.
+ *
+ * //// Neoffice — `club` (S.perms.nudge, see clubNudgeOf) replaces the back-off by the club's own count. With d = the number of missed
+ * planned days in a row since the last workout, TODAY INCLUDED: the club off → never; once (the default) → only on d == after;
+ * not once → on d = after, after + 1, after + 2 (at most three). No `club` → upstream's: d = 1, 2, 3. The same table, case for case, is
+ * api/training_day.py's `nudge_for` in neoffice_gym and this file's test.
  */
-export function nudgeFor(state, iso) {
+export function nudgeFor(state, iso, club) {
+  const rule = clubNudgeOf(club)
+  if (rule && rule.off) return null
   const S = norm(state)
   const ids = missed(S, iso)
   if (!ids.length) return null
   const last = S.workouts.reduce((m, w) => (typeof w.d === 'string' && w.d < iso && w.d > m ? w.d : m), '')
+  const lookback = rule ? NUDGE_CLUB_LOOKBACK_DAYS : NUDGE_LOOKBACK_DAYS
   let misses = 0
   let d = dayBefore(iso)
-  for (let i = 0; i < NUDGE_LOOKBACK_DAYS && d > last; i++, d = dayBefore(d)) {
-    if (missed(S, d).length && ++misses >= NUDGE_MAX_MISSES) return null
+  for (let i = 0; i < lookback && d > last; i++, d = dayBefore(d)) {
+    if (missed(S, d).length && ++misses >= NUDGE_MAX_MISSES && !rule) return null
   }
-  return ids
+  if (!rule) return ids
+  const n = misses + 1
+  return (rule.once ? n === rule.after : n >= rule.after && n <= rule.after + 2) ? ids : null
 }
 
 /** The day's line index: by date, so a day keeps its line and consecutive days rotate. */

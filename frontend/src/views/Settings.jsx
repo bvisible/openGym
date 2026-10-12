@@ -31,7 +31,7 @@ import { DEMO, REPO } from '../lib/demo.js'
 //// Neoffice — no photos or videos of members' exercises on the club's server (Jérémy, 06.10): none of
 //// upstream's media imports (backup zip, media store, uploads).
 import { MOBILE, isAndroid, shareExport, syncReminder } from '../lib/mobile.js'
-import { NUDGE_COPY, NUDGE_TONES, toneOf } from '../lib/nudge.js'
+import { NUDGE_COPY, NUDGE_TONES, nudgeAllowed, toneOf } from '../lib/nudge.js'
 import { setRestAccent } from '../lib/rest-alert.js'
 import { CUSTOM, accentKey, adjustedIn, applyAccent, cleanHex, inkOn, isGrey } from '../lib/accent.js'
 import { checkForUpdate, downloadAndInstall, fetchChecksum, RELEASES_PAGE } from '../lib/update.js'
@@ -367,6 +367,8 @@ export default function Settings({ page = null, find = null, via = null }) {
     sound: !!S.sound, playOnSilent: playOnSilentSupported(), canVibrate, vibrate: S.vibrate !== false,
     profiles: (S.equipProfiles || []).length > 0, nameLang: EXERCISE_NAME_LANGS.includes(baseLang(lang)),
     pushOK: !MOBILE && pushSupported(), reminderOn: !!S.reminder?.on, nudge: !!S.reminder?.nudge,
+    //// Neoffice — the club may switch the relance off (S.perms.nudge); the search offers its rows only when the page draws them.
+    nudgeAllowed: nudgeAllowed(S),
     autoBackup: !!S.autoBackup, synced: !!sync, installTip: !MOBILE && !standalone(), androidWeb: IS_ANDROID,
   }
   const mode = scheduleModeOf(S)
@@ -1085,6 +1087,8 @@ function MobileReminderCard({ S, update, toast }) {
 // on — the server sends it with the same push (or the phone schedules it beside the reminder).
 function NudgeRows({ S, setReminder }) {
   const r = S.reminder || {}
+  //// Neoffice — a club that switched the relance off offers no switch and no tone (S.perms.nudge.enabled === false; lib/nudge.js).
+  if (!nudgeAllowed(S)) return null
   return <>
     <Row icon="bell" iconTint="var(--red)" title={t('Nudge me when I skip a planned workout')}>
       <Switch checked={!!r.nudge} onChange={() => setReminder({ nudge: !r.nudge })} />
@@ -1097,7 +1101,9 @@ function NudgeRows({ S, setReminder }) {
   </>
 }
 const toneLabel = k => k === 'guilt' ? t('Guilt trip') : k === 'drill' ? t('Drill sergeant') : t('Friendly')
-const nudgeNote = S => S.reminder?.nudge
+//// Neoffice — upstream's sentence is only true of upstream's rule (3 missed days, then quiet): a club that set its own count (S.perms.nudge) says its
+//// own thing at the desk, and the sentence is left out rather than untrue.
+const nudgeNote = S => S.reminder?.nudge && !S.perms?.nudge
   ? ' ' + t('One nudge in the evening of a planned day with nothing logged, between 20:00 and 21:30. After 3 missed days in a row it goes quiet until your next workout.')
   : ''
 

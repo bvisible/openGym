@@ -12,7 +12,7 @@
 import { t, tn } from './i18n-core.js'
 import { isoOf, todayISO } from './format.js'
 import { effectiveRoutineIds } from './history.js'
-import { NUDGE_COPY, lineIndex, nudgeFor, nudgeMinute, toneOf } from './nudge.js'
+import { NUDGE_COPY, lineIndex, nudgeAllowed, nudgeFor, nudgeMinute, toneOf } from './nudge.js'
 import { excusedOn } from './day-notes.js'
 
 export const MOBILE = import.meta.env.VITE_MOBILE === '1'
@@ -140,6 +140,8 @@ const NUDGE_ID_BASE = 2000
 export function buildNudgeNotifications(S, now = new Date()) {
   const r = S?.reminder
   if (!r?.on || !r.nudge) return []
+  //// Neoffice — a club that switched the relance off (S.perms.nudge) gets none from this phone either; its own count replaces the back-off (lib/nudge.js).
+  if (!nudgeAllowed(S)) return []
   const at = nudgeMinute(r.time || '08:00')
   if (at == null) return []
   const routines = Array.isArray(S.routines) ? S.routines : []
@@ -152,7 +154,7 @@ export function buildNudgeNotifications(S, now = new Date()) {
     const iso = isoOf(day)
     // a session on screen right now is today's workout in the making, not a miss
     if (offset === 0 && S.active) continue
-    const ids = nudgeFor(S, iso)
+    const ids = nudgeFor(S, iso, S.perms?.nudge)
     if (!ids) continue
     const names = ids.map(id => routines.find(x => x.id === id)?.name).filter(Boolean)
     const label = names.length && names.length <= 2 ? names.join(' + ') : tn('{0} routine', '{0} routines', ids.length)

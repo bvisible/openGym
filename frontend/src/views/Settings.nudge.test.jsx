@@ -137,3 +137,37 @@ describe.each([['self-hosted (web push)', false], ['mobile (native)', true]])('S
     expect(nudgeRow()).toBeFalsy()
   })
 })
+
+//// Neoffice — the club has its own say over the relance (Gym Settings → S.perms.nudge, lib/nudge.js): it can switch it off, which
+//// takes the switch and the tone away from the member; or set its own count, which makes upstream's sentence about 3 missed days untrue.
+describe.each([['self-hosted (web push)', false], ['mobile (native)', true]])('Settings — the club\'s say over the nudge, %s', (_, mobile) => {
+  beforeEach(() => { mocks.MOBILE = mobile })
+
+  it('a club that switched it off offers no switch and no tone, even to a member who had turned it on', async () => {
+    mocks.S.perms = { nudge: { enabled: false, after: 4, once: true } }
+    mocks.S.reminder = { on: true, time: '08:00', nudge: true, tone: 'drill' }
+    await mount()
+    expect(nudgeRow()).toBeFalsy()
+    expect(toneRow()).toBeFalsy()
+    expect(row('Workout day reminder')).toBeTruthy()   // the reminder itself is not the club's to take away here
+    expect(host.textContent).not.toContain('After 3 missed days in a row')
+  })
+
+  it('a club with its own count keeps the switch and the tone, and drops upstream\'s sentence about 3 missed days', async () => {
+    mocks.S.perms = { nudge: { enabled: true, after: 4, once: true } }
+    mocks.S.reminder = { on: true, time: '08:00', nudge: true, tone: 'friendly' }
+    await mount()
+    expect(nudgeRow()).toBeTruthy()
+    expect(toneRow()).toBeTruthy()
+    expect(host.textContent).toContain(mobile ? 'Reminds you at this time on days that have a routine planned.' : 'Only sent on days you have a routine planned')
+    expect(host.textContent).not.toContain('After 3 missed days in a row')
+  })
+
+  it('a server that sends nothing about it (an older one) changes nothing', async () => {
+    mocks.S.perms = { editPlan: true }
+    mocks.S.reminder = { on: true, time: '08:00', nudge: true, tone: 'friendly' }
+    await mount()
+    expect(nudgeRow()).toBeTruthy()
+    expect(host.textContent).toContain('After 3 missed days in a row it goes quiet until your next workout.')
+  })
+})

@@ -1136,3 +1136,16 @@ export function localExtras(local, server) {
     ...(setup ? { setup } : {}),
   }
 }
+
+//// Neoffice — what the server composes for a member and never keeps (neoffice_gym api/sync.py NOT_KEPT): the club's rules for them
+//// (`perms`: the detail level, the plan lock, the missed-day relance, automatic progression), the club's own title and logo (`club`) and
+//// its shortlist of exercises (`clubPicks`). The journal never edits them, so no copy of them can be « newer »; but the merge above
+//// takes every key nobody stamped from the NEWER copy by `_ts`, and after a push both copies carry the same `_ts` (a tie goes to the
+//// device's own): a club that changed a setting reached nobody who had synced since. After a pull's merge these three come from the
+//// server's document, whichever copy won the rest.
+export const SERVER_OWNED_KEYS = ['perms', 'club', 'clubPicks']
+export function takeServerOwned(merged, remote) {
+  if (!merged || !remote) return merged
+  for (const k of SERVER_OWNED_KEYS) if (remote[k] !== undefined && remote[k] !== null) merged[k] = clone(remote[k])
+  return merged
+}

@@ -96,14 +96,22 @@ export const DEFAULT_SEC_INCREMENT = 5
 // an evening. Past this the honest advice is load or a harder variation (issue #33).
 export const MAX_BW_SETS = 6
 
+//// Neoffice — the club decides whether the journal moves a weight on its own when nothing says otherwise (Gym Settings « Suggest
+//// heavier loads automatically », sent as S.perms.autoProgression). Only an explicit `false` turns the default off: a server that
+//// does not send the key (an older one), a journal that is not signed in to a club and the mobile build keep upstream's linear
+//// progression for rep-based exercises.
+export const clubAutoProgression = S => !(S && S.perms && S.perms.autoProgression === false)
+
 // The policy in force for one exercise: its own override, else the routine's default, else
 // the mode's default. Reps keeps behaving the way the app always did (all reps → add a step).
-export function policyFor(cfg, routine, mode) {
+//// Neoffice — `S` (optional) carries the club's default for the « else » (clubAutoProgression); an exercise's own rule and its
+//// routine's always win over it.
+export function policyFor(cfg, routine, mode, S) {
   // Pyramid sets are never progressed: the lifter picks every set's weight (CONTEXT.md).
   if (isPyramid(cfg)) return 'off'
   const m = mode || modeOf(cfg || {})
   const allowed = POLICIES_FOR[m] || ['off']
-  const pick = (cfg && cfg.prog) || (routine && routine.prog) || (m === 'reps' ? 'linear' : 'off')
+  const pick = (cfg && cfg.prog) || (routine && routine.prog) || (m === 'reps' && clubAutoProgression(S) ? 'linear' : 'off')
   //// Neoffice — a per-set plan fixes the reps of every set: a rule that moves the reps (double
   //// progression, Greyskull) is read as linear, and a plan that fixes the weights too has nothing
   //// to progress. Drop once upstream's own per-set targets (v1.3.12) carry their progression.
@@ -459,7 +467,7 @@ export function nextPrescription(S, cfg, routine) {
 // Upstream's `nextPrescription`, unchanged, under the name the wrapper above calls.
 function prescriptionFor(S, cfg, routine) {
   const mode = modeOf(cfg)
-  const policy = policyFor(cfg, routine, mode)
+  const policy = policyFor(cfg, routine, mode, S)
   const unit = S.unit || 'kg'
   const inc = mode === 'time'
     ? (cfg.inc > 0 ? cfg.inc : DEFAULT_SEC_INCREMENT)
