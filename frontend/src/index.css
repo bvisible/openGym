@@ -1728,6 +1728,9 @@ body.no-tabbar #timer.working{box-shadow:inset 0 var(--hair) 0 var(--acc),0 -10p
 /* //// Neoffice — the share sheet (components/ShareSheet.jsx): one sheet, three pictures. The preview is shorter so that the choices
    under it stay in reach on a phone; a movable photo is dragged with a finger, so the page must not scroll under it. */
 .share-seg{margin:0 0 12px}
+/* Four pictures share one track: on a phone the label gets the room, not the icon, and it can never spill over its segment. */
+.share-seg button span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:480px){.share-seg button{padding-inline:2px;font-size:13.5px}.share-seg button .icn{display:none}}
 .share-seg + .share-card{margin-top:2px}
 .share-card{position:relative}
 .share-card img{max-height:46vh;margin:0 auto;width:auto;max-width:100%}

@@ -224,6 +224,7 @@ export default function ShareSheet({ w, nameOf, close }) {
       <input ref={libraryRef} type="file" accept="image/*" hidden onChange={onFile} />
       <div className="small dim share-note">{movable ? t('Drag the picture to move the photo.') + ' ' : ''}{t('Your photo stays on this phone: it is not saved anywhere.')}</div>
     </>}
+    {sticker && <div className="small dim share-note">{t('Transparent background: paste it onto a photo or a story.')}</div>}
     {template !== 'muscles' && !sticker && <div className="share-format">
       <Segmented value={format} onChange={v => changePrefs({ format: v })}
         options={[{ value: 'feed', label: t('Feed') + ' 4:5' }, { value: 'story', label: t('Story') + ' 9:16' }]} />
@@ -244,7 +245,6 @@ export default function ShareSheet({ w, nameOf, close }) {
           ))}
         </div>
       </>}
-    {sticker && <div className="small dim share-note">{t('Transparent background: paste it onto a photo or a story.')}</div>}
     {sticker && canCopyImage() && <><Button icon="copy" disabled={!img?.url || busy} onClick={copy}>{t('Copy image')}</Button><div style={{ height: 8 }} /></>}
     <Button variant="primary" icon="share" disabled={!img?.url || busy} onClick={share}>{t('Share')}</Button>
   </>
