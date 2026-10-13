@@ -188,14 +188,14 @@
     "file": "assets/rolldown-runtime-QTnfLwEv.js",
     "name": "rolldown-runtime"
   },
-  "_sheets-B-63uI09.js": {
-    "file": "assets/sheets-B-63uI09.js",
+  "_sheets-DHnE4xvp.js": {
+    "file": "assets/sheets-DHnE4xvp.js",
     "name": "sheets",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
       "_i18n-OLvEjjBB.js",
       "_preload-helper-BqjX9scX.js",
-      "_useUI-B-3-s9b5.js",
+      "_useUI-CzzyGi4v.js",
       "_exercises-BV0nhMH0.js",
       "_coach-device-BTyire2C.js",
       "_media-refs-CBisMdU5.js",
@@ -209,7 +209,7 @@
       "_onerm-DkNlZCeM.js"
     ],
     "dynamicImports": [
-      "_useUI-B-3-s9b5.js",
+      "_useUI-CzzyGi4v.js",
       "src/lib/media-ingest.js",
       "src/lib/body-paths.js"
     ]
@@ -222,8 +222,8 @@
       "_history-BPR-O4tZ.js"
     ]
   },
-  "_useUI-B-3-s9b5.js": {
-    "file": "assets/useUI-B-3-s9b5.js",
+  "_useUI-CzzyGi4v.js": {
+    "file": "assets/useUI-CzzyGi4v.js",
     "name": "useUI",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
@@ -239,14 +239,14 @@
     "dynamicImports": [
       "_dist-Cawi-vbT.js",
       "node_modules/@capacitor/app/dist/esm/index.js",
-      "_useUI-B-3-s9b5.js",
-      "_sheets-B-63uI09.js",
+      "_useUI-CzzyGi4v.js",
+      "_sheets-DHnE4xvp.js",
       "src/lib/demoSeed.js",
       "node_modules/@capacitor/local-notifications/dist/esm/index.js"
     ]
   },
   "index.html": {
-    "file": "assets/index-CAcrZEyD.js",
+    "file": "assets/index-yAYMQ6dJ.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -254,13 +254,13 @@
       "_rolldown-runtime-QTnfLwEv.js",
       "_i18n-OLvEjjBB.js",
       "_preload-helper-BqjX9scX.js",
-      "_useUI-B-3-s9b5.js",
+      "_useUI-CzzyGi4v.js",
       "_exercises-BV0nhMH0.js",
       "_coach-device-BTyire2C.js",
       "_media-refs-CBisMdU5.js",
       "_history-BPR-O4tZ.js",
       "_mobile-Dyi23zbc.js",
-      "_sheets-B-63uI09.js",
+      "_sheets-DHnE4xvp.js",
       "_starter-BYZE9fXs.js",
       "_onerm-DkNlZCeM.js"
     ],
@@ -653,7 +653,7 @@
     "isDynamicEntry": true
   },
   "src/lib/coach-demo.js": {
-    "file": "assets/coach-demo-BmYQ28ru.js",
+    "file": "assets/coach-demo-C-FK4GLt.js",
     "name": "coach-demo",
     "src": "src/lib/coach-demo.js",
     "isDynamicEntry": true,
@@ -666,7 +666,7 @@
     ]
   },
   "src/lib/coach-local.js": {
-    "file": "assets/coach-local-BKHuzls1.js",
+    "file": "assets/coach-local-CS0I_JhU.js",
     "name": "coach-local",
     "src": "src/lib/coach-local.js",
     "isDynamicEntry": true,
@@ -683,7 +683,7 @@
     ]
   },
   "src/lib/demoSeed.js": {
-    "file": "assets/demoSeed-D9Rcexb0.js",
+    "file": "assets/demoSeed-DHB9Mqn8.js",
     "name": "demoSeed",
     "src": "src/lib/demoSeed.js",
     "isDynamicEntry": true,
