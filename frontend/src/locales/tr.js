@@ -2693,4 +2693,20 @@ export default {
   //// Neoffice — the two badges of the Focus view that upstream writes in English whatever the language (views/FocusView.jsx).
   'Rest {0}s': 'Dinlenme {0} sn',
   '{0} Reps': '{0} tekrar',
+  //// Neoffice — the share sheet (components/ShareSheet.jsx, lib/share/): one « Share » entry that makes a Photo, Numbers or Muscles picture.
+  'Add a photo to start': 'Başlamak için bir fotoğraf ekle',
+  'Choose a photo': 'Fotoğraf seç',
+  'Take a photo': 'Fotoğraf çek',
+  'Drag the picture to move the photo.': 'Fotoğrafı kaydırmak için önizlemeyi sürükle.',
+  'Feed': 'Gönderi',
+  'Story': 'Hikaye',
+  'Loads': 'Yükler',
+  'Muscles': 'Kaslar',
+  'Numbers': 'Sayılar',
+  'Shown next to each exercise.': 'Her egzersizin yanında gösterilir.',
+  'What appears': 'Gösterilenler',
+  'Your photo stays on this phone: it is not saved anywhere.': 'Fotoğrafın yalnızca bu telefonda kalır, hiçbir yere kaydedilmez.',
+  'max {0}': 'maks {0}',
+  '+ {0} more exercise': '+ {0} egzersiz daha',
+  '+ {0} more exercises': '+ {0} egzersiz daha',
 }

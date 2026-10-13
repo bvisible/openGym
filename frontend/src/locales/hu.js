@@ -2656,4 +2656,20 @@ export default {
   //// Neoffice — the two badges of the Focus view that upstream writes in English whatever the language (views/FocusView.jsx).
   'Rest {0}s': 'Pihenő {0} mp',
   '{0} Reps': '{0} ism',
+  //// Neoffice — the share sheet (components/ShareSheet.jsx, lib/share/): one « Share » entry that makes a Photo, Numbers or Muscles picture.
+  'Add a photo to start': 'Kezdéshez adj hozzá fotót',
+  'Choose a photo': 'Fotó választása',
+  'Take a photo': 'Fotó készítése',
+  'Drag the picture to move the photo.': 'A fotó mozgatásához húzd az előnézetet.',
+  'Feed': 'Bejegyzés',
+  'Story': 'Történet',
+  'Loads': 'Terhelések',
+  'Muscles': 'Izmok',
+  'Numbers': 'Számok',
+  'Shown next to each exercise.': 'Minden gyakorlat mellett megjelenik.',
+  'What appears': 'Mi jelenik meg',
+  'Your photo stays on this phone: it is not saved anywhere.': 'A fotód ezen a telefonon marad, sehol sincs elmentve.',
+  'max {0}': 'max {0}',
+  '+ {0} more exercise': '+ {0} további gyakorlat',
+  '+ {0} more exercises': '+ {0} további gyakorlat',
 }

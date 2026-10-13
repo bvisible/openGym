@@ -1534,6 +1534,22 @@ export const PT_BR_OVERRIDES = {
   'Gentle, for headphones or a quiet room.': 'Suave, para fones de ouvido ou um lugar silencioso.',
   'Fewer than two workouts in this period. Pick a longer one.': 'Menos de dois treinos neste período. Escolha um mais longo.',
   'Releases are checked on GitHub. The download is verified against its checksum before the installer opens.': 'As versões são verificadas no GitHub. O download é conferido pela soma de verificação antes de abrir o instalador.',
+  //// Neoffice — the share sheet (components/ShareSheet.jsx, lib/share/): one « Share » entry that makes a Photo, Numbers or Muscles picture.
+  'Add a photo to start': 'Adicione uma foto para começar',
+  'Choose a photo': 'Escolher uma foto',
+  'Take a photo': 'Tirar foto',
+  'Drag the picture to move the photo.': 'Arraste a imagem para mover a foto.',
+  'Feed': 'Publicação',
+  'Story': 'Story',
+  'Loads': 'Cargas',
+  'Muscles': 'Músculos',
+  'Numbers': 'Números',
+  'Shown next to each exercise.': 'Mostradas ao lado de cada exercício.',
+  'What appears': 'O que aparece',
+  'Your photo stays on this phone: it is not saved anywhere.': 'Sua foto fica neste celular: ela não é enviada nem salva em lugar nenhum.',
+  'max {0}': 'máx. {0}',
+  '+ {0} more exercise': '+ {0} exercício a mais',
+  '+ {0} more exercises': '+ {0} exercícios a mais',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

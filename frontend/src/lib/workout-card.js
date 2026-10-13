@@ -12,6 +12,10 @@ import { isWarmupRow } from './workout-model.js'
 import { MUSCLES, INERT, levelsOf, loadOfWorkouts } from './muscles.js'
 import { fmtDate, fmtDur, fmtNum, fmtVol, capWords } from './format.js'
 import { t, exerciseNameClass } from './i18n-core.js'
+//// Neoffice — the club's foot (logo, name, address, line of information) every shared picture carries: lib/share/footer.js, drawn by
+//// lib/share/draw.js. Both import nothing, so this card stays as light to load as it was.
+import { footLayout } from './share/footer.js'
+import { drawLogo } from './share/draw.js'
 
 export const CARD_WIDTH = 1080
 const PAD = 88
@@ -31,7 +35,7 @@ const MAP_MAX_HEIGHT = 560
  * summary's muscle map for this one session (levelsOf over loadOfWorkouts), null when no set
  * reached a muscle the map can show — a card of only cardio has nothing to shade.
  */
-export function workoutCardModel(w, { unit, nameOf, brand }) {
+export function workoutCardModel(w, { unit, nameOf, brand, club }) {
   const entries = w.entries || []
   const sets = entries.reduce((n, e) => n + (e.sets || []).reduce((m, s) => m + (isWarmupRow(s) ? 0 : doneUnits(s)), 0), 0)
   // New bests in the order the sheet lists the exercises, each named once — a combined session
@@ -61,6 +65,9 @@ export function workoutCardModel(w, { unit, nameOf, brand }) {
     //// Neoffice — the club signs the card. Upstream writes its own product name in the footer; a member who shares the
     //// picture would advertise the software, not the club they train at. Empty = upstream's name, as before.
     brand: typeof brand === 'string' ? brand.trim() : '',
+    //// Neoffice — the club's whole identity ({ name, logo, site, info }): when it is given, the card ends on the club's foot instead
+    //// of the one-line signature above. null (a build with no club behind it) keeps the signature.
+    club: club && typeof club === 'object' ? club : null,
   }
 }
 
@@ -189,6 +196,18 @@ export function layoutWorkoutCard(model, { measure, rtl = false, width = CARD_WI
     if (shown.length < model.records.length) text(t('and {0} more', model.records.length - shown.length), 38, 400, 'label2', start + indent * dir)
   }
 
+  //// Neoffice — the club's foot: a hairline, then the logo, the name, the address and the line of information
+  //// (lib/share/footer.js), the same on every picture a member shares. Only when the club is given (model.club); otherwise the
+  //// one-line signature below.
+  const foot = model.club ? footLayout({ club: model.club, width, pad: PAD, measure, rtl }) : null
+  if (foot && foot.height) {
+    y += 52
+    items.push({ kind: 'rule', x: PAD, y, w: inner })
+    y += 2 + 26
+    items.push(...foot.items(y))
+    y += foot.height
+    return { width, height: Math.max(MIN_HEIGHT, Math.round(y + PAD)), rtl, items }
+  }
   y += 64
   const height = Math.max(MIN_HEIGHT, Math.round(y + 34 + PAD))
   //// Neoffice — the club's name (model.brand), cut to one line, in place of upstream's own; see workoutCardModel.
@@ -262,7 +281,7 @@ export const viewAspect = view => {
  * layout has a map in it, is `{ body, levels }`: body-paths.js geometry for the profile's body
  * ({ front, back }) and the model's levels.
  */
-export function drawWorkoutCard(ctx, layout, colors, map = null, family = CARD_FONT) {
+export function drawWorkoutCard(ctx, layout, colors, map = null, family = CARD_FONT, images = {}) {
   const { width, height, rtl, items } = layout
   const shades = mapColors(colors)
   ctx.fillStyle = colors.bg
@@ -288,6 +307,13 @@ export function drawWorkoutCard(ctx, layout, colors, map = null, family = CARD_F
     } else if (item.kind === 'map') {
       const view = map?.body?.[item.view]
       if (view) drawView(ctx, view, item, map.levels, shades)
+    } else if (item.kind === 'rule') {
+      //// Neoffice — the hairline above the club's foot, a little label over the surface like the silhouette.
+      ctx.fillStyle = shades.sil
+      ctx.fillRect(item.x, item.y, item.w, 2)
+    } else if (item.kind === 'logo') {
+      //// Neoffice — the club's logo (images.logo = lib/share/draw.js logoInfo), contained in its square.
+      drawLogo(ctx, item, images.logo)
     } else if (item.kind === 'trophy') {
       ctx.save()
       ctx.translate(item.x, item.y)

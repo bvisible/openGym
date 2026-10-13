@@ -81,14 +81,14 @@ import { editCompletedSession, editLeftEmpty, editedRecord, editChangesNothing }
 import { stampWorkout } from './lib/sync-merge.js'
 import { weeklyWeights } from './lib/bodyweight.js'
 import { workoutText } from './lib/workout-text.js'
-import { workoutCardModel, layoutWorkoutCard, drawWorkoutCard, viewAspect, CARD_FONT } from './lib/workout-card.js'
 import { copyText } from './lib/clipboard.js'
 import { showsIntensifier, showsWarmupRamp, showsFailureControl, showsBackoffControl, showsTripleProgression, showsSetPlanControl, showsPerSideControl, showsPlateLoading, showsProgressionControls } from './lib/level-visibility.js'
 import FloorPlanFor from './components/FloorPlan.jsx'
 import FloorPlanSheet from './components/FloorPlanSheet.jsx'
 //// Neoffice — see the same note in store/useStore.js: i18n-core, so mocks of i18n.js keep working.
 import { catalogueNameFor, exerciseAliasOf } from './lib/i18n-core.js'
-import ShareWorkout from './components/ShareWorkout.jsx'
+//// Neoffice — the one share sheet (photo, numbers, muscles) that replaced « Share this session » and « Share as image »: components/ShareSheet.jsx.
+import ShareSheet from './components/ShareSheet.jsx'
 import { queueRemaining, pinState } from './lib/queue.js'
 import { DAY_NOTE_TAGS, DAY_NOTE_LABEL, DAY_NOTE_ICON, dayNoteOf, dayNoteLine, canNoteDay, withDayNote } from './lib/day-notes.js'
 
@@ -3005,21 +3005,6 @@ function WorkoutDetail({ w, close }) {
       stampWorkout(rec)
     })
   }, [])
-  //// Neoffice — what this session can put on a card. Computed here because
-  //// the sheet must not have to know how a workout is shaped; and each value
-  //// is left EMPTY when there is none, so the share screen never offers a
-  //// checkbox that can only disappoint. The length is end - start: a saved
-  //// workout has no `dur` (it read `w.dur` until the v1.3.9 merge, so the card
-  //// never offered the duration).
-  const shareable = {
-    name: w.name,
-    date: fmtDate(w.d),
-    duration: w.start && w.end && w.end - w.start >= 60000 ? fmtDur(w.end - w.start) : '',
-    exercises: (w.entries || []).length || '',
-    sets: (w.entries || []).reduce((n, e) => n + (e.sets || []).filter(x => x.done).length, 0) || '',
-    volume: Math.round(workoutVolume(w)) || '',
-    records: '',
-  }
   const nameOf = e => (EXIDX[e.id] ? exerciseNameFor(EXIDX[e.id]) : (e.n || e.id))
   // Tapping an exercise opens its history (Discord 'Improvement ideas'): from one session to the
   // curve it sits on, which is the question a past workout raises most often.
@@ -3060,7 +3045,7 @@ function WorkoutDetail({ w, close }) {
   }
   const shareAsImage = () => {
     const rec = st.workouts.find(x => sameWorkout(x, w)) || w
-    ui().openSheet(c2 => <ShareWorkoutImage w={rec} nameOf={nameOf} close={c2} />)
+    ui().openSheet(c2 => <ShareSheet w={rec} nameOf={nameOf} close={c2} />)
   }
   // A combined session's entries carry a `rid`; group them into per-routine sections in merge
   // order, with each section's supersets paired inside it (sessionSections, which "Copy as text"
@@ -3093,10 +3078,10 @@ function WorkoutDetail({ w, close }) {
       placeholder={t('How the session went as a whole.')}
       onFocus={onNoteFocus} onChange={e => setNote(e.target.value)} onBlur={saveNote} />
     <div style={{ height: 14 }} />
-    {/* //// Neoffice — sharing sits ABOVE deleting and looks nothing like it:
-        //// the two are one tap apart on a phone, and only one of them can be
-        //// undone. Client's request of 31.08 — the member advertises the club. */}
-    <Button icon="link" onClick={() => shareWorkoutSheet(shareable, st.club, st.unit)}>{t('Share this session')}</Button>
+    {/* //// Neoffice — THE way to share a session, above the buttons that change or delete it (the two are one tap apart on a phone, and only
+        //// one of them can be undone): one sheet, three pictures — photo, numbers, muscles — each with the club's foot. It replaces the two
+        //// buttons that sat side by side (« Share this session », « Share as image »). */}
+    <Button icon="share" onClick={shareAsImage}>{t('Share')}</Button>
     <div style={{ height: 8 }} />
     {st.active && <p className="small muted">{t('Finish the current workout first.')}</p>}
     {/* The editor starts from the record as it is, so a note typed here goes in first — the same
@@ -3142,8 +3127,7 @@ function WorkoutDetail({ w, close }) {
     <div style={{ height: 8 }} />
     <Button icon="copy" onClick={copyAsText}>{t('Copy as text')}</Button>
     <div style={{ height: 8 }} />
-    <Button icon="share" onClick={shareAsImage}>{t('Share as image')}</Button>
-    <div style={{ height: 8 }} />
+    {/* //// Neoffice — « Share as image » is the Share button at the top of this sheet now (one share sheet for all three pictures). */}
     <Button icon="download" onClick={exportFit}>{t('Export as .fit file')}</Button>
     <div style={{ height: 10 }} />
     {/* Matched the way the edits above are, not by id: a workout from before ids has none, and
@@ -3151,83 +3135,14 @@ function WorkoutDetail({ w, close }) {
     <Button variant="danger" onClick={() => confirmSheet({ title: t('Delete workout?'), message: t('This removes it from your history for good.') + mediaGoesToo(S().workouts.find(x => sameWorkout(x, w))), confirmText: t('Delete'), danger: true, onConfirm: () => { update(s => { s.workouts = s.workouts.filter(x => !sameWorkout(x, w)) }); close(); toast(t('Workout deleted')) } })}>{t('Delete workout')}</Button>
   </>
 }
-// "Share as image" (#453): the card lib/workout-card.js lays out, painted in the theme and accent
-// the app is showing right now, previewed before it goes anywhere. The muscle map is the finish
-// summary's, for this one session; whether the card carries it is remembered with the profile.
-function ShareWorkoutImage({ w, nameOf, close }) {
-  const st = useStore(s => s.S)
-  const update = useStore(s => s.update)
-  const withMap = st.shareMap !== false
-  //// Neoffice — the card is signed with the club's app title (the server's gym_boot.app_title, as the install banner and
-  //// the sign-in screen read it), not upstream's product name. Read off window rather than imported from lib/api.js:
-  //// the view tests replace that module, and a share sheet has no business failing for want of a title.
-  const clubTitle = (typeof window !== 'undefined' && window.gym_boot && window.gym_boot.app_title) || ''
-  const model = useMemo(() => workoutCardModel(w, { unit: st.unit, nameOf, brand: clubTitle }), [w, st.unit, clubTitle])
-  // The last picture stays up while the next one is drawn, so the toggle never blanks the sheet.
-  const [img, setImg] = useState(null)
-  const [busy, setBusy] = useState(false)
-  const shown = useRef(null)
-  useEffect(() => {
-    let alive = true
-    workoutCardImage(model, { map: withMap, body: st.body })
-      .then(blob => {
-        if (!alive) return
-        if (!blob) { setImg(prev => ({ ...prev, failed: true })); return }
-        if (shown.current) URL.revokeObjectURL(shown.current)
-        shown.current = URL.createObjectURL(blob)
-        setImg({ blob, url: shown.current })
-      })
-      .catch(() => { if (alive) setImg(prev => ({ ...prev, failed: true })) })
-    return () => { alive = false }
-  }, [model, withMap, st.body])
-  useEffect(() => () => { if (shown.current) URL.revokeObjectURL(shown.current) }, [])
-  const name = 'opengym-workout-' + (workoutDay(w) || todayISO()) + '.png'
-  const share = async () => {
-    setBusy(true)
-    await shareImage(img.blob, name, w.name || 'openGym')
-    setBusy(false)
-    close()
-  }
-  return <>
-    <h3>{t('Share workout')}</h3>
-    <div className="share-card">
-      {img?.url
-        ? <img src={img.url} alt={t('Preview of the image to share')} />
-        : img?.failed ? <div className="share-card-ph small muted">{t('Could not create the image')}</div>
-          : <div className="share-card-ph" aria-hidden="true" />}
-    </div>
-    {model.levels && <div className="sect-b" style={{ marginBottom: 12 }}>
-      <Row icon="figureStrength" iconTint="var(--acc)" title={t('Muscle map')} subtitle={t('Show which muscles this workout trained.')}>
-        <Switch checked={withMap} aria-label={t('Muscle map')} onChange={v => update(s => { s.shareMap = v })} />
-      </Row>
-    </div>}
-    <Button variant="primary" icon="share" disabled={!img?.blob || busy} onClick={share}>{t('Share')}</Button>
-  </>
-}
-//// Neoffice — the share-as-image sheet of a saved workout, opened straight from a list row (Home, Stats, History)
-//// without going through its detail sheet: the same card, the same sheet. `w` may be the row's copy; the saved
-//// record is the one the card reads, as in the detail sheet.
+//// Neoffice — « Share as image » (#453) is now the share sheet of components/ShareSheet.jsx: the muscle card (lib/workout-card.js), a card
+//// of numbers and the member's own photo with their numbers over it, one sheet, signed with the club's foot. The muscle card's own
+//// drawing moved to lib/share/muscles.js, the file hand-over to lib/share/send.js. Opened straight from a list row (Home, Stats,
+//// History) without going through the detail sheet: `w` may be the row's copy; the saved record is the one the picture reads.
 export function shareWorkoutImageSheet(w) {
   const rec = S().workouts.find(x => sameWorkout(x, w)) || w
   const nameOf = e => (EXIDX[e.id] ? exerciseNameFor(EXIDX[e.id]) : (e.n || e.id))
-  ui().openSheet(c2 => <ShareWorkoutImage w={rec} nameOf={nameOf} close={c2} />)
-}
-async function workoutCardImage(model, { map, body }) {
-  const root = getComputedStyle(document.documentElement)
-  const css = (name, fallback) => root.getPropertyValue(name).trim() || fallback
-  const colors = { bg: css('--bg', '#000'), surface: css('--surface', '#1c1c1e'), tile: css('--surface-2', '#2c2c2e'), label: css('--label', '#fff'), label2: css('--label-2', '#999'), acc: css('--acc', '#30d158') }
-  // The body geometry is ~90 KB and lazy everywhere else too (components/BodyMap.jsx).
-  const geometry = map && model.levels ? (await import('./lib/body-paths.js')).default : null
-  const shape = geometry && (geometry[body] || geometry.male)
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return null
-  const measure = (text, weight, size) => { ctx.font = `${weight} ${size}px ${CARD_FONT}`; return ctx.measureText(text).width }
-  const layout = layoutWorkoutCard(model, { measure, rtl: document.documentElement.dir === 'rtl', map: shape ? { aspect: viewAspect(shape.front) } : null })
-  canvas.width = layout.width
-  canvas.height = layout.height
-  drawWorkoutCard(ctx, layout, colors, shape ? { body: shape, levels: model.levels } : null)
-  return new Promise(resolve => canvas.toBlob(resolve, 'image/png'))
+  ui().openSheet(c2 => <ShareSheet w={rec} nameOf={nameOf} close={c2} />)
 }
 // The .fit file goes out the way a backup does: the share sheet in the phone app (Files, Drive,
 // Garmin Connect itself), a download in the browser.
@@ -3235,18 +3150,6 @@ async function saveFitFile(blob, name) {
   if (MOBILE) { try { await shareExportBlob(blob, name) } catch (e) { /* share sheet dismissed */ } return }
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); URL.revokeObjectURL(a.href)
   toast(t('Saved. Garmin Connect can take it from here.'))
-}
-// The phone app goes through the OS share sheet the way a backup does; a browser that can share
-// files (most phones) opens its own; anything else saves the picture as a download.
-async function shareImage(blob, name, title) {
-  if (MOBILE) { try { await shareExportBlob(blob, name) } catch (e) { /* share sheet dismissed */ } return }
-  const file = typeof File === 'function' ? new File([blob], name, { type: 'image/png' }) : null
-  if (file && navigator.canShare?.({ files: [file] })) {
-    try { await navigator.share({ files: [file], title }) } catch (e) { /* dismissed */ }
-    return
-  }
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); URL.revokeObjectURL(a.href)
-  toast(t('Image saved'))
 }
 // The sentence a workout's Delete adds when its photos and videos go with it — every file the
 // record lists, shown or not. Empty when it has none.
@@ -4313,11 +4216,3 @@ function Row2({ icon, label, value }) {
     <div className="grow"><div className="ss">{label}</div><div className="tt">{value}</div></div>
   </div>
 }
-
-
-//// Neoffice — added below: sharing a finished session as an image.
-//// Opened from the workout detail rather than forced at the end of a session:
-//// somebody who just finished wants to sit down, not to be asked to publish.
-//// The button waits for them where they go to look at what they did.
-export const shareWorkoutSheet = (workout, club, unit) =>
-	ui().openSheet(close => <ShareWorkout workout={workout} club={club} unit={unit} close={close} />)

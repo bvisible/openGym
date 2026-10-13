@@ -2694,4 +2694,20 @@ export default {
   //// Neoffice — the two badges of the Focus view that upstream writes in English whatever the language (views/FocusView.jsx).
   'Rest {0}s': '휴식 {0}초',
   '{0} Reps': '{0}회',
+  //// Neoffice — the share sheet (components/ShareSheet.jsx, lib/share/): one « Share » entry that makes a Photo, Numbers or Muscles picture.
+  'Add a photo to start': '시작하려면 사진을 추가하세요',
+  'Choose a photo': '사진 선택',
+  'Take a photo': '사진 찍기',
+  'Drag the picture to move the photo.': '사진을 옮기려면 미리보기를 드래그하세요.',
+  'Feed': '게시물',
+  'Story': '스토리',
+  'Loads': '중량',
+  'Muscles': '근육',
+  'Numbers': '숫자',
+  'Shown next to each exercise.': '각 운동 옆에 표시됩니다.',
+  'What appears': '표시 항목',
+  'Your photo stays on this phone: it is not saved anywhere.': '사진은 이 휴대폰에만 남고, 어디에도 저장되지 않습니다.',
+  'max {0}': '최대 {0}',
+  '+ {0} more exercise': '+ {0}개 운동 더',
+  '+ {0} more exercises': '+ {0}개 운동 더',
 }

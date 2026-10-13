@@ -1725,6 +1725,20 @@ body.no-tabbar #timer.working{box-shadow:inset 0 var(--hair) 0 var(--acc),0 -10p
    holds a portrait card's shape so nothing below it jumps when the picture lands. */
 .share-card{margin:0 auto 14px;max-width:420px}
 .share-card img{display:block;width:100%;max-height:56vh;object-fit:contain;border-radius:16px;box-shadow:0 6px 24px rgba(0,0,0,.28)}
+/* //// Neoffice — the share sheet (components/ShareSheet.jsx): one sheet, three pictures. The preview is shorter so that the choices
+   under it stay in reach on a phone; a movable photo is dragged with a finger, so the page must not scroll under it. */
+.share-seg{margin:0 0 12px}
+.share-seg + .share-card{margin-top:2px}
+.share-card{position:relative}
+.share-card img{max-height:46vh;margin:0 auto;width:auto;max-width:100%}
+.share-card.movable{touch-action:none;cursor:grab;-webkit-user-select:none;user-select:none}
+.share-card.movable img{-webkit-touch-callout:none}
+.share-ask{position:absolute;left:0;right:0;top:0;height:42%;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.share-ask-t{padding:7px 14px;border-radius:99px;background:rgba(0,0,0,.45);color:#fff;font-size:14px;font-weight:600}
+.share-photo-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:0 0 6px}
+.share-note{text-align:center;margin:0 0 12px}
+.share-format{margin:0 0 12px}
+.share-h{margin:2px 4px 6px}
 .share-card-ph{aspect-ratio:4/5;max-height:56vh;margin:0 auto;border-radius:16px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;text-align:center;padding:16px}
 /* --- muscle map --- */
 /* Reuses the .hm-c level ramp above, so one accent scale means one thing app-wide. */
