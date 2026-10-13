@@ -126,7 +126,9 @@ export function layoutShare(model, { template = 'photo', format = 'feed', measur
           const detailW = detail ? measure(detail, 600, z.detail) : 0
           const iconW = row.pr ? z.icon + 14 : 0
           const nameRoom = inner - detailW - (detail ? 28 : 0) - iconW
-          const nameSize = fitSize(row.name, nameRoom, measure, 600, z.name, 26)
+          // A long name shrinks a little before it is cut — never by more than an eighth: type that jumps from one row to the next looks
+          // like a mistake, so a name that still does not fit at the smallest size is cut there.
+          const nameSize = fitSize(row.name, nameRoom, measure, 600, z.name, Math.round(z.name * 0.88 / 2) * 2)
           const name = oneLine(row.name, nameRoom, s => measure(s, 600, nameSize))
           const nameW = measure(name, 600, nameSize)
           const base = y + z.row / 2 + nameSize * 0.36

@@ -93,24 +93,41 @@ export default function ShareSheet({ w, nameOf, close }) {
     : renderShare({ ...base, picks, template, format, photo: onPhoto ? photo : null, focus, scale, type, quality }))
   const key = JSON.stringify([template, format, [...picks].sort(), withMap, focus, club, photoId, onPhoto ? 1 : 0, unit, st.body])
 
-  // The preview is drawn small and as a JPEG so that dragging the photo stays smooth; the picture that is shared is drawn full size a
-  // moment after the last change, so that « Share » finds it ready (a browser lets a share start only just after the tap).
+  // The preview is drawn small and as a JPEG so that dragging the photo stays smooth, and its requests do not wait for each other:
+  // while one preview is being drawn only the latest request is kept, drawn as soon as the first is done, so the photo follows the
+  // finger instead of jumping when it stops. The picture that is shared is drawn full size a moment after the last change, so that
+  // « Share » finds it ready (a browser lets a share start only just after the tap).
   const [img, setImg] = useState(null)
   const shown = useRef(null)
   const ready = useRef({ key: '', blob: null })
+  const wanted = useRef(null)
+  const drawing = useRef(false)
+  const alive = useRef(true)
+  useEffect(() => { alive.current = true; return () => { alive.current = false } }, [])
+  const drawPreviews = async () => {
+    if (drawing.current) return
+    drawing.current = true
+    try {
+      while (wanted.current && alive.current) {
+        const job = wanted.current
+        wanted.current = null
+        let blob = null
+        try { blob = await job.run() } catch { blob = null }
+        if (!alive.current) return
+        if (!blob) { setImg(prev => ({ ...prev, failed: true })); continue }
+        if (shown.current) URL.revokeObjectURL(shown.current)
+        shown.current = URL.createObjectURL(blob)
+        setImg({ url: shown.current })
+        // The muscle card has one size: its preview is the picture that is shared.
+        if (job.final) ready.current = { key: job.key, blob }
+      }
+    } finally {
+      drawing.current = false
+    }
+  }
   useEffect(() => {
-    let alive = true
-    const timer = setTimeout(async () => {
-      let blob = null
-      try { blob = await render(0.5, 'image/jpeg', 0.84) } catch { blob = null }
-      if (!alive) return
-      if (!blob) { setImg(prev => ({ ...prev, failed: true })); return }
-      if (shown.current) URL.revokeObjectURL(shown.current)
-      shown.current = URL.createObjectURL(blob)
-      setImg({ url: shown.current })
-      if (template === 'muscles') ready.current = { key, blob }
-    }, 30)
-    return () => { alive = false; clearTimeout(timer) }
+    wanted.current = { key, final: template === 'muscles', run: () => render(0.5, 'image/jpeg', 0.84) }
+    drawPreviews()
   }, [key])
   useEffect(() => {
     if (template === 'muscles') return undefined
@@ -171,7 +188,9 @@ export default function ShareSheet({ w, nameOf, close }) {
     <h3>{t('Share workout')}</h3>
     <Segmented className="share-seg" value={template} onChange={v => changePrefs({ template: v })}
       options={[{ value: 'photo', label: t('Photo'), icon: 'camera' }, { value: 'numbers', label: t('Numbers'), icon: 'chart' }, { value: 'muscles', label: t('Muscles'), icon: 'figureStrength' }]} />
-    <div ref={frameRef} className={'share-card' + (movable ? ' movable' : '')} data-swipe-ignore
+    {/* A photo that moves under the finger is dragged DOWN as often as sideways: the sheet's own pull-to-dismiss (components/Modals.jsx) must
+        leave the gesture alone while the frame is movable, or one downward drag of the photo closes the sheet (`data-nodrag` is its opt-out). */}
+    <div ref={frameRef} className={'share-card' + (movable ? ' movable' : '')} data-swipe-ignore data-nodrag={movable ? '' : undefined}
       onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
       {img?.url
         ? <img src={img.url} alt={t('Preview of the image to share')} draggable={false} />

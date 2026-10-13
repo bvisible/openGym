@@ -162,15 +162,27 @@ describe('layoutShare — long names', () => {
     expect(width(t[1])).toBeLessThanOrEqual(WH('feed').width - PAD * 2 + 0.5)
   })
 
-  it('shrinks an exercise\'s name to 26 px before cutting it, then cuts it with an ellipsis', () => {
-    const fits = 'Single-arm dumbbell Bulgarian split squat with a pause'
+  it('shrinks an exercise\'s name a little before cutting it, never below an eighth under its size, then cuts it with an ellipsis', () => {
+    // 47 characters: 34 px and 32 px are too wide for the room left by the numbers, 30 px fits.
+    const fits = 'abcde '.repeat(8).trim()
     const a = texts(run({ lines: [{ name: fits, detail: '4 × 8 · 80 kg', pr: false }] }, { template: 'photo' })).find(i => i.text === fits)
     expect(a).toBeTruthy()
-    expect(a.size).toBe(26)
+    expect(a.size).toBe(30)
     const tooLong = Array.from({ length: 30 }, () => 'incline').join(' ')
     const b = texts(run({ lines: [{ name: tooLong, detail: '4 × 8 · 80 kg', pr: false }] }, { template: 'photo' })).find(i => i.text.startsWith('incline'))
-    expect(b.size).toBe(26)
+    expect(b.size).toBe(30)
     expect(b.text.endsWith('…')).toBe(true)
+    const numbers = texts(run({ lines: [{ name: tooLong, detail: '4 × 8 · 80 kg', pr: false }] }, { template: 'numbers' })).find(i => i.text.startsWith('incline'))
+    expect(numbers.size).toBe(36)
+  })
+
+  it('keeps the names of one list within an eighth of each other in size', () => {
+    const long = Array.from({ length: 9 }, () => 'barbell').join(' ')
+    const rows = [{ name: 'Squat', detail: '4 × 8 · 80 kg', pr: false }, { name: long, detail: '60×10 · 70×8 · 80×6 · 90×4', pr: false }, { name: 'Row', detail: '3 × 10', pr: false }]
+    const names = texts(run({ lines: rows }, { template: 'photo' })).filter(i => i.weight === 600 && ['Squat', 'Row'].includes(i.text) || i.text.startsWith('barbell'))
+    const sizes = names.map(i => i.size)
+    expect(Math.min(...sizes)).toBeGreaterThanOrEqual(Math.round(34 * 0.88 / 2) * 2)
+    expect(Math.max(...sizes) / Math.min(...sizes)).toBeLessThanOrEqual(1.14)
   })
 
   it('cuts a long line of numbers so the name keeps its room', () => {

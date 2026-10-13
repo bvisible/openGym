@@ -119,6 +119,27 @@ describe('the share sheet — what it opens on', () => {
     expect(full).toMatchObject({ type: 'image/png', template: 'photo' })
   })
 
+  it('keeps only the latest of the changes made while a preview is being drawn and draws it right after: the photo follows the finger', async () => {
+    const gates = []
+    h.render = vi.fn(o => (o.scale === 0.5 && gates.length === 0
+      ? new Promise(resolve => gates.push(() => resolve(new Blob(['first'], { type: o.type }))))
+      : Promise.resolve(new Blob(['x'], { type: o.type }))))
+    const previews = () => h.render.mock.calls.filter(([o]) => o.scale === 0.5)
+    act(() => { shareWorkoutImageSheet(workout) })
+    const host = renderTop()
+    await tick(5)
+    expect(previews()).toHaveLength(1)
+    act(() => sw(host, 'Sets').click())
+    act(() => sw(host, 'Weight moved').click())
+    act(() => sw(host, 'Duration').click())
+    await tick(5)
+    expect(previews()).toHaveLength(1)   // nothing starts while one is under way
+    await act(async () => { gates[0]() })
+    await tick(5)
+    expect(previews()).toHaveLength(2)   // not four: the changes in between were folded into one
+    expect([...previews()[1][0].picks].sort()).toEqual(['exercises', 'records', 'sets', 'volume', 'weights'])
+  })
+
   it('has a Share button, kept off until the preview is there', async () => {
     act(() => { shareWorkoutImageSheet(workout) })
     const host = renderTop()
@@ -276,6 +297,34 @@ describe('the share sheet — the member\'s photo', () => {
     await pickPhoto(host)
     expect(useUI.getState().toastMsg).toMatch(/cannot read/i)
     expect(byText(host, 'Take a photo').disabled).toBe(false)
+  })
+
+  it('moves the photo under the finger: dragging right shows more of its left, and the picture is drawn again', async () => {
+    const host = await open()
+    await pickPhoto(host)
+    await tick(40)
+    const frame = host.querySelector('.share-card')
+    frame.querySelector('img').getBoundingClientRect = () => ({ width: 270, height: 337, left: 0, top: 0, right: 270, bottom: 337, x: 0, y: 0 })
+    const before = lastRender().focus
+    const fire = (type, x, y) => act(() => { frame.dispatchEvent(new PointerEvent(type, { bubbles: true, clientX: x, clientY: y, pointerId: 1 })) })
+    fire('pointerdown', 100, 100); fire('pointermove', 160, 100); fire('pointerup', 160, 100)
+    await tick(40)
+    expect(lastRender().focus.x).toBeLessThan(before.x)
+    expect(lastRender().focus.y).toBeCloseTo(before.y, 6)   // dragged sideways only
+  })
+
+  it('keeps the sheet from being pulled down while the photo can be moved (its pull-to-dismiss would take every downward drag)', async () => {
+    const host = await open()
+    const frame = () => host.querySelector('.share-card')
+    // Nothing to move yet: pulling on the preview still dismisses the sheet, as on any other sheet.
+    expect(frame().hasAttribute('data-nodrag')).toBe(false)
+    await pickPhoto(host)
+    await tick(40)
+    expect(frame().classList.contains('movable')).toBe(true)
+    expect(frame().hasAttribute('data-nodrag')).toBe(true)
+    act(() => byText(host, 'Numbers').click())
+    await tick(40)
+    expect(frame().hasAttribute('data-nodrag')).toBe(false)
   })
 
   it('keeps the photo off the Numbers card', async () => {

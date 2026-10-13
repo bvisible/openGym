@@ -62,7 +62,7 @@ export function logoInfo(img, doc = globalThis.document) {
     const c = doc.createElement('canvas')
     c.width = 32
     c.height = 32
-    const g = c.getContext('2d')
+    const g = c.getContext('2d', { willReadFrequently: true })   // read back right away: the browser keeps these canvases on the CPU
     g.drawImage(img, 0, 0, 32, 32)
     const { data } = g.getImageData(0, 0, 32, 32)
     let sum = 0
@@ -90,7 +90,7 @@ export function lowerBrightness(photo, layout, focus = DEFAULT_FOCUS, doc = glob
     const c = doc.createElement('canvas')
     c.width = 24
     c.height = 16
-    const g = c.getContext('2d')
+    const g = c.getContext('2d', { willReadFrequently: true })
     g.drawImage(photo.source, r.sx, r.sy + r.sh * top, r.sw, r.sh * (1 - top), 0, 0, 24, 16)
     const { data } = g.getImageData(0, 0, 24, 16)
     let sum = 0
