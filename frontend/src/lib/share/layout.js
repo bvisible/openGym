@@ -1,7 +1,8 @@
 //// Neoffice — added file (no upstream equivalent).
 ////
 //// Where everything goes on the picture a member shares of a finished workout: the PHOTO (their own photo, the numbers laid over its
-//// lower part) and the NUMBERS card (no photo, big figures on a dark ground). Pure — a way to measure text goes in, a flat list of
+//// lower part), the NUMBERS card (no photo, big figures on a dark ground) and the STICKER (the photo's numbers on a rounded dark panel,
+//// everything around the panel transparent, to be pasted onto a photo or a story). Pure — a way to measure text goes in, a flat list of
 //// items comes out for lib/share/draw.js — so the part that decides what fits is tested without a canvas, the way lib/workout-card.js
 //// is. The same blocks serve both templates; only the sizes and the anchoring differ (the photo's numbers sit at the bottom, over
 //// the photo; the numbers card starts at the top).
@@ -13,6 +14,8 @@ export const FORMATS = Object.freeze({
   story: Object.freeze({ width: 1080, height: 1920 }),  // 9:16
 })
 export const PAD = 64
+// The sticker is as wide as a feed picture and as tall as what it says; the panel's corners are the only part that is cut.
+export const STICKER = Object.freeze({ width: 1080, top: 60, bottom: 60, maxLines: 8, radius: 56 })
 
 const SIZES = {
   photo: { eyebrow: 28, title: 66, figure: 84, label: 24, name: 34, detail: 32, row: 58, more: 28, icon: 30 },
@@ -33,9 +36,10 @@ const RULE = 2
  * drawing darkens the photo from a little above it).
  */
 export function layoutShare(model, { template = 'photo', format = 'feed', measure, rtl = false }) {
+  const sticker = template === 'sticker'
   const tiles = template === 'numbers'
   const z = SIZES[tiles ? 'numbers' : 'photo']
-  const { width: W, height: H } = FORMATS[format] || FORMATS.feed
+  const { width: W, height: H } = sticker ? { width: STICKER.width, height: 0 } : (FORMATS[format] || FORMATS.feed)
   const inner = W - PAD * 2
   const startX = rtl ? W - PAD : PAD
   const aStart = rtl ? 'right' : 'left'
@@ -146,6 +150,22 @@ export function layoutShare(model, { template = 'photo', format = 'feed', measur
 
   // The most exercise lines that still fit the room: the photo's numbers may cover part of it, the numbers card the whole of it
   // between its top and its foot.
+  if (sticker) {
+    // As tall as its content: nothing to fit into, so no search for the number of lines that fit, only a cap.
+    const n = Math.min(lines.length, STICKER.maxLines)
+    const built = compose(n)
+    const top = STICKER.top
+    const footTop = top + built.height + gapToFoot
+    const height = footTop + (foot.height ? footH : 0) + STICKER.bottom
+    const items = [{ kind: 'panel', x: 0, y: 0, w: W, h: height, r: STICKER.radius }]
+    let at = top
+    for (const p of built.parts) { items.push(...p.put(at)); at += p.h }
+    if (foot.height) {
+      items.push({ kind: 'rule', x: PAD, y: footTop, w: inner })
+      items.push(...foot.items(footTop + RULE + 26))
+    }
+    return { template: 'sticker', format: 'sticker', width: W, height, rtl, items, overlayTop: top, shown: n, hidden: lines.length - n }
+  }
   const inset = INSET[format] || INSET.feed
   const room = tiles
     ? H - inset.top - inset.bottom - footH - gapToFoot - 24

@@ -1,12 +1,12 @@
 //// Neoffice — added file (no upstream equivalent).
 ////
-//// What a member chose the last time they shared — the picture (photo, numbers, muscles), its shape (feed or story) and what appears on
+//// What a member chose the last time they shared — the picture (photo, numbers, muscles, sticker), its shape (feed or story) and what appears on
 //// it — kept on THIS device, so that the next share opens on the same choices. A preference of the device, not of the profile: nothing
 //// about it is synced, and a storage that refuses (a private window) only means the sheet opens on its defaults.
 import { PICKS, DEFAULT_PICKS } from './model.js'
 import { FORMATS } from './layout.js'
 
-export const TEMPLATES = Object.freeze(['photo', 'numbers', 'muscles'])
+export const TEMPLATES = Object.freeze(['photo', 'numbers', 'muscles', 'sticker'])
 export const DEFAULT_PREFS = Object.freeze({ template: 'photo', format: 'feed', picks: DEFAULT_PICKS })
 const KEY = 'opengym.share.v1'
 

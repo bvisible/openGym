@@ -2672,4 +2672,8 @@ export default {
   'max {0}': 'max {0}',
   '+ {0} more exercise': '+ {0} további gyakorlat',
   '+ {0} more exercises': '+ {0} további gyakorlat',
+  //// Neoffice — the share sheet's sticker (components/ShareSheet.jsx): a transparent picture to copy and paste onto a photo or a story.
+  'Sticker': 'Matrica',
+  'Copy image': 'Kép másolása',
+  'Transparent background: paste it onto a photo or a story.': 'Átlátszó háttér: illeszd rá egy fotóra vagy történetre.',
 }

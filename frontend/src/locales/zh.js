@@ -2710,4 +2710,8 @@ export default {
   'max {0}': '最重 {0}',
   '+ {0} more exercise': '+ 还有 {0} 个动作',
   '+ {0} more exercises': '+ 还有 {0} 个动作',
+  //// Neoffice — the share sheet's sticker (components/ShareSheet.jsx): a transparent picture to copy and paste onto a photo or a story.
+  'Sticker': '贴纸',
+  'Copy image': '复制图片',
+  'Transparent background: paste it onto a photo or a story.': '透明背景：粘贴到照片上或限时动态中。',
 }

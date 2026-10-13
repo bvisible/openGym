@@ -15,7 +15,7 @@ describe('readPrefs', () => {
     const p = readPrefs(null)
     expect(p).toEqual({ template: 'photo', format: 'feed', picks: [...DEFAULT_PICKS] })
     expect(DEFAULT_PREFS.template).toBe('photo')
-    expect(TEMPLATES).toEqual(['photo', 'numbers', 'muscles'])
+    expect(TEMPLATES).toEqual(['photo', 'numbers', 'muscles', 'sticker'])
   })
 
   it('does not hand out the shared default array: a change to one result must not change the next', () => {
@@ -27,6 +27,11 @@ describe('readPrefs', () => {
   it('reads back valid choices as they were stored', () => {
     const raw = JSON.stringify({ template: 'numbers', format: 'story', picks: ['duration', 'sets', 'volume'] })
     expect(readPrefs(raw)).toEqual({ template: 'numbers', format: 'story', picks: ['duration', 'sets', 'volume'] })
+  })
+
+  it('knows the sticker', () => {
+    expect(readPrefs({ template: 'sticker' }).template).toBe('sticker')
+    expect(readPrefs(JSON.stringify({ template: 'sticker', format: 'story', picks: ['duration'] }))).toEqual({ template: 'sticker', format: 'story', picks: ['duration'] })
   })
 
   it('falls back to the default for a picture or a shape it does not know', () => {

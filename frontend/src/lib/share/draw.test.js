@@ -191,3 +191,36 @@ describe('the helpers that read pixels', () => {
     expect(paletteFor('#d68a59').label).toBe('#ffffff')
   })
 })
+
+describe('drawShare — the sticker', () => {
+  const layout = () => layoutOf('sticker')
+
+  it('paints a rounded panel on a transparent canvas: the frame is cleared, no ground, no photo', () => {
+    const ctx = recorder()
+    const l = layout()
+    drawShare(ctx, l, { colors, photo, logo: null })
+    expect(named(ctx, 'clearRect')[0].args).toEqual([0, 0, l.width, l.height])
+    expect(named(ctx, 'createRadialGradient')).toHaveLength(0)
+    expect(named(ctx, 'createLinearGradient')).toHaveLength(0)
+    expect(named(ctx, 'drawImage').filter(c => c.args[0] === photo.source)).toHaveLength(0)
+    expect(named(ctx, 'fillRect').filter(c => c.args[2] === l.width && c.args[3] === l.height)).toHaveLength(0)
+  })
+
+  it('fills the panel with a dark, almost opaque colour and outlines it', () => {
+    const ctx = recorder()
+    drawShare(ctx, layout(), { colors })
+    const fills = named(ctx, 'fill')
+    expect(fills[0].fillStyle).toMatch(/^rgba\(12, 14, 18, 0\.[789]/)
+    expect(named(ctx, 'stroke').length).toBeGreaterThan(0)
+    expect(named(ctx, 'arcTo').length).toBeGreaterThanOrEqual(4)
+  })
+
+  it('writes the same texts as the layout says, with no shadow behind them', () => {
+    const ctx = recorder()
+    const l = layout()
+    drawShare(ctx, l, { colors, photo })
+    const written = named(ctx, 'fillText')
+    expect(written.map(c => c.args[0])).toEqual(l.items.filter(i => i.kind === 'text').map(i => i.text))
+    expect(written.every(c => !c.shadowBlur)).toBe(true)
+  })
+})

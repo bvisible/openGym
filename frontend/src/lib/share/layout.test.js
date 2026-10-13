@@ -2,7 +2,7 @@
 //// Where everything goes on the picture a member shares (lib/share/layout.js): checked without a canvas, with a fake measure in which
 //// every character is half its font size wide.
 import { describe, expect, it } from 'vitest'
-import { layoutShare, FORMATS, PAD } from './layout.js'
+import { layoutShare, FORMATS, PAD, STICKER } from './layout.js'
 
 const measure = (text, weight, size) => String(text).length * size * 0.5
 const lines = n => Array.from({ length: n }, (_, i) => ({ name: `Exercise number ${i + 1}`, detail: '4 × 8 · 80 kg', pr: i === 0 }))
@@ -257,5 +257,74 @@ describe('layoutShare — the numbers card', () => {
     const ys = layout.items.map(i => i.y).filter(Number.isFinite)
     expect(Math.min(...ys)).toBeGreaterThanOrEqual(PAD - 1)
     expect(Math.max(...ys)).toBeLessThanOrEqual(height - PAD + 1)
+  })
+})
+
+describe('layoutShare — the sticker', () => {
+  const sticker = (over, opts = {}) => run(over, { template: 'sticker', ...opts })
+
+  it('is 1 080 wide and as tall as what it says, whatever shape was asked for', () => {
+    const feed = sticker({}, { format: 'feed' })
+    const story = sticker({}, { format: 'story' })
+    expect(feed).toMatchObject({ template: 'sticker', width: 1080 })
+    expect(feed.height).toBe(story.height)
+    expect(feed.height).toBeLessThan(FORMATS.feed.height)
+  })
+
+  it('is one panel that holds everything, the panel drawn first', () => {
+    const layout = sticker({})
+    expect(layout.items[0]).toEqual({ kind: 'panel', x: 0, y: 0, w: 1080, h: layout.height, r: STICKER.radius })
+    for (const i of layout.items.slice(1)) {
+      expect(i.x).toBeGreaterThanOrEqual(0)
+      expect(i.x).toBeLessThanOrEqual(1080)
+      if (Number.isFinite(i.y)) { expect(i.y).toBeGreaterThanOrEqual(STICKER.top - 1); expect(i.y).toBeLessThanOrEqual(layout.height - STICKER.bottom + 1) }
+    }
+  })
+
+  it('keeps every text between the side margins, left- and right-aligned alike', () => {
+    for (const rtl of [false, true]) {
+      for (const t of texts(sticker({ lines: lines(12) }, { rtl }))) {
+        const w = width(t)
+        const [from, to] = t.anchor === 'right' ? [t.x - w, t.x] : [t.x, t.x + w]
+        expect(from).toBeGreaterThanOrEqual(PAD - 0.5)
+        expect(to).toBeLessThanOrEqual(1080 - PAD + 0.5)
+      }
+    }
+  })
+
+  it('grows with what it says, up to eight exercise lines, and counts the rest in a last line', () => {
+    const one = sticker({ lines: lines(1) })
+    const six = sticker({ lines: lines(6) })
+    const twelve = sticker({ lines: lines(12) })
+    expect(one.height).toBeLessThan(six.height)
+    expect(six.height).toBeLessThan(twelve.height)
+    expect(twelve).toMatchObject({ shown: STICKER.maxLines, hidden: 4 })
+    expect(texts(twelve).map(i => i.text)).toContain('+ 4 more')
+    expect(texts(six).some(i => /^\+ \d+ more$/.test(i.text))).toBe(false)
+  })
+
+  it('closes on the foot — the club\'s name and site — and is shorter without one', () => {
+    const withFoot = sticker({})
+    expect(texts(withFoot).map(i => i.text)).toEqual(expect.arrayContaining(['Riverside Gym', 'riverside.example']))
+    const none = sticker({ club: { name: '', logo: '', site: '', info: '' } })
+    expect(none.height).toBeLessThan(withFoot.height)
+    expect(none.items.some(i => i.kind === 'rule' && i.y > STICKER.top + 400)).toBe(false)
+  })
+
+  it('has a bottom margin as deep as its top one', () => {
+    const layout = sticker({})
+    const lowest = Math.max(...layout.items.filter(i => i.kind === 'text').map(i => i.y))
+    expect(layout.height - lowest).toBeGreaterThanOrEqual(STICKER.bottom - 1)
+  })
+
+  it('mirrors in a right-to-left language', () => {
+    const rtl = sticker({}, { rtl: true })
+    expect(texts(rtl).find(i => i.text === 'Push day')).toMatchObject({ x: 1080 - PAD, anchor: 'right' })
+    expect(rtl.items.find(i => i.kind === 'bar').x).toBe(1080 - PAD - 96)
+  })
+
+  it('says nothing about a figure that was not ticked', () => {
+    const none = sticker({ figures: [] })
+    for (const f of figures) expect(texts(none).map(i => i.text)).not.toContain(f.value)
   })
 })

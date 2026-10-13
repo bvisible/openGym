@@ -1,7 +1,8 @@
 //// Neoffice — added file (no upstream equivalent).
 ////
 //// Paints a layout from lib/share/layout.js onto a 2D canvas context: the member's photo cropped to fill the frame and darkened
-//// where the numbers sit, or the numbers card's own ground; then the bars, tiles, rules, trophies, the club's logo and the text. The
+//// where the numbers sit, or the numbers card's own ground, or nothing at all for the sticker (a rounded panel on a transparent canvas);
+//// then the bars, tiles, rules, trophies, the club's logo and the text. The
 //// muscle card (lib/workout-card.js) reuses drawLogo and drawTrophy so that the club's foot looks the same on every picture.
 import { FONT, withAlpha, luminance } from './text.js'
 import { coverRect, DEFAULT_FOCUS } from './frame.js'
@@ -143,13 +144,25 @@ export function drawShare(ctx, layout, { colors, photo = null, focus = DEFAULT_F
     veil.addColorStop(1, `rgba(0,0,0,${alpha.toFixed(3)})`)
     ctx.fillStyle = veil
     ctx.fillRect(0, top, W, H - top)
+  } else if (template === 'sticker') {
+    ctx.clearRect(0, 0, W, H)
   } else {
     drawGround(ctx, W, H, colors)
   }
   ctx.textBaseline = 'alphabetic'
   ctx.direction = rtl ? 'rtl' : 'ltr'
   for (const item of items) {
-    if (item.kind === 'bar') {
+    if (item.kind === 'panel') {
+      // The sticker's body: dark enough to read white text on whatever it is pasted over, with a hairline so that it holds on a dark photo.
+      ctx.save()
+      roundRect(ctx, item.x + 1, item.y + 1, item.w - 2, item.h - 2, item.r)
+      ctx.fillStyle = 'rgba(12, 14, 18, 0.88)'
+      ctx.fill()
+      ctx.lineWidth = 2
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'
+      ctx.stroke()
+      ctx.restore()
+    } else if (item.kind === 'bar') {
       ctx.fillStyle = colors.acc
       roundRect(ctx, Math.min(item.x, item.x + item.w), item.y, Math.abs(item.w), item.h, item.h / 2)
       ctx.fill()

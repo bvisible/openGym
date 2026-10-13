@@ -1550,6 +1550,10 @@ export const PT_BR_OVERRIDES = {
   'max {0}': 'máx. {0}',
   '+ {0} more exercise': '+ {0} exercício a mais',
   '+ {0} more exercises': '+ {0} exercícios a mais',
+  //// Neoffice — the share sheet's sticker (components/ShareSheet.jsx): a transparent picture to copy and paste onto a photo or a story.
+  'Sticker': 'Adesivo',
+  'Copy image': 'Copiar imagem',
+  'Transparent background: paste it onto a photo or a story.': 'Fundo transparente: cole-o em uma foto ou no story.',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

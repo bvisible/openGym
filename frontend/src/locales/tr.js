@@ -2709,4 +2709,8 @@ export default {
   'max {0}': 'maks {0}',
   '+ {0} more exercise': '+ {0} egzersiz daha',
   '+ {0} more exercises': '+ {0} egzersiz daha',
+  //// Neoffice — the share sheet's sticker (components/ShareSheet.jsx): a transparent picture to copy and paste onto a photo or a story.
+  'Sticker': 'Çıkartma',
+  'Copy image': 'Görseli kopyala',
+  'Transparent background: paste it onto a photo or a story.': 'Şeffaf arka plan: bir fotoğrafın veya bir hikayenin üzerine yapıştır.',
 }

@@ -28,3 +28,21 @@ export async function sendImage(blob, name, title) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000)
   return 'downloaded'
 }
+
+/** Whether this browser can put a picture on the clipboard (a ClipboardItem and an async clipboard): the « Copy image » button exists only then. */
+export const canCopyImage = () => typeof ClipboardItem === 'function' && !!globalThis.navigator?.clipboard?.write
+
+/**
+ * Puts `blob` (a PNG: a transparent sticker keeps its transparency there) on the clipboard, to be pasted onto a story or into a message.
+ * Resolves 'copied' | 'unsupported' | 'failed'. The write starts at once, in the tap that asked for it: a browser lets the clipboard
+ * be written only inside a tap, and waits for nothing here.
+ */
+export async function copyImage(blob) {
+  if (!canCopyImage()) return 'unsupported'
+  try {
+    await navigator.clipboard.write([new ClipboardItem({ [blob.type || 'image/png']: blob })])
+    return 'copied'
+  } catch (e) {
+    return 'failed'
+  }
+}

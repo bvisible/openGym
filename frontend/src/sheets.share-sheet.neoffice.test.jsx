@@ -9,11 +9,11 @@ import React, { act } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createRoot } from 'react-dom/client'
 
-const h = vi.hoisted(() => ({ ingest: null, decode: null, render: null, muscles: null, send: null }))
+const h = vi.hoisted(() => ({ ingest: null, decode: null, render: null, muscles: null, send: null, copy: null, canCopy: () => true }))
 vi.mock('./lib/media-ingest.js', () => ({ ingestMediaFile: (...a) => h.ingest(...a), decodeImage: (...a) => h.decode(...a) }))
 vi.mock('./lib/share/render.js', () => ({ renderShare: (...a) => h.render(...a), loadLogo: async () => null, textMeasure: () => () => 0, currentAccent: () => '#30d158' }))
 vi.mock('./lib/share/muscles.js', () => ({ renderMuscles: (...a) => h.muscles(...a) }))
-vi.mock('./lib/share/send.js', () => ({ sendImage: (...a) => h.send(...a) }))
+vi.mock('./lib/share/send.js', () => ({ sendImage: (...a) => h.send(...a), copyImage: (...a) => h.copy(...a), canCopyImage: () => h.canCopy() }))
 
 import { DEF, useStore } from './store/useStore.js'
 import { useUI } from './store/useUI.js'
@@ -76,6 +76,8 @@ beforeEach(() => {
   h.render = vi.fn(async o => new Blob([`${o.template}|${o.scale}`], { type: o.type }))
   h.muscles = vi.fn(async () => new Blob(['muscles'], { type: 'image/png' }))
   h.send = vi.fn(async () => 'shared')
+  h.copy = vi.fn(async () => 'copied')
+  h.canCopy = () => true
   h.ingest = vi.fn(async () => ({ media: { kind: 'image', hash: 'h1' }, blobs: [{ hash: 'h1', blob: new Blob(['jpeg']), mime: 'image/jpeg' }], warnings: [] }))
   h.decode = vi.fn(async () => decoded)
 })
@@ -414,6 +416,80 @@ describe('the share sheet — handing the picture over', () => {
     await act(async () => { byText(host, 'Share').click() })
     await settle()
     expect(h.send.mock.calls.at(-1)[1]).toBe('workout-2026-09-07.png')
+  })
+})
+
+describe('the share sheet — the sticker', () => {
+  const openSticker = async () => {
+    const host = await open()
+    act(() => byText(host, 'Sticker').click())
+    await tick(40)
+    return host
+  }
+
+  it('is a fourth picture, kept for the next time', async () => {
+    const host = await openSticker()
+    expect(pressed(host)).toContain('Sticker')
+    expect(lastRender()).toMatchObject({ template: 'sticker', photo: null })
+    expect(stored().template).toBe('sticker')
+  })
+
+  it('has no shape to choose and no photo to add, a hint about its transparent background, and the numbers to tick', async () => {
+    const host = await openSticker()
+    expect(host.textContent).not.toContain('Feed 4:5')
+    expect(byText(host, 'Take a photo')).toBeUndefined()
+    expect(host.textContent).toContain('Transparent background: paste it onto a photo or a story.')
+    expect(sw(host, 'Duration')).toBeTruthy()
+    expect(sw(host, 'Exercises')).toBeTruthy()
+  })
+
+  it('draws its preview as a PNG, on a chequerboard, so that the transparent surround shows', async () => {
+    const host = await openSticker()
+    const preview = h.render.mock.calls.filter(([o]) => o.template === 'sticker' && o.scale === 0.5).at(-1)[0]
+    expect(preview.type).toBe('image/png')
+    expect(host.querySelector('.share-card').classList.contains('checker')).toBe(true)
+  })
+
+  it('shares a PNG named .png, never a JPEG', async () => {
+    const host = await openSticker()
+    await tick(600)
+    await act(async () => { byText(host, 'Share').click() })
+    await settle()
+    expect(h.send.mock.calls.at(-1)[1]).toBe('workout-2026-09-07.png')
+    expect(h.send.mock.calls.at(-1)[0].type).toBe('image/png')
+  })
+
+  it('offers « Copy image » and puts the picture on the clipboard', async () => {
+    const host = await openSticker()
+    await tick(600)
+    const before = h.render.mock.calls.length
+    await act(async () => { byText(host, 'Copy image').click() })
+    await settle()
+    expect(h.copy).toHaveBeenCalledTimes(1)
+    expect(h.copy.mock.calls[0][0]).toBeInstanceOf(Blob)
+    expect(h.copy.mock.calls[0][0].type).toBe('image/png')
+    expect(h.render.mock.calls.length).toBe(before)   // the picture made after the last change was used, none made on the tap
+    expect(useUI.getState().toastMsg).toBe('Copied')
+    expect(useUI.getState().sheets).toHaveLength(1)   // copying does not close the sheet: the member goes on to paste it
+  })
+
+  it('says so when the browser refuses to copy', async () => {
+    h.copy = vi.fn(async () => 'failed')
+    const host = await openSticker()
+    await tick(600)
+    await act(async () => { byText(host, 'Copy image').click() })
+    await settle()
+    expect(useUI.getState().toastMsg).toBe('Could not copy')
+  })
+
+  it('offers no « Copy image » where the browser cannot copy a picture, nor on the other pictures', async () => {
+    h.canCopy = () => false
+    const host = await openSticker()
+    expect(byText(host, 'Copy image')).toBeUndefined()
+    h.canCopy = () => true
+    act(() => byText(host, 'Numbers').click())
+    await tick(40)
+    expect(byText(host, 'Copy image')).toBeUndefined()
   })
 })
 

@@ -5,8 +5,9 @@
 //// from, a photo of the member with their numbers laid over it, « like Strava » — and by Jérémy on 13.10: one way to share, the
 //// member picks what appears, the club's logo and address at the foot of everything.
 ////
-//// Three pictures: PHOTO (the member's own photo, their exercises with the loads and reps over it), NUMBERS (no photo, big figures on a
-//// dark ground), MUSCLES (the silhouette card). Two shapes for the first two: FEED (4:5) and STORY (9:16). The choices are kept on the
+//// Four pictures: PHOTO (the member's own photo, their exercises with the loads and reps over it), NUMBERS (no photo, big figures on a
+//// dark ground), MUSCLES (the silhouette card), STICKER (the numbers on a rounded dark panel with a transparent surround, to copy and
+//// paste onto a photo or a story). Two shapes for the first two: FEED (4:5) and STORY (9:16). The choices are kept on the
 //// device. The photo is read to make the picture and is never stored, never sent: it lives in this sheet's memory until the sheet
 //// closes (Jérémy, 06.10: « ça doit rester en local »).
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -22,7 +23,7 @@ import { shareChoices } from '../lib/share/model.js'
 import { renderShare } from '../lib/share/render.js'
 import { renderMuscles } from '../lib/share/muscles.js'
 import { workoutCardModel } from '../lib/workout-card.js'
-import { sendImage } from '../lib/share/send.js'
+import { sendImage, copyImage, canCopyImage } from '../lib/share/send.js'
 import { loadPrefs, savePrefs } from '../lib/share/prefs.js'
 import { DEFAULT_FOCUS, coverRect, panFocus } from '../lib/share/frame.js'
 import { FORMATS } from '../lib/share/layout.js'
@@ -88,6 +89,7 @@ export default function ShareSheet({ w, nameOf, close }) {
   const base = { w, nameOf, unit, speedUnit, club }
   const onPhoto = template === 'photo' && photo
   const finalType = onPhoto ? 'image/jpeg' : 'image/png'
+  const sticker = template === 'sticker'
   const render = (scale, type, quality) => (template === 'muscles'
     ? renderMuscles({ ...base, map: withMap, body: st.body })
     : renderShare({ ...base, picks, template, format, photo: onPhoto ? photo : null, focus, scale, type, quality }))
@@ -126,7 +128,8 @@ export default function ShareSheet({ w, nameOf, close }) {
     }
   }
   useEffect(() => {
-    wanted.current = { key, final: template === 'muscles', run: () => render(0.5, 'image/jpeg', 0.84) }
+    // A sticker's preview is a PNG: its transparent surround must show as such (a JPEG would paint it black).
+    wanted.current = { key, final: template === 'muscles', run: () => (sticker ? render(0.5, 'image/png', 1) : render(0.5, 'image/jpeg', 0.84)) }
     drawPreviews()
   }, [key])
   useEffect(() => {
@@ -152,6 +155,18 @@ export default function ShareSheet({ w, nameOf, close }) {
       const res = await sendImage(blob, name, w.name || '')
       if (res === 'downloaded') toast(t('Image saved'))
       if (res !== 'cancelled') close()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // « Copy image »: the sticker's PNG on the clipboard, to paste onto a story. Started in the tap itself: the picture is ready by then.
+  const copy = async () => {
+    if (busy) return
+    setBusy(true)
+    try {
+      const blob = ready.current.key === key && ready.current.blob ? ready.current.blob : await render(1, 'image/png', 1)
+      toast(blob && (await copyImage(blob)) === 'copied' ? t('Copied') : t('Could not copy'))
     } finally {
       setBusy(false)
     }
@@ -187,10 +202,10 @@ export default function ShareSheet({ w, nameOf, close }) {
   return <>
     <h3>{t('Share workout')}</h3>
     <Segmented className="share-seg" value={template} onChange={v => changePrefs({ template: v })}
-      options={[{ value: 'photo', label: t('Photo'), icon: 'camera' }, { value: 'numbers', label: t('Numbers'), icon: 'chart' }, { value: 'muscles', label: t('Muscles'), icon: 'figureStrength' }]} />
+      options={[{ value: 'photo', label: t('Photo'), icon: 'camera' }, { value: 'numbers', label: t('Numbers'), icon: 'chart' }, { value: 'muscles', label: t('Muscles'), icon: 'figureStrength' }, { value: 'sticker', label: t('Sticker'), icon: 'sparkles' }]} />
     {/* A photo that moves under the finger is dragged DOWN as often as sideways: the sheet's own pull-to-dismiss (components/Modals.jsx) must
         leave the gesture alone while the frame is movable, or one downward drag of the photo closes the sheet (`data-nodrag` is its opt-out). */}
-    <div ref={frameRef} className={'share-card' + (movable ? ' movable' : '')} data-swipe-ignore data-nodrag={movable ? '' : undefined}
+    <div ref={frameRef} className={'share-card' + (movable ? ' movable' : '') + (sticker ? ' checker' : '')} data-swipe-ignore data-nodrag={movable ? '' : undefined}
       onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
       {img?.url
         ? <img src={img.url} alt={t('Preview of the image to share')} draggable={false} />
@@ -209,7 +224,7 @@ export default function ShareSheet({ w, nameOf, close }) {
       <input ref={libraryRef} type="file" accept="image/*" hidden onChange={onFile} />
       <div className="small dim share-note">{movable ? t('Drag the picture to move the photo.') + ' ' : ''}{t('Your photo stays on this phone: it is not saved anywhere.')}</div>
     </>}
-    {template !== 'muscles' && <div className="share-format">
+    {template !== 'muscles' && !sticker && <div className="share-format">
       <Segmented value={format} onChange={v => changePrefs({ format: v })}
         options={[{ value: 'feed', label: t('Feed') + ' 4:5' }, { value: 'story', label: t('Story') + ' 9:16' }]} />
     </div>}
@@ -229,6 +244,8 @@ export default function ShareSheet({ w, nameOf, close }) {
           ))}
         </div>
       </>}
+    {sticker && <div className="small dim share-note">{t('Transparent background: paste it onto a photo or a story.')}</div>}
+    {sticker && canCopyImage() && <><Button icon="copy" disabled={!img?.url || busy} onClick={copy}>{t('Copy image')}</Button><div style={{ height: 8 }} /></>}
     <Button variant="primary" icon="share" disabled={!img?.url || busy} onClick={share}>{t('Share')}</Button>
   </>
 }
