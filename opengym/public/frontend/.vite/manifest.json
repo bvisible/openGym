@@ -188,14 +188,14 @@
     "file": "assets/rolldown-runtime-QTnfLwEv.js",
     "name": "rolldown-runtime"
   },
-  "_sheets-iPxHCkmm.js": {
-    "file": "assets/sheets-iPxHCkmm.js",
+  "_sheets-DJNgj3zH.js": {
+    "file": "assets/sheets-DJNgj3zH.js",
     "name": "sheets",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
       "_i18n-DxHMAFla.js",
       "_preload-helper-BqjX9scX.js",
-      "_useUI-D0SDthsP.js",
+      "_useUI-DXPDyMV-.js",
       "_exercises-BV0nhMH0.js",
       "_coach-device-BTyire2C.js",
       "_media-refs-CBisMdU5.js",
@@ -209,7 +209,7 @@
       "_onerm-DkNlZCeM.js"
     ],
     "dynamicImports": [
-      "_useUI-D0SDthsP.js",
+      "_useUI-DXPDyMV-.js",
       "src/lib/media-ingest.js",
       "src/lib/body-paths.js"
     ]
@@ -222,8 +222,8 @@
       "_history-BPR-O4tZ.js"
     ]
   },
-  "_useUI-D0SDthsP.js": {
-    "file": "assets/useUI-D0SDthsP.js",
+  "_useUI-DXPDyMV-.js": {
+    "file": "assets/useUI-DXPDyMV-.js",
     "name": "useUI",
     "imports": [
       "_rolldown-runtime-QTnfLwEv.js",
@@ -239,14 +239,14 @@
     "dynamicImports": [
       "_dist-Cawi-vbT.js",
       "node_modules/@capacitor/app/dist/esm/index.js",
-      "_useUI-D0SDthsP.js",
-      "_sheets-iPxHCkmm.js",
+      "_useUI-DXPDyMV-.js",
+      "_sheets-DJNgj3zH.js",
       "src/lib/demoSeed.js",
       "node_modules/@capacitor/local-notifications/dist/esm/index.js"
     ]
   },
   "index.html": {
-    "file": "assets/index-8Ugd0Ie1.js",
+    "file": "assets/index-BJedd9at.js",
     "name": "index",
     "src": "index.html",
     "isEntry": true,
@@ -254,13 +254,13 @@
       "_rolldown-runtime-QTnfLwEv.js",
       "_i18n-DxHMAFla.js",
       "_preload-helper-BqjX9scX.js",
-      "_useUI-D0SDthsP.js",
+      "_useUI-DXPDyMV-.js",
       "_exercises-BV0nhMH0.js",
       "_coach-device-BTyire2C.js",
       "_media-refs-CBisMdU5.js",
       "_history-BPR-O4tZ.js",
       "_mobile-Dyi23zbc.js",
-      "_sheets-iPxHCkmm.js",
+      "_sheets-DJNgj3zH.js",
       "_starter-BYZE9fXs.js",
       "_onerm-DkNlZCeM.js"
     ],
@@ -277,7 +277,7 @@
       "_media-prefetch-BGtZOCpp.js"
     ],
     "css": [
-      "assets/index-BKuN-EIw.css"
+      "assets/index-DIMXRiYh.css"
     ]
   },
   "node_modules/@aparajita/capacitor-secure-storage/dist/esm/index.js": {
@@ -653,7 +653,7 @@
     "isDynamicEntry": true
   },
   "src/lib/coach-demo.js": {
-    "file": "assets/coach-demo-RCRnm5s8.js",
+    "file": "assets/coach-demo-CH-MmRiF.js",
     "name": "coach-demo",
     "src": "src/lib/coach-demo.js",
     "isDynamicEntry": true,
@@ -666,7 +666,7 @@
     ]
   },
   "src/lib/coach-local.js": {
-    "file": "assets/coach-local-B1R0q9HB.js",
+    "file": "assets/coach-local-Bj3HiEyG.js",
     "name": "coach-local",
     "src": "src/lib/coach-local.js",
     "isDynamicEntry": true,
@@ -683,7 +683,7 @@
     ]
   },
   "src/lib/demoSeed.js": {
-    "file": "assets/demoSeed-B52CibpI.js",
+    "file": "assets/demoSeed-BX_t4XB2.js",
     "name": "demoSeed",
     "src": "src/lib/demoSeed.js",
     "isDynamicEntry": true,
