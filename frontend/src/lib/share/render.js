@@ -26,6 +26,13 @@ export function loadLogo(url) {
   return logos.get(url)
 }
 
+/** Width over height of a loaded logo: what tells the layout an icon from a wordmark. */
+export const aspectOf = img => {
+  const w = img.naturalWidth || img.width
+  const h = img.naturalHeight || img.height
+  return w > 0 && h > 0 ? w / h : 1
+}
+
 let scratch = null
 /** A way to measure text in the picture's font. */
 export function textMeasure() {
@@ -44,9 +51,10 @@ export function currentAccent(doc = globalThis.document) {
  * browser cannot make one. A logo the browser will not let us read back (a tainted canvas) is left out and the picture made again.
  */
 export async function renderShare({ w, nameOf, unit, speedUnit, picks, club, template = 'photo', format = 'feed', photo = null, focus = DEFAULT_FOCUS, accent, scale = 1, type = 'image/png', quality = 0.92 }) {
-  const model = shareModel(w, { unit, nameOf, speedUnit, picks, club })
+  // The logo first: the foot is laid out for its proportions (an icon in a square, a wordmark in its own shape).
+  const logo = await loadLogo(club?.logo)
+  const model = shareModel(w, { unit, nameOf, speedUnit, picks, club: { ...club, logoAspect: logo ? aspectOf(logo.img) : undefined } })
   const layout = layoutShare(model, { template, format, measure: textMeasure(), rtl: globalThis.document?.documentElement?.dir === 'rtl' })
-  const logo = await loadLogo(model.club.logo)
   const colors = paletteFor(accent || currentAccent())
   const make = withLogo => {
     const canvas = document.createElement('canvas')

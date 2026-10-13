@@ -172,10 +172,22 @@ describe('the helpers that read pixels', () => {
     expect(logoInfo({}, docWith(pixels(1024, [0, 0, 0, 0]))).plate).toBe(false)
   })
 
+  it('tells a logo that carries its own background (nothing transparent in it) from one that does not', () => {
+    expect(logoInfo({ id: 'badge' }, docWith(pixels(1024, [255, 255, 255, 255]))).opaque).toBe(true)
+    expect(logoInfo({ id: 'icon' }, docWith(pixels(1024, [10, 10, 10, 255]))).opaque).toBe(true)
+    const half = pixels(1024, [0, 0, 0, 0])
+    for (let i = 0; i < 512; i++) half.set([250, 250, 250, 255], i * 4)
+    expect(logoInfo({}, docWith(half)).opaque).toBe(false)
+    // A stray transparent corner or two does not make a white-backed wordmark transparent.
+    const nearly = pixels(1024, [255, 255, 255, 255])
+    nearly.set([0, 0, 0, 0], 0)
+    expect(logoInfo({}, docWith(nearly)).opaque).toBe(true)
+  })
+
   it('does not fail on a logo it cannot read back', () => {
     const doc = { createElement() { throw new Error('no canvas') } }
     const img = { id: 'x' }
-    expect(logoInfo(img, doc)).toEqual({ img, plate: false })
+    expect(logoInfo(img, doc)).toEqual({ img, plate: false, opaque: false })
   })
 
   it('reads how bright the photo is where the numbers go, 0.4 when it cannot', () => {
@@ -222,5 +234,51 @@ describe('drawShare — the sticker', () => {
     const written = named(ctx, 'fillText')
     expect(written.map(c => c.args[0])).toEqual(l.items.filter(i => i.kind === 'text').map(i => i.text))
     expect(written.every(c => !c.shadowBlur)).toBe(true)
+  })
+})
+
+describe('drawLogo — a wordmark in its own shape', () => {
+  const wide = { img: { naturalWidth: 1400, naturalHeight: 298 } }
+
+  it('fills a wide box edge to edge, clipped to its rounded corners, when the logo carries its own background', () => {
+    const ctx = recorder()
+    drawLogo(ctx, { x: 64, y: 100, w: 338, h: 72 }, { ...wide, opaque: true })
+    const call = named(ctx, 'drawImage')[0]
+    const [, x, y, w, h] = call.args
+    // Filled to the box: a box of the logo's own shape crops a fraction of a pixel at most.
+    expect(x).toBeCloseTo(64, 0)
+    expect(y).toBeCloseTo(100, 0)
+    expect(w).toBeCloseTo(338, 0)
+    expect(h).toBeCloseTo(72, 0)
+    expect(w / h).toBeCloseTo(1400 / 298, 1)
+    expect(named(ctx, 'clip')).toHaveLength(1)
+    expect(named(ctx, 'fill')).toHaveLength(0)   // the logo is its own plate: nothing painted behind it
+  })
+
+  it('draws a transparent wordmark inside its box, never stretched, on the faint plate (or the light one when it is dark)', () => {
+    for (const plate of [false, true]) {
+      const ctx = recorder()
+      drawLogo(ctx, { x: 0, y: 0, w: 340, h: 72 }, { ...wide, opaque: false, plate })
+      const [, x, y, w, h] = named(ctx, 'drawImage')[0].args
+      expect(w / h).toBeCloseTo(1400 / 298, 3)
+      expect(x).toBeGreaterThanOrEqual(0)
+      expect(x + w).toBeLessThanOrEqual(340 + 1e-6)
+      expect(y + h).toBeLessThanOrEqual(72 + 1e-6)
+      expect(named(ctx, 'fill')[0].fillStyle).toBe(plate ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.08)')
+    }
+  })
+
+  it('still reads a square item written with `size` alone', () => {
+    const ctx = recorder()
+    drawLogo(ctx, { x: 10, y: 20, size: 80 }, { img: { naturalWidth: 200, naturalHeight: 100 }, opaque: false })
+    const [, , , w, h] = named(ctx, 'drawImage')[0].args
+    expect(w / h).toBeCloseTo(2, 6)
+    expect(w).toBeLessThanOrEqual(80)
+  })
+
+  it('draws nothing for a box that has no size', () => {
+    const ctx = recorder()
+    drawLogo(ctx, { x: 0, y: 0, w: 0, h: 72 }, { ...wide, opaque: true })
+    expect(named(ctx, 'drawImage')).toHaveLength(0)
   })
 })

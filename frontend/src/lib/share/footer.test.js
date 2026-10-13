@@ -1,7 +1,7 @@
 //// Neoffice — added file (no upstream equivalent).
 //// The foot every shared picture carries: the club's logo, name, address and one line of information (lib/share/footer.js).
 import { describe, expect, it } from 'vitest'
-import { footLayout, FOOT_LOGO } from './footer.js'
+import { footLayout, FOOT_LOGO, WIDE_LOGO } from './footer.js'
 
 const measure = (text, weight, size) => String(text).length * size * 0.5
 const W = 1080
@@ -87,5 +87,74 @@ describe('footLayout', () => {
       expect(t.anchor).toBe('right')
       expect(t.x).toBeLessThan(logo.x)
     }
+  })
+})
+
+describe('footLayout — a wordmark', () => {
+  const wordmark = { ...club, logoAspect: 1400 / 298 }
+  const logoOf = items => items.find(i => i.kind === 'logo')
+
+  it('keeps a logo wider than tall in its own proportions, 72 px tall, and does not write the name beside it', () => {
+    const items = foot(wordmark).items(1000)
+    const logo = logoOf(items)
+    expect(logo.h).toBe(72)
+    expect(logo.w).toBe(Math.round(72 * 1400 / 298))
+    expect(logo.w / logo.h).toBeCloseTo(1400 / 298, 1)
+    expect(logo.x).toBe(PAD)
+    // The logotype says « Riverside Gym » already: the lines are the address and the information.
+    expect(texts(items).map(i => i.text)).toEqual(['riverside.example', 'Rue du Lac 4 · 021 555 01 02'])
+    expect(texts(items).map(i => i.color)).toEqual(['acc', 'label2'])
+  })
+
+  it('puts the lines beside the logo, with the room that is left', () => {
+    const items = foot(wordmark).items(0)
+    const logo = logoOf(items)
+    for (const t of texts(items)) {
+      expect(t.x).toBeGreaterThan(logo.x + logo.w)
+      expect(t.x + measure(t.text, t.weight, t.size)).toBeLessThanOrEqual(W - PAD + 0.5)
+    }
+    const long = foot({ ...wordmark, info: 'x'.repeat(200) }).items(0)
+    const info = texts(long).at(-1)
+    expect(info.text.endsWith('…')).toBe(true)
+    expect(info.x + measure(info.text, info.weight, info.size)).toBeLessThanOrEqual(W - PAD + 0.5)
+  })
+
+  it('is as tall as the taller of the logo and its lines, and only the logo when it has no line to go with', () => {
+    const f = foot(wordmark)
+    expect(f.height).toBeGreaterThanOrEqual(72)
+    expect(f.height).toBeLessThan(FOOT_LOGO + 10)
+    const alone = foot({ name: 'Riverside Gym', logo: '/x.png', logoAspect: 4.7 })
+    expect(alone.height).toBe(72)
+    expect(texts(alone.items(0))).toEqual([])
+  })
+
+  it('limits the width of an extremely wide strip, and so its height', () => {
+    const strip = logoOf(foot({ ...wordmark, logoAspect: 10 }).items(0))
+    expect(strip.w).toBeLessThanOrEqual(340)
+    expect(strip.h).toBe(34)
+  })
+
+  it('reads a logo as a wordmark from 1.8 on, and as an icon below, or when the proportions are unknown', () => {
+    expect(WIDE_LOGO).toBe(1.8)
+    expect(logoOf(foot({ ...club, logoAspect: 1.8 }).items(0)).w).toBeGreaterThan(FOOT_LOGO)
+    for (const aspect of [1.79, 1, 0.5, undefined, NaN, null, 0, -3]) {
+      const logo = logoOf(foot({ ...club, logoAspect: aspect }).items(0))
+      expect(logo.w, String(aspect)).toBe(FOOT_LOGO)
+      expect(logo.h, String(aspect)).toBe(FOOT_LOGO)
+    }
+    // An icon keeps the name next to it.
+    expect(texts(foot({ ...club, logoAspect: 1 }).items(0)).map(i => i.text)).toContain('Riverside Gym')
+  })
+
+  it('mirrors in a right-to-left language: the logo on the right, its lines to its left, aligned right', () => {
+    const items = foot(wordmark, { rtl: true }).items(0)
+    const logo = logoOf(items)
+    expect(logo.x + logo.w).toBe(W - PAD)
+    for (const t of texts(items)) { expect(t.anchor).toBe('right'); expect(t.x).toBeLessThan(logo.x) }
+  })
+
+  it('carries the box under both names, so that an older drawing reading `size` still works', () => {
+    const logo = logoOf(foot(wordmark).items(0))
+    expect(logo.size).toBe(logo.h)
   })
 })

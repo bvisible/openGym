@@ -6,14 +6,21 @@
 //// returns what to draw; the drawing is lib/share/draw.js (and the muscle card's own, lib/workout-card.js).
 import { oneLine } from './text.js'
 
-/** The logo's square, in px on a 1 080 px picture. */
+/** The logo's square, in px on a 1 080 px picture (an icon, or a logo about as wide as it is tall). */
 export const FOOT_LOGO = 80
+/**
+ * A logo at least this much wider than tall is a WORDMARK (the club's name drawn as a logo, what the sign-in screen shows): it is kept
+ * in its own proportions, at most WIDE_H tall and WIDE_MAX_W wide, and the club's name is not written beside it a second time.
+ */
+export const WIDE_LOGO = 1.8
+const WIDE_H = 72
+const WIDE_MAX_W = 340
 const GAP = 24
 
 const clean = v => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '')
 
 /**
- * `club` = { name, logo, site, info }, each possibly empty. Returns `{ height, items(top) }`: the block's height (0 when the club
+ * `club` = { name, logo, site, info, logoAspect }, each possibly empty; `logoAspect` (width / height of the logo as loaded, 1 when unknown) tells an icon from a wordmark. Returns `{ height, items(top) }`: the block's height (0 when the club
  * says nothing at all, the picture then has no foot) and the items to draw with the block's top edge at `top`.
  *
  * The three lines are the name (bold), the address (in the accent: it is what the reader should act on) and the information (dim).
@@ -26,21 +33,26 @@ export function footLayout({ club, width, pad, measure, rtl = false }) {
   const info = clean(club?.info)
   const logo = typeof club?.logo === 'string' && club.logo.trim() !== ''
   if (!name && !site && !info && !logo) return { height: 0, items: () => [] }
+  const aspect = Number(club?.logoAspect)
+  const wide = logo && Number.isFinite(aspect) && aspect >= WIDE_LOGO
+  const logoH = wide ? Math.min(WIDE_H, Math.round(WIDE_MAX_W / aspect)) : FOOT_LOGO
+  const logoW = wide ? Math.round(logoH * aspect) : FOOT_LOGO
   const inner = width - pad * 2
   const dir = rtl ? -1 : 1
   const start = rtl ? width - pad : pad
-  const shift = logo ? FOOT_LOGO + GAP : 0
+  const shift = logo ? logoW + GAP : 0
   const room = inner - shift
   const lines = []
-  if (name) lines.push({ text: oneLine(name, room, s => measure(s, 700, 36)), size: 36, weight: 700, color: 'label' })
+  // A wordmark already says the club's name: written again beside it, it would be said twice.
+  if (name && !wide) lines.push({ text: oneLine(name, room, s => measure(s, 700, 36)), size: 36, weight: 700, color: 'label' })
   if (site) lines.push({ text: oneLine(site, room, s => measure(s, 600, 30)), size: 30, weight: 600, color: 'acc' })
   if (info) lines.push({ text: oneLine(info, room, s => measure(s, 400, 28)), size: 28, weight: 400, color: 'label2' })
   const lineH = l => Math.round(l.size * 1.3)
   const textH = lines.reduce((n, l) => n + lineH(l), 0)
-  const height = Math.max(logo ? FOOT_LOGO : 0, textH)
+  const height = Math.max(logo ? logoH : 0, textH)
   const items = top => {
     const out = []
-    if (logo) out.push({ kind: 'logo', x: rtl ? start - FOOT_LOGO : start, y: top + (height - FOOT_LOGO) / 2, size: FOOT_LOGO })
+    if (logo) out.push({ kind: 'logo', x: rtl ? start - logoW : start, y: top + (height - logoH) / 2, w: logoW, h: logoH, size: logoH })
     let y = top + (height - textH) / 2
     for (const l of lines) {
       out.push({ kind: 'text', text: l.text, x: start + shift * dir, y: y + l.size, size: l.size, weight: l.weight, color: l.color, anchor: rtl ? 'right' : 'left' })

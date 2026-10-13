@@ -166,6 +166,15 @@ describe('shareModel', () => {
     expect(m.lines.every(l => !/kg/.test(l.detail))).toBe(true)
   })
 
+  it('carries the proportions of the club\'s logo when it knows them, and only then', () => {
+    expect(make(picks).club.logoAspect).toBeUndefined()
+    const known = shareModel(w, { ...base, nameOf, picks, club: { ...club, logoAspect: 4.7 } })
+    expect(known.club.logoAspect).toBe(4.7)
+    for (const bad of [0, -1, NaN, Infinity, 'wide', null]) {
+      expect(shareModel(w, { ...base, nameOf, picks, club: { ...club, logoAspect: bad } }).club.logoAspect, String(bad)).toBeUndefined()
+    }
+  })
+
   it('tidies the club it is given and tolerates none', () => {
     expect(make(picks).club).toEqual({ name: 'Riverside Gym', logo: '/files/logo.png', site: 'riverside.example', info: 'Rue du Lac 4' })
     expect(shareModel(w, { ...base, nameOf, picks, club: null }).club).toEqual({ name: '', logo: '', site: '', info: '' })

@@ -61,7 +61,7 @@ export function exerciseDetail(entry, { unit, speedUnit, weights = true }) {
 const clean = v => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '')
 
 /**
- * `picks`: what the member ticked (a Set or an array of PICKS). `club` = { name, logo, site, info } as the server gives it. `nameOf(entry)`
+ * `picks`: what the member ticked (a Set or an array of PICKS). `club` = { name, logo, site, info } as the server gives it (+ `logoAspect`, the proportions of the loaded logo, when known). `nameOf(entry)`
  * is the exercise's display name, `speedUnit` the one cardio reads in. Returns what layoutShare takes: `figures` (the ticked numbers
  * this workout has — never a "0 kg"), `lines` (every exercise with a work set done, in the order the history lists them; the layout
  * keeps those that fit), and the club's foot.
@@ -108,7 +108,7 @@ export function shareModel(w, { unit, nameOf, speedUnit, picks, club }) {
     figures,
     lines,
     recordCount: records.length,
-    club: { name: clean(club?.name), logo: clean(club?.logo), site: clean(club?.site), info: clean(club?.info) },
+    club: { name: clean(club?.name), logo: clean(club?.logo), site: clean(club?.site), info: clean(club?.info), logoAspect: Number.isFinite(club?.logoAspect) && club.logoAspect > 0 ? club.logoAspect : undefined },
     labels: { done: t('Session done'), more: n => tn('+ {0} more exercise', '+ {0} more exercises', n) },
   }
 }

@@ -36,28 +36,43 @@ export function drawTrophy(ctx, x, y, size, color) {
 }
 
 /**
- * The club's logo in its square: contained, never stretched (a logo drawn out of proportion is the club's identity drawn wrong).
- * `logo` = { img, plate }: a dark logo (plate) sits on a light plate so that it does not vanish on a dark picture.
+ * The club's logo in its box (a square for an icon, the logo's own shape for a wordmark: `item.w` × `item.h`, `item.size` for a
+ * square): never stretched (a logo drawn out of proportion is the club's identity drawn wrong).
+ * `logo` = { img, plate, opaque }: a logo that carries its own background (`opaque`: the white behind a black wordmark, the black
+ * of an icon) IS its plate and fills the box edge to edge; a transparent one is contained in the box, and a dark one (`plate`)
+ * sits on a light plate so that it does not vanish on a dark picture.
  */
 export function drawLogo(ctx, item, logo) {
   if (!logo?.img) return
-  const { x, y, size } = item
+  const { x, y } = item
+  const w = item.w ?? item.size
+  const h = item.h ?? item.size
   const img = logo.img
   const iw = img.naturalWidth || img.width
   const ih = img.naturalHeight || img.height
-  if (!iw || !ih) return
+  if (!iw || !ih || !(w > 0) || !(h > 0)) return
   ctx.save()
-  roundRect(ctx, x, y, size, size, size * 0.22)
+  roundRect(ctx, x, y, w, h, Math.min(w, h) * 0.22)
+  if (logo.opaque) {
+    ctx.clip()
+    const k = Math.max(w / iw, h / ih)
+    ctx.drawImage(img, x + (w - iw * k) / 2, y + (h - ih * k) / 2, iw * k, ih * k)
+    ctx.restore()
+    return
+  }
   ctx.fillStyle = logo.plate ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.08)'
   ctx.fill()
   ctx.clip()
-  const inset = logo.plate ? size * 0.12 : size * 0.06
-  const k = Math.min((size - inset * 2) / iw, (size - inset * 2) / ih)
-  ctx.drawImage(img, x + (size - iw * k) / 2, y + (size - ih * k) / 2, iw * k, ih * k)
+  const inset = Math.min(w, h) * (logo.plate ? 0.12 : 0.06)
+  const k = Math.min((w - inset * 2) / iw, (h - inset * 2) / ih)
+  ctx.drawImage(img, x + (w - iw * k) / 2, y + (h - ih * k) / 2, iw * k, ih * k)
   ctx.restore()
 }
 
-/** Whether the logo is dark enough to need a light plate behind it: the mean brightness of its opaque pixels. */
+/**
+ * What the drawing must know of a logo: whether it is dark enough to need a light plate behind it (the mean brightness of its
+ * opaque pixels), and whether it carries a background of its own (no transparent pixel to speak of).
+ */
 export function logoInfo(img, doc = globalThis.document) {
   try {
     const c = doc.createElement('canvas')
@@ -68,15 +83,16 @@ export function logoInfo(img, doc = globalThis.document) {
     const { data } = g.getImageData(0, 0, 32, 32)
     let sum = 0
     let weight = 0
+    let clear = 0
     for (let i = 0; i < data.length; i += 4) {
       const a = data[i + 3] / 255
-      if (a < 0.2) continue
+      if (a < 0.2) { clear++; continue }
       sum += luminance([data[i], data[i + 1], data[i + 2]]) * a
       weight += a
     }
-    return { img, plate: weight > 0 && sum / weight < 0.22 }
+    return { img, plate: weight > 0 && sum / weight < 0.22, opaque: clear / (data.length / 4) < 0.01 }
   } catch (e) {
-    return { img, plate: false }
+    return { img, plate: false, opaque: false }
   }
 }
 
