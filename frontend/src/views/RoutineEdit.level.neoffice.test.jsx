@@ -27,9 +27,10 @@ const clone = value => JSON.parse(JSON.stringify(value))
 let root
 let container
 
-function renderRoutine({ level = 'full', perms, routine = {} } = {}) {
+function renderRoutine({ level = 'full', perms, routine = {}, customEx } = {}) {
   const S = clone(DEF)
   S.level = level
+  if (customEx) S.customEx = customEx
   if (perms) S.perms = { ...(S.perms || {}), ...perms }
   S.routines = [{ id: 'r1', name: 'Push', emoji: 'dumbbell', ex: [], ...routine }]
   useStore.setState({ S, user: null })
@@ -98,5 +99,37 @@ describe('what a routine with no rule of its own applies', () => {
   it('a rule written on the routine wins over the club default', () => {
     renderRoutine({ perms: { autoProgression: false }, routine: { prog: 'linear' } })
     expect(rowTitled('Progression').textContent).toContain(POLICY_NAME.linear)
+  })
+})
+
+describe('the link between two exercises, at every level', () => {
+  //// The pilot club (23.10): the coach links two or three exercises for beginners with the paperclip, so Simple offers it.
+  const custom = id => ({ id, n: id, bp: 'chest', eq: 'body weight', tg: 'chest', custom: true })
+  const row = id => ({ id, sets: 3, reps: 8 })
+  const three = () => ({ ex: [row('c1'), row('c2'), row('c3')] })
+  const links = () => [...container.querySelectorAll('button[title="Superset with exercise above"]')]
+  const mount = (level, routine) => renderRoutine({ level, routine, customEx: ['c1', 'c2', 'c3'].map(custom) })
+
+  it.each(['simple', 'normal', 'full'])('%s: a link on every row but the first, and the hint that goes with it', level => {
+    mount(level, three())
+    expect(links()).toHaveLength(2)
+    expect(container.textContent).toContain('Tap the link button on an exercise to superset it with the one above.')
+  })
+
+  it('Simple chains three exercises with two taps, and the second tap does not undo the first', () => {
+    mount('simple', three())
+    act(() => { links()[0].dispatchEvent(new MouseEvent('click', { bubbles: true })) })
+    act(() => { links()[1].dispatchEvent(new MouseEvent('click', { bubbles: true })) })
+    const ex = useStore.getState().S.routines[0].ex
+    expect(ex[0].sg).toBeTruthy()
+    expect(ex[1].sg).toBe(ex[0].sg)
+    expect(ex[2].sg).toBe(ex[0].sg)
+  })
+
+  it('Simple takes a link away again with the same tap', () => {
+    mount('simple', { ex: [{ ...row('c1'), sg: 'sg1' }, { ...row('c2'), sg: 'sg1' }, row('c3')] })
+    act(() => { links()[0].dispatchEvent(new MouseEvent('click', { bubbles: true })) })
+    const ex = useStore.getState().S.routines[0].ex
+    expect(ex.map(e => e.sg)).toEqual([undefined, undefined, undefined])
   })
 })

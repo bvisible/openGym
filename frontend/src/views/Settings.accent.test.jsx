@@ -184,3 +184,51 @@ describe('Settings: your own accent colour', () => {
     }
   })
 })
+
+//// Neoffice — the club's swatch (lib/accent.js CLUB): the club's colour, named after the club.
+describe('Settings: the colour of the club', () => {
+  const swatches = () => [...host.querySelectorAll('.swatches > button.swatch')]
+  const clubSwatch = () => host.querySelector('.swatches > button.swatch[aria-label="Colour of Riverside"]')
+
+  it('has no club swatch when the club has no colour of its own', () => {
+    mocks.S.club = { name: 'Riverside' }
+    mount()
+    expect(clubSwatch()).toBeNull()
+    expect(swatches()).toHaveLength(8)
+  })
+
+  it('offers the club\'s colour first, painted in that colour and named after the club', () => {
+    mocks.S.club = { name: 'Riverside', accent: '#ffff00' }
+    mount()
+    expect(swatches()).toHaveLength(9)
+    expect(swatches()[0]).toBe(clubSwatch())
+    expect(clubSwatch().style.background).toContain('#ffff00')
+  })
+
+  it('picking it stores the choice (the club), not the colour, and tells the countdown the colour', () => {
+    mocks.S.club = { name: 'Riverside', accent: '#ffff00' }
+    mount()
+    act(() => clubSwatch().click())
+    expect(mocks.S.accent).toBe('club')
+    expect(mocks.S.accentCustom).toBeUndefined()
+    expect(setRestAccent).toHaveBeenCalledWith('#ffff00')
+    mount()
+    expect(clubSwatch().classList.contains('on')).toBe(true)
+    expect(host.querySelector('.lrow-v').textContent).toBe('Colour of Riverside')
+  })
+
+  it('a journal that follows the club shows the club\'s swatch as the chosen one', () => {
+    mocks.S.club = { name: 'Riverside', accent: '#ffff00' }
+    mocks.S.accent = 'club'
+    mount()
+    expect(clubSwatch().classList.contains('on')).toBe(true)
+    expect(swatches().filter(b => b.classList.contains('on'))).toHaveLength(1)
+  })
+
+  it('a journal that follows a club that has no colour shows green as the chosen one', () => {
+    mocks.S.club = { name: 'Riverside' }
+    mocks.S.accent = 'club'
+    mount()
+    expect(host.querySelector('.lrow-v').textContent).toBe('Green')
+  })
+})

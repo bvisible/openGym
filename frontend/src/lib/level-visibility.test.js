@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   showsBodyMap, showsEffortHistogram, showsEquipmentProfiles, showsEstimated1RM,
-  showsEffortSetting, showsIntensifier, showsSupersetControl, showsWarmupRamp,
+  showsEffortSetting, showsIntensifier, showsRoutineSupersetLink, showsSupersetControl, showsWarmupRamp,
   showsSetIntensifierChips, showsInSessionWarmup, showsRestPauseSetting,
   showsFailureControl, showsBackoffControl, showsTripleProgression, showsOneRmFormula,
   showsSetPlanControl, showsPerSideControl, showsPlateLoading, showsProgressionControls,
@@ -247,5 +247,13 @@ describe('simple level — the exercise settings carry reps, sets, weight, rest 
     for (const config of [{}, { inc: 0 }, { inc: -1 }, { prog: '' }, { backoff: false }, { excludeFromProgression: false }, null, undefined]) {
       expect(showsProgressionControls(SIMPLE, config)).toBe(false)
     }
+  })
+})
+
+describe('the link of the routine editor', () => {
+  it('is offered at every level, while the live session keeps its own rule', () => {
+    for (const S of [SIMPLE, NORMAL, FULL, {}]) expect(showsRoutineSupersetLink(S)).toBe(true)
+    // The pair buttons of a session in progress are still a technique of the full level.
+    expect(showsSupersetControl(SIMPLE, false)).toBe(false)
   })
 })

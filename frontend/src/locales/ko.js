@@ -2714,4 +2714,9 @@ export default {
   'Sticker': '스티커',
   'Copy image': '이미지 복사',
   'Transparent background: paste it onto a photo or a story.': '투명 배경: 사진이나 스토리에 붙여넣으세요.',
+  //// Neoffice — the share sheet's zoom, « Finish and share », and the club's own colour swatch (components/ShareSheet.jsx, sheets.jsx, views/Settings.jsx).
+  'Colour of {0}': '{0}의 색상',
+  'Finish and share': '완료하고 공유',
+  'Move the photo with a finger, zoom with two fingers or the slider.': '한 손가락으로 사진을 옮기고, 두 손가락 또는 슬라이더로 확대하세요.',
+  'Zoom': '확대/축소',
 }

@@ -3660,6 +3660,10 @@ function WorkoutComplete({ close }) {
     <h3 style={{ margin: '8px 0' }}>{t("That's the whole workout!")}</h3>
     <div className="muted small" style={{ marginBottom: 16 }}>{t('All exercises done. Nice work! Finish up, or add another one if you’ve got more in you.')}</div>
     <Button variant="primary" icon="flag" onClick={() => { close(); finishWorkout() }}>{t('Finish workout')}</Button>
+    {/* //// Neoffice — « Finish and share » (the pilot club, 23.10): the moment a member is proudest of the session is the moment
+         the sheet is open, and every shared picture is free publicity for the club. Same finish, then the share sheet. */}
+    <div style={{ height: 8 }} />
+    <Button icon="share" onClick={() => { close(); finishWorkout({ share: true }) }}>{t('Finish and share')}</Button>
     <div style={{ height: 8 }} />
     <Button onClick={() => { close(); useUI.getState().toast(t('Keep going: tap “+ Add exercise” below')) }}>{t('Continue workout')}</Button>
   </div>
@@ -3808,18 +3812,25 @@ function FinishSummary({ w, prs, e1prs = [], close }) {
     {/* The moment for a progress photo or the clip of a set: the workout is already saved, so
         what is added here goes straight onto its record. */}
     <div style={{ textAlign: 'start' }}><WorkoutMediaSection w={w} hint /></div>
+    {/* //// Neoffice — the workout is saved: share it from here (the pilot club, 23.10). */}
+    <Button icon="share" onClick={() => shareWorkoutImageSheet(w)}>{t('Share')}</Button>
+    <div style={{ height: 8 }} />
     <Button variant="primary" onClick={() => closeThenNav(close, '/home')}>{t('Nice!')}</Button>
   </div>
 }
-export function finishWorkout() {
+//// Neoffice — `{ share: true }`: finish, then open the share sheet on the saved workout (« Finish and share »). A bare call, or an
+//// event handed in by a button, finishes exactly as before.
+export function finishWorkout(opts) {
+  const share = opts?.share === true
   if (S().active?.editingWorkoutId) { saveWorkoutEdits(); return }
   const A = S().active
   if (!A) return
   const done = setsDoneActive(A)
   const total = setUnitsTotal(A.entries)
-  if (!done) { confirmSheet({ title: t('Nothing logged yet'), message: t('You haven’t checked off any sets. Finish the workout anyway?'), confirmText: t('Finish anyway'), onConfirm: doFinishWorkout }); return }
-  if (done < total) { confirmSheet({ title: t('Finish early?'), message: tn('{0} set still unchecked. Finish the workout now?', '{0} sets still unchecked. Finish the workout now?', total - done), confirmText: t('Finish workout'), onConfirm: doFinishWorkout }); return }
-  doFinishWorkout()
+  const finish = () => doFinishWorkout({ share })
+  if (!done) { confirmSheet({ title: t('Nothing logged yet'), message: t('You haven’t checked off any sets. Finish the workout anyway?'), confirmText: t('Finish anyway'), onConfirm: finish }); return }
+  if (done < total) { confirmSheet({ title: t('Finish early?'), message: tn('{0} set still unchecked. Finish the workout now?', '{0} sets still unchecked. Finish the workout now?', total - done), confirmText: t('Finish workout'), onConfirm: finish }); return }
+  finish()
 }
 // The workout screen's Finish pill (v1.3.11): one sheet with both ways out, Finish and save or
 // Discard. It says what finishWorkout's confirm would have said about sets still unchecked, so
@@ -3836,12 +3847,14 @@ export function finishWorkoutSheet({ onDiscard } = {}) {
     subtitle: !done ? t('You haven’t checked off any sets. Finish the workout anyway?')
       : done < total ? tn('{0} set still unchecked. Finish the workout now?', '{0} sets still unchecked. Finish the workout now?', total - done) : null,
     sections: [
-      { items: [{ icon: 'flag', accent: true, label: t('Finish and save'), onClick: doFinishWorkout }] },
+      { items: [{ icon: 'flag', accent: true, label: t('Finish and save'), onClick: () => doFinishWorkout() },
+        //// Neoffice — « Finish and share » (the pilot club, 23.10): the save, then the share sheet on the saved workout.
+        { icon: 'share', label: t('Finish and share'), onClick: () => doFinishWorkout({ share: true }) }] },
       { items: [onDiscard && { icon: 'trash', danger: true, label: t('Discard workout'), onClick: onDiscard }] },
     ],
   })
 }
-function doFinishWorkout() {
+function doFinishWorkout({ share = false } = {}) {
   const st = S()
   const A = st.active
   if (!A) return
@@ -3899,6 +3912,8 @@ function doFinishWorkout() {
   useUI.getState().stopWork()
   beep(snd(), 880, 0.15); beep(snd(), 1100, 0.15, 0.18); beep(snd(), 1320, 0.3, 0.36)
   ui().openSheet(close => <FinishSummary w={shown} prs={prs} e1prs={e1prs} close={close} />, { kind: 'center', locked: true })
+  // Sheets stack: the share sheet opens over the summary, and closing it shows the summary again.
+  if (share) shareWorkoutImageSheet(shown)
 }
 
 

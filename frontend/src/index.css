@@ -1740,6 +1740,9 @@ body.no-tabbar #timer.working{box-shadow:inset 0 var(--hair) 0 var(--acc),0 -10p
 .share-ask-t{padding:7px 14px;border-radius:99px;background:rgba(0,0,0,.45);color:#fff;font-size:14px;font-weight:600}
 .share-photo-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:0 0 6px}
 .share-note{text-align:center;margin:0 0 12px}
+/* //// Neoffice — the zoom of the shared photo (the pilot club): a small photo, the slider, a large one. */
+.share-zoom{display:flex;align-items:center;gap:10px;max-width:320px;margin:0 auto 8px;color:var(--label-3)}
+.share-zoom input[type=range]{flex:1;min-width:0;accent-color:var(--acc)}
 .share-format{margin:0 0 12px}
 /* A sticker is transparent around its panel: the preview sits on a chequerboard so that the member sees it. */
 .share-card.checker img{background:repeating-conic-gradient(rgba(128,128,128,.24) 0 25%,rgba(255,255,255,.04) 0 50%) 50%/22px 22px;box-shadow:none}

@@ -138,7 +138,10 @@ export const DEF = {
   //// whatever it holds, including a 'dark' they never actively picked. Changing
   //// the appearance of an app under somebody who did not ask is worse than a
   //// default that was wrong for a while.
-  theme: 'system', accent: 'lime', body: 'male', targetW: null,
+  //// Neoffice — 'club' and not upstream's 'lime': a new journal starts in the club's own colour when the club has set one
+  //// (lib/accent.js CLUB), and in the same green as before when it has not. Like the theme above, only NEW journals are affected:
+  //// a member who already has a state keeps the colour it holds.
+  theme: 'system', accent: 'club', body: 'male', targetW: null,
   bodyweight: [], routines: [], week: {}, dayPlan: {},
   // A note per day off (#261): { [iso]: { tag, text, _ts } } (lib/day-notes.js). A noted day is
   // excused from the missed-day nudge; each day merges on its own stamp (lib/sync-merge.js).

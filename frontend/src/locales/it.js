@@ -2714,4 +2714,9 @@ export default {
   'Sticker': 'Adesivo',
   'Copy image': 'Copia immagine',
   'Transparent background: paste it onto a photo or a story.': 'Sfondo trasparente: incollalo su una foto o in una storia.',
+  //// Neoffice — the share sheet's zoom, « Finish and share », and the club's own colour swatch (components/ShareSheet.jsx, sheets.jsx, views/Settings.jsx).
+  'Colour of {0}': 'Colore di {0}',
+  'Finish and share': 'Termina e condividi',
+  'Move the photo with a finger, zoom with two fingers or the slider.': 'Sposta la foto con un dito, ingrandisci con due dita o con il cursore.',
+  'Zoom': 'Zoom',
 }

@@ -2676,4 +2676,9 @@ export default {
   'Sticker': 'Matrica',
   'Copy image': 'Kép másolása',
   'Transparent background: paste it onto a photo or a story.': 'Átlátszó háttér: illeszd rá egy fotóra vagy történetre.',
+  //// Neoffice — the share sheet's zoom, « Finish and share », and the club's own colour swatch (components/ShareSheet.jsx, sheets.jsx, views/Settings.jsx).
+  'Colour of {0}': '{0} színe',
+  'Finish and share': 'Befejezés és megosztás',
+  'Move the photo with a finger, zoom with two fingers or the slider.': 'Mozgassa a fotót ujjával, nagyítson két ujjal vagy a csúszkával.',
+  'Zoom': 'Nagyítás',
 }

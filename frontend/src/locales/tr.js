@@ -2713,4 +2713,9 @@ export default {
   'Sticker': 'Çıkartma',
   'Copy image': 'Görseli kopyala',
   'Transparent background: paste it onto a photo or a story.': 'Şeffaf arka plan: bir fotoğrafın veya bir hikayenin üzerine yapıştır.',
+  //// Neoffice — the share sheet's zoom, « Finish and share », and the club's own colour swatch (components/ShareSheet.jsx, sheets.jsx, views/Settings.jsx).
+  'Colour of {0}': '{0} rengi',
+  'Finish and share': 'Bitir ve paylaş',
+  'Move the photo with a finger, zoom with two fingers or the slider.': 'Fotoğrafı tek parmakla taşıyın, iki parmakla veya kaydırıcıyla yakınlaştırın.',
+  'Zoom': 'Yakınlaştır',
 }

@@ -2714,4 +2714,9 @@ export default {
   'Sticker': 'Pegatina',
   'Copy image': 'Copiar imagen',
   'Transparent background: paste it onto a photo or a story.': 'Fondo transparente: pégala sobre una foto o en una historia.',
+  //// Neoffice — the share sheet's zoom, « Finish and share », and the club's own colour swatch (components/ShareSheet.jsx, sheets.jsx, views/Settings.jsx).
+  'Colour of {0}': 'Color de {0}',
+  'Finish and share': 'Terminar y compartir',
+  'Move the photo with a finger, zoom with two fingers or the slider.': 'Mueva la foto con un dedo, amplíe con dos dedos o con el deslizador.',
+  'Zoom': 'Zoom',
 }

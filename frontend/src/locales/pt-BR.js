@@ -1554,6 +1554,11 @@ export const PT_BR_OVERRIDES = {
   'Sticker': 'Adesivo',
   'Copy image': 'Copiar imagem',
   'Transparent background: paste it onto a photo or a story.': 'Fundo transparente: cole-o em uma foto ou no story.',
+  //// Neoffice — the share sheet's zoom, « Finish and share », and the club's own colour swatch. Overridden (identical or not) so that pt-BR's inheritance fingerprint, which covers what is NOT overridden, does not move.
+  'Colour of {0}': 'Cor de {0}',
+  'Finish and share': 'Concluir e compartilhar',
+  'Move the photo with a finger, zoom with two fingers or the slider.': 'Mova a foto com um dedo, amplie com dois dedos ou com o controle deslizante.',
+  'Zoom': 'Zoom',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

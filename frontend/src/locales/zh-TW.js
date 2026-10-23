@@ -2632,4 +2632,9 @@ export default {
   'Sticker': '貼圖',
   'Copy image': '複製圖片',
   'Transparent background: paste it onto a photo or a story.': '透明背景：貼到照片上或限時動態中。',
+  //// Neoffice — the share sheet's zoom, « Finish and share », and the club's own colour swatch (components/ShareSheet.jsx, sheets.jsx, views/Settings.jsx).
+  'Colour of {0}': '{0} 的顏色',
+  'Finish and share': '完成並分享',
+  'Move the photo with a finger, zoom with two fingers or the slider.': '用一根手指移動照片，用兩根手指或滑桿縮放。',
+  'Zoom': '縮放',
 }

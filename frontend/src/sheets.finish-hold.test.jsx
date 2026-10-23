@@ -102,7 +102,7 @@ describe('the Finish sheet', () => {
     act(() => finishWorkoutSheet({ onDiscard: vi.fn() }))
     const host = sheetText()
     expect(host.querySelector('h3').textContent).toBe('Finish workout?')
-    expect([...host.querySelectorAll('.menu-item .tt')].map(e => e.textContent)).toEqual(['Finish and save', 'Discard workout'])
+    expect([...host.querySelectorAll('.menu-item .tt')].map(e => e.textContent)).toEqual(['Finish and save', 'Finish and share', 'Discard workout'])
     expect(host.querySelector('.menu-item.danger').textContent).toContain('Discard workout')
     tapItem(host, 'Finish and save')
     expect(S().active).toBeNull()

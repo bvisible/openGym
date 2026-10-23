@@ -31,6 +31,14 @@ export const showsWarmupRamp = (S, config) =>
  *  `linked` = this row is ALREADY part of a superset. */
 export const showsSupersetControl = (S, linked) => atLeast(S, 'full') || Boolean(linked)
 
+//// Neoffice — the link of the ROUTINE EDITOR (the paperclip between two exercises) is offered at every level.
+//// The pilot club (23.10) asked to link two exercises as a superset with the paperclip, even three, because the coach does it
+//// all the time with beginners. The coach builds the plan, the beginner only follows it, so the control the coach
+//// reaches for must not be one a level hides. Chaining three is the same gesture twice (the second row links to the first,
+//// the third to the second). The pair buttons of the LIVE session (Workout.jsx) keep `showsSupersetControl`: a member in the
+//// middle of a set is not offered a technique he was never taught (views/jargon.level.test.jsx).
+export const showsRoutineSupersetLink = () => true
+
 /** The whole "Equipment" section in Settings. */
 export const showsEquipmentProfiles = S =>
   atLeast(S, 'normal') || ((S && S.equipProfiles) || []).length > 0

@@ -28,7 +28,7 @@ import { POLICIES_FOR, POLICY_NAME, POLICY_DESC } from '../lib/progression.js'
 import BodyMap from '../components/BodyMap.jsx'
 import { loadOfRoutine, rankOf, MUSCLE_NAME } from '../lib/muscles.js'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
-import { showsSupersetControl, showsProgressionControls } from '../lib/level-visibility.js'
+import { showsRoutineSupersetLink, showsProgressionControls } from '../lib/level-visibility.js'
 import { clubAutoProgression } from '../lib/progression.js'
 
 export const ROUTINE_LONG_PRESS_MS = 380
@@ -581,10 +581,9 @@ export default function RoutineEdit() {
           {noEquip && <span className="tag" style={{ color: 'var(--orange)', borderColor: 'var(--orange)' }} title={t('Needs {0}, which isn’t in your active profile', t(ex.eq))}><Icon name="warning" /></span>}
           {/* //// Neoffice — the link and the arrows, drawn only when the member may edit (mayEdit). */}
           {mayEdit && <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 'none', alignItems: 'center' }}>
-            {/* //// Neoffice — chaining two exercises back-to-back is a technique, not a
-                 basic gesture. Hidden at the simple level, EXCEPT on a row that is
-                 already linked: the member must always be able to unlink. */}
-            {i > 0 && showsSupersetControl(S, linkedPrev) && <button className={'iconbtn' + (linkedPrev ? ' on-ss' : '')} title={t('Superset with exercise above')} style={{ width: 32, height: 28, borderRadius: 8, fontSize: 15 }} onClick={ev => { ev.stopPropagation(); toggleLink(i) }}><Icon name="link" /></button>}
+            {/* //// Neoffice — the link is offered at every level (showsRoutineSupersetLink): the club's coach
+                 chains two or three exercises for beginners. It used to be hidden at the simple level. */}
+            {i > 0 && showsRoutineSupersetLink(S) && <button className={'iconbtn' + (linkedPrev ? ' on-ss' : '')} title={t('Superset with exercise above')} style={{ width: 32, height: 28, borderRadius: 8, fontSize: 15 }} onClick={ev => { ev.stopPropagation(); toggleLink(i) }}><Icon name="link" /></button>}
             <div style={{ display: 'flex', gap: 2 }}>
               <button className="iconbtn" aria-label={t('Move up')} title={leavesUp ? t('Move out of the superset') : t('Move up')} disabled={!moveRoutineEntry(r.ex, i, -1)} style={{ width: 28, height: 24, borderRadius: 7, fontSize: 12 }} onClick={ev => { ev.stopPropagation(); move(i, -1) }}><Icon name="chevronUp" /></button>
               <button className="iconbtn" aria-label={t('Move down')} title={leavesDown ? t('Move out of the superset') : t('Move down')} disabled={!moveRoutineEntry(r.ex, i, 1)} style={{ width: 28, height: 24, borderRadius: 7, fontSize: 12 }} onClick={ev => { ev.stopPropagation(); move(i, 1) }}><Icon name="chevronDown" /></button>
@@ -630,11 +629,10 @@ export default function RoutineEdit() {
       </div>
     })()}
 
-    {/* //// Neoffice — the hint goes with the button it describes: at the simple
-         level the link button is hidden, and an instruction pointing at a control
-         that is not there is worse than no instruction. ("Add exercise" heads the list since
-         upstream v1.3.11; ours under the last exercise is gone with it.) */}
-    {mayEdit && showsSupersetControl(S, false) && <div className="small dim row" style={{ margin: '10px 2px', gap: 5 }}><Icon name="link" style={{ fontSize: 13 }} />{t('Tap the link button on an exercise to superset it with the one above. You’ll do them back-to-back.')}</div>}
+    {/* //// Neoffice — the hint goes with the button it describes (both drawn at every level since the link is
+         offered everywhere). ("Add exercise" heads the list since upstream v1.3.11; ours under the last exercise
+         is gone with it.) */}
+    {mayEdit && showsRoutineSupersetLink(S) && <div className="small dim row" style={{ margin: '10px 2px', gap: 5 }}><Icon name="link" style={{ fontSize: 13 }} />{t('Tap the link button on an exercise to superset it with the one above. You’ll do them back-to-back.')}</div>}
     {/* //// Neoffice — a copy and a deletion change the plan: not when the club writes it (mayEdit). Printing does not. */}
     {mayEdit && <><Button onClick={() => {
       const copy = copyRoutine(r, t('Copy'))

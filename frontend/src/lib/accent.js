@@ -18,6 +18,11 @@ import { ACCENTS, ACCENT_INK } from './format.js'
 
 export const DEFAULT_ACCENT = 'lime'
 export const CUSTOM = 'custom'
+//// Neoffice — the club's own colour (the pilot club, 17.10, asked for exactly the yellow of its logo). A club sets it once (Gym Settings ›
+//// Club Colour, sent as `club.accent`); `accent: 'club'` follows it. It is what a NEW journal starts with (store/useStore.js DEF), so a
+//// club's members open the journal in the club's colour without choosing anything, and a swatch with the club's name in Settings brings
+//// it back for whoever picked another. A club with no colour of its own: 'club' reads as the journal's own green, as before.
+export const CLUB = 'club'
 
 const HEX = /^#[0-9a-f]{6}$/i
 // What a stored `accent` may be at all: a short lowercase word. One this version does not know
@@ -43,21 +48,26 @@ export function sanitizeAccent(s) {
   return s
 }
 
-/** The choice to draw: a known preset key, 'custom' with a usable colour, or the default. */
+/** The club's own colour as '#rrggbb' (the server's `club.accent`), or null when it has none or sent something that is not a colour. */
+export const clubAccent = S => cleanHex(S?.club?.accent)
+
+/** The choice to draw: a known preset key, 'custom' with a usable colour, 'club' with a colour from the club, or the default. */
 export function accentKey(S) {
   const k = S?.accent
   if (typeof k === 'string' && Object.hasOwn(ACCENTS, k)) return k
   if (k === CUSTOM && cleanHex(S?.accentCustom)) return CUSTOM
+  if (k === CLUB && clubAccent(S)) return CLUB
   return DEFAULT_ACCENT
 }
 
 /**
  * The value the rest of the app passes around (the rest alert, the native countdown): a preset
- * key, or the user's colour itself as '#rrggbb'.
+ * key, or a colour itself as '#rrggbb' (the user's own, or the club's).
  */
 export function accentValue(S) {
   const k = accentKey(S)
-  return k === CUSTOM ? cleanHex(S.accentCustom) : k
+  if (k === CUSTOM) return cleanHex(S.accentCustom)
+  return k === CLUB ? clubAccent(S) : k
 }
 
 // --- colour maths (sRGB, WCAG 2 relative luminance) ---

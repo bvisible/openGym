@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { ACCENTS } from './format.js'
 import {
-  cleanHex, sanitizeAccent, accentKey, accentValue, contrast, inkOn, readableIn, adjustedIn,
+  cleanHex, sanitizeAccent, accentKey, accentValue, clubAccent, CLUB, contrast, inkOn, readableIn, adjustedIn,
   customAccentVars, accentPair, applyAccent, THEMES, isGrey, inkOnBoth, mix, GREY_TEXT, GREY_GAP,
 } from './accent.js'
 import { mergeStates, stampChange } from './sync-merge.js'
@@ -237,5 +237,61 @@ describe('an own colour and a preset picked on two devices', () => {
     const A = change(base, T + 1000, s => { s.accent = 'custom'; s.accentCustom = '#00aa00' })
     const B = change(base, T + 4000, s => { s.accent = 'sky' })
     for (const out of [mergeStates(A, B), mergeStates(B, A)]) expect(out.accent).toBe('sky')
+  })
+})
+
+//// Neoffice — the club's own colour (the pilot club asked for the exact yellow of its logo).
+describe('the club colour', () => {
+  const club = { accent: '#FFFF00', name: 'Riverside' }
+
+  it('reads the colour the server sent as one clean hex, and nothing else', () => {
+    expect(CLUB).toBe('club')
+    expect(clubAccent({ club })).toBe('#ffff00')
+    for (const bad of [undefined, null, '', 'yellow', '#ff0', 'rgb(255,255,0)', '#ffff00;x', 42]) expect(clubAccent({ club: { accent: bad } }), String(bad)).toBe(null)
+    expect(clubAccent({})).toBe(null)
+    expect(clubAccent(undefined)).toBe(null)
+  })
+
+  it('a journal that follows the club draws the club colour, the exact one, in the dark theme', () => {
+    const S = { accent: 'club', club }
+    expect(accentKey(S)).toBe('club')
+    expect(accentValue(S)).toBe('#ffff00')
+    const vars = customAccentVars(accentValue(S), 'dark')
+    expect(vars['--acc']).toBe('#ffff00')
+    expect(vars['--on-acc']).toBeTruthy()
+  })
+
+  it('is read for the screen like an own colour: inline properties, not a preset', () => {
+    const el = document.createElement('div')
+    applyAccent(el, accentValue({ accent: 'club', club }), 'dark')
+    expect(el.dataset.accent).toBe('custom')
+    expect(el.style.getPropertyValue('--acc')).toBe('#ffff00')
+  })
+
+  it('a club with no colour of its own: "follow the club" is the journal\'s own green, as it was', () => {
+    for (const S of [{ accent: 'club' }, { accent: 'club', club: {} }, { accent: 'club', club: { accent: 'nope' } }]) {
+      expect(accentKey(S)).toBe('lime')
+      expect(accentValue(S)).toBe('lime')
+    }
+  })
+
+  it('a colour the member chose is theirs, whatever the club sets', () => {
+    expect(accentValue({ accent: 'sky', club })).toBe('sky')
+    expect(accentValue({ accent: 'lime', club })).toBe('lime')
+    expect(accentValue({ accent: 'custom', accentCustom: '#ff00aa', club })).toBe('#ff00aa')
+  })
+
+  it('goes back to green when the club takes its colour away', () => {
+    expect(accentValue({ accent: 'club', club })).toBe('#ffff00')
+    expect(accentValue({ accent: 'club', club: { ...club, accent: null } })).toBe('lime')
+  })
+
+  it('is a word like any other for the merge and the sanitising of a state', () => {
+    expect(sanitizeAccent({ accent: 'club' }).accent).toBe('club')
+  })
+
+  it('is what a new journal starts with', async () => {
+    const { DEF } = await import('../store/useStore.js')
+    expect(DEF.accent).toBe('club')
   })
 })

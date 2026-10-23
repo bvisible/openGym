@@ -18,6 +18,7 @@ import { speedUnitOf } from '../lib/speed.js'
 import { workoutDay } from '../lib/history.js'
 import { todayISO } from '../lib/format.js'
 import { Segmented, Switch, Row, Button } from './ui.jsx'
+import Icon from './Icon.jsx'
 import { mediaErrorText } from './CustomMediaField.jsx'
 import { shareChoices } from '../lib/share/model.js'
 import { renderShare } from '../lib/share/render.js'
@@ -25,7 +26,7 @@ import { renderMuscles } from '../lib/share/muscles.js'
 import { workoutCardModel } from '../lib/workout-card.js'
 import { sendImage, copyImage, canCopyImage } from '../lib/share/send.js'
 import { loadPrefs, savePrefs } from '../lib/share/prefs.js'
-import { DEFAULT_FOCUS, coverRect, panFocus } from '../lib/share/frame.js'
+import { DEFAULT_FOCUS, ZOOM_MIN, ZOOM_MAX, coverRect, panFocus, zoomFocus } from '../lib/share/frame.js'
 import { FORMATS } from '../lib/share/layout.js'
 
 const toast = m => useUI.getState().toast(m)
@@ -172,23 +173,49 @@ export default function ShareSheet({ w, nameOf, close }) {
     }
   }
 
-  // Dragging the preview moves the photo under the numbers (the crop is the only thing the member cannot otherwise reach).
+  // Dragging the preview moves the photo under the numbers; two fingers, or the slider under it, zoom into it (the pilot club asked to
+  // be able to frame the photo: at 1× a portrait photo only had room to move up and down).
   const frameRef = useRef(null)
-  const drag = useRef(null)
+  const pointers = useRef(new Map())
+  const pinch = useRef(null)
   const geom = onPhoto ? coverRect(photo.width, photo.height, FORMATS[format].width, FORMATS[format].height, focus) : null
-  const movable = !!geom && (geom.overflowX > 1 || geom.overflowY > 1)
-  const onDown = e => { if (!movable) return; drag.current = { x: e.clientX, y: e.clientY }; e.currentTarget.setPointerCapture?.(e.pointerId) }
+  const movable = !!geom
+  const zoom = focus.zoom || ZOOM_MIN
+  const changeZoom = z => {
+    if (!photo) return
+    const dst = FORMATS[format]
+    setFocus(f => zoomFocus(photo.width, photo.height, dst.width, dst.height, f, z))
+  }
+  const spread = () => {
+    const [a, b] = [...pointers.current.values()]
+    return Math.hypot(a.x - b.x, a.y - b.y)
+  }
+  const onDown = e => {
+    if (!movable) return
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    e.currentTarget.setPointerCapture?.(e.pointerId)
+    pinch.current = pointers.current.size === 2 ? { from: spread() || 1, zoom } : null
+  }
   const onMove = e => {
-    if (!drag.current || !geom) return
+    const last = pointers.current.get(e.pointerId)
+    if (!last || !geom) return
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    if (pointers.current.size >= 2) {
+      if (pinch.current) changeZoom(pinch.current.zoom * (spread() / pinch.current.from))
+      return
+    }
     const r = frameRef.current?.querySelector('img')?.getBoundingClientRect()
     if (!r || !r.width) return
     const k = FORMATS[format].width / r.width
-    const dx = (e.clientX - drag.current.x) * k
-    const dy = (e.clientY - drag.current.y) * k
-    drag.current = { x: e.clientX, y: e.clientY }
-    setFocus(f => panFocus(f, dx, dy, geom))
+    const dx = (e.clientX - last.x) * k
+    const dy = (e.clientY - last.y) * k
+    setFocus(f => panFocus(f, dx, dy, coverRect(photo.width, photo.height, FORMATS[format].width, FORMATS[format].height, f)))
   }
-  const onUp = () => { drag.current = null }
+  const onUp = e => {
+    pointers.current.delete(e.pointerId)
+    pinch.current = null
+    // One finger stays down after a pinch: it carries on as a drag from where it is, so the photo does not jump.
+  }
 
   const rows = [
     ['duration', t('Duration')],
@@ -222,7 +249,12 @@ export default function ShareSheet({ w, nameOf, close }) {
       </div>
       <input ref={cameraRef} type="file" accept="image/*" capture="user" hidden onChange={onFile} />
       <input ref={libraryRef} type="file" accept="image/*" hidden onChange={onFile} />
-      <div className="small dim share-note">{movable ? t('Drag the picture to move the photo.') + ' ' : ''}{t('Your photo stays on this phone: it is not saved anywhere.')}</div>
+      {movable && <div className="share-zoom">
+        <Icon name="image" style={{ fontSize: 14 }} />
+        <input type="range" min={ZOOM_MIN} max={ZOOM_MAX} step="0.02" value={zoom} aria-label={t('Zoom')} onChange={e => changeZoom(parseFloat(e.target.value))} />
+        <Icon name="image" style={{ fontSize: 22 }} />
+      </div>}
+      <div className="small dim share-note">{movable ? t('Move the photo with a finger, zoom with two fingers or the slider.') + ' ' : ''}{t('Your photo stays on this phone: it is not saved anywhere.')}</div>
     </>}
     {sticker && <div className="small dim share-note">{t('Transparent background: paste it onto a photo or a story.')}</div>}
     {template !== 'muscles' && !sticker && <div className="share-format">

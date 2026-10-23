@@ -2712,4 +2712,9 @@ export default {
   'Sticker': 'স্টিকার',
   'Copy image': 'ছবি কপি করুন',
   'Transparent background: paste it onto a photo or a story.': 'স্বচ্ছ ব্যাকগ্রাউন্ড: ছবি বা স্টোরিতে পেস্ট করুন।',
+  //// Neoffice — the share sheet's zoom, « Finish and share », and the club's own colour swatch (components/ShareSheet.jsx, sheets.jsx, views/Settings.jsx).
+  'Colour of {0}': '{0}-এর রং',
+  'Finish and share': 'শেষ করে শেয়ার করুন',
+  'Move the photo with a finger, zoom with two fingers or the slider.': 'একটি আঙুল দিয়ে ছবি সরান, দুই আঙুল দিয়ে বা স্লাইডার দিয়ে জুম করুন।',
+  'Zoom': 'জুম',
 }

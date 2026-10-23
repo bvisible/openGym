@@ -245,7 +245,7 @@ describe('the share sheet — the member\'s photo', () => {
     expect(lastRender().photo).toBe(decoded)
     await tick(40)
     expect(host.textContent).not.toContain('Add a photo to start')
-    expect(host.textContent).toContain('Drag the picture to move the photo.')
+    expect(host.textContent).toContain('Move the photo with a finger, zoom with two fingers or the slider.')
   })
 
   it('never stores the photo and never sends it anywhere', async () => {
@@ -313,6 +313,83 @@ describe('the share sheet — the member\'s photo', () => {
     await tick(40)
     expect(lastRender().focus.x).toBeLessThan(before.x)
     expect(lastRender().focus.y).toBeCloseTo(before.y, 6)   // dragged sideways only
+  })
+
+  it('offers a zoom once there is a photo, and the picture is drawn again at the zoom chosen (the club asked to frame the photo)', async () => {
+    const host = await open()
+    expect(host.querySelector('.share-zoom')).toBeNull()
+    await pickPhoto(host)
+    await tick(40)
+    const slider = host.querySelector('.share-zoom input[type="range"]')
+    expect(slider).toBeTruthy()
+    expect(slider.getAttribute('aria-label')).toBe('Zoom')
+    expect([slider.min, slider.max]).toEqual(['1', '4'])
+    expect(lastRender().focus.zoom ?? 1).toBe(1)
+    const set = v => act(() => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(slider, String(v))
+      slider.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+    set(2.5)
+    await tick(40)
+    expect(lastRender().focus.zoom).toBeCloseTo(2.5, 6)
+  })
+
+  it('moves a zoomed photo on both axes, where a photo that only fills the frame moves on one', async () => {
+    decoded = { source: { tag: 'portrait' }, width: 3000, height: 4000, close: vi.fn() }
+    const host = await open()
+    await pickPhoto(host)
+    await tick(40)
+    const frame = host.querySelector('.share-card')
+    frame.querySelector('img').getBoundingClientRect = () => ({ width: 270, height: 337, left: 0, top: 0, right: 270, bottom: 337, x: 0, y: 0 })
+    const fire = (type, x, y, id = 1) => act(() => { frame.dispatchEvent(new PointerEvent(type, { bubbles: true, clientX: x, clientY: y, pointerId: id })) })
+    const sideways = () => { const b = lastRender().focus.x; fire('pointerdown', 100, 100); fire('pointermove', 160, 100); fire('pointerup', 160, 100); return b }
+    const before = sideways()
+    await tick(40)
+    expect(lastRender().focus.x).toBeCloseTo(before, 6)           // a portrait photo has no room sideways at 1×
+    const slider = host.querySelector('.share-zoom input[type="range"]')
+    act(() => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(slider, '2')
+      slider.dispatchEvent(new Event('input', { bubbles: true }))
+    })
+    await tick(40)
+    const zoomed = lastRender().focus.x
+    sideways()
+    await tick(40)
+    expect(lastRender().focus.x).toBeLessThan(zoomed)             // …and some once it is zoomed
+    expect(lastRender().focus.zoom).toBe(2)                       // dragging keeps the zoom
+  })
+
+  it('zooms with two fingers', async () => {
+    const host = await open()
+    await pickPhoto(host)
+    await tick(40)
+    const frame = host.querySelector('.share-card')
+    frame.querySelector('img').getBoundingClientRect = () => ({ width: 270, height: 337, left: 0, top: 0, right: 270, bottom: 337, x: 0, y: 0 })
+    const fire = (type, x, y, id) => act(() => { frame.dispatchEvent(new PointerEvent(type, { bubbles: true, clientX: x, clientY: y, pointerId: id })) })
+    fire('pointerdown', 100, 100, 1); fire('pointerdown', 140, 100, 2)       // 40 px apart
+    fire('pointermove', 80, 100, 1); fire('pointermove', 160, 100, 2)        // 80 px apart: twice as close
+    await tick(40)
+    expect(lastRender().focus.zoom).toBeCloseTo(2, 3)
+    fire('pointerup', 80, 100, 1); fire('pointerup', 160, 100, 2)
+    await tick(40)
+    expect(lastRender().focus.zoom).toBeCloseTo(2, 3)                        // lifting the fingers keeps it
+  })
+
+  it('goes back to no zoom with a new photo', async () => {
+    const host = await open()
+    await pickPhoto(host)
+    await tick(40)
+    const slider = () => host.querySelector('.share-zoom input[type="range"]')
+    act(() => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(slider(), '3')
+      slider().dispatchEvent(new Event('input', { bubbles: true }))
+    })
+    await tick(40)
+    expect(lastRender().focus.zoom).toBeCloseTo(3, 6)
+    await pickPhoto(host)
+    await tick(40)
+    expect(lastRender().focus.zoom ?? 1).toBe(1)
+    expect(slider().value).toBe('1')
   })
 
   it('keeps the sheet from being pulled down while the photo can be moved (its pull-to-dismiss would take every downward drag)', async () => {

@@ -33,7 +33,7 @@ import { DEMO, REPO } from '../lib/demo.js'
 import { MOBILE, isAndroid, shareExport, syncReminder } from '../lib/mobile.js'
 import { NUDGE_COPY, NUDGE_TONES, nudgeAllowed, toneOf } from '../lib/nudge.js'
 import { setRestAccent } from '../lib/rest-alert.js'
-import { CUSTOM, accentKey, adjustedIn, applyAccent, cleanHex, inkOn, isGrey } from '../lib/accent.js'
+import { CLUB, CUSTOM, accentKey, adjustedIn, applyAccent, cleanHex, clubAccent, inkOn, isGrey } from '../lib/accent.js'
 import { checkForUpdate, downloadAndInstall, fetchChecksum, RELEASES_PAGE } from '../lib/update.js'
 import { forgetCoach } from '../lib/coach-api.js'
 import { REST_MAX, REST_PAUSE_MIN, REST_PAUSE_MAX, fmtRest, fmtDuration } from '../lib/duration.js'
@@ -1183,8 +1183,11 @@ function PushCard({ S, update, toast }) {
 // What the chosen accent is called: a preset's colour name, or the user's own.
 function accentLabel(S) {
   const k = accentKey(S)
+  if (k === CLUB) return clubSwatchLabel(S)
   return k === CUSTOM ? t('Your own color') : t(ACCENT_NAMES[k] || 'Green')
 }
+//// Neoffice — what the club's swatch is called: the club's name, as the server gives it.
+const clubSwatchLabel = S => t('Colour of {0}', S?.club?.name || (typeof window !== 'undefined' && window.gym_boot?.app_title) || '')
 
 /**
  * The presets, then one swatch for a colour of the user's own (lib/accent.js). With no colour
@@ -1203,6 +1206,9 @@ function AccentSwatches({ S, update }) {
   const own = cleanHex(S.accentCustom)
   const onCustom = key === CUSTOM
   const pickPreset = k => { update(s => { s.accent = k }); setRestAccent(k) }
+  //// Neoffice — the club's own swatch (lib/accent.js CLUB): it follows the club, so what is stored is the choice, not the colour.
+  const club = clubAccent(S)
+  const pickClub = () => { update(s => { s.accent = CLUB }); setRestAccent(club) }
   const pickOwn = hex => {
     const c = cleanHex(hex)
     if (!c || (onCustom && c === own)) return
@@ -1254,6 +1260,8 @@ function AccentSwatches({ S, update }) {
   ].filter(Boolean) : []
   return <>
     <div className="swatches" style={{ flexBasis: '100%', paddingInlineStart: 41 }}>
+      {club && <button className={'swatch' + (key === CLUB ? ' on' : '')}
+        style={{ background: club }} onClick={pickClub} aria-label={clubSwatchLabel(S)} title={clubSwatchLabel(S)} />}
       {Object.entries(ACCENTS).map(([k, c]) => (
         <button key={k} className={'swatch' + (key === k ? ' on' : '')}
           style={{ background: c }} onClick={() => pickPreset(k)} aria-label={t(ACCENT_NAMES[k] || k)} />
