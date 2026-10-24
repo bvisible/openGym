@@ -355,13 +355,13 @@ export const resumeRenewal = () => api(M.resumeRenewal, { method: 'POST', body: 
 //// merge — the same choice already made for push (`pushSupported()` is false).
 export function setRemoteAuth() { /* no remote server here */ }
 export function setAccessHeaders() { /* no Cloudflare Access token here: lib/cf-access.js sets it for a paired phone only */ }
-//// Neoffice — upstream v1.3.8's subpath helper (#238), kept verbatim because its
-//// test imports it. Our calls go to Frappe's /api/method at the site root, which
-//// the journal served under /gym reaches as it is — nothing here uses it.
-export function appBase(loc = typeof location !== 'undefined' ? location : null) {
-  const path = (loc && loc.pathname) || '/'
-  return path.slice(0, path.lastIndexOf('/') + 1) || '/'
-}
+//// Neoffice — upstream v1.4.2 adds `remoteAuth` (the paired server and what a request to it carries, handed to the phone's background
+//// check, lib/nudge-check.js). The journal is a page of the club instance and is never paired: no remote auth, so null.
+export const remoteAuth = () => null
+//// Neoffice — upstream's subpath helper (#238), exported because its test and the store import it. Our calls go to Frappe's /api/method at
+//// the site root, which the journal served under /gym reaches as it is: nothing in this file uses it. Since v1.4.2 it lives in lib/app-base.js,
+//// where the base can no longer leave the page's origin (a crafted link whose path started with « // » made the app talk to the host named in it).
+export { appBase } from './app-base.js'
 export async function pairRedeem() {   //// Neoffice — no pairing: the journal is a page of the club instance
   throw new Error('Pairing is not available: this journal is served by your club instance.')
 }

@@ -39,6 +39,9 @@ vi.mock('../lib/coach-api.js', () => ({
   requestPlan: vi.fn(() => Promise.resolve({})),
   disclosure: vi.fn(() => Promise.resolve({ payer: 'instance', providerLabel: 'Nora', categories: ['plan'] })),
   JOB_ERRORS: {},
+  //// Neoffice — upstream v1.4.2's: the intake names the provider's consent (isDeclined) for the way the Coach runs (coachVia).
+  isDeclined: () => false,
+  coachVia: () => 'device',
 }))
 vi.mock('../lib/api.js', () => ({ BOOT: { coach: {} }, api: vi.fn(() => Promise.resolve({})) }))
 vi.mock('../lib/demo.js', () => ({ DEMO: false }))

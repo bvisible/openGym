@@ -100,6 +100,14 @@ export const showsInSessionWarmup = (S, hasWarmups) =>
 export const showsRestPauseSetting = (S, defaultSec = 15) =>
   atLeast(S, 'full') || Number((S && S.restPauseSec) ?? defaultSec) !== defaultSec
 
+/** The "Rest between warm-ups" row in Settings (upstream v1.4.2).
+ *
+ *  Warm-up sets are a technique of the full level here (the ramp stepper and the in-session « Add warm-up set » are hidden below it),
+ *  so a setting that times the rest between them goes with them. Kept once the member has moved it off « like the work sets »
+ *  (a number, 0 for no timer): they changed it, so they know what it is. */
+export const showsWarmupRestSetting = S =>
+  atLeast(S, 'full') || typeof (S && S.warmupRestSec) === 'number'
+
 //// ─── what v1.4 added ───────────────────────────────────────────────────────
 //// Upstream's v1.4 brought four techniques a beginner was never taught. Same
 //// shape as the rest, same exception: a plan, an exercise or a set that already

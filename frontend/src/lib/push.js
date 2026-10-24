@@ -79,7 +79,29 @@ const readyWorker = (ms = 8000) => Promise.race([
 ])
 
 //// Neoffice — the club's endpoint, the device id under Frappe's name (device_id).
-const register = sub => api(PUSH_PATHS.subscribe, { method: 'POST', body: JSON.stringify({ subscription: sub.toJSON(), device_id: deviceId() }) })
+//// (upstream v1.4.2 moves the sending into `register` below, which retries once on a 409: the club's endpoint never answers one, so the
+//// retry stays unused here; the device id keeps the name Frappe gives it.)
+const post = sub => api(PUSH_PATHS.subscribe, { method: 'POST', body: JSON.stringify({ subscription: sub.toJSON(), device_id: deviceId() }) })
+
+/* Hands the server this browser's subscription. A 409 means the server has this endpoint filed
+   under another account with keys other than the ones sent, and moves it only for a caller that
+   holds its keys, so sending it again changes nothing. A fresh subscription (a new endpoint and
+   new keys) is this browser's alone, so it is made and sent once more. If that fails too, the
+   fresh one is dropped: a subscription the server does not hold only tells the rest timer that
+   an alert is on its way (useUI's pushArmed) when none is. A retry the server answered is thrown
+   with `refused` set, so Settings shows the switch off with the server's own words. One that
+   never reached it (offline, or the browser would not subscribe) is thrown as it is, and
+   Settings reads the browser's side, which by then holds nothing: off as well. */
+async function register(reg, key, sub) {
+  try { return await post(sub) } catch (e) { if (e.status !== 409) throw e }
+  try {
+    await sub.unsubscribe().catch(() => {})
+    const fresh = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(key) })
+    try { return await post(fresh) } catch (e) { await fresh.unsubscribe().catch(() => {}); throw e }
+  } catch (e) {
+    throw e.status ? Object.assign(e, { refused: true }) : e
+  }
+}
 
 export async function enablePush() {
   if (!pushSupported()) throw new Error('Push notifications are not supported in this browser')
@@ -90,7 +112,7 @@ export async function enablePush() {
   const { key } = await api(PUSH_PATHS.key)
   const subscription = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(key) })
   await shareDeviceId()
-  await register(subscription)
+  await register(reg, key, subscription)
 }
 
 export async function disablePush() {
@@ -114,7 +136,9 @@ export async function disablePush() {
    - the server has it under no device id or another one → sent again with this one, true;
    - the server lost it → re-registered, true;
    - the server's key changed → the old subscription is useless; unsubscribe, subscribe against
-     the new key, register, true.
+     the new key, register, true;
+   - the server has the endpoint under another account → a fresh subscription, sent once more
+     (register above); if that is refused too, it throws with `refused` set.
    Network failures propagate — the caller decides what "unknown" means for it. */
 export async function syncPushSubscription() {
   if (!pushSupported() || Notification.permission !== 'granted') return false
@@ -128,7 +152,7 @@ export async function syncPushSubscription() {
   if (mine && key && bytesToUrlBase64(mine) !== key.replace(/=+$/, '')) {
     await sub.unsubscribe().catch(() => {})
     sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(key) })
-    await register(sub)
+    await register(reg, key, sub)
     return true
   }
   //// Neoffice — the club's status endpoint answers device_id, Frappe's spelling.
@@ -137,7 +161,7 @@ export async function syncPushSubscription() {
   // rotated subscription with no id to hand.
   const { subscribed, device_id: storedAs } = await api(PUSH_PATHS.status + '?endpoint=' + encodeURIComponent(sub.endpoint))
   const id = deviceId()
-  if (!subscribed || (id && storedAs !== undefined && storedAs !== id)) await register(sub)
+  if (!subscribed || (id && storedAs !== undefined && storedAs !== id)) await register(reg, key, sub)
   return true
 }
 

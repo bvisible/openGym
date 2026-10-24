@@ -155,7 +155,7 @@ export default function CoachThread() {
         //// being written to, and nothing else. No club menu, no app switcher,
         //// nothing a member has no business seeing. */}
     <div className="chat-hdr">
-      <button className="iconbtn" onClick={() => nav('/settings')} aria-label={t('Back')}><Icon name="chevronLeft" /></button>
+      <button className="iconbtn" data-back="/settings" onClick={() => nav('/settings')} aria-label={t('Back')}><Icon name="chevronLeft" /></button>
       <div className="chat-av who">{initials(title) || <Icon name="person" />}</div>
       <div className="grow">
         <h1>{title}</h1>

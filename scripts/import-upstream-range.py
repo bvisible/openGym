@@ -22,6 +22,13 @@ usage: import-upstream-range.py <repo> <base> <tip> <new-ref> [--base-filtered <
                    of the last upstream merge commit (`git rev-parse <merge commit>^2`). Without it the
                    first parent of the range would be the original <base>, media included.
 
+A commit of the range can have a parent that is NOT in the range but in the history of <base>: a pull request
+branched before <base> and merged after it (v1.4.2: the shared-superset fix, branched at the v1.4.0 release).
+That parent is a raw upstream commit with its media; it is replaced by OUR copy of it (found in the history of
+--base-filtered by author, date and subject), or kept when it is an ancestor of --base-filtered as it is (a commit from
+before the media came in is the same commit on both sides). One that cannot be resolved is kept and warned about,
+and the proof at the end then refuses the import.
+
 Then:  git merge --no-ff <new-ref>   (message without the word of the tool that wrote it; see CLAUDE.md)
 """
 import os
@@ -124,6 +131,31 @@ order = git("rev-list", "--topo-order", "--reverse", f"{base}..{tip}", text=True
 mapping = {}
 if base_filtered:
     mapping[base_commit] = git("rev-parse", f"{base_filtered}^{{commit}}", text=True).strip()
+
+#: Our history, by (author, author time, subject): where a raw commit of the history of <base> has its copy.
+_ours = None
+
+
+def our_copy_of(raw):
+    """OUR commit that stands for the raw upstream commit `raw` (a parent that is not in the range), or None."""
+    global _ours
+    if not base_filtered:
+        return None
+    if _ours is None:
+        _ours = {}
+        listing = git("log", "--format=%H%x00%an%x00%ae%x00%at%x00%s", mapping[base_commit], text=True)
+        for line in listing.splitlines():
+            sha, an, ae, at, subject = line.split("\0", 4)
+            _ours.setdefault((an, ae, at, subject), sha)
+    line = git("log", "-1", "--format=%an%x00%ae%x00%at%x00%s", raw, text=True).strip()
+    an, ae, at, subject = line.split("\0", 3)
+    return _ours.get((an, ae, at, subject))
+
+
+def is_ancestor_of_ours(raw):
+    return base_filtered is not None and subprocess.run(
+        ["git", "-C", repo, "merge-base", "--is-ancestor", raw, mapping[base_commit]], capture_output=True
+    ).returncode == 0
 changed = 0
 for sha in order:
     tree, parents, author, committer, body = parse(sha)
@@ -132,7 +164,14 @@ for sha in order:
         changed += 1
     for p in parents:
         if p not in mapping and p != base_commit:
-            print(f"warning: {sha[:10]} has a parent outside the range ({p[:10]}): kept as it is, check it carries no media")
+            copy = None if is_ancestor_of_ours(p) else our_copy_of(p)
+            if copy:
+                mapping[p] = copy
+                print(f"note: {sha[:10]} has a parent outside the range ({p[:10]}): replaced by our copy of it ({copy[:10]})")
+            elif is_ancestor_of_ours(p):
+                print(f"note: {sha[:10]} has a parent outside the range ({p[:10]}) that is already in our history: kept")
+            else:
+                print(f"warning: {sha[:10]} has a parent outside the range ({p[:10]}): kept as it is, check it carries no media")
     new_parents = [mapping.get(p, p) for p in parents]
     an, ae, ad, atz = IDENT.match(author).groups()
     cn, ce, cd, ctz = IDENT.match(committer).groups()

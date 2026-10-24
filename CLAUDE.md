@@ -119,6 +119,9 @@ Le script prouve ce qu'il fait : il refuse (et supprime la référence) si un se
 atteignable depuis les commits recréés. Il garde auteurs, dates et messages ; les signatures GPG ne
 survivent pas à une réécriture (c'est pourquoi pas `git filter-repo`, qui change aussi le hash de la base).
 Premier import filtré : v1.3.10 → v1.4.1, le 11.10 (note du coffre `Neoffice/Fitness-Coaching/84-…`).
+Deuxième : v1.4.1 → v1.4.2, le 24.10 (note `…/93-…`) : 250 commits, 48 fichiers en conflit, 64 blocs. **Une PR de l'amont branchée avant la v1.4.1 et fusionnée après**
+donne un commit de la plage dont un parent est hors de la plage (un commit brut de l'historique de la v1.4.1, médias compris) : le script le remplace par
+NOTRE copie de ce parent (trouvée dans l'historique de `--base-filtered` par auteur, date et sujet) et refuse toujours l'import si un seul objet de média reste atteignable.
 
 **Pas de branche filet** (règle de la flotte : `version-15` seule, ni branche ni worktree) : l'état
 d'avant la fusion est le premier parent du commit de fusion. Faire la fusion dans un clone jetable,
@@ -159,6 +162,18 @@ et ne pousser qu'une fois les tests verts.
   (sous-agent `model: haiku`, lot de ~190 clés avec l'ancien texte en regard) ; les clés que l'amont a retirées
   partent aussi de notre pack (`check-locales` exige les mêmes clés partout). Une langue neuve de l'amont (v1.4 :
   `bn`) reçoit les chaînes de NOS écrans, traduites de la même façon. `npm --prefix frontend run i18n` le prouve.
+- **`App.jsx`** — SA structure (`view` + `<Page>` : l'aperçu du balayage arrière dessine la route d'en dessous avec la même fonction), NOS routes dans `view` (classes,
+  défis, évaluations, abonnement, fil du coach ; ni `/admin`, ni `/progress-photos`, ni `<Login/>`). Nos `useEffect`/`authed` restent AU-DESSUS du retour anticipé vers la
+  connexion : un hook après un retour change le nombre de hooks d'un rendu (« Rendered fewer hooks »).
+- **Un écran de l'amont avec une flèche de retour** (ou le nôtre) porte `data-back="<route>"` : le balayage depuis le bord la presse (`lib/edge-swipe-back.test.js` liste ceux qui n'en ont pas).
+- **Le consentement IA par fournisseur** (v1.4.2, `ensureAiConsent`) ne se pose pas pour le coach du club (`noraConfigured()`), ni la rangée « Partage de données avec l'IA » : la
+  question nommerait l'hôte de l'instance comme « un service d'IA hors de l'app » avec « votre clé d'API ». Il reste pour un autre fournisseur.
+- **Ce qui n'est pas livré, retiré à chaque fois** : passkeys, mot de passe, tableau d'administration, suppression de compte (`DeleteAccount.jsx`), photos de progression, appairage ;
+  les tests de l'amont qui les touchent partent avec eux, et ceux qui supposent un invité (`gym_guest`) ou l'API de l'amont s'adaptent (un membre connecté ; `BOOT` dans les doubles de `lib/api.js`).
+- **Les préfixes de médias** : le carnet web sert `/assets/opengym/media/…` (`lib/exercises.js`), l'amont `exercise-media/…` (relatif, DANS le paquet de l'app). Les tests de l'app native
+  (`Animations`, `anim-data-safety`, `watch-sync`) fixent `VITE_IMG_BASE` / `VITE_GIF_BASE` à ceux du paquet. **Une app native de NOTRE carnet doit les fixer de même** (note 92).
+- **Les niveaux des nouveautés** : une technique ou un réglage que le niveau Simple ne doit pas montrer entre dans `lib/level-visibility.js` avec sa règle « cacher le contrôle, jamais la donnée »
+  (v1.4.2 : « Repos entre échauffements », `showsWarmupRestSetting`). `scripts/check-imports.mjs` est à nous : il a dû apprendre qu'une définition de méthode n'est pas un appel.
 - Partout ailleurs : **leur code**, avec nos `////` réappliqués par-dessus.
 
 > L'amont a son propre `CLAUDE.md`, qui décrit SON projet (docker, api, mcp,

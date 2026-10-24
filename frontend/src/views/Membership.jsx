@@ -66,7 +66,7 @@ export default function Membership() {
   }, [round])
 
   const head = <div className="hdr">
-    <button className="iconbtn" onClick={() => nav('/settings')} aria-label={t('Back')}><Icon name="chevronLeft" /></button>
+    <button className="iconbtn" data-back="/settings" onClick={() => nav('/settings')} aria-label={t('Back')}><Icon name="chevronLeft" /></button>
     <div style={{ flex: 1, marginLeft: 10 }}><h1>{t('My membership')}</h1></div>
   </div>
 

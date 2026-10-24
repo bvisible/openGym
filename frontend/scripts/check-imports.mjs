@@ -91,6 +91,10 @@ for (const file of files) {
       if (/^[A-Za-z_$][\w$]*$/.test(name)) known.add(name)
     }
   }
+  //// A METHOD DEFINITION is a name this file declares, not a call of the export of another one: `async remove(hash) {` and
+  //// `subscribe(fn) {` in an object or a class were reported as missing imports of lib/anim-packs.js's own `remove` and
+  //// `subscribe` (upstream v1.4.2 exports both). Found on the v1.4.2 merge.
+  for (const m of src.matchAll(/^\s*(?:static\s+)?(?:async\s+)?(?:get\s+|set\s+)?\*?\s*([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{/gm)) known.add(m[1])
   // Bare single-parameter arrows: `x => …`
   for (const m of src.matchAll(/(?:^|[^\w$.])([A-Za-z_$][\w$]*)\s*=>/g)) known.add(m[1])
 

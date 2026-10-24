@@ -7,12 +7,16 @@ import { useStore } from './store/useStore.js'
 import { startMediaSync } from './lib/media-sync.js'
 import { startNativeKeyboard } from './lib/native-keyboard.js'
 import './index.css'
+import { hideBoot } from './lib/boot.js'
 
 // `beforeinstallprompt` fires once, early — before any component mounts. Caught
 // here so the home-screen banner can replay it from a button (lib/install-offer.js).
 captureInstallPrompt()
 
 // App.jsx restores per-route scroll itself; the browser's own attempt races it.
+// A script that dies before the app draws would otherwise leave the boot logo lifting forever.
+window.addEventListener('error', hideBoot, { once: true })
+
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
 
 createRoot(document.getElementById('root')).render(

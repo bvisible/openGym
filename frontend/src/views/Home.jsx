@@ -24,6 +24,7 @@ import { Button } from '../components/ui.jsx'
 import { tappable } from '../lib/use-sheet-keyboard.js'
 import { glyphOf } from '../lib/glyphs.js'
 import { dayNoteOf } from '../lib/day-notes.js'
+import { weighInAt } from '../lib/bodyweight.js'
 
 //// Neoffice — what the offer contains, said in the member's language.
 function offerSummary(o) {
@@ -199,7 +200,7 @@ export default function Home() {
   // The streak card's fraction: this calendar week's workouts over the weekdays with a plan, or,
   // in a coach week, the queue's sessions and your own days together (lib/queue.js weekTally).
   const { done: doneThisWeek, planned: plannedPerWeek } = weekTally(S, todayISO())
-  const bwPoints = S.bodyweight.slice(-30).map(b => ({ t: b.t || new Date(b.d).getTime(), y: b.w, d: b.d }))
+  const bwPoints = S.bodyweight.slice(-30).map(b => ({ t: weighInAt(b), y: b.w, d: b.d }))
   //// Neoffice — no routine and nothing running: the plan's set-up is ONE compact row below (it used to be a big « Welcome! » card,
   //// and a second « No rotation yet » block inside the week card, on the screen a member opens the app on).
   const noPlan = !S.routines.length && !S.active

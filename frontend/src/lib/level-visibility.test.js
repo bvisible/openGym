@@ -12,7 +12,7 @@ import { describe, expect, it } from 'vitest'
 import {
   showsBodyMap, showsEffortHistogram, showsEquipmentProfiles, showsEstimated1RM,
   showsEffortSetting, showsIntensifier, showsRoutineSupersetLink, showsSupersetControl, showsWarmupRamp,
-  showsSetIntensifierChips, showsInSessionWarmup, showsRestPauseSetting,
+  showsSetIntensifierChips, showsInSessionWarmup, showsRestPauseSetting, showsWarmupRestSetting,
   showsFailureControl, showsBackoffControl, showsTripleProgression, showsOneRmFormula,
   showsSetPlanControl, showsPerSideControl, showsPlateLoading, showsProgressionControls,
 } from './level-visibility.js'
@@ -255,5 +255,21 @@ describe('the link of the routine editor', () => {
     for (const S of [SIMPLE, NORMAL, FULL, {}]) expect(showsRoutineSupersetLink(S)).toBe(true)
     // The pair buttons of a session in progress are still a technique of the full level.
     expect(showsSupersetControl(SIMPLE, false)).toBe(false)
+  })
+})
+
+describe('the rest between warm-ups (upstream v1.4.2)', () => {
+  it('goes with the warm-up sets: from the full level up', () => {
+    expect(showsWarmupRestSetting(FULL)).toBe(true)
+    expect(showsWarmupRestSetting({})).toBe(true)             // an unset level is the full journal
+    expect(showsWarmupRestSetting(SIMPLE)).toBe(false)
+    expect(showsWarmupRestSetting(NORMAL)).toBe(false)
+  })
+
+  it('stays for a member who already moved it off « like the work sets », « no timer » included', () => {
+    expect(showsWarmupRestSetting({ ...SIMPLE, warmupRestSec: 30 })).toBe(true)
+    expect(showsWarmupRestSetting({ ...NORMAL, warmupRestSec: 0 })).toBe(true)
+    expect(showsWarmupRestSetting({ ...SIMPLE, warmupRestSec: null })).toBe(false)
+    expect(showsWarmupRestSetting({ ...SIMPLE, warmupRestSec: undefined })).toBe(false)
   })
 })

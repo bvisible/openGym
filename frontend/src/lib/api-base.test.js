@@ -2,7 +2,7 @@
 // Issue #238: openGym behind a reverse proxy that serves it under a subpath. The assets were
 // already relative; the API call was not, so it went to the proxy's own root where nothing
 // answers it. The base is read from where the app is being served.
-import { describe, it, expect } from 'vitest'   //// Neoffice — no beacon here (see below)
+import { describe, it, expect } from 'vitest'   //// Neoffice — no beacon and no api() here (see below)
 import { appBase } from './api.js'
 import { readFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
@@ -254,3 +254,47 @@ describe('the web container refuses a BASE_PATH it cannot serve', () => {
     expect(dockerfile).toMatch(/^COPY web\/nginx\.conf\.template \/etc\/nginx\/templates\/default\.conf\.template$/m)
   })
 })
+
+// A path that begins with two slashes is still served the real app on the real origin: nginx
+// merges the slashes and resolves an encoded "..%2F" before it looks for a file, so
+// https://gym.example//evil.example/..%2F/ is the shell, with its scripts. Taken as-is, that
+// path is a protocol-relative URL, and every API call, the passkey sign-in included, went to
+// evil.example.
+const ORIGIN = 'https://gym.test'
+const lands = base => new URL(base.replace(/\/$/, '') + '/api/login/verify', ORIGIN).origin
+
+describe('the base never leaves the page\'s origin', () => {
+  it.each([
+    ['//evil.example/', '/evil.example/'],
+    ['//evil.example//', '/evil.example/'],
+    ['///evil.example/', '/evil.example/'],
+    ['//evil.example/..%2F/', '/evil.example/..%2F/'],
+    ['/gym//evil.example/', '/gym/evil.example/'],
+    ['//', '/'],
+    ['///', '/'],
+    ['//index.html', '/'],
+    ['/\\evil.example/', '/evil.example/'],
+  ])('%s is the path %s on this origin', (pathname, base) => {
+    expect(at(pathname)).toBe(base)
+    expect(lands(at(pathname))).toBe(ORIGIN)
+  })
+
+  it.each([
+    ['/', '/'],
+    ['/gym/', '/gym/'],
+    ['/gym/index.html', '/gym/'],
+  ])('an ordinary %s is unchanged', (pathname, base) => {
+    expect(at(pathname)).toBe(base)
+    expect(lands(at(pathname))).toBe(ORIGIN)
+  })
+
+  it('a base the URL parser would still read as another host is refused, not used', () => {
+    // A real location never has a raw tab in its path (the parser drops it on the way in), which
+    // is exactly why the last word goes to the parser rather than to the slash rule alone.
+    expect(() => at('/\t/evil.example/')).toThrow(/another site/)
+  })
+})
+
+//// Neoffice — upstream's tests of api() on a page whose path starts with two slashes are not kept: upstream's api() prefixes every call
+//// with appBase(), ours calls Frappe's /api/method at the site root (lib/api.js), so the host a page's path names never enters a request.
+//// What is kept is the other half, above: appBase() itself, which the store still reads, cannot be made to leave the origin.

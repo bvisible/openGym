@@ -8,7 +8,8 @@
 //  2. A clean, printable page (Save as PDF) where a single exercise never splits across
 //     a page break — each exercise, and each routine that fits, stays in one place.
 
-import { EXIDX, canonicalExId, isBodyweightEq } from './exercises.js'
+import { EXIDX, canonicalExId, isBodyweightEq, isCustomEx } from './exercises.js'
+import { cleanBackups } from './routine-backups.js'
 import { cleanUrl } from './media-refs.js'
 import { modeOf, exLine, MAX_PLANNED_WARMUPS } from './history.js'
 import { deriveSessionName } from './session-merge.js'
@@ -23,6 +24,7 @@ import { fmtSpeed, speedUnitOf } from './speed.js'
 import { MUSCLES, inMuscleOrder } from './muscles.js'
 //// Neoffice — a different target for each set (a pyramid): lib/set-plan.js, no upstream equivalent.
 import { cleanSetPlan, setPlanOf, setPlanLine } from './set-plan.js'
+import { SG_NAME_MAX } from './superset-meta.js'
 
 const PLAN_FMT = 1
 const WEEK_DAYS = [1, 2, 3, 4, 5, 6, 0]   // every getDay() index; only the reader's own
@@ -123,7 +125,21 @@ function cleanEx(e) {
   // timer in charge. parsePlan and mergePlan carry it through by spread.
   if (e.restSec > 0) o.restSec = e.restSec
   if (e.warmupRestSec > 0) o.warmupRestSec = e.warmupRestSec   // the ramp's own rest travels with the work rest
-  if (e.sg) o.sg = e.sg
+  // The warm-ups' "no timer" and the break between sides travel the same way, only when set.
+  // Planned substitutes (lib/routine-backups.js): the catalogue's only, since the other end may
+  // not have someone's own exercises.
+  const subs = cleanBackups(e.subs, e.id, id => !!EXIDX[id] && !isCustomEx(EXIDX[id]))
+  if (subs.length) o.subs = subs
+  if (e.warmupRestOff === true) o.warmupRestOff = true
+  if (e.side && e.sideRestSec > 0) o.sideRestSec = e.sideRestSec
+  if (e.sg) {
+    o.sg = e.sg
+    // A superset's name and its rest between rounds (#292) ride on every member, so they travel
+    // with the group; without them a shared "Arms · 90 s" arrives nameless, resting the default.
+    const name = cleanSgName(e.sgName), rest = cleanRestSec(e.sgRest)
+    if (name) o.sgName = name
+    if (rest) o.sgRest = rest
+  }
   if (e.note) o.note = e.note
   const warm = cleanWarmupSets(e.warmupSets)
   if (warm) o.warmupSets = warm
@@ -151,6 +167,11 @@ function cleanWarmupSets(v) {
 function cleanRestSec(v) {
   const n = Math.round(Number(v)) || 0
   return n > 0 ? n : 0
+}
+
+/** A superset name as setSupersetMeta writes it: a trimmed string of at most SG_NAME_MAX, or nothing. */
+function cleanSgName(v) {
+  return typeof v === 'string' ? v.trim().slice(0, SG_NAME_MAX) : ''
 }
 
 /** Keep the floors the config sheet and applyIntensifierPlan already enforce, and nothing else:
@@ -254,16 +275,23 @@ export function parsePlan(raw, destinationUnit = 'kg') {
       const intens = cleanIntensifier(e.intensifier)
       const rest = cleanRestSec(e.restSec)
       const warmRest = cleanRestSec(e.warmupRestSec)
+      const warmOff = e.warmupRestOff === true
+      const sideRest = cleanRestSec(e.sideRestSec)
+      // Planned substitutes: the catalogue's only, as they are exported.
+      const subs = cleanBackups(Array.isArray(e.subs) ? e.subs.map(x => (typeof x === 'string' ? canonicalExId(x) : x)) : [], known.has(e.id) ? e.id : canonicalExId(e.id), x => !known.has(x) && !!EXIDX[x] && !isCustomEx(EXIDX[x]))
+      // Superset meta only means something on a member of a superset; on a lone exercise it is dropped.
+      const sgName = e.sg ? cleanSgName(e.sgName) : ''
+      const sgRest = e.sg ? cleanRestSec(e.sgRest) : 0
       //// Neoffice — a per-set plan is read the way it is written and cleaned the way it is read; one
       //// that does not agree with `sets` and `reps` is dropped here, not carried into the planner.
       //// Upstream's pyramid (v1.3.10) travels beside it, as upstream reads it.
       const pyramid = normalizePyramid(e.pyramid)
       const pyramidRest = pyramid.length ? normalizePyramidRest(e.pyramidRest, pyramid.length) : []
       const pyramidWeight = pyramid.length ? normalizePyramidWeight(e.pyramidWeight, pyramid.length) : []
-      const { warmupSets, intensifier, restSec, warmupRestSec, setPlan: incoming, pyramid: _pyramid, pyramidRest: _pyramidRest, pyramidWeight: _pyramidWeight, ...passthrough } = e
+      const { warmupSets, intensifier, restSec, warmupRestSec, warmupRestOff: _warmOff, sideRestSec: _sideRest, subs: _subs, setPlan: incoming, pyramid: _pyramid, pyramidRest: _pyramidRest, pyramidWeight: _pyramidWeight, sgName: _sgName, sgRest: _sgRest, ...passthrough } = e
       if (!known.has(passthrough.id)) passthrough.id = canonicalExId(passthrough.id)
       const plan = setPlanOf({ ...e, setPlan: cleanSetPlan(incoming, { perSide: !!e.side }) })
-      return convertedExercise({ ...passthrough, ...(pyramid.length ? { pyramid } : {}), ...(pyramidRest.length ? { pyramidRest } : {}), ...(pyramidWeight.length ? { pyramidWeight } : {}), ...(warm ? { warmupSets: warm } : {}), ...(intens ? { intensifier: intens } : {}), ...(rest ? { restSec: rest } : {}), ...(warmRest ? { warmupRestSec: warmRest } : {}), ...(plan ? { setPlan: plan } : {}) }, sourceUnit || destination, destination)
+      return convertedExercise({ ...passthrough, ...(pyramid.length ? { pyramid } : {}), ...(pyramidRest.length ? { pyramidRest } : {}), ...(pyramidWeight.length ? { pyramidWeight } : {}), ...(warm ? { warmupSets: warm } : {}), ...(intens ? { intensifier: intens } : {}), ...(rest ? { restSec: rest } : {}), ...(warmOff ? { warmupRestOff: true } : warmRest ? { warmupRestSec: warmRest } : {}), ...(sideRest ? { sideRestSec: sideRest } : {}), ...(subs.length ? { subs } : {}), ...(sgName ? { sgName } : {}), ...(sgRest ? { sgRest } : {}), ...(plan ? { setPlan: plan } : {}) }, sourceUnit || destination, destination)
     })
   }))
   return {
