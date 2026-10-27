@@ -295,10 +295,11 @@ plan is in [ROADMAP.md](ROADMAP.md), and the issues sit in the
 | v1.4.1 | released Oct 2026 | Bug fixes for v1.4.0 |
 | v1.4.2 | released Oct 2026 | The App Store, the Apple Watch, widgets, three APK sizes |
 | v1.4.3 | released Oct 2026 | The Halloween and community release: gym reminder, health data read back, watch upgrades, CSV export |
-| v1.4.4 | in progress | Programmes with %1RM and RPE targets, custom app icons, kg or lb per exercise, the Coach fix |
-| v1.4.5 | Nov 2026 | Remote MCP over HTTPS, Google Play, a gym reminder that also notices you leaving |
-| v1.4.6 | Dec 2026 | The progression engine by @giulioleuci: smarter targets, wave progression, a warm-up generator |
-| later | dates are guesses | Circuits and EMOM, a trainer role, OIDC, F-Droid, an on-device Coach, Strava and Garmin, database storage |
+| v1.4.4 | Nov 2026 | Programmes, a tour with tutorials, AirPods heart rate, kg or lb per exercise, bug fixes |
+| v1.4.5 | Nov 2026 | Google Play, F-Droid, Settings → Integrations (Strava, webhooks, calendar, Nextcloud), timed holds that start themselves |
+| v1.4.6 | Dec 2026 | Wear OS, deeper Health Connect, body composition |
+| v1.4.7 | Dec 2026 | The progression engine by @giulioleuci, circuits, AMRAP and EMOM |
+| later | dates are guesses | Search and catalogue, accounts, a trainer role, skins, Garmin, database storage |
 
 ## Community
 
