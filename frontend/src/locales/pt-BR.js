@@ -1691,6 +1691,19 @@ export const PT_BR_OVERRIDES = {
   // --- import with no account: workouts on this device ---
   'This device has 1 workout that is not in this backup. Replacing deletes it.': 'Este dispositivo tem 1 treino que não está neste backup. Substituir exclui esse treino.',
   'This device has {0} workouts that are not in this backup. Replacing deletes them.': 'Este dispositivo tem {0} treinos que não estão neste backup. Substituir exclui esses treinos.',
+  //// Neoffice — badges with levels (bronze, silver, gold) and the badges the club put forward on the home screen: lib/badge-tiers.js, components/HomeBadges.jsx.
+  'Bronze': 'Bronze',
+  'Silver': 'Prata',
+  'Gold': 'Ouro',
+  'Your badges': 'Seus distintivos',
+  '{0} reached': '{0} alcançado',
+  '{0} in {1}': '{0}: faltam {1}',
+  '{0} class': '{0} aula',
+  '{0} classes': '{0} aulas',
+  '{0} week': '{0} semana',
+  '{0} weeks': '{0} semanas',
+  '{0} goal': '{0} meta',
+  '{0} goals': '{0} metas',
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

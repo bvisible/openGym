@@ -2285,6 +2285,25 @@ button.wl-summary{width:100%;padding:0 0 10px;text-align:start;border-radius:var
   margin: 6px 2px 0; overflow: hidden;
 }
 .badge-bar span { display: block; height: 100%; background: var(--acc); }
+/* //// Neoffice — levels (lib/badge-tiers.js): the medal colours, a shade deeper on the light theme so that silver and gold still read on white. */
+:root { --medal-bronze: #d99a6c; --medal-silver: #c9ced6; --medal-gold: #e6c25a; }
+:root[data-theme="light"] { --medal-bronze: #b4713f; --medal-silver: #8a919c; --medal-gold: #b08a14; }
+.badge.m-bronze { border-color: var(--medal-bronze); } .badge.m-bronze .badge-ico { color: var(--medal-bronze); }
+.badge.m-silver { border-color: var(--medal-silver); } .badge.m-silver .badge-ico { color: var(--medal-silver); }
+.badge.m-gold { border-color: var(--medal-gold); } .badge.m-gold .badge-ico { color: var(--medal-gold); }
+.badge-bar span.bronze { background: var(--medal-bronze); }
+.badge-bar span.silver { background: var(--medal-silver); }
+.badge-bar span.gold { background: var(--medal-gold); }
+/* The progress ring of a badge (components/BadgeRing.jsx): the arc fills towards the next level, in its medal colour. */
+.ring { position: relative; flex: none; }
+.ring svg { display: block; }
+.ring-track { stroke: var(--sep); }
+.ring-arc { stroke: var(--acc); }
+.ring-arc.bronze { stroke: var(--medal-bronze); }
+.ring-arc.silver { stroke: var(--medal-silver); }
+.ring-arc.gold { stroke: var(--medal-gold); }
+.ring-in { position: absolute; inset: 0; display: grid; place-items: center; font-size: 15px; font-weight: 700; color: var(--label); }
+.ring-in .icn { font-size: 24px; }
 
 .reward-list { display: flex; flex-direction: column; gap: 6px; }
 .reward {

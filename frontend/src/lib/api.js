@@ -108,6 +108,9 @@ const M = {
   //// `{enabled: false}` for a club that has not turned them on, so the
   //// journal shows nothing rather than an empty trophy case.
   badges: '/api/method/neoffice_gym.api.badges.mine',
+  //// Neoffice — the check that AWARDS badges and raises their level (POST, the member's own). Nothing else calls it: without it a member
+  //// never earns a badge by training, so the journal asks for it just before it reads the badges.
+  badgesRecheck: '/api/method/neoffice_gym.api.badges.recheck',
 }
 
 /**
@@ -286,7 +289,8 @@ export const myMembership = () => api(M.myMembership)
 export const invoicePdfUrl = (invoice) => M.invoicePdf + '?invoice=' + encodeURIComponent(invoice)
 export const floorPlan = () => api(M.floorPlan)
 export const floorWhereIs = exercise => api(M.floorWhereIs + '?exercise=' + encodeURIComponent(exercise))
-export const myBadges = () => api(M.badges)
+//// Neoffice — the check first (a failure of it, or an older server without it, must not hide the badges), then the badges as they stand.
+export const myBadges = () => api(M.badgesRecheck, { method: 'POST', body: '{}' }).catch(() => null).then(() => api(M.badges))
 
 //// Neoffice — signing in WITHOUT leaving the journal. `signIn` posts the
 //// credentials to Frappe, as-is: none of them are checked here.

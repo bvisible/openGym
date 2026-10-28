@@ -15,6 +15,8 @@
 import { useEffect, useState } from 'react'
 import { myBadges } from '../lib/api.js'
 import { t } from '../lib/i18n.js'
+//// Neoffice — levels: a badge may have bronze, silver and gold (lib/badge-tiers.js); the tile shows the level held and the way to the next.
+import { tierState, medalName, nextLine } from '../lib/badge-tiers.js'
 import Icon from './Icon.jsx'
 
 export default function Badges() {
@@ -72,15 +74,17 @@ export default function Badges() {
 }
 
 function Badge({ badge }) {
-  const pct = Math.round((badge.progress || 0) * 100)
-  return <div className={'badge' + (badge.earned ? ' got' : '')} title={badge.description || badge.name}>
+  const st = tierState(badge)
+  const got = st.tier >= 1
+  const bar = st.nextMedal || ''
+  return <div className={'badge' + (got ? ' got' : '') + (st.medal ? ' m-' + st.medal : '')} title={badge.description || badge.name}>
     <div className="badge-ico"><Icon name={badge.glyph || 'medal'} /></div>
     <div className="badge-name">{badge.name}</div>
-    {badge.earned
-      ? <div className="badge-sub">{t('Earned')}</div>
-      : <>
-          <div className="badge-bar"><span style={{ width: pct + '%' }} /></div>
-          <div className="badge-sub">{badge.description || ''}</div>
-        </>}
+    {got && <div className="badge-sub">{st.medal ? medalName(st.medal) : t('Earned')}</div>}
+    {!st.complete && <>
+      <div className="badge-bar"><span className={bar} style={{ width: st.pct + '%' }} /></div>
+      {/* One level: what the club says about the badge, as before. Several: the level to come and what it takes. */}
+      <div className="badge-sub">{st.levels === 3 ? nextLine(badge, st) : (badge.description || '')}</div>
+    </>}
   </div>
 }

@@ -2809,4 +2809,17 @@ export default {
   // --- import with no account: workouts on this device ---
   'This device has 1 workout that is not in this backup. Replacing deletes it.': '此裝置上有 1 筆訓練紀錄不在此備份中。覆蓋將會刪除它。',
   'This device has {0} workouts that are not in this backup. Replacing deletes them.': '此裝置上有 {0} 筆訓練紀錄不在此備份中。覆蓋將會將其全數刪除。',
+  //// Neoffice — badges with levels (bronze, silver, gold) and the badges the club put forward on the home screen: lib/badge-tiers.js, components/HomeBadges.jsx.
+  'Bronze': '銅牌',
+  'Silver': '銀牌',
+  'Gold': '金牌',
+  'Your badges': '你的徽章',
+  '{0} reached': '{0}已達成',
+  '{0} in {1}': '{0}：還差{1}',
+  '{0} class': '{0}堂課',
+  '{0} classes': '{0}堂課',
+  '{0} week': '{0}週',
+  '{0} weeks': '{0}週',
+  '{0} goal': '{0}個目標',
+  '{0} goals': '{0}個目標',
 }

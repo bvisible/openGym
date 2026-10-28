@@ -2877,4 +2877,17 @@ export default {
   // --- import with no account: workouts on this device ---
   'This device has 1 workout that is not in this backup. Replacing deletes it.': 'على هذا الجهاز تمرين واحد ليس في هذه النسخة الاحتياطية. الاستبدال يحذفه.',
   'This device has {0} workouts that are not in this backup. Replacing deletes them.': 'على هذا الجهاز {0} تمارين ليست في هذه النسخة الاحتياطية. الاستبدال يحذفها.',
+  //// Neoffice — badges with levels (bronze, silver, gold) and the badges the club put forward on the home screen: lib/badge-tiers.js, components/HomeBadges.jsx.
+  'Bronze': 'برونزي',
+  'Silver': 'فضي',
+  'Gold': 'ذهبي',
+  'Your badges': 'شاراتك',
+  '{0} reached': 'تم بلوغ {0}',
+  '{0} in {1}': '{0}: تبقى {1}',
+  '{0} class': '{0} حصة',
+  '{0} classes': '{0} حصص',
+  '{0} week': '{0} أسبوع',
+  '{0} weeks': '{0} أسابيع',
+  '{0} goal': '{0} هدف',
+  '{0} goals': '{0} أهداف',
 }

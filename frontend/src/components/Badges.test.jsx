@@ -25,7 +25,9 @@ vi.mock('../lib/api.js', () => ({
 }))
 vi.mock('../lib/i18n.js', () => ({
   t: (s, ...a) => a.reduce((out, v, i) => out.replaceAll('{' + i + '}', v), s),
+  tn: (one, other, n, ...rest) => [n, ...rest].reduce((out, v, i) => out.replaceAll('{' + i + '}', v), n === 1 ? one : other),
 }))
+vi.mock('../lib/format.js', () => ({ fmtNum: n => String(Math.round(n * 10) / 10) }))
 vi.mock('./Icon.jsx', () => ({ default: () => React.createElement('i') }))
 
 import Badges from './Badges.jsx'
@@ -106,5 +108,38 @@ describe('badge case', () => {
     expect(el.textContent).toContain('60 points to go')   // 200 - 140
     expect(el.textContent).toContain('Available')          // the 50 one
     expect(el.querySelectorAll('.reward.on').length).toBe(1)
+  })
+})
+
+describe('badge case: levels', () => {
+  const tiered = (over = {}) => badge({
+    id: 'w', name: 'Total soulevé', glyph: 'dumbbell', metric: 'Weight Moved', levels: 3, thresholds: [20000, 40000, 60000],
+    tier: 1, next: 40000, value: 31200, progress: 0.78, earned: true, ...over,
+  })
+
+  it('the level held, the bar towards the next one in its medal colour, and what it takes', async () => {
+    mocks.answer = { enabled: true, pointsEnabled: false, points: 0, rewards: [], badges: [tiered()] }
+    const el = await render()
+    expect(el.querySelector('.badge.got.m-bronze')).toBeTruthy()
+    expect(el.textContent).toContain('Bronze')
+    expect(el.querySelector('.badge-bar span').className).toBe('silver')
+    expect(el.querySelector('.badge-bar span').style.width).toBe('78%')
+    expect(el.textContent).toContain('Silver in 8800 kg')
+  })
+
+  it('every level reached: the last medal, no bar', async () => {
+    mocks.answer = { enabled: true, pointsEnabled: false, points: 0, rewards: [], badges: [tiered({ tier: 3, next: null, progress: 1 })] }
+    const el = await render()
+    expect(el.querySelector('.badge.m-gold')).toBeTruthy()
+    expect(el.textContent).toContain('Gold')
+    expect(el.querySelector('.badge-bar')).toBeNull()
+  })
+
+  it('a badge with three levels and none reached yet: a locked tile that says what the first one takes', async () => {
+    mocks.answer = { enabled: true, pointsEnabled: false, points: 0, rewards: [], badges: [tiered({ tier: 0, earned: false, next: 20000, value: 5000, progress: 0.25 })] }
+    const el = await render()
+    expect(el.querySelector('.badge.got')).toBeNull()
+    expect(el.querySelector('.badge-bar span').className).toBe('bronze')
+    expect(el.textContent).toContain('Bronze in 15000 kg')
   })
 })

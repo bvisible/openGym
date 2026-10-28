@@ -2889,4 +2889,17 @@ export default {
   // --- import with no account: workouts on this device ---
   'This device has 1 workout that is not in this backup. Replacing deletes it.': 'এই ডিভাইসে ১টি ওয়ার্কআউট আছে যা এই ব্যাকআপে নেই। প্রতিস্থাপন করলে এটি মুছে যাবে।',
   'This device has {0} workouts that are not in this backup. Replacing deletes them.': 'এই ডিভাইসে {0}টি ওয়ার্কআউট আছে যা এই ব্যাকআপে নেই। প্রতিস্থাপন করলে এগুলো মুছে যাবে।',
+  //// Neoffice — badges with levels (bronze, silver, gold) and the badges the club put forward on the home screen: lib/badge-tiers.js, components/HomeBadges.jsx.
+  'Bronze': 'ব্রোঞ্জ',
+  'Silver': 'রুপো',
+  'Gold': 'সোনা',
+  'Your badges': 'আপনার ব্যাজ',
+  '{0} reached': '{0} অর্জিত',
+  '{0} in {1}': '{0}: আর {1} বাকি',
+  '{0} class': '{0} ক্লাস',
+  '{0} classes': '{0}টি ক্লাস',
+  '{0} week': '{0} সপ্তাহ',
+  '{0} weeks': '{0} সপ্তাহ',
+  '{0} goal': '{0} লক্ষ্য',
+  '{0} goals': '{0}টি লক্ষ্য',
 }

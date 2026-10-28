@@ -17,6 +17,8 @@ import InstallBanner from '../components/InstallBanner.jsx'
 import QueueRow from '../components/QueueRow.jsx'
 //// Neoffice — « Recent workouts » on Home, each with a visible Share button (components/RecentWorkouts.jsx).
 import RecentWorkouts from '../components/RecentWorkouts.jsx'
+//// Neoffice — the badges the club put forward, first thing under the notices.
+import HomeBadges from '../components/HomeBadges.jsx'
 import { queueOf, queueView, weekTally, pinState } from '../lib/queue.js'
 import { scheduleModeOf } from '../lib/rotation.js'
 import { useConnectionTrouble } from '../components/SyncBanner.jsx'
@@ -234,6 +236,10 @@ export default function Home() {
       </div>
       <div className="small" style={{ lineHeight: 1.5, whiteSpace: 'pre-line' }}>{n.body}</div>
     </div>)}
+
+    {/* //// Neoffice — the badges the club put forward, with their progress ring: what the club's coach asked to see first (28.10). Silent when the club
+         featured none, so the home screen of a club without badges is exactly what it was. */}
+    <HomeBadges onOpen={() => nav('/stats')} />
 
     {/* //// Neoffice — the room itself, one tap away: « voir le plan de la salle
         hors exercice » (2026-09-09). Only when the club drew one. */}
