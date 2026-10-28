@@ -59,11 +59,13 @@ export function progressLine(b, state = tierState(b)) {
   return fmtNum(state.value) + ' / ' + amountOf(b.metric, state.next)
 }
 
-/** The sentence under it: the level to come and what it takes (« Silver in 8 800 kg »), or what the member holds once nothing is left. */
+/**
+ * The sentence under it: the level to come and what it takes (« Silver in 8 800 kg »), or what the member holds once nothing is left.
+ * A badge with ONE level has no level to name while it is open: the progress line already says what it takes, so the sentence is empty.
+ */
 export function nextLine(b, state = tierState(b)) {
   if (state.complete) return state.medal ? t('{0} reached', medalName(state.medal)) : t('Earned')
-  const left = amountOf(b.metric, state.remaining)
-  return state.nextMedal ? t('{0} in {1}', medalName(state.nextMedal), left) : left
+  return state.nextMedal ? t('{0} in {1}', medalName(state.nextMedal), amountOf(b.metric, state.remaining)) : ''
 }
 
 const byName = (a, b) => String(a.name || '').localeCompare(String(b.name || ''))

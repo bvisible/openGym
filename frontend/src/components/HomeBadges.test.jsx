@@ -79,6 +79,14 @@ describe('the badges on the home screen', () => {
     expect(c.textContent).not.toContain(' / ')
   })
 
+  it('a badge with one level: its progress line only, no second sentence repeating it', async () => {
+    mocks.answer = { enabled: true, badges: [badge('Semaines', { metric: 'Week Streak', levels: 1, thresholds: [4], tier: 0, next: 4, value: 1, progress: 0.25, earned: false })] }
+    const c = await render()
+    expect(c.textContent).toContain('1 / 4 weeks')
+    expect([...c.querySelectorAll('.home-badge .small')].map(e => e.textContent)).toEqual(['1 / 4 weeks'])
+    expect(c.querySelector('.ring-arc.bronze')).toBeNull()                 // no medal to climb to: the club's accent
+  })
+
   it('shows at most three, the closest to their next level first', async () => {
     mocks.answer = { enabled: true, badges: ['a', 'b', 'c', 'd'].map((id, i) => badge(id, { progress: 0.2 + i * 0.2 })) }
     const c = await render()

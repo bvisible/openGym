@@ -74,9 +74,10 @@ describe('the words', () => {
     expect(progressLine(gold3({ tier: 3, next: null, progress: 1 }))).toBe('')
   })
 
-  it('a one-level badge: what is left, then « Earned »', () => {
+  it('a one-level badge: nothing to say about a level while it is open (the progress line says it), then « Earned »', () => {
     const one = { id: 'o', metric: 'Workout Count', levels: 1, thresholds: [10], tier: 0, next: 10, value: 7, progress: 0.7, earned: false }
-    expect(nextLine(one)).toBe('3 workouts')
+    expect(progressLine(one)).toBe('7 / 10 workouts')
+    expect(nextLine(one)).toBe('')
     expect(nextLine({ ...one, tier: 1, next: null, progress: 1, earned: true })).toBe('Earned')
   })
 })

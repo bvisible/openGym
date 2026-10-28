@@ -40,7 +40,7 @@ export default function HomeBadges({ onOpen }) {
         <div style={{ minWidth: 0 }}>
           <div className="ttl">{b.name}</div>
           {!st.complete && <div className="small dim">{progressLine(b, st)}</div>}
-          <div className="small dim">{nextLine(b, st)}</div>
+          {nextLine(b, st) && <div className="small dim">{nextLine(b, st)}</div>}
         </div>
       </div>
     })}
