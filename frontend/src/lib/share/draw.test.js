@@ -184,10 +184,20 @@ describe('the helpers that read pixels', () => {
     expect(logoInfo({}, docWith(nearly)).opaque).toBe(true)
   })
 
+  it('tells a bright logo on a transparent background (it needs a dark plate on a white page) from the rest', () => {
+    const yellow = (n, px) => { const d = pixels(1024, [0, 0, 0, 0]); for (let i = 0; i < n; i++) d.set(px, i * 4); return d }
+    expect(logoInfo({}, docWith(yellow(300, [255, 234, 0, 255]))).light).toBe(true)       // the club's yellow wordmark
+    expect(logoInfo({}, docWith(yellow(300, [250, 250, 250, 255]))).light).toBe(true)
+    expect(logoInfo({}, docWith(yellow(300, [20, 20, 20, 255]))).light).toBe(false)        // a dark one wants a light plate instead
+    expect(logoInfo({}, docWith(yellow(300, [120, 120, 120, 255]))).light).toBe(false)     // a mid grey is neither
+    expect(logoInfo({}, docWith(pixels(1024, [250, 250, 250, 255]))).light).toBe(false)    // carries its own background: no plate to choose
+    expect(logoInfo({}, docWith(pixels(1024, [0, 0, 0, 0]))).light).toBe(false)
+  })
+
   it('does not fail on a logo it cannot read back', () => {
     const doc = { createElement() { throw new Error('no canvas') } }
     const img = { id: 'x' }
-    expect(logoInfo(img, doc)).toEqual({ img, plate: false, opaque: false })
+    expect(logoInfo(img, doc)).toEqual({ img, plate: false, opaque: false, light: false })
   })
 
   it('reads how bright the photo is where the numbers go, 0.4 when it cannot', () => {

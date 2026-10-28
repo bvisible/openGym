@@ -1,5 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useUI } from '../store/useUI.js'
+import { useStore } from '../store/useStore.js'
+import { restNextTarget } from '../lib/supersetFlow.js'
 import { t } from '../lib/i18n.js'
 import { REST_MAX } from '../lib/duration.js'
 import { durationSheet } from './DurationWheel.jsx'
@@ -75,13 +77,19 @@ function useSkipFits(actsRef, deps) {
   return fits
 }
 
-export default function RestTimer() {
+export default function RestTimer({ onWorkout = false }) {
   const timer = useUI(s => s.timer)
   const work = useUI(s => s.work)
   const { addRest, stopRest, pauseRest, resumeRest, finishWorkEarly, stopWork } = useUI()
   const on = work || timer
   const actsRef = useRef(null)
-  const skipFits = useSkipFits(actsRef, [!!timer && !work, t('Skip'), t('Dismiss')])
+  //// Neoffice — on the last set of an exercise the bar's main button is « Next » (restNextTarget), only on the workout screen.
+  const nextTo = useStore(s => onWorkout && timer && !work ? restNextTarget(s.S, timer.forIdx) : null)
+  const goNext = () => {
+    stopRest()
+    useStore.getState().update(s => { if (s.active && nextTo != null) s.active.cur = nextTo })
+  }
+  const skipFits = useSkipFits(actsRef, [!!timer && !work, nextTo != null, t('Skip'), t('Dismiss'), t('Next')])
   // The page keeps room at its bottom for the bar (index.css body.resting), so the last set and
   // the Finish button can scroll clear of it.
   useEffect(() => {
@@ -128,13 +136,13 @@ export default function RestTimer() {
           : <Button size="sm" className="pause" icon={timer.paused ? 'play' : 'pause'}
             aria-label={t(timer.paused ? 'Resume' : 'Pause')} aria-pressed={!!timer.paused}
             onClick={timer.paused ? resumeRest : pauseRest} />}
-        <button type="button" className={'btn primary sm skip' + (skipFits ? '' : ' icon-only')} onClick={stopRest}
-          aria-label={skipFits ? undefined : t(timer.ready ? 'Dismiss' : 'Skip')}>
+        <button type="button" className={'btn primary sm skip' + (skipFits ? '' : ' icon-only')} onClick={nextTo != null ? goNext : stopRest}
+          aria-label={skipFits ? undefined : nextTo != null ? t('Next') : t(timer.ready ? 'Dismiss' : 'Skip')}>
           {skipFits
-            ? <span><span className="on">{t(timer.ready ? 'Dismiss' : 'Skip')}</span>
-              <span className="off" aria-hidden="true">{t(timer.ready ? 'Skip' : 'Dismiss')}</span></span>
-            : <Icon name={timer.ready ? 'xmark' : 'skipForward'} />}
-          <span className="skip-probe" aria-hidden="true"><span>{t('Skip')}</span><span>{t('Dismiss')}</span></span>
+            ? <span><span className="on">{nextTo != null ? t('Next') : t(timer.ready ? 'Dismiss' : 'Skip')}</span>
+              <span className="off" aria-hidden="true">{nextTo != null ? t('Next') : t(timer.ready ? 'Skip' : 'Dismiss')}</span></span>
+            : <Icon name={nextTo != null ? 'chevronRight' : timer.ready ? 'xmark' : 'skipForward'} />}
+          <span className="skip-probe" aria-hidden="true"><span>{t('Skip')}</span><span>{t('Dismiss')}</span><span>{t('Next')}</span></span>
         </button>
       </div>
     </div>

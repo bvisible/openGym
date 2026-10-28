@@ -184,3 +184,57 @@ describe('the docked rest bar', () => {
     expect(useUI.getState().timer).toMatchObject({ left: 60, paused: true })
   })
 })
+
+//// Neoffice — the bar's button on an exercise's LAST set (the club's coach, 28.10: Skip only skipped the rest and Next was a small button hidden
+//// behind it): it says Next and goes to the next exercise.
+describe('the docked rest bar on an exercise\'s last set', () => {
+  const ex = (...done) => ({ id: 'x', sets: done.map(d => ({ done: d })) })
+  const mountOnWorkout = (entries, cur = 0, extra = {}) => {
+    useStore.setState({ S: { ...originalS, sound: false, active: { entries, cur, ...extra } } })
+    act(() => root.render(<RestTimer onWorkout />))
+  }
+  const skip = () => host.querySelector('#timer .skip')
+  const label = () => skip().querySelector('.on').textContent
+
+  it('says Next, and Next ends the rest and moves to the next exercise', () => {
+    mountOnWorkout([ex(true, true), ex(false)])
+    act(() => useUI.getState().startRest(90, 0, { forSet: 1 }))
+    expect(label()).toBe('Next')
+    act(() => skip().click())
+    expect(useUI.getState().timer).toBeNull()
+    expect(useStore.getState().S.active.cur).toBe(1)
+  })
+
+  it('stays Skip between two sets of the same exercise, and Skip only ends the rest', () => {
+    mountOnWorkout([ex(true, false), ex(false)])
+    act(() => useUI.getState().startRest(90, 0, { forSet: 0 }))
+    expect(label()).toBe('Skip')
+    act(() => skip().click())
+    expect(useUI.getState().timer).toBeNull()
+    expect(useStore.getState().S.active.cur).toBe(0)
+  })
+
+  it('stays Skip when the bar is not on the workout screen', () => {
+    useStore.setState({ S: { ...originalS, sound: false, active: { entries: [ex(true), ex(false)], cur: 0 } } })
+    act(() => useUI.getState().startRest(90, 0))
+    act(() => root.render(<RestTimer />))
+    expect(label()).toBe('Skip')
+  })
+
+  it('also says Next once the rest has run out (it was Dismiss)', () => {
+    mountOnWorkout([ex(true), ex(false)])
+    act(() => useUI.getState().startRest(5, 0, { forSet: 0 }))
+    act(() => vi.advanceTimersByTime(5000))
+    expect(useUI.getState().timer.ready).toBe(true)
+    expect(label()).toBe('Next')
+    act(() => skip().click())
+    expect(useUI.getState().timer).toBeNull()
+    expect(useStore.getState().S.active.cur).toBe(1)
+  })
+
+  it('stays Skip on a list layout: every exercise is already on screen', () => {
+    mountOnWorkout([ex(true), ex(false)], 0, { workoutView: 'list' })
+    act(() => useUI.getState().startRest(90, 0))
+    expect(label()).toBe('Skip')
+  })
+})

@@ -129,13 +129,14 @@ describe('Home — coach week progress row', () => {
     expect(host.querySelector('.today-row .ss')).toBeNull()
   })
 
-  it('Rotation chosen with nothing built yet hides the weekday strip and offers an empty state instead', () => {
+  it('Rotation chosen with nothing built yet hides the weekday strip and says nothing more on the home screen (the Plan has the empty state)', () => {
     setS({ queue: null, rotation: null, scheduleMode: 'rotation', week: {} })
     mount()
     expect(host.querySelector('.week')).toBeNull()
     expect(host.querySelectorAll('.wday').length).toBe(0)
     expect(host.querySelector('.queue')).toBeNull()
-    expect(host.textContent).toContain('No rotation yet')
+    // //// Neoffice — the club's coach, 28.10: the home screen no longer opens on « No rotation yet »; the Plan keeps that empty state.
+    expect(host.textContent).not.toContain('No rotation yet')
     expect(todayTitle()).toBe('Rest day')
     expect(host.querySelector('.today-row .ss')).toBeNull()
   })

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { insertionIndexAfterCurrentUnit, nextUnfinishedUnit, setProgressHighWater, supersetFlowStep, restAfterSet, restOnRecheck, restSecFor, warmupRestSecFor, sideRestFor, stepUnitIndex, advanceAfterTimedRest } from './supersetFlow.js'
+import { insertionIndexAfterCurrentUnit, nextUnfinishedUnit, setProgressHighWater, supersetFlowStep, restAfterSet, restOnRecheck, restSecFor, warmupRestSecFor, sideRestFor, stepUnitIndex, restNextTarget, advanceAfterTimedRest } from './supersetFlow.js'
 
 const entry = done => ({ sets: done.map(value => ({ done: value })) })
 
@@ -277,3 +277,39 @@ describe('advanceAfterTimedRest (#532)', () => {
   })
 })
 
+//// Neoffice — the rest bar's « Next » on an exercise's last set (the club's coach, 28.10).
+describe('restNextTarget', () => {
+  const ex = (...done) => ({ sets: done.map(d => ({ done: d })) })
+  const S = (entries, cur, extra = {}, top = {}) => ({ active: { entries, cur, ...extra }, ...top })
+  it('the last set of an exercise: the first exercise of the next one', () => {
+    expect(restNextTarget(S([ex(true, true), ex(false)], 0), 0)).toBe(1)
+  })
+  it('a rest between two sets of the same exercise stays a plain Skip', () => {
+    expect(restNextTarget(S([ex(true, false), ex(false)], 0), 0)).toBeNull()
+  })
+  it('a superset is done only when every member is; the target is the first exercise of the next unit', () => {
+    const entries = [{ ...ex(true), sg: 'a' }, { ...ex(true), sg: 'a' }, ex(false)]
+    expect(restNextTarget(S(entries, 1), 1)).toBe(2)
+    expect(restNextTarget(S([{ ...ex(true), sg: 'a' }, { ...ex(false), sg: 'a' }, ex(false)], 0), 0)).toBeNull()
+  })
+  it('nothing after the last exercise, or once the member has moved on', () => {
+    expect(restNextTarget(S([ex(true), ex(true)], 1), 1)).toBeNull()
+    expect(restNextTarget(S([ex(true), ex(false)], 1), 0)).toBeNull()
+  })
+  it('the list layouts show every exercise already: no Next', () => {
+    expect(restNextTarget(S([ex(true), ex(false)], 0, { workoutView: 'list' }), 0)).toBeNull()
+    expect(restNextTarget(S([ex(true), ex(false)], 0, {}, { workoutView: 'compact' }), 0)).toBeNull()
+    expect(restNextTarget(S([ex(true), ex(false)], 0, { workoutView: 'focus' }), 0)).toBe(1)
+  })
+  it('follows Skip completed exercises, as the Next button does', () => {
+    const entries = [ex(true), ex(true), ex(false)]
+    expect(restNextTarget(S(entries, 0, {}, { skipCompleted: true }), 0)).toBe(2)
+    expect(restNextTarget(S(entries, 0), 0)).toBe(1)
+  })
+  it('never while editing or back-filling, nor with an unknown exercise', () => {
+    expect(restNextTarget(S([ex(true), ex(false)], 0, { editingWorkoutId: 'w' }), 0)).toBeNull()
+    expect(restNextTarget(S([ex(true), ex(false)], 0, { backfill: true }), 0)).toBeNull()
+    expect(restNextTarget(S([ex(true), ex(false)], 0), undefined)).toBeNull()
+    expect(restNextTarget({}, 0)).toBeNull()
+  })
+})

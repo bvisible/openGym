@@ -2,6 +2,8 @@ import { supersetMeta } from './superset-meta.js'
 // Pure decisions for the active-workout superset flow. Keeping these independent of React and
 // the stores makes the uneven-round and re-check rules explicit and directly testable.
 import { isWarmupRow } from './workout-model.js'
+//// Neoffice — restNextTarget, at the end of this file, groups the entries into units the way the screen does.
+import { supersetUnits } from './history.js'
 
 const hasWork = (entries, idx) => !!entries[idx]?.sets?.some(set => !set.done)
 
@@ -187,3 +189,24 @@ export function advanceAfterTimedRest(entries, units, forIdx, cur, isTimed) {
   return next ? next[0] : null
 }
 
+//// Neoffice — what the rest bar's button does on an exercise's LAST set (the club's coach, 28.10: on the last set « Skip » only skips the rest, then
+//// « Next » is a small button hidden behind it, and it took a while to find). Upstream's bar only skips the rest; here the same button says Next and
+//// goes to the next exercise, as Prev/Next below would.
+/**
+ * The exercise the rest bar can send the member to once the rest was for the LAST set of a unit (an exercise, or a whole superset): the first
+ * exercise of the unit Next lands on (stepUnitIndex, "Skip completed exercises" included), or null when the bar should stay a plain Skip:
+ * the rest sits between two sets of the same exercise, the member already moved on, the workout is a list (every exercise is on screen), it
+ * is being edited or back-filled, or there is nothing after this unit.
+ */
+export function restNextTarget(S, forIdx) {
+  const A = S && S.active
+  if (!A || !Array.isArray(A.entries) || !Number.isInteger(forIdx) || A.editingWorkoutId || A.backfill) return null
+  const view = A.workoutView || S.workoutView
+  if (view === 'list' || view === 'compact') return null
+  const units = supersetUnits(A.entries)
+  const from = units.findIndex(u => u.includes(forIdx))
+  if (from < 0 || !units[from].includes(A.cur)) return null
+  if (units[from].some(idx => hasWork(A.entries, idx))) return null
+  const to = stepUnitIndex(A.entries, units, from, 1, S.skipCompleted === true)
+  return to < 0 ? null : units[to][0]
+}

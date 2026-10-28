@@ -129,13 +129,13 @@ describe('Home — the plan\'s set-up as one compact row', () => {
     expect(compact()).toBeNull()
   })
 
-  it('Rotation chosen with nothing built: one line with its button — and not twice when the compact row already says it', () => {
+  it('Rotation chosen with nothing built: the home screen says nothing about it (the Plan screen keeps its own empty state)', () => {
+    // The club's coach, 28.10: « No rotation yet, set up the plan » was the first thing shown on opening the app, and means nothing to most members.
     setS({ routines, scheduleMode: 'rotation' })
     mount()
-    const line = [...host.querySelectorAll('.card .small.muted')].find(e => e.textContent.includes('No rotation yet'))
-    expect(line).toBeTruthy()
-    expect(line.querySelector('button').textContent).toBe('Set up in Plan')
-    expect(host.querySelector('.card .empty')).toBeNull()
+    expect(host.textContent).not.toContain('No rotation yet')
+    expect(host.textContent).not.toContain('Set up in Plan')
+    expect(host.querySelector('.today-row')).toBeTruthy()    // the Today row still starts the next session
     act(() => root.unmount()); root = createRoot(host)
     setS({ scheduleMode: 'rotation' })    // no routine at all: the compact row speaks for it
     mount()

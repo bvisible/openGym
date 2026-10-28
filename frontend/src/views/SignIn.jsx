@@ -20,6 +20,8 @@ import { t } from '../lib/i18n.js'
 import { BOOT, signIn, rememberMe, forgotPassword } from '../lib/api.js'
 import Icon from '../components/Icon.jsx'
 import { Button } from '../components/ui.jsx'
+//// Neoffice — the club's full logo, on a dark plate when it is a bright wordmark.
+import ClubLogo from '../components/ClubLogo.jsx'
 
 export default function SignIn() {
   const [mode, setMode] = useState('signin')   // signin · forgot · sent
@@ -98,7 +100,7 @@ export default function SignIn() {
         Logo, "le logo complet sur la page de connexion", 2026-09-09); the square
         icon otherwise, the dumbbell last. */}
     {BOOT.app_logo
-      ? <img className="signin-logo" src={BOOT.app_logo} alt={BOOT.app_title || ''} />
+      ? <ClubLogo src={BOOT.app_logo} alt={BOOT.app_title || ''} />
       : <div className="signin-mark">
         {BOOT.app_icon
           ? <img src={BOOT.app_icon} alt="" />

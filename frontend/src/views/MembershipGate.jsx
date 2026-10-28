@@ -13,6 +13,8 @@ import { useStore } from '../store/useStore.js'
 import { t } from '../lib/i18n.js'
 import { Button } from '../components/ui.jsx'
 import Icon from '../components/Icon.jsx'
+//// Neoffice — the club's full logo, on a dark plate when it is a bright wordmark.
+import ClubLogo from '../components/ClubLogo.jsx'
 //// Neoffice — the terms, the checkbox and the signature now live in one
 //// place: the member also signs from « Mon abonnement », before their
 //// membership runs out. See components/RenewalForm.jsx.
@@ -41,7 +43,7 @@ export default function MembershipGate() {
 
   return <div className="signin gate">
     {BOOT.app_logo
-      ? <img className="signin-logo" src={BOOT.app_logo} alt={BOOT.app_title || ''} />
+      ? <ClubLogo src={BOOT.app_logo} alt={BOOT.app_title || ''} />
       : <div className="signin-mark">
         {BOOT.app_icon ? <img src={BOOT.app_icon} alt="" /> : <Icon name="dumbbell" />}
       </div>}

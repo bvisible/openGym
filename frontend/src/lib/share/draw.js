@@ -71,7 +71,8 @@ export function drawLogo(ctx, item, logo) {
 
 /**
  * What the drawing must know of a logo: whether it is dark enough to need a light plate behind it (the mean brightness of its
- * opaque pixels), and whether it carries a background of its own (no transparent pixel to speak of).
+ * opaque pixels), whether it is bright enough to need a dark one (`light`, only for a transparent logo), and whether it carries a
+ * background of its own (no transparent pixel to speak of).
  */
 export function logoInfo(img, doc = globalThis.document) {
   try {
@@ -90,9 +91,13 @@ export function logoInfo(img, doc = globalThis.document) {
       sum += luminance([data[i], data[i + 1], data[i + 2]]) * a
       weight += a
     }
-    return { img, plate: weight > 0 && sum / weight < 0.22, opaque: clear / (data.length / 4) < 0.01 }
+    const mean = weight > 0 ? sum / weight : null
+    const opaque = clear / (data.length / 4) < 0.01
+    //// Neoffice — `light`: a bright logo on a transparent background (the club's yellow wordmark, a white one) needs a DARK plate wherever the page
+    //// behind it is white (the sign-in screen). On the shared pictures it is drawn straight on the dark picture, as before.
+    return { img, plate: mean != null && mean < 0.22, opaque, light: mean != null && !opaque && mean > 0.6 }
   } catch (e) {
-    return { img, plate: false, opaque: false }
+    return { img, plate: false, opaque: false, light: false }
   }
 }
 

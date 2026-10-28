@@ -350,7 +350,8 @@ function Shell() {
           and "help me word it" buttons started at y=802 and so did the tab
           bar, exactly overlapped. (//// Neoffice — /coach-thread is ours: CONVERSATIONS.) */}
       {!noTabs && !CONVERSATIONS.has(loc.pathname) && <TabBar onStart={startFlow} />}
-      <RestTimer />
+      {/* //// Neoffice — onWorkout: the bar's « Next » on an exercise's last set only makes sense on the workout screen. */}
+      <RestTimer onWorkout={inWorkout} />
       <Modals />
       <Toast />
       <TimerFlash />

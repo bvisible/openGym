@@ -305,11 +305,10 @@ export default function Home() {
       {/* A coach week runs by order, not by weekday, so its progress row stands in for the
           seven dots (components/QueueRow.jsx). The today row below stays as it is: the queue's
           next session reaches it through effectiveRoutineIds like any planned routine. */}
-      {/* //// Neoffice — the empty rotation as one line with its button, and not at all when the compact plan row below already says it. */}
-      {rotating ? (queue ? <QueueRow S={S} today={todayISO()} onStart={onQueueStart} managed={managedQueue} /> : noPlan ? null : <div className="row between small muted" style={{ gap: 10, alignItems: 'center', padding: '2px 0 10px' }}>
-        <span>{t('No rotation yet. Add routines to it in Plan.')}</span>
-        <Button size="sm" variant="tinted" onClick={() => nav('/plan')}>{t('Set up in Plan')}</Button>
-      </div>) : <>
+      {/* //// Neoffice — an empty rotation says nothing on the home screen any more: « No rotation yet. Add routines to it in Plan » was the first thing
+           the club's coach read on opening the app (28.10), and it means nothing to most members, whose days change from week to week. The Plan screen
+           keeps its own empty state (Plan.jsx); the Today row below still starts the next session. */}
+      {rotating ? (queue ? <QueueRow S={S} today={todayISO()} onStart={onQueueStart} managed={managedQueue} /> : null) : <>
         <div className="row between" style={{ marginBottom: 8 }}>
           <button className="iconbtn" style={{ width: 30, height: 30, fontSize: 15 }} onClick={() => setWeekOffset(w => w - 1)} aria-label={t('Previous week')}><Icon name="chevronLeft" /></button>
           <div className="small muted" style={{ fontWeight: 500 }}>{wkLabel}</div>
