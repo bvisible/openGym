@@ -74,7 +74,10 @@ if you want to try it before installing anything.
 - Per-side reps for lunges and single-arm work, the screen stays awake while you train, and a
   rest-timer alert can flash the screen for loud gyms.
 - Swipe a set left to delete it (with Undo) or right to copy it. Pyramid sets with their own reps
-  and rest per set, and a scroll wheel for any rest time up to 15 minutes.
+  and rest per set, and a scroll wheel for any rest time up to 15 minutes, or no timer at all.
+- Machine taken? A planned backup exercise swaps in with one tap and keeps the slot's sets and reps.
+  Machines can carry their real weight stack, odd steps included, and progression sticks to it.
+- The session's volume runs live at the end of the progress bar.
 
 **Progress**
 
@@ -85,8 +88,9 @@ if you want to try it before installing anything.
   ATG), a year-long activity heatmap.
 - A muscle map in three modes: where your volume went, what is still recovering, and what has gone
   untrained.
-- Body-weight chart against a goal line, and progress photos on a timeline with a before/after
-  slider.
+- Body-weight chart against a goal line, with your weekly rate and an optional lose, gain or hold
+  range, and progress photos on a timeline with a before/after slider.
+- Lifts as a percentage of body weight, and a running total of everything you've ever lifted.
 - Edit any saved workout after the fact, log one you did on paper, or move it to the right date.
   Records are re-read from the corrected history.
 
@@ -97,7 +101,7 @@ if you want to try it before installing anything.
 - Two devices editing at once merge field by field instead of overwriting each other (see
   [sync](#how-sync-works)).
 - Import from FitNotes, Strong, Hevy (CSV or API key) and Apple Health weight exports. Export
-  everything as one JSON file whenever you like.
+  everything as one JSON file, or your workouts and body data as a spreadsheet (CSV).
 - Share a plan as a small file or print it as a PDF.
 - Optional admin dashboard with invite-only signup and an activity log.
 - 20 languages, including right-to-left Arabic and Traditional Chinese. Exercise names and
@@ -106,17 +110,22 @@ if you want to try it before installing anything.
 **On the phone and the wrist**
 
 - Apps for iPhone, iPad and Android that work on their own (no server, no account) or connected to
-  yours. Rest timer in the notification shade, reminders, and Health Connect or Apple Health.
+  yours. Rest timer in the notification shade, reminders, and Health Connect or Apple Health in both
+  directions: workouts go out, weigh-ins and heart rate per set come back in.
 - A gym reminder, off by default: walk into one of your gyms and the phone nudges you to hit
   Start. Once a day at most, never after you trained, and your gyms stay on the phone.
-- An Apple Watch app: tick off sets with the Digital Crown, a full-screen rest countdown, heart
-  rate per set, and complications. Widgets and a Live Activity on the iPhone.
+- An Apple Watch app: tick off sets with the Digital Crown, RPE or RIR right on the wrist, a
+  full-screen rest countdown, heart rate per set, a Lock button against stray crown presses, and
+  complications.
+- Widgets and a Live Activity on the iPhone: log a set, skip the rest or jump to the next exercise
+  from the Lock Screen without opening the app.
 
 **Optional extras, off by default**
 
 - An [AI coach](docs/AI_COACH.md) that drafts a week of routines and later suggests changes based on
-  what you logged. You approve every change. It runs on your server with your own provider key
-  (Anthropic, OpenAI, Gemini or any OpenAI-compatible endpoint, Ollama included).
+  what you logged, and answers questions about your training. You approve every change. It runs
+  on your server, or on the phone alone, with your own provider key (Anthropic, OpenAI, Gemini or
+  any OpenAI-compatible endpoint, Ollama included).
 - An [MCP server](mcp/README.md) so an assistant like Claude Desktop can answer questions about your
   training history, and log a workout you describe to it. Local; not part of the Docker build.
 
