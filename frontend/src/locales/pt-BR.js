@@ -1833,6 +1833,9 @@ export const PT_BR_OVERRIDES = {
   "Nora, the club's assistant": "Nora, a assistente do clube",
   "Planning": "Planejamento",
   "Your club has no coach to write to yet.": "Seu clube ainda não tem nenhum treinador para quem escrever.",
+  // --- Neoffice: the calmed home screen (30.10) ---
+  "My access": "Meu acesso",
+  "To read": "Para ler",
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

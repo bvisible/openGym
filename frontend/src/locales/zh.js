@@ -3080,4 +3080,7 @@ export default {
   "Nora, the club's assistant": "Nora，俱乐部助手",
   "Planning": "计划",
   "Your club has no coach to write to yet.": "你的俱乐部还没有可以发消息的教练。",
+  // --- Neoffice: the calmed home screen (30.10) ---
+  "My access": "我的通行码",
+  "To read": "待阅读",
 }

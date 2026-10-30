@@ -3079,4 +3079,7 @@ export default {
   "Nora, the club's assistant": "Nora, kulübün asistanı",
   "Planning": "Planlama",
   "Your club has no coach to write to yet.": "Kulübünde henüz yazabileceğin bir koç yok.",
+  // --- Neoffice: the calmed home screen (30.10) ---
+  "My access": "Erişimim",
+  "To read": "Okunacaklar",
 }

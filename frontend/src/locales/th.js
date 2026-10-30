@@ -3050,4 +3050,7 @@ export default {
   "Nora, the club's assistant": "Nora ผู้ช่วยของคลับ",
   "Planning": "แผนการฝึก",
   "Your club has no coach to write to yet.": "คลับของคุณยังไม่มีโค้ชให้เขียนถึง",
+  // --- Neoffice: the calmed home screen (30.10) ---
+  "My access": "สิทธิ์ของฉัน",
+  "To read": "รอการอ่าน",
 }

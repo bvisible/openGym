@@ -15,6 +15,8 @@ import './index.css'
 import './simple-level.css'
 //// Neoffice — the bottom bar centred on the Start button, its beat, the account button (src/tabbar-centered.css).
 import './tabbar-centered.css'
+//// Neoffice — the calmed home screen (src/home-today.css, views/HomeToday.jsx).
+import './home-today.css'
 import { hideBoot, handOverFromLaunchScreen } from './lib/boot.js'
 
 // `beforeinstallprompt` fires once, early — before any component mounts. Caught

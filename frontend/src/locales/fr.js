@@ -1408,7 +1408,8 @@ export default {
   'Pick one to continue.': 'Choisissez-en une pour continuer.',
   "Pick what you will actually keep, not the best week you can imagine.": "Choisissez ce que vous tiendrez vraiment, pas la meilleure semaine imaginable.",
   "Reading your training…": "Lecture de votre entraînement…",
-  'Schedule': 'Planning',
+  // //// Neoffice — « Planning » is the name of a place of the bottom bar now (the second segment of its screen reads « Semaine », as the screen's own sub-line does).
+  'Schedule': 'Semaine',
   'Send': 'Envoyer',
   'Sent straight to {0} with your own API key. You pay for every request.': 'Envoyé directement à {0} avec votre propre clé API. Vous payez chaque requête.',
   'Sent to {0}, running on this server under the instance owner’s account.': 'Envoyé à {0}, exécuté sur ce serveur avec le compte du propriétaire de l’instance.',
@@ -3168,4 +3169,7 @@ export default {
   "Nora, the club's assistant": "Nora, l'assistante du club",
   "Planning": "Planning",
   "Your club has no coach to write to yet.": "Votre club n'a pas encore de coach à qui écrire.",
+  // --- Neoffice: the calmed home screen (30.10) ---
+  "My access": "Mon accès",
+  "To read": "À lire",
 }

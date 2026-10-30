@@ -3042,4 +3042,7 @@ export default {
   "Nora, the club's assistant": "Nora, a klub asszisztense",
   "Planning": "Tervező",
   "Your club has no coach to write to yet.": "Az Ön klubjának még nincs edzője, akinek írhatna.",
+  // --- Neoffice: the calmed home screen (30.10) ---
+  "My access": "Belépőm",
+  "To read": "Olvasnivaló",
 }

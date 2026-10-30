@@ -23,6 +23,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import ChallengesCard from '../components/ChallengesCard.jsx'
 import { useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
 import { t, dateLocale } from '../lib/i18n.js'
@@ -93,6 +94,7 @@ export default function Classes({ embedded = false }) {
   if (!data) return <div className="narrow">{!embedded && <Hdr />}<div className="card muted">{t('Loading…')}</div></div>
   if (!data.sessions.length) {
     return <div className="narrow">{!embedded && <Hdr />}
+      <ChallengesCard />
       <div className="card muted" style={{ lineHeight: 1.5 }}>
         {t('No class published for the next {0} days.', data.horizon)}
       </div></div>
@@ -130,6 +132,8 @@ export default function Classes({ embedded = false }) {
 
   return <div className="narrow">
     {!embedded && <Hdr />}
+    {/* //// Neoffice — the club's challenges sit with its classes (they were a card on the home screen). */}
+    <ChallengesCard />
 
     <div className="card" style={{ padding: '10px 8px 8px' }}>
       <DayPicker days={days} day={day} byDay={byDay} onPick={setPicked} />

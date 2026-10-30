@@ -51,6 +51,7 @@ import AppIconRow from '../components/AppIconRow.jsx'
 //// Neoffice — upstream v1.4.2's AnimationQualityRow draws nothing outside the store apps (`if (!MOBILE) return null`), so it is kept as it is.
 import { AnimationQualityRow } from '../components/Animations.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, SearchField } from '../components/ui.jsx'
+import FloorPlanRow from '../components/FloorPlanRow.jsx'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
 import { showsEffortSetting, showsEquipmentProfiles, showsRestPauseSetting, showsWarmupRestSetting, showsOneRmFormula, showsSeasonalThemes, showsReports } from '../lib/level-visibility.js'
 import { PAGES, ROOT_GROUPS, pageVisible, searchSettings, pageTrail } from './settings-pages.js'
@@ -1107,6 +1108,8 @@ function SettingsRoot({ ctx, preview, open, user, sync, home, go, entryKey }) {
           that as much as for their settings ("how much do I have left", "when is my next class"). Each
           block shows only when there is something in it. */}
       <MyClub />
+      {/* //// Neoffice — the floor plan moved here from the home screen (components/FloorPlanRow.jsx). */}
+      <FloorPlanRow />
       <MyCoach />
       {ROOT_GROUPS.map(g => g.filter(id => pageVisible(id, ctx))).filter(g => g.length).map(g => (
         <Section key={g[0]}>

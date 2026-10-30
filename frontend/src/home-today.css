@@ -1,0 +1,12 @@
+/* //// Neoffice — added file (no upstream equivalent).
+   The calmed home screen (views/HomeToday.jsx, 30.10): the hero card with today's session and its one filled button, the row « to read », the coach card
+   and the weight row. Everything else is the app's own classes (.card, .lbl2, .ttl, .week, .wday, .dot, .lrow-i), so a theme change reaches this screen too. */
+.home-hero{padding:18px 16px 14px}
+.home-hero-title{font-size:30px;line-height:1.1;font-weight:700;letter-spacing:-.028em;margin:2px 0 4px;overflow-wrap:anywhere}
+.home-hero-sub{font-size:15px;margin-bottom:2px}
+.home-hero-go{width:100%;min-height:52px;margin-top:14px;font-size:17px}
+.home-hero-week{margin-top:16px}
+.home-hero-line{text-align:center;margin-top:10px;cursor:pointer}
+.home-read-row{display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer;min-width:0}
+.home-read-row + .home-read-row{border-top:var(--hair) solid var(--sep-op)}
+.home-read-clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}

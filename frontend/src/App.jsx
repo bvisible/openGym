@@ -55,7 +55,8 @@ import { SeasonalLayer } from './components/Seasonal.jsx'
 import { useAnimPacksBoot } from './components/Animations.jsx'
 import MobileOnboarding from './views/MobileOnboarding.jsx'
 import PermissionSteps from './views/PermissionSteps.jsx'
-import Home from './views/Home.jsx'
+//// Neoffice — the home screen is views/HomeToday.jsx; upstream's views/Home.jsx stays in the tree, untouched, so upstream merges stay trivial.
+import HomeToday from './views/HomeToday.jsx'
 //// Neoffice — Plan and Classes are drawn by views/Planning.jsx now (the route below), no longer imported here.
 import Workout from './views/Workout.jsx'
 //// Neoffice — our screens, imported at start: group classes (when the club offers them), challenges, the coach's physical assessments, the
@@ -342,7 +343,7 @@ function Shell() {
   //// the coach's thread) sit in the same list so that the edge-swipe preview (Page `under`) draws them too.
   const view = l => (needsMobileOnboarding ? <MobileOnboarding /> : permSteps ? <PermissionSteps /> : (
     <Routes location={l}>
-      <Route path="/home" element={<Home />} />
+      <Route path="/home" element={<HomeToday />} />
       {/* Gym check-in — switched off in Settings, the route falls through to the
           catch-all redirect below. */}
       {S.checkIn !== false && <Route path="/checkin" element={<CheckIn />} />}

@@ -3089,4 +3089,7 @@ export default {
   "Nora, the club's assistant": "Nora, asystentka klubu",
   "Planning": "Plan",
   "Your club has no coach to write to yet.": "Twój klub nie ma jeszcze trenera, do którego można napisać.",
+  // --- Neoffice: the calmed home screen (30.10) ---
+  "My access": "Mój dostęp",
+  "To read": "Do przeczytania",
 }

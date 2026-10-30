@@ -2998,4 +2998,7 @@ export default {
   "Nora, the club's assistant": "Nora，俱樂部助理",
   "Planning": "計畫",
   "Your club has no coach to write to yet.": "你的俱樂部目前還沒有可以傳訊息的教練。",
+  // --- Neoffice: the calmed home screen (30.10) ---
+  "My access": "我的通行證",
+  "To read": "待閱讀",
 }

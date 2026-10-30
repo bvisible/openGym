@@ -35,6 +35,8 @@
    views/Planning.test.jsx pins the two things this relies on: the h1 and the .hdr-actions of upstream's Plan header. */
 .planning .plan>.hdr h1{display:none}
 .planning .plan>.hdr{margin-top:12px}
+/* The Coach has a place of its own in the bar: Plan's header button to it is a second door to the same room, and one row of buttons too many. */
+.planning .plan>.hdr .hdr-actions .btn{display:none}
 .planning-seg{margin:0 0 6px}
 .acct-btn{
   position:absolute;top:calc(var(--sat) + var(--conn) + 10px);inset-inline-end:var(--pad);z-index:6;

@@ -3066,4 +3066,7 @@ export default {
   "Nora, the club's assistant": "نورا، مساعدة النادي",
   "Planning": "الجدول",
   "Your club has no coach to write to yet.": "ليس لناديك مدرب يمكن مراسلته بعد.",
+  // --- Neoffice: the calmed home screen (30.10) ---
+  "My access": "وصولي",
+  "To read": "للقراءة",
 }
