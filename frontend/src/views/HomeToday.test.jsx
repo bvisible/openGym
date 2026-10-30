@@ -101,6 +101,15 @@ describe('today as the one task', () => {
     expect(startFlow).not.toHaveBeenCalled()
   })
 
+  it('offers « Choose a different workout » once on a finished day (the hero button), and once under a planned session (the link)', async () => {
+    await mount({ workouts: [{ id: 'w1', d: todayISO(), name: 'Upper body', start: 1, end: 3600001, entries: [], routineIds: ['r1'] }] })
+    expect(host.querySelector('.home-hero-title').textContent).toBe('Upper body (done)')
+    expect([...host.querySelectorAll('button')].filter(b => b.textContent.includes('Choose a different workout'))).toHaveLength(1)
+    await mount()
+    expect([...host.querySelectorAll('button')].filter(b => b.textContent.includes('Choose a different workout'))).toHaveLength(1)
+    expect(host.querySelector('.home-hero-go').textContent).toBe('Start workout')
+  })
+
   it('says a session is done once logged, with no Start', async () => {
     await mount({ workouts: [{ id: 'w1', d: todayISO(), name: 'Upper body', routineIds: ['r1'], routineId: 'r1', start: 1, end: 2, entries: [] }] })
     expect(host.querySelector('.home-hero-title').textContent).toBe('Upper body (done)')

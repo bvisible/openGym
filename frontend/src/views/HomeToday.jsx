@@ -92,8 +92,9 @@ function Hero({ S, nav, hero, today, iso }) {
       {done}{planned ? ' / ' + planned : ''} {t('this week')}{streak > 0 ? ' · ' + streakLine(streak) : ''}
     </div>
 
-    {/* The way to another session: both the card and the Start button jump into the planned one, so this is the door to a freestyle session. */}
-    {!S.active && (hero.kind === 'planned' || hero.kind === 'done') && <div style={{ display: 'flex', justifyContent: 'center', marginTop: 4 }}>
+    {/* The way to another session: both the card and the Start button jump into the planned one, so this is the door to a freestyle session.
+        Only under a planned session: on a finished day or a rest day the main button above already says it (it was drawn twice on a finished day). */}
+    {!S.active && hero.kind === 'planned' && <div style={{ display: 'flex', justifyContent: 'center', marginTop: 4 }}>
       <Button size="sm" variant="ghost" className="dim" icon="swap" onClick={() => nav('/workout')}>{t('Choose a different workout')}</Button>
     </div>}
   </div>

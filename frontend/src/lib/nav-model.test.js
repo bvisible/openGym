@@ -1,6 +1,6 @@
 //// Neoffice — added file (no upstream equivalent). What the bottom bar holds and which place a screen lights (lib/nav-model.js).
 import { describe, expect, it } from 'vitest'
-import { ACCOUNT_SCREENS, BAR_PLACES, barModel, classesPlaces, litPlace } from './nav-model.js'
+import { ACCOUNT_SCREENS, BAR_PLACES, barModel, classesPlaces, libraryDoor, litPlace } from './nav-model.js'
 
 describe('the places of the bar', () => {
   it('holds Home and Plan on the left, a library and Stats on the right, by default', () => {
@@ -81,6 +81,25 @@ describe('the place a screen lights', () => {
 
   it('shows the library under Plan once Coach has taken the library’s place', () => {
     expect(litPlace('library', { coach: true })).toBe('plan')
+  })
+})
+
+describe('the door to the catalogue under Plan', () => {
+  it('opens when Coach has the library’s seat and the level has a library (Normal and up)', () => {
+    expect(libraryDoor({ coach: true, library: true })).toBe(true)
+  })
+
+  it('stays shut when the bar already has the Exercises place, and at Simple, where « Add exercise » reaches the catalogue', () => {
+    expect(libraryDoor({ coach: false, library: true })).toBe(false)
+    expect(libraryDoor({ coach: true, library: false })).toBe(false)
+    expect(libraryDoor()).toBe(false)
+  })
+
+  it('is exactly the case the bar has no Exercises place although the level offers one', () => {
+    for (const coach of [false, true]) for (const library of [false, true]) {
+      const inBar = barModel({ coach, library }).right.includes('library')
+      expect(libraryDoor({ coach, library })).toBe(library && !inBar)
+    }
   })
 })
 

@@ -25,6 +25,13 @@ export function barModel({ classes = false, coach = false, library = true } = {}
 }
 
 /**
+ * Whether the Plan place carries a door to the exercise catalogue: the member's level has a catalogue (`library`, Normal and up) but the Coach place
+ * took its seat in the bar (`coach`). Without it the catalogue would have no way in at all once a club has a coach (found on screen, 30.10).
+ * At Simple (`library` false) there is no door on purpose: the plan's and the workout's « Add exercise » reach the catalogue.
+ */
+export const libraryDoor = ({ coach = false, library = true } = {}) => !!coach && !!library
+
+/**
  * Whether the club's classes are reachable at all (`club`: a server behind them, a club that runs classes) and whether this member wants
  * them in the bar (`bar`: their own setting `classesTab`, which defaults to yes: `!== false`, not `=== true`, otherwise the place would
  * change its name for as long as the state takes to arrive from the server). The standalone mobile and demo builds have no server at all.

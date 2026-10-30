@@ -7,6 +7,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import Planning, { PLANNING_TAB_KEY } from './Planning.jsx'
 import { DEF, useStore } from '../store/useStore.js'
 
+const m = vi.hoisted(() => ({ doors: { nora: false, human: false, any: false } }))
+vi.mock('../lib/use-coach-doors.js', () => ({ useCoachDoors: () => m.doors }))
 vi.mock('./Plan.jsx', () => ({ default: () => <div data-testid="plan">PLAN</div> }))
 vi.mock('./Classes.jsx', () => ({ default: ({ embedded }) => <div data-testid="classes" data-embedded={String(!!embedded)}>CLASSES</div> }))
 
@@ -15,6 +17,7 @@ let host, root, originalS, here
 const Where = () => { here = useLocation(); return null }
 
 beforeEach(() => {
+  m.doors = { nora: false, human: false, any: false }
   originalS = useStore.getState().S
   localStorage.removeItem(PLANNING_TAB_KEY)
   host = document.createElement('div')
@@ -91,5 +94,41 @@ describe('the Planning place', () => {
     mount('/plan?tab=classes', { perms: { classes: false } })
     expect(host.querySelector('[data-testid="classes"]')).toBeNull()
     expect(host.querySelector('[data-testid="plan"]')).toBeTruthy()
+  })
+})
+
+describe('the door to the exercise catalogue', () => {
+  const door = () => host.querySelector('.planning-library')
+
+  it.each(['normal', 'full'])('is under the plan at the %s level once Coach has taken the Exercises place', level => {
+    m.doors = { nora: true, human: false, any: true }
+    mount('/plan', { level })
+    expect(door()).toBeTruthy()
+    expect(door().textContent).toContain('Exercises')
+    act(() => { door().querySelector('button, [role="button"], .row, .lrow').click() })
+    expect(here.pathname).toBe('/library')
+  })
+
+  it('is there for a club without classes too, right after the Plan screen', () => {
+    m.doors = { nora: false, human: true, any: true }
+    mount('/plan', { level: 'normal', perms: { classes: false } })
+    expect(host.querySelector('.planning')).toBeNull()
+    expect(host.querySelector('[data-testid="plan"]').nextElementSibling).toBe(door())
+  })
+
+  it('is not there at Simple (« Add exercise » reaches the catalogue), nor when the bar has the Exercises place itself', () => {
+    m.doors = { nora: true, human: false, any: true }
+    mount('/plan', { level: 'simple' })
+    expect(door()).toBeNull()
+    m.doors = { nora: false, human: false, any: false }
+    act(() => root.unmount()); root = createRoot(host)
+    mount('/plan', { level: 'normal' })
+    expect(door()).toBeNull()
+  })
+
+  it('is under « My sessions » only, not under the classes', () => {
+    m.doors = { nora: true, human: false, any: true }
+    mount('/plan?tab=classes', { level: 'normal' })
+    expect(door()).toBeNull()
   })
 })
