@@ -111,12 +111,12 @@ describe('today as the one task', () => {
 describe('the access code', () => {
   it('is a button in the header that opens the check-in', async () => {
     await mount()
-    await act(async () => { button('My access').click() })
+    await act(async () => { host.querySelector('.hdr [aria-label="My access"]').click() })
     expect(m.nav).toHaveBeenCalledWith('/checkin')
   })
   it('is gone when the member switched the check-in off', async () => {
     await mount({ checkIn: false })
-    expect(button('My access')).toBeUndefined()
+    expect(host.querySelector('[aria-label="My access"]')).toBeNull()
   })
 })
 

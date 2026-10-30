@@ -80,7 +80,7 @@ function Hero({ S, nav, hero, today, iso }) {
         ? <Button variant="primary" className="home-hero-go" icon="play" onClick={onStart}>
           {hero.kind === 'editing' ? t('Edit') : hero.kind === 'running' ? t('Resume') : t('Start workout')}
         </Button>
-        : <Button className="home-hero-go" icon="swap" onClick={() => nav('/workout')}>{t('Choose a different workout')}</Button>}
+        : <Button variant="tinted" className="home-hero-go" icon="swap" onClick={() => nav('/workout')}>{t('Choose a different workout')}</Button>}
 
     {rotating
       ? (queue ? <div style={{ marginTop: 12 }}><QueueRow S={S} today={iso} onStart={onQueueStart} managed={managed} /></div> : null)
@@ -177,7 +177,8 @@ export default function HomeToday() {
       <SeasonDeco spot="header-bats" />
       <div><h1>{user ? t('Hi {0}', user.name) : 'openGym'}</h1><div className="sub">{today.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}</div></div>
       {S.checkIn !== false && <div className="hdr-actions">
-        <Button size="sm" variant="tinted" icon="qr" onClick={() => nav('/checkin')}>{t('My access')}</Button>
+        {/* An icon, not a labelled pill: with a long member name the greeting wrapped on three lines at phone width. It still has its name (screen readers, long press). */}
+        <button className="iconbtn" onClick={() => nav('/checkin')} aria-label={t('My access')} title={t('My access')}><Icon name="qr" /></button>
       </div>}
     </div>
     <InstallBanner />
