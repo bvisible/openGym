@@ -15,7 +15,7 @@ import {
   showsSetIntensifierChips, showsInSessionWarmup, showsRestPauseSetting, showsWarmupRestSetting,
   showsFailureControl, showsBackoffControl, showsTripleProgression, showsOneRmFormula,
   showsSetPlanControl, showsPerSideControl, showsPlateLoading, showsProgressionControls,
-  showsWarmupRestRow, showsBackupsRow, showsBodyweightSwitch, showsMuscleInfo, showsExerciseChips, showsPlanTools,
+  showsWarmupRestRow, showsBackupsRow, showsBodyweightSwitch, showsBodyweightExtras, showsMuscleInfo, showsExerciseChips, showsPlanTools,
   showsSeasonalThemes, showsReports, showsHomeExtras,
 } from './level-visibility.js'
 
@@ -243,10 +243,10 @@ describe('simple level — the exercise settings carry reps, sets, weight, rest 
     expect(showsPlateLoading({ ...SIMPLE, barWeights: {}, loadKind: {} }, '0009')).toBe(false)
     expect(showsPlateLoading(SIMPLE, undefined)).toBe(false)
     // progression: a rule, a step, a deload, back-off sets, or a deload routine
-    for (const config of [{ prog: 'double' }, { prog: 'off' }, { inc: 2.5 }, { deloadFactor: 0.8 }, { backoff: true }, { excludeFromProgression: true }]) {
+    for (const config of [{ prog: 'double' }, { inc: 2.5 }, { deloadFactor: 0.8 }, { backoff: true }, { excludeFromProgression: true }]) {
       expect(showsProgressionControls(SIMPLE, config)).toBe(true)
     }
-    for (const config of [{}, { inc: 0 }, { inc: -1 }, { prog: '' }, { backoff: false }, { excludeFromProgression: false }, null, undefined]) {
+    for (const config of [{}, { inc: 0 }, { inc: -1 }, { prog: '' }, { prog: 'off' }, { backoff: false }, { excludeFromProgression: false }, null, undefined]) {
       expect(showsProgressionControls(SIMPLE, config)).toBe(false)
     }
   })
@@ -300,7 +300,11 @@ describe('simple level, 30.10 — one screen, one job', () => {
   it('hide the control, never the data: what an exercise already carries keeps its control', () => {
     expect(showsBackupsRow(SIMPLE, { subs: ['0001'] })).toBe(true)
     expect(showsBackupsRow(SIMPLE, { subs: [] })).toBe(false)
-    expect(showsBodyweightSwitch(SIMPLE, true)).toBe(true)
+    // the bodyweight switch is not kept « once on »: it is ON for every bodyweight exercise (30.10)
+    expect(showsBodyweightSwitch(SIMPLE)).toBe(false)
+    expect(showsBodyweightExtras(SIMPLE, { weight: 10 })).toBe(true)
+    expect(showsBodyweightExtras(SIMPLE, { repsMax: 15 })).toBe(true)
+    expect(showsBodyweightExtras(SIMPLE, { weight: 0, repsMax: 0 })).toBe(false)
     // a member who switched a season ON keeps it; Off or Auto is not a choice to keep
     expect(showsSeasonalThemes({ ...SIMPLE, seasonal: { halloween: 'on' } }, 'halloween')).toBe(true)
     expect(showsSeasonalThemes({ ...SIMPLE, seasonal: { halloween: 'auto' } }, 'halloween')).toBe(false)

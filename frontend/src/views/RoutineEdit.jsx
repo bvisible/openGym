@@ -481,9 +481,7 @@ export default function RoutineEdit() {
   //// Neoffice — what a routine with no rule of its own applies is the club's default (S.perms.autoProgression, lib/progression.js).
   const policy = r.prog ? (POLICIES_FOR.reps.includes(r.prog) ? r.prog : 'off') : (clubAutoProgression(S) ? 'linear' : 'off')
   //// Neoffice — the routine's progression rule and its « Deload routine » row are the progression section: from the Normal level up, kept once the routine has a rule or is a deload routine.
-  //// Neoffice — a coach's « off » is written on every routine of its program: when the club writes the plan the row is a read-only line of it (mayEdit),
-  //// and « No automatic progression » alone is not a reason to draw it at Simple (30.10). A member who set « off » on a routine of their own keeps the row.
-  const showProg = showsProgressionControls(S, mayEdit || r.prog !== 'off' ? r : { ...r, prog: '' })
+  const showProg = showsProgressionControls(S, r)
 
   return <div className="narrow">
     <div className="hdr">

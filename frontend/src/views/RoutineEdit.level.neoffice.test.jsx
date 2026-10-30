@@ -73,15 +73,13 @@ describe('the routine screen at each detail level', () => {
     expect(rowTitled('Progression')).toBeTruthy()
   })
 
-  it('Simple: when the club writes the plan, its « No automatic progression » does not keep the rows on (30.10)', () => {
-    renderRoutine({ level: 'simple', routine: { prog: 'off' }, perms: { editPlan: false } })
-    expect(rowTitled('Progression')).toBeUndefined()
-    expect(rowTitled('Deload routine')).toBeUndefined()
-  })
-
-  it('Simple: a member who set « off » on a routine of their own keeps the row', () => {
-    renderRoutine({ level: 'simple', routine: { prog: 'off' } })
-    expect(rowTitled('Progression')).toBeTruthy()
+  it('Simple: « No automatic progression » (prog « off », what a coach\'s program writes) does not keep the rows on (30.10)', () => {
+    for (const perms of [undefined, { editPlan: false }]) {
+      renderRoutine({ level: 'simple', routine: { prog: 'off' }, perms })
+      expect(rowTitled('Progression')).toBeUndefined()
+      expect(rowTitled('Deload routine')).toBeUndefined()
+      act(() => root.unmount()); container.remove()
+    }
   })
 
   it('Simple: no copy, no print, no muscle figure under the exercises (30.10); Normal brings them back', () => {

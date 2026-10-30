@@ -159,7 +159,9 @@ export const showsPlateLoading = (S, exId) => atLeast(S, 'normal')
  *  `config` = the exercise's config or the routine: kept when it carries a rule of its own, a
  *  step, a deload, back-off sets, or is a deload routine. */
 export const showsProgressionControls = (S, config) => atLeast(S, 'normal')
-  || Boolean(config && (config.prog || config.inc > 0 || config.deloadFactor != null || config.backoff === true || config.excludeFromProgression === true))
+  //// Neoffice — « off » (No automatic progression) is the ABSENCE of a rule, and the value a coach's program writes on every routine: it does not
+  //// keep the section on a beginner's screen (seen at Simple on 30.10). Nothing is trapped: there is nothing to undo.
+  || Boolean(config && ((config.prog && config.prog !== 'off') || config.inc > 0 || config.deloadFactor != null || config.backoff === true || config.excludeFromProgression === true))
 
 //// ─── Simple, « de gros bébé » (30.10) ──────────────────────────────────────────────────────────────────
 //// Asked for by the pilot club, who had three of its members who did not know the journal try it: « trop d'informations, trop de
@@ -178,8 +180,14 @@ export const showsWarmupRestRow = (S, config) =>
 export const showsBackupsRow = (S, config) =>
   atLeast(S, 'normal') || Boolean(config && Array.isArray(config.subs) && config.subs.length)
 
-/** The exercise sheet's « Bodyweight » switch: the catalogue already knows which exercises are bodyweight. From Normal, or once on. */
-export const showsBodyweightSwitch = (S, on) => atLeast(S, 'normal') || Boolean(on)
+/** The exercise sheet's « Bodyweight » switch: the catalogue already knows which exercises are bodyweight, and a beginner's push-up is one whether
+ *  or not the switch is drawn. From Normal, whatever the switch says (seen on 30.10: it was ON for every bodyweight exercise, so « kept once on »
+ *  kept it on every one of them). */
+export const showsBodyweightSwitch = S => atLeast(S, 'normal')
+
+/** What a bodyweight exercise's sheet adds below the sets: the weight added (a belt) and the rep ceiling. From Normal, or once the exercise has some. */
+export const showsBodyweightExtras = (S, config) =>
+  atLeast(S, 'normal') || Number(config && config.weight) > 0 || Number(config && config.repsMax) > 0
 
 /** What the plan and the session say about MUSCLES: the figure under a routine, in the workout's header and on the home card, the
  *  muscle chip under an exercise's name. A picture, but a second thing to read on a screen that has one job. */

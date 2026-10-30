@@ -63,7 +63,8 @@ describe('exercise settings at each level', () => {
     expect(heads(host)).not.toContain('Progression')
     expect(labels(host)).not.toContain('Step (kg)')
     expect(text).not.toContain('Deload')
-    // 30.10 — the three the pilot club still saw at the first level
+    // 30.10 — the three the pilot club still saw at the first level, and the chips under the name
+    expect(host.querySelectorAll('.tag').length).toBe(0)
     expect(titles(host)).not.toContain('Bodyweight')
     expect(titles(host)).not.toContain('Rest between warm-ups')
     expect(titles(host)).not.toContain('Backups')
@@ -80,8 +81,15 @@ describe('exercise settings at each level', () => {
 
   describe('Simple keeps what the exercise already carries (30.10)', () => {
     beforeEach(() => setLevel('simple'))
-    it('a bodyweight exercise keeps its switch (so it can be turned off)', () => {
-      expect(titles(open({ bodyweight: true, weight: 0 }))).toContain('Bodyweight')
+    it('a bodyweight exercise (the switch is ON for all of them) shows no switch, no « Added » stepper and no rep ceiling', () => {
+      const host = open({ bodyweight: true, weight: 0, mode: 'reps', reps: 12 })
+      expect(titles(host)).not.toContain('Bodyweight')
+      expect(host.textContent).not.toContain('Top of the range')
+      expect(host.textContent).not.toMatch(/Added \(/)
+    })
+    it('…until the exercise already has a weight added, or a ceiling', () => {
+      expect(open({ bodyweight: true, weight: 10, mode: 'reps', reps: 8 }).textContent).toMatch(/Added \(/)
+      expect(open({ bodyweight: true, weight: 0, repsMax: 15, mode: 'reps', reps: 8 }).textContent).toContain('Top of the range')
     })
     it('warm-ups, or a rest of their own between them', () => {
       expect(titles(open({ warmupSets: 2 }))).toContain('Rest between warm-ups')

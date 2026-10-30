@@ -92,7 +92,7 @@ import { hrLabel } from './lib/heart-rate.js'
 import { weeklyWeights } from './lib/bodyweight.js'
 import { workoutText } from './lib/workout-text.js'
 import { copyText } from './lib/clipboard.js'
-import { showsIntensifier, showsWarmupRamp, showsFailureControl, showsBackoffControl, showsTripleProgression, showsSetPlanControl, showsPerSideControl, showsPlateLoading, showsProgressionControls, showsWarmupRestRow, showsBackupsRow, showsBodyweightSwitch, showsMuscleInfo, showsPlanTools, showsSessionVolume, showsEstimated1RM } from './lib/level-visibility.js'
+import { showsIntensifier, showsWarmupRamp, showsFailureControl, showsBackoffControl, showsTripleProgression, showsSetPlanControl, showsPerSideControl, showsPlateLoading, showsProgressionControls, showsWarmupRestRow, showsBackupsRow, showsBodyweightSwitch, showsBodyweightExtras, showsExerciseChips, showsMuscleInfo, showsPlanTools, showsSessionVolume, showsEstimated1RM } from './lib/level-visibility.js'
 import FloorPlanFor from './components/FloorPlan.jsx'
 import FloorPlanSheet from './components/FloorPlanSheet.jsx'
 //// Neoffice — see the same note in store/useStore.js: i18n-core, so mocks of i18n.js keep working.
@@ -2420,8 +2420,10 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
     <div className="row" style={{ gap: 6, flexWrap: 'wrap', margin: '10px 0 14px' }}>
       {cardio && <span className="tag acc"><Icon name="figureRun" />{t('Cardio')}</span>}
       {/* //// Neoffice — the term in sentence case (span.capitalize): a tag is a flex box, which ::first-letter does not reach, and its own word-by-word capitalize made « Poids Du Corps ». */}
-      <span className="tag"><span className="capitalize">{t(MUSCLE_NAME[ex.tg] || ex.tg || ex.bp)}</span></span><span className="tag"><span className="capitalize">{t(ex.eq)}</span></span>
-      {!cardio && (ex.secondaries?.length ? ex.secondaries : smOf(ex)).filter(trainedBy(ex)).slice(0, 3)
+      {/* //// Neoffice — muscle, equipment and secondary muscles: from Normal (lib/level-visibility.js showsExerciseChips, 30.10). */}
+      {showsExerciseChips(st) && <span className="tag"><span className="capitalize">{t(MUSCLE_NAME[ex.tg] || ex.tg || ex.bp)}</span></span>}
+      {showsExerciseChips(st) && <span className="tag"><span className="capitalize">{t(ex.eq)}</span></span>}
+      {showsExerciseChips(st) && !cardio && (ex.secondaries?.length ? ex.secondaries : smOf(ex)).filter(trainedBy(ex)).slice(0, 3)
         .map((s, i) => <span key={i} className="tag dim"><span className="capitalize">{t(MUSCLE_NAME[s] || s)}</span></span>)}
     </div>
     {descFor(ex) && <div className="exnote">{descFor(ex)}</div>}
@@ -2640,9 +2642,9 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
       </div>
     </>}
     {/* ---------- bodyweight + per side (issues #31/#32/#33) ---------- */}
-    {!cardio && (showsBodyweightSwitch(st, bw) || showsPerSideControl(st, perSide)) && <div className="sect-b" style={{ marginBottom: 8 }}>
-      {/* //// Neoffice — the Bodyweight switch from Normal up, or once on (showsBodyweightSwitch): the catalogue knows which exercises are bodyweight. */}
-      {showsBodyweightSwitch(st, bw) && <Row icon="figureStrength" iconTint="var(--acc)" title={t('Bodyweight')}
+    {!cardio && (showsBodyweightSwitch(st) || showsPerSideControl(st, perSide)) && <div className="sect-b" style={{ marginBottom: 8 }}>
+      {/* //// Neoffice — the Bodyweight switch from Normal up (showsBodyweightSwitch): the catalogue knows which exercises are bodyweight. */}
+      {showsBodyweightSwitch(st) && <Row icon="figureStrength" iconTint="var(--acc)" title={t('Bodyweight')}
         subtitle={bw ? (mode === 'time' ? t('No weight to enter. Just time the hold.') : t('No weight to enter. Just log the reps.')) : t('Ask for a weight on every set.')}>
         {/* //// Neoffice — bodyweight has no load to ask of a set: a per-set plan keeps its reps only. */}
         <Switch checked={bw} onChange={v => setC(x => { const next = { ...x, bodyweight: v, weight: v ? 0 : x.weight }; return v ? unloadSetPlan(next) : next })} />
@@ -2689,7 +2691,8 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
     {/* A stepper is too wide to sit in a list row next to a label — it squeezes the text to
         one word per line — so added weight gets the same full-width treatment as sets and
         reps, with its explanation underneath. */}
-    {bw && <>
+    {/* //// Neoffice — the weight added and the rep ceiling of a bodyweight exercise: from Normal, or once the exercise has some (showsBodyweightExtras). */}
+    {bw && showsBodyweightExtras(st, c) && <>
       <div className="row cfgrow" style={{ marginBottom: 8 }}>
         <Stepper label={t('Added ({0})', st.unit)} value={c.weight || 0} step={2.5}
           onChange={v => setC(x => ({ ...x, weight: v }))} />
@@ -2699,11 +2702,11 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
       </div>
     </>}
     {/* The rep ceiling only means something when there is no load to add instead. */}
-    {mode === 'reps' && bw && !(c.weight > 0) && <div className="row cfgrow" style={{ marginBottom: 18 }}>
+    {mode === 'reps' && bw && !(c.weight > 0) && showsBodyweightExtras(st, c) && <div className="row cfgrow" style={{ marginBottom: 18 }}>
       <Stepper label={t('Top of the range')} value={c.repsMax || 0} step={1} decimal={false}
         onChange={v => setC(x => ({ ...x, repsMax: v }))} />
     </div>}
-    {mode === 'reps' && bw && !(c.weight > 0) && <div className="small dim" style={{ marginTop: -10, marginBottom: 18 }}>
+    {mode === 'reps' && bw && !(c.weight > 0) && showsBodyweightExtras(st, c) && <div className="small dim" style={{ marginTop: -10, marginBottom: 18 }}>
       {c.repsMax > 0
         ? t('Reps climb to {0}, then a set is added and the reps start over. At {1} sets it asks you to add weight instead.', c.repsMax, MAX_BW_SETS)
         : t('Reps climb by one whenever every set was clean. Set a ceiling to add sets instead of reps forever.')}
