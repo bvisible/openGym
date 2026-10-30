@@ -12,6 +12,8 @@ vi.mock('./lib/sound.js', () => ({
 }))
 vi.mock('./lib/api.js', async importOriginal => ({
   ...await importOriginal(), api: vi.fn(() => Promise.resolve({})), beacon: vi.fn(),
+  //// Neoffice — the bar asks the server once whether the member has a coach (lib/use-coach-doors.js): here nobody, and no network.
+  myCoach: vi.fn(() => Promise.resolve({ coach: null })),
 }))
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 let host, root, original
@@ -49,8 +51,8 @@ it('a running workout has no tab bar and no bottom action; minimized, the tabs a
   expect(host.querySelector('#tabbar')).toBeNull()
   expect(document.body.classList.contains('no-tabbar')).toBe(true)
   await act(async () => host.querySelector('.whdr button[aria-label="Minimize"]').click())
-  //// Neoffice — seven tabs, not five: the club's classes and the library join Home, Plan, Start, Stats and the account.
-  expect(host.querySelectorAll('#tabbar button')).toHaveLength(7)
+  //// Neoffice — five places, the Start button in the middle (lib/nav-model.js): Home, Planning, Start, Exercises, Stats. The account is a round button on the screens, not a tab.
+  expect(host.querySelectorAll('#tabbar button')).toHaveLength(5)
   expect(host.querySelector('#tabbar .start').getAttribute('aria-label')).toBe('Resume')
   await act(async () => host.querySelector('#tabbar .start').click())
   expect(host.querySelector('#tabbar')).toBeNull()

@@ -65,6 +65,17 @@ const buttons = () => [...host.querySelectorAll('button')].map(b => b.textConten
 const seg = label => [...host.querySelectorAll('.plan-views button')].find(b => b.textContent === label)
 
 describe('Plan on Neoffice', () => {
+  //// Neoffice — what views/Planning.jsx and src/tabbar-centered.css rest on: the Planning place hides Plan's own h1 (`.planning .plan>.hdr h1`) and keeps its sub-line and its
+  //// buttons. If an upstream merge renames either, the title would show twice or the buttons vanish: this fails first, and says where to look.
+  it('keeps the header shape the Planning place relies on: .plan > .hdr with an h1, a sub-line and the buttons', () => {
+    mount()
+    const hdr = host.querySelector('.plan > .hdr')
+    expect(hdr).toBeTruthy()
+    expect(hdr.querySelector('h1').textContent).toBe('Plan')
+    expect(hdr.querySelector('.sub')).toBeTruthy()
+    expect(hdr.querySelector('.hdr-actions [aria-label="Plan options"]')).toBeTruthy()
+  })
+
   it('opens on the routines when the member never chose a view (#765)', () => {
     mount()
     expect(host.querySelector('.plan-routines')).toBeTruthy()

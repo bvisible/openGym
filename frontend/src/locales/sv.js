@@ -3036,4 +3036,13 @@ export default {
   "{0} weeks": "{0} veckor",
   "{0} goal": "{0} mål",
   "{0} goals": "{0} mål",
+  // --- Neoffice: the bottom bar centred on Start, the Planning and Coach places, the account button (30.10) ---
+  "A question between two sessions?": "En fråga mellan två pass?",
+  "Ask Nora": "Fråga Nora",
+  "Ask Nora. She answers within the limits your club has set.": "Fråga Nora. Hon svarar inom de gränser som din klubb har satt.",
+  "My account": "Mitt konto",
+  "My sessions": "Mina pass",
+  "Nora, the club's assistant": "Nora, klubbens assistent",
+  "Planning": "Planering",
+  "Your club has no coach to write to yet.": "Din klubb har ännu ingen coach att skriva till.",
 }

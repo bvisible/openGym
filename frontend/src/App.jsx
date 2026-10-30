@@ -34,6 +34,9 @@ import SignIn from './views/SignIn.jsx'
 import MembershipGate from './views/MembershipGate.jsx'
 import { BOOT } from './lib/api.js'
 import TabBar from './components/TabBar.jsx'
+//// Neoffice — the round account button, top right of the places of the bar (components/AccountButton.jsx, lib/nav-model.js).
+import AccountButton from './components/AccountButton.jsx'
+import { ACCOUNT_SCREENS } from './lib/nav-model.js'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import Modals from './components/Modals.jsx'
 import Toast from './components/Toast.jsx'
@@ -53,15 +56,17 @@ import { useAnimPacksBoot } from './components/Animations.jsx'
 import MobileOnboarding from './views/MobileOnboarding.jsx'
 import PermissionSteps from './views/PermissionSteps.jsx'
 import Home from './views/Home.jsx'
-import Plan from './views/Plan.jsx'
+//// Neoffice — Plan and Classes are drawn by views/Planning.jsx now (the route below), no longer imported here.
 import Workout from './views/Workout.jsx'
 //// Neoffice — our screens, imported at start: group classes (when the club offers them), challenges, the coach's physical assessments, the
 //// member's own membership and invoices, the conversation with the coach. Upstream's lazy views below are its own screens.
-import Classes from './views/Classes.jsx'
 import Challenges from './views/Challenges.jsx'
 import Assessments from './views/Assessments.jsx'
 import Membership from './views/Membership.jsx'
 import CoachThread from './views/CoachThread.jsx'
+//// Neoffice — the « Planning » and « Coach » places of the bar (views/Planning.jsx, views/CoachHub.jsx).
+import Planning from './views/Planning.jsx'
+import CoachHub from './views/CoachHub.jsx'
 
 // Screens most sessions never open (the Coach, photos, measurements, the balance check) are their
 // own chunks rather than part of the code every start parses: ~200 KB of the main bundle. They are
@@ -341,14 +346,16 @@ function Shell() {
       {/* Gym check-in — switched off in Settings, the route falls through to the
           catch-all redirect below. */}
       {S.checkIn !== false && <Route path="/checkin" element={<CheckIn />} />}
-      <Route path="/plan" element={<Plan />} />
+      {/* //// Neoffice — « Planning »: Plan, plus the club's classes as a second segment when it has any (views/Planning.jsx). Plan itself is drawn unchanged. */}
+      <Route path="/plan" element={<Planning />} />
       <Route path="/plan/r/:id" element={<RoutineEdit />} />
       <Route path="/workout" element={<Workout />} />
       <Route path="/stats" element={<Stats />} />
       <Route path="/history" element={<History />} />
       <Route path="/library" element={<Library />} />
       {/* //// Neoffice — see views/Classes.jsx */}
-      <Route path="/classes" element={<Classes />} />
+      <Route path="/classes" element={<Navigate to="/plan?tab=classes" replace />} />
+      <Route path="/coach-hub" element={<CoachHub />} />
       {/* //// Neoffice — the club's challenges. Same door as classes:
           reached from the home screen, not through a sixth tab. */}
       <Route path="/challenges" element={<Challenges />} />
@@ -375,6 +382,8 @@ function Shell() {
       <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   ))
+  //// Neoffice — the account is a round button on the places of the bar, no longer a tab.
+  const showAccount = authed && !noTabs && !needsMobileOnboarding && !permSteps && ACCOUNT_SCREENS.has(loc.pathname)
   const showPreview = !!preview && preview !== loc.pathname && authed && !needsMobileOnboarding && !permSteps
 
   return (
@@ -384,9 +393,10 @@ function Shell() {
           is under way the page it goes back to sits underneath (Page `under`), and as the swipe
           lands it simply stays: same key, same parent, so React keeps it instead of mounting
           the route again. */}
-      <div id="app">
+      <div id="app" className={showAccount ? 'has-acct' : undefined}>
         <Page key={loc.pathname} loc={loc} render={view} motion={pageMotion(pathRef.current, loc.pathname, navType)} />
         {showPreview && <Page key={preview} loc={previewLoc(preview)} render={view} under scrollY={scrollPositions.get(preview) || 0} />}
+        {showAccount && <AccountButton />}
       </div>
       {/* Outside #app: the view's fade-in animates a transform, and a fixed element inside it
           would ride along with the page for the length of it. Decides for itself when to show.

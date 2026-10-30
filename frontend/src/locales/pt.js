@@ -3071,4 +3071,13 @@ export default {
   "Gain {0} to {1} a week.": "Ganhar de {0} a {1} por semana.",
   "A cut is often 0.5 to 1 % a week, a lean bulk 0.25 to 0.5 %.": "Uma fase de definição anda muitas vezes nos 0,5 a 1 % por semana, um bulk limpo nos 0,25 a 0,5 %.",
   "Remove range": "Remover intervalo",
+  // --- Neoffice: the bottom bar centred on Start, the Planning and Coach places, the account button (30.10) ---
+  "A question between two sessions?": "Uma dúvida entre duas sessões?",
+  "Ask Nora": "Pergunta à Nora",
+  "Ask Nora. She answers within the limits your club has set.": "Pergunta à Nora. Responde dentro dos limites que o teu clube definiu.",
+  "My account": "A minha conta",
+  "My sessions": "As minhas sessões",
+  "Nora, the club's assistant": "Nora, a assistente do clube",
+  "Planning": "Planeamento",
+  "Your club has no coach to write to yet.": "O teu clube ainda não tem nenhum coach a quem escrever.",
 }

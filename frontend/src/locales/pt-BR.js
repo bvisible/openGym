@@ -1824,6 +1824,15 @@ export const PT_BR_OVERRIDES = {
   "The trend through your weigh-ins of the last 3 weeks, so one salty dinner does not move it. Give it a range and the card tells you whether you are on pace.": "A tendência das suas pesagens das últimas 3 semanas, então um jantar salgado não mexe nela. Dê uma faixa e o cartão diz se você está no ritmo.",
   "A cut is often 0.5 to 1 % a week, a lean bulk 0.25 to 0.5 %.": "Um cutting costuma ficar em 0,5 a 1 % por semana, um bulking limpo em 0,25 a 0,5 %.",
   "Remove range": "Remover faixa",
+  // --- Neoffice: the bottom bar centred on Start, the Planning and Coach places, the account button (30.10) ---
+  "A question between two sessions?": "Uma dúvida entre duas sessões?",
+  "Ask Nora": "Pergunte à Nora",
+  "Ask Nora. She answers within the limits your club has set.": "Pergunte à Nora. Ela responde dentro dos limites definidos pelo seu clube.",
+  "My account": "Minha conta",
+  "My sessions": "Minhas sessões",
+  "Nora, the club's assistant": "Nora, a assistente do clube",
+  "Planning": "Planejamento",
+  "Your club has no coach to write to yet.": "Seu clube ainda não tem nenhum treinador para quem escrever.",
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

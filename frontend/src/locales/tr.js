@@ -3070,4 +3070,13 @@ export default {
   "Gain {0} to {1} a week.": "Haftada {0} ile {1} arası al.",
   "A cut is often 0.5 to 1 % a week, a lean bulk 0.25 to 0.5 %.": "Yağ yakımı genelde haftada %0,5 ile %1, temiz bulk %0,25 ile %0,5 arasıdır.",
   "Remove range": "Aralığı kaldır",
+  // --- Neoffice: the bottom bar centred on Start, the Planning and Coach places, the account button (30.10) ---
+  "A question between two sessions?": "İki seans arasında bir soru mu var?",
+  "Ask Nora": "Nora'ya sor",
+  "Ask Nora. She answers within the limits your club has set.": "Nora'ya sor. Nora, kulübün belirlediği sınırlar içinde yanıt verir.",
+  "My account": "Hesabım",
+  "My sessions": "Seanslarım",
+  "Nora, the club's assistant": "Nora, kulübün asistanı",
+  "Planning": "Planlama",
+  "Your club has no coach to write to yet.": "Kulübünde henüz yazabileceğin bir koç yok.",
 }

@@ -13,6 +13,8 @@ import './coach.css'
 import './index.css'
 //// Neoffice — the Simple level reads bigger (src/simple-level.css).
 import './simple-level.css'
+//// Neoffice — the bottom bar centred on the Start button, its beat, the account button (src/tabbar-centered.css).
+import './tabbar-centered.css'
 import { hideBoot, handOverFromLaunchScreen } from './lib/boot.js'
 
 // `beforeinstallprompt` fires once, early — before any component mounts. Caught

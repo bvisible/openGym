@@ -3069,4 +3069,13 @@ export default {
   "Gain {0} to {1} a week.": "সপ্তাহে {0} থেকে {1} বাড়ানো।",
   "A cut is often 0.5 to 1 % a week, a lean bulk 0.25 to 0.5 %.": "কাটিং সাধারণত সপ্তাহে ০.৫ থেকে ১ %, লিন বাল্ক ০.২৫ থেকে ০.৫ %।",
   "Remove range": "সীমা সরান",
+  // --- Neoffice: the bottom bar centred on Start, the Planning and Coach places, the account button (30.10) ---
+  "A question between two sessions?": "দুটি সেশনের মাঝে একটি প্রশ্ন?",
+  "Ask Nora": "নোরাকে জিজ্ঞাসা করুন",
+  "Ask Nora. She answers within the limits your club has set.": "নোরাকে জিজ্ঞাসা করুন। ক্লাব যে সীমা ঠিক করেছে, তার মধ্যেই তিনি উত্তর দেন।",
+  "My account": "আমার অ্যাকাউন্ট",
+  "My sessions": "আমার সেশনগুলো",
+  "Nora, the club's assistant": "নোরা, ক্লাবের সহকারী",
+  "Planning": "পরিকল্পনা",
+  "Your club has no coach to write to yet.": "আপনার ক্লাবে এখনও লেখার মতো কোনো কোচ নেই।",
 }

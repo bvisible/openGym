@@ -49,7 +49,8 @@ const fmtPrice = n => Number(n) % 1 === 0
   ? String(Number(n))
   : Number(n).toFixed(2)
 
-export default function Classes() {
+//// Neoffice — `embedded`: drawn as the second segment of the Planning place (views/Planning.jsx), which carries the title.
+export default function Classes({ embedded = false }) {
   const nav = useNavigate()
   const S = useStore(s => s.S)
   const [data, setData] = useState(null)
@@ -88,10 +89,10 @@ export default function Classes() {
     } finally { setBusy(null) }
   }
 
-  if (error) return <div className="narrow"><Hdr /><div className="card">{error}</div></div>
-  if (!data) return <div className="narrow"><Hdr /><div className="card muted">{t('Loading…')}</div></div>
+  if (error) return <div className="narrow">{!embedded && <Hdr />}<div className="card">{error}</div></div>
+  if (!data) return <div className="narrow">{!embedded && <Hdr />}<div className="card muted">{t('Loading…')}</div></div>
   if (!data.sessions.length) {
-    return <div className="narrow"><Hdr />
+    return <div className="narrow">{!embedded && <Hdr />}
       <div className="card muted" style={{ lineHeight: 1.5 }}>
         {t('No class published for the next {0} days.', data.horizon)}
       </div></div>
@@ -128,7 +129,7 @@ export default function Classes() {
   const free = items.filter(takeable).length
 
   return <div className="narrow">
-    <Hdr />
+    {!embedded && <Hdr />}
 
     <div className="card" style={{ padding: '10px 8px 8px' }}>
       <DayPicker days={days} day={day} byDay={byDay} onPick={setPicked} />

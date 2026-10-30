@@ -3057,4 +3057,13 @@ export default {
   "Gain {0} to {1} a week.": "زيادة {0} إلى {1} أسبوعيًا.",
   "A cut is often 0.5 to 1 % a week, a lean bulk 0.25 to 0.5 %.": "التنشيف غالبًا 0.5 إلى 1 % أسبوعيًا، والتضخيم النظيف 0.25 إلى 0.5 %.",
   "Remove range": "إزالة النطاق",
+  // --- Neoffice: the bottom bar centred on Start, the Planning and Coach places, the account button (30.10) ---
+  "A question between two sessions?": "سؤال بين جلستين؟",
+  "Ask Nora": "اسأل نورا",
+  "Ask Nora. She answers within the limits your club has set.": "اسأل نورا. ترد ضمن الحدود التي حددها ناديك.",
+  "My account": "حسابي",
+  "My sessions": "جلساتي",
+  "Nora, the club's assistant": "نورا، مساعدة النادي",
+  "Planning": "الجدول",
+  "Your club has no coach to write to yet.": "ليس لناديك مدرب يمكن مراسلته بعد.",
 }

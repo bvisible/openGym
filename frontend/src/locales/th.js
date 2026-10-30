@@ -3041,4 +3041,13 @@ export default {
   "Gain {0} to {1} a week.": "เพิ่ม {0} ถึง {1} ต่อสัปดาห์",
   "A cut is often 0.5 to 1 % a week, a lean bulk 0.25 to 0.5 %.": "ช่วงลดไขมันมักอยู่ที่ 0.5 ถึง 1 % ต่อสัปดาห์ ช่วงเพิ่มกล้ามแบบลีนอยู่ที่ 0.25 ถึง 0.5 %",
   "Remove range": "ลบช่วง",
+  // --- Neoffice: the bottom bar centred on Start, the Planning and Coach places, the account button (30.10) ---
+  "A question between two sessions?": "มีคำถามระหว่างการฝึกสองครั้งไหม?",
+  "Ask Nora": "ถาม Nora",
+  "Ask Nora. She answers within the limits your club has set.": "ถาม Nora ได้เลย Nora ตอบภายในขอบเขตที่คลับของคุณกำหนดไว้",
+  "My account": "บัญชีของฉัน",
+  "My sessions": "การฝึกของฉัน",
+  "Nora, the club's assistant": "Nora ผู้ช่วยของคลับ",
+  "Planning": "แผนการฝึก",
+  "Your club has no coach to write to yet.": "คลับของคุณยังไม่มีโค้ชให้เขียนถึง",
 }

@@ -3071,4 +3071,13 @@ export default {
   "Gain {0} to {1} a week.": "주당 {0}~{1} 증량.",
   "A cut is often 0.5 to 1 % a week, a lean bulk 0.25 to 0.5 %.": "감량기는 보통 주당 0.5~1 %, 린 벌크는 0.25~0.5 % 정도예요.",
   "Remove range": "범위 삭제",
+  // --- Neoffice: the bottom bar centred on Start, the Planning and Coach places, the account button (30.10) ---
+  "A question between two sessions?": "두 세션 사이에 궁금한 점이 있나요?",
+  "Ask Nora": "노라에게 묻기",
+  "Ask Nora. She answers within the limits your club has set.": "노라에게 물어보세요. 클럽이 정한 범위 안에서 답해 드려요.",
+  "My account": "내 계정",
+  "My sessions": "내 세션",
+  "Nora, the club's assistant": "노라, 클럽 어시스턴트",
+  "Planning": "플래닝",
+  "Your club has no coach to write to yet.": "아직 메시지를 보낼 수 있는 코치가 클럽에 없습니다.",
 }

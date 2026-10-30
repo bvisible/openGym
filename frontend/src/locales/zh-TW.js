@@ -2989,4 +2989,13 @@ export default {
   "Gain {0} to {1} a week.": "每週增 {0} 到 {1}。",
   "A cut is often 0.5 to 1 % a week, a lean bulk 0.25 to 0.5 %.": "減脂期通常每週 0.5 到 1 %，乾淨增肌每週 0.25 到 0.5 %。",
   "Remove range": "移除範圍",
+  // --- Neoffice: the bottom bar centred on Start, the Planning and Coach places, the account button (30.10) ---
+  "A question between two sessions?": "兩次訓練之間有問題想問嗎？",
+  "Ask Nora": "問問 Nora",
+  "Ask Nora. She answers within the limits your club has set.": "問問 Nora。她會在你的俱樂部設定的範圍內回覆。",
+  "My account": "我的帳戶",
+  "My sessions": "我的訓練",
+  "Nora, the club's assistant": "Nora，俱樂部助理",
+  "Planning": "計畫",
+  "Your club has no coach to write to yet.": "你的俱樂部目前還沒有可以傳訊息的教練。",
 }

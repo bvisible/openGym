@@ -13,7 +13,8 @@ beforeEach(() => {
   const store = useStore.getState()
   originalS = store.S
   originalUser = store.user
-  useStore.setState({ S: JSON.parse(JSON.stringify(DEF)), user: { id: 'test', name: 'test' } })
+  //// Neoffice — classes off: the second place is then called « Plan » (with them it is « Planning »; components/TabBar.test.jsx).
+  useStore.setState({ S: { ...JSON.parse(JSON.stringify(DEF)), classesTab: false }, user: { id: 'test', name: 'test' } })
   host = document.createElement('div')
   document.body.appendChild(host)
   root = createRoot(host)

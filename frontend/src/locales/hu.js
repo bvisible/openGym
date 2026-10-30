@@ -3033,4 +3033,13 @@ export default {
   "Gain {0} to {1} a week.": "Heti {0}–{1} hízás.",
   "A cut is often 0.5 to 1 % a week, a lean bulk 0.25 to 0.5 %.": "Szálkásításnál gyakran heti 0,5–1 %, tiszta tömegnövelésnél 0,25–0,5 %.",
   "Remove range": "Tartomány törlése",
+  // --- Neoffice: the bottom bar centred on Start, the Planning and Coach places, the account button (30.10) ---
+  "A question between two sessions?": "Kérdése van két edzés között?",
+  "Ask Nora": "Kérdezze Norát",
+  "Ask Nora. She answers within the limits your club has set.": "Kérdezze Norát. A klub által beállított keretek között válaszol.",
+  "My account": "Fiókom",
+  "My sessions": "Edzéseim",
+  "Nora, the club's assistant": "Nora, a klub asszisztense",
+  "Planning": "Tervező",
+  "Your club has no coach to write to yet.": "Az Ön klubjának még nincs edzője, akinek írhatna.",
 }
