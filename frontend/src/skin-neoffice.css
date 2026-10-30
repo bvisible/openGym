@@ -1,0 +1,96 @@
+/* //// Neoffice — added file (no upstream equivalent).
+   The warm skin (30.10, the pilot club): the journal in the art direction of the Neoffice design system — cream paper, ink, Forum for titles, Karla for the rest.
+   WHY A SKIN AND NOT EDITS: the whole app is drawn from CSS custom properties (index.css :root), so the look is a handful of token values plus a few rules, and
+   every one of them sits behind :root[data-skin="neoffice"] (lib/skin.js sets it). An upstream merge of index.css cannot touch this file, and taking the skin off is
+   one attribute (localStorage gym_skin=off on a device, or the one line in main.jsx for everybody): the app is then exactly upstream's.
+   WHAT IT DOES NOT TOUCH: the accent. A member's own colour and the club's colour (lib/accent.js) still decide --acc, so the club's brand stays on links, rings and the
+   beat behind Start; the skin only makes the solid primary button ink (the design system: « never a filled CTA in clay », ink is the solid primary).
+   Values are the mobile theme of the design system (readme §9.1, ui_kits/mobile/mobile.css), copied, not invented. The categorical palette (blue, teal, purple…) is left
+   alone: charts and accent presets read it. Selector rule: every selector here starts with :root[data-skin="neoffice"], so it outranks upstream's single-class rules. */
+
+/* ---- fonts: Karla (UI) and Forum (titles), Latin subsets of the design system's own files, SIL OFL 1.1 (src/fonts/README) ---- */
+@font-face{font-family:'Karla';font-style:normal;font-weight:400;font-display:swap;src:url('./fonts/Karla-Regular.woff2') format('woff2')}
+@font-face{font-family:'Karla';font-style:normal;font-weight:500;font-display:swap;src:url('./fonts/Karla-Medium.woff2') format('woff2')}
+@font-face{font-family:'Karla';font-style:normal;font-weight:600;font-display:swap;src:url('./fonts/Karla-SemiBold.woff2') format('woff2')}
+@font-face{font-family:'Karla';font-style:normal;font-weight:700;font-display:swap;src:url('./fonts/Karla-Bold.woff2') format('woff2')}
+@font-face{font-family:'Forum';font-style:normal;font-weight:400;font-display:swap;src:url('./fonts/Forum-Regular.woff2') format('woff2')}
+
+/* ---- tokens, dark (the app's default theme): the mobile dark ramp, never pure black ---- */
+:root[data-skin="neoffice"]:not([data-theme="light"]){
+  --bg:#15140F; --bg-el:#1D1B15; --surface:#2A2620; --surface-2:#3A352D; --surface-3:#4A4338;
+  --label:#F2EFE8; --label-2:#A39A8C; --label-3:#6B6359; --label-4:rgba(163,154,140,.28);
+  --sep:rgba(220,210,190,.18); --sep-op:rgba(220,210,190,.12);
+  --green:#3DBE74; --orange:#E6A93B; --red:#FF6369;
+  --skin-ink:#F2EFE8; --skin-on-ink:#15140F;
+  --skin-hero-a:#403829; --skin-hero-b:#322D1F; --skin-hero-border:rgba(220,210,190,.10);
+  --skin-grid:rgba(220,210,190,.07); --skin-glow:rgba(214,138,89,.16);
+}
+/* ---- tokens, light: cream paper, white cards, warm hairlines ---- */
+:root[data-skin="neoffice"][data-theme="light"]{
+  --bg:#FAF3EA; --bg-el:#FFFDF8; --surface:#FFFFFF; --surface-2:#F6F3ED; --surface-3:#EAE3D6;
+  --label:#141414; --label-2:#524B41; --label-3:#968C7C; --label-4:rgba(82,75,65,.2);
+  --sep:#DCD4C7; --sep-op:rgba(220,212,199,.7);
+  --green:#1F9D57; --orange:#E0980F; --red:#DC4A3D;
+  --skin-ink:#141414; --skin-on-ink:#FFFFFF;
+  --skin-hero-a:#FCEEDB; --skin-hero-b:#F5ECD2; --skin-hero-border:#E8DFC4;
+  --skin-grid:rgba(60,45,20,.07); --skin-glow:rgba(214,138,89,.11);
+}
+/* ---- geometry: card 18, button/input 14 (readme §9.2) ---- */
+:root[data-skin="neoffice"]{ --r:14px; --r-card:18px }
+
+/* ---- the paper: the page's canvas is a soft glow top-right over a 32px ruled grid (readme §9.3). Fixed-size glow, so it does not stretch with a long page. ---- */
+:root[data-skin="neoffice"] body{
+  font-family:'Karla',-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',Roboto,system-ui,sans-serif;
+  letter-spacing:0;
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(560px circle at 100% 0,var(--skin-glow),transparent 72%),
+    linear-gradient(var(--skin-grid) 1px,transparent 1px),
+    linear-gradient(90deg,var(--skin-grid) 1px,transparent 1px);
+  background-size:auto,32px 32px,32px 32px;
+  background-repeat:no-repeat,repeat,repeat;
+}
+
+/* ---- Forum for titles and section headers, never for rows, buttons or numbers (readme §9.5). It has one weight: no faux bold. ---- */
+:root[data-skin="neoffice"] .hdr h1,
+:root[data-skin="neoffice"] .card h2,
+:root[data-skin="neoffice"] .sect-t,
+:root[data-skin="neoffice"] .home-hero-title{
+  font-family:'Forum',Georgia,'Times New Roman',serif;font-weight:400;color:var(--label);
+}
+:root[data-skin="neoffice"] .hdr h1{font-size:32px;letter-spacing:0}
+:root[data-skin="neoffice"] .card h2,
+:root[data-skin="neoffice"] .sect-t{font-size:18px;letter-spacing:0}
+:root[data-skin="neoffice"] .home-hero-title{font-size:32px;letter-spacing:0}
+@media (max-width:420px){:root[data-skin="neoffice"] .hdr h1{font-size:30px}}
+
+/* ---- a border before a shadow: cards and grouped lists get a warm hairline ring ---- */
+:root[data-skin="neoffice"] .card,
+:root[data-skin="neoffice"] .sect-b{box-shadow:inset 0 0 0 1px var(--sep)}
+/* the hero card of the home screen: the beige gradient (readme §9.4 HeroCard) */
+:root[data-skin="neoffice"] .home-hero{
+  background:linear-gradient(135deg,var(--skin-hero-a),var(--skin-hero-b));
+  box-shadow:inset 0 0 0 1px var(--skin-hero-border);
+}
+
+/* ---- the solid primary button is ink (and inverts in the dark theme); the accent stays for links, rings, dots (readme §9.1) ---- */
+:root[data-skin="neoffice"] .btn.primary{background:var(--skin-ink);color:var(--skin-on-ink)}
+:root[data-skin="neoffice"] .btn.primary:active{background:var(--skin-ink);opacity:.86}
+
+/* ---- the bottom bar: warm paper instead of cool glass; the active place is ink and bold; Start is the ink disc, orange while a session runs ---- */
+:root[data-skin="neoffice"][data-theme="light"] #tabbar{background:rgba(255,253,248,.94)}
+:root[data-skin="neoffice"] #tabbar button.on{color:var(--label);font-weight:700}
+:root[data-skin="neoffice"] #tabbar button.start .cir{background:var(--skin-ink);color:var(--skin-on-ink);box-shadow:0 6px 16px rgba(20,20,20,.25)}
+:root[data-skin="neoffice"] #tabbar button.start .cir .icn{color:inherit}
+:root[data-skin="neoffice"] #tabbar button.start>span:not(.cir){color:var(--label)}
+:root[data-skin="neoffice"] #tabbar button.start.rec .cir{background:var(--orange);color:#000}
+:root[data-skin="neoffice"] #tabbar button.start.rec>span:not(.cir){color:var(--orange)}
+@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  :root[data-skin="neoffice"][data-theme="light"] #tabbar{background:var(--bg-el)}
+}
+
+/* ---- controls and fields that upstream tints with a cool grey in the light theme ---- */
+:root[data-skin="neoffice"][data-theme="light"] .seg,
+:root[data-skin="neoffice"][data-theme="light"] .searchf .field,
+:root[data-skin="neoffice"][data-theme="light"] .search .input,
+:root[data-skin="neoffice"][data-theme="light"] .search-row>.ex-view-btn{background:var(--surface-3)}

@@ -17,6 +17,9 @@ import './simple-level.css'
 import './tabbar-centered.css'
 //// Neoffice — the calmed home screen (src/home-today.css, views/HomeToday.jsx).
 import './home-today.css'
+//// Neoffice — the warm skin: its stylesheet (src/skin-neoffice.css) and the switch that turns it on (lib/skin.js). Delete both lines for upstream's look.
+import './skin-neoffice.css'
+import { startSkin } from './lib/skin.js'
 import { hideBoot, handOverFromLaunchScreen } from './lib/boot.js'
 
 // `beforeinstallprompt` fires once, early — before any component mounts. Caught
@@ -30,6 +33,8 @@ handOverFromLaunchScreen()
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
 
+//// Neoffice — before the first paint, so the page never shows upstream's greys for a frame (lib/skin.js).
+startSkin()
 createRoot(document.getElementById('root')).render(
   <StrictMode><App /></StrictMode>
 )

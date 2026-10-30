@@ -129,8 +129,8 @@ function CoachCard({ nav, doors }) {
   return <div className="card home-coach">
     <div className="lbl2" style={{ marginBottom: 8 }}>{t('Your coach')}</div>
     <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
-      {doors.human && <Button icon="chat" onClick={() => nav('/coach-thread')}>{t('Write to your coach')}</Button>}
-      {doors.nora && <Button icon="sparkles" onClick={() => nav('/coach')}>{t('Ask Nora')}</Button>}
+      {doors.human && <Button variant="tinted" icon="chat" onClick={() => nav('/coach-thread')}>{t('Write to your coach')}</Button>}
+      {doors.nora && <Button variant="tinted" icon="sparkles" onClick={() => nav('/coach')}>{t('Ask Nora')}</Button>}
     </div>
   </div>
 }
