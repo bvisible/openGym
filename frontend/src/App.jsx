@@ -33,7 +33,8 @@ import Icon from './components/Icon.jsx'
 import SignIn from './views/SignIn.jsx'
 import MembershipGate from './views/MembershipGate.jsx'
 import { BOOT } from './lib/api.js'
-import TabBar from './components/TabBar.jsx'
+//// Neoffice — the centred five-place bar (components/TabBarCentered.jsx); upstream's components/TabBar.jsx stays in the tree untouched, so its merges stay trivial.
+import TabBar from './components/TabBarCentered.jsx'
 //// Neoffice — the round account button, top right of the places of the bar (components/AccountButton.jsx, lib/nav-model.js).
 import AccountButton from './components/AccountButton.jsx'
 import { ACCOUNT_SCREENS } from './lib/nav-model.js'

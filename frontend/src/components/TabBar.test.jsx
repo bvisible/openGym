@@ -14,10 +14,6 @@ vi.mock('react-router-dom', () => ({
   useLocation: () => where.loc,
 }))
 
-//// Neoffice — whether the club has a coach or Nora is a hook of its own (lib/use-coach-doors.js): the test says it, it does not ask a server.
-const doors = vi.hoisted(() => ({ value: { nora: false, human: false, any: false } }))
-vi.mock('../lib/use-coach-doors.js', () => ({ useCoachDoors: () => doors.value }))
-
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
 let host, root, originalS, originalUser
@@ -26,7 +22,8 @@ beforeEach(() => {
   const store = useStore.getState()
   originalS = store.S
   originalUser = store.user
-  //// Neoffice — classes off: the second place is then « Plan » (with the club's classes it is « Planning »), and the bar holds five buttons.
+  //// Neoffice — classes off: our bar adds a Classes tab (when the club runs classes) and an Account
+  //// tab; with Classes off the indexes below are upstream's, and the bar holds six buttons.
   useStore.setState({ S: { ...JSON.parse(JSON.stringify(DEF)), classesTab: false }, user: { id: 1, name: 'test' } })
   host = document.createElement('div')
   document.body.appendChild(host)
@@ -38,7 +35,6 @@ afterEach(() => {
   host.remove()
   useStore.setState({ S: originalS, user: originalUser })
   where.loc = { pathname: '/home' }
-  doors.value = { nora: false, human: false, any: false }
 })
 
 const tabs = () => [...host.querySelectorAll('#tabbar button')]
@@ -47,7 +43,7 @@ describe('the tab bar across a store write', () => {
   it('keeps the very same buttons instead of rebuilding them every tick', () => {
     act(() => { root.render(<TabBar onStart={() => {}} />) })
     const before = tabs()
-    expect(before).toHaveLength(5)  //// Neoffice — five places, the account is a round button on the screens
+    expect(before).toHaveLength(6)  //// Neoffice — plus the Account tab
 
     // What a rest does once a second: S is replaced, so everything reading it re-renders.
     act(() => { useStore.getState().update(s => { s.restSec = 91 }, false) })
@@ -69,6 +65,28 @@ describe('the tab bar across a store write', () => {
   })
 })
 
+// Settings → "Show connection status" off (#369, #330): a stuck sync shows as a dot on Home, the
+// tab Settings opens from, and the tab's name says it.
+//// Neoffice — on our bar it is the Account tab, far right: Settings open from there, not from Home.
+describe('the connection dot on Home', () => {
+  const home = () => tabs().at(-1)
+  it('is there for a sync problem only while the banner is switched off', () => {
+    const original = useStore.getState().sync
+    try {
+      useStore.setState({ sync: { status: 'error', lastError: { status: 502 }, pending: true } })
+      act(() => { root.render(<TabBar onStart={() => {}} />) })
+      expect(home().querySelector('.tab-dot')).toBeNull()
+      act(() => { useStore.getState().update(s => { s.connStatus = false }, false) })
+      expect(home().querySelector('.tab-dot')).not.toBeNull()
+      //// Neoffice — the Account tab carries the dot on our bar (see the describe).
+      expect(home().getAttribute('aria-label')).toBe('Account, Connection problem')
+      act(() => { useStore.setState({ sync: { status: 'ok', lastError: null, pending: false } }) })
+      expect(home().querySelector('.tab-dot')).toBeNull()
+      expect(home().getAttribute('aria-label')).toBeNull()
+    } finally { useStore.setState({ sync: original }) }
+  })
+})
+
 // v1.3.11 icon sweep: one icon per concept. Every tab carries its name under the icon, Start is a
 // play button whether or not a session runs, and Exercises is the dumbbell (no more generic list).
 describe('the tab icons and labels', () => {
@@ -76,51 +94,24 @@ describe('the tab icons and labels', () => {
   const label = el => el.querySelector('span:last-child').textContent
   it('labels every tab and uses one icon per concept', () => {
     act(() => { root.render(<TabBar onStart={() => {}} />) })
-    //// Neoffice — Plan is the clipboard (Planning, with the classes, is the calendar); the Start button is the middle one of five.
-    expect(tabs().map(icon)).toEqual(['house', 'clipboard', 'play', 'dumbbell', 'chart'])
-    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Exercises', 'Stats'])
+    //// Neoffice — Plan is the clipboard (Classes is the calendar), and the Account tab ends the bar.
+    expect(tabs().map(icon)).toEqual(['house', 'clipboard', 'play', 'chart', 'dumbbell', 'personCircle'])
+    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Stats', 'Exercises', 'Account'])
 
     act(() => { useStore.getState().update(s => { s.active = { id: 'a', entries: [], cur: 0 } }, false) })
     expect(icon(tabs()[2])).toBe('play')
     expect(label(tabs()[2])).toBe('Resume')
   })
 
-  //// Neoffice — the club's classes make the second place « Planning », a coach (or Nora) makes the third one « Coach » instead of « Exercises »:
-  //// the bar keeps its shape and the Start button its middle (lib/nav-model.js has the rest).
-  it('names the second place Planning with the club’s classes, and the third one Coach when there is a coach', () => {
-    useStore.setState({ S: { ...useStore.getState().S, classesTab: true } })
-    doors.value = { nora: true, human: false, any: true }
-    act(() => { root.render(<TabBar onStart={() => {}} />) })
-    expect(tabs().map(icon)).toEqual(['house', 'calendar', 'play', 'chat', 'chart'])
-    expect(tabs().map(label)).toEqual(['Home', 'Planning', 'Start', 'Coach', 'Stats'])
-  })
-
-  it('has no Account tab: the account is the round button on the screens', () => {
-    act(() => { root.render(<TabBar onStart={() => {}} />) })
-    expect(tabs().map(label)).not.toContain('Account')
-  })
-
-  //// Neoffice — Simple (30.10): no « Exercises » place without a coach, and the bar says how many it holds for the stylesheet.
-  it('has no Exercises place at the Simple level, and counts its places for the stylesheet', () => {
+  //// Neoffice — Simple (30.10): no « Exercises » tab, so the bar has five tabs (six with the club's classes) and room for bigger labels.
+  it('has no Exercises tab at the Simple level, and counts its tabs for the stylesheet', () => {
     act(() => { useStore.getState().update(s => { s.level = 'simple' }, false) })
     act(() => { root.render(<TabBar onStart={() => {}} />) })
-    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Stats'])
-    expect(document.querySelector('#tabbar').getAttribute('data-tabs')).toBe('4')
-    act(() => { useStore.getState().update(s => { s.level = 'normal' }, false) })
-    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Exercises', 'Stats'])
+    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Stats', 'Account'])
     expect(document.querySelector('#tabbar').getAttribute('data-tabs')).toBe('5')
-    act(() => { useStore.getState().update(s => { delete s.level }, false) })
-  })
-
-  //// Neoffice — the Start button is the middle COLUMN of a three-column grid, whatever the number of places on either side (the club: Start always stays
-  //// in the middle). A layout is not measured by happy-dom, so the test pins what the layout rests on: the three children and the attribute the stylesheet reads.
-  it('keeps the Start button alone in the middle of the bar, between the two sides', () => {
-    act(() => { useStore.getState().update(s => { s.level = 'simple' }, false) })
-    act(() => { root.render(<TabBar onStart={() => {}} />) })
-    const bar = document.querySelector('#tabbar')
-    expect(bar.getAttribute('data-layout')).toBe('centered')
-    const kids = [...bar.children]
-    expect(kids.map(k => k.className)).toEqual(['tab-side', 'start', 'tab-side'])
+    act(() => { useStore.getState().update(s => { s.level = 'normal' }, false) })
+    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Stats', 'Exercises', 'Account'])
+    expect(document.querySelector('#tabbar').getAttribute('data-tabs')).toBe('6')
     act(() => { useStore.getState().update(s => { delete s.level }, false) })
   })
 
@@ -150,18 +141,12 @@ describe('the tab a screen without its own lights', () => {
   const lit = () => tabs().filter(b => b.classList.contains('on')).map(b => b.textContent)
   it.each([
     ['/history', 'Stats'], ['/structural-balance', 'Stats'], ['/progress-photos', 'Stats'], ['/measurements', 'Stats'],
-    //// Neoffice — Settings is reached by the round account button, no place of the bar is lit there.
-    ['/checkin', 'Home'], ['/muscles', 'Exercises'],
+    //// Neoffice — Settings light the Account tab on our bar (components/TabBar.jsx), not Home.
+    ['/settings', 'Account'], ['/settings/units', 'Account'], ['/checkin', 'Home'], ['/muscles', 'Exercises'],
   ])('%s lights %s', (pathname, tab) => {
     where.loc = { pathname }
     act(() => { root.render(<TabBar onStart={() => {}} />) })
     expect(lit()).toEqual([tab])
-  })
-
-  it.each(['/settings', '/settings/units', '/membership'])('%s lights no place: the account is not one', pathname => {
-    where.loc = { pathname }
-    act(() => { root.render(<TabBar onStart={() => {}} />) })
-    expect(lit()).toEqual([])
   })
 
   it('Muscles opened from Stats lights Stats, the way its back button goes', () => {
