@@ -1,0 +1,1 @@
+function e(t,n=Date.now()){return t?t.kind===`ask`?e(t.prev,n):t.expiresAt&&t.expiresAt<n?null:t:null}export{e as t};
