@@ -1,2 +1,0 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["assets/web-DnV5bWqR.js","assets/dist-D8dS8Cur.js","assets/rolldown-runtime-XKyaHtl9.js","assets/definitions-2rCe0T2Y.js"])))=>i.map(i=>d[i]);
-import{s as e}from"./dist-D8dS8Cur.js";import{t}from"./preload-helper-BH8OVgxH.js";import"./definitions-2rCe0T2Y.js";var n=e(`BarcodeScanner`,{web:()=>t(()=>import(`./web-DnV5bWqR.js`).then(e=>new e.BarcodeScannerWeb),__vite__mapDeps([0,1,2,3]))});export{n as BarcodeScanner};
