@@ -92,6 +92,10 @@ jobs:
           cache-dependency-path: mcp/package-lock.json
       - run: npm ci
         working-directory: mcp
+      # //// Neoffice — log_workout's end-to-end test (v1.4.3) drives the real api/server.js, so the api's own dependencies are installed
+      # //// here too: without them the test fails under CI instead of skipping.
+      - run: npm ci --omit=optional
+        working-directory: api
       - run: npm test
         working-directory: mcp
       # The one check the vitest suite structurally cannot make. The MCP server is a bare node
