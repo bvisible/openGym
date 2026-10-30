@@ -42,12 +42,11 @@ describe('Brazilian Portuguese locale', () => {
     // If the hash fails, review the changed keys and wording before accepting a new one. From
     // frontend/: node scripts/pt-br-inheritance-fingerprint.mjs --list
     //// Neoffice — our own strings live in pt.js like every other locale and pt-BR inherits them,
-    //// so the hash differs from upstream's. Recomputed after the v1.4.2 merge (1,540 overrides,
-    //// 1,262 inherited; it was 1,403 and 1,223 after v1.4.1): the strings new since v1.4.1 that
-    //// upstream left inherited stay inherited, and the four of ours of 23.10 (the share sheet's zoom,
-    //// « Finish and share », the club's colour swatch) are overridden so that they do not move it. With:
+    //// so the hash differs from upstream's. Recomputed after the v1.4.3 merge (1,662 overrides,
+    //// 1,313 inherited; it was 1,540 and 1,262 after v1.4.2): the 17 strings of v1.4.3 whose wording upstream
+    //// wrote in Brazilian Portuguese are overridden here as well, the other new ones stay inherited. With:
     //// node scripts/pt-br-inheritance-fingerprint.mjs
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('e068dc02618332328880a6298dfa97c4b140b93a939c08c9344914af079f1961')
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('27cfb348806de54a04b34fc90e9911958e30440de2f9c205996e17f265736096')
   })
 
   // pt-PT labelled Unpair 'Desfazer': Undo, in Portuguese (it is pt-BR's Undo), on the button that

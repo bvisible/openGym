@@ -28,10 +28,10 @@
 //// Frappe serves (opengym/www/gym_sw.js) is a static file no build rewrites, and
 //// src/sw.session.test.js pins both copies to one name. A fixed name keeps the files of every
 //// build it held, so it moves at each upstream merge: activate then drops the previous build's.
-//// v6 with the upstream v1.4.1 merge (2026-10-11: clips played from the cache, the media folders renamed); v5 with v1.3.10 (2026-10-08); v4 with v1.3.9 (2026-10-06: the media moved to a
+//// v7 with the upstream v1.4.3 merge (2026-10-30: the build's hashed chunks and stylesheets are served cache-first, `cacheFirst` below); v6 with the upstream v1.4.1 merge (2026-10-11: clips played from the cache, the media folders renamed); v5 with v1.3.10 (2026-10-08); v4 with v1.3.9 (2026-10-06: the media moved to a
 //// cache of their own, MEDIA); v3: the shell precached at install, v1.3.7; v2: the signed-out-shell
 //// fix below; v1: upstream's.
-const CACHE = 'opengym-rt-v6'
+const CACHE = 'opengym-rt-v7'
 //// Neoffice — where the app shell lives. Upstream serves index.html next to this worker; on
 //// Neoffice the shell is rendered by Frappe at /gym (see the header of opengym/www/gym_sw.js) and
 //// carries the member's boot payload.
@@ -364,6 +364,18 @@ async function passOrFallBack(request, response) {
   return (await fromCache(request)) || response
 }
 
+//// Neoffice — kept in step with frontend/public/sw.js (v1.4.3).
+// The build's own chunks and stylesheets (assets/<name>-<hash>.js|css): the name changes whenever
+// the content does, so a copy in this build's cache is the file, and a start serves them from
+// here instead of asking the network about each of them again (40-odd round trips before Home).
+const isHashedAsset = p => /\/assets\/[^/]+-[A-Za-z0-9_-]{8}\.(?:js|css)$/.test(p)
+const cacheFirst = e => caches.match(e.request, { ignoreSearch: true }).then(hit => hit || fetch(e.request).then(res => {
+  // Only a real answer is kept: an auth proxy's login page would otherwise stand in for the chunk
+  // for the rest of this build.
+  if (res.ok && !res.redirected) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {}) }
+  return res
+}))
+
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url)
   if (e.request.method !== 'GET' || url.origin !== location.origin) return
@@ -371,6 +383,10 @@ self.addEventListener('fetch', e => {
 
   if (isMediaPath(url.pathname)) {
     e.respondWith(media(e))
+    return
+  }
+  if (isHashedAsset(url.pathname)) {
+    e.respondWith(cacheFirst(e))
     return
   }
   // Network first; the copy for the cache is cloned before the response is handed to the page —

@@ -153,6 +153,13 @@ export default defineConfig({
     outDir: '../opengym/public/frontend',
     emptyOutDir: true,
     manifest: true,
-    chunkSizeWarningLimit: 1500
-  }
+    chunkSizeWarningLimit: 1500,
+    // //// Neoffice — upstream v1.4.3's target, kept as it is: the iOS app's deployment target is 15.5, so its WebView is Safari 15.5, and
+    // //// the web app follows the same floor. Vite's own default is Safari 16.4: syntax newer than 15.5 went out unlowered and one regex
+    // //// lookbehind kept 1.4.2 (and OUR bundle, media-refs) on its splash screen on iOS 15.5 to 16.3. What the transpiler cannot lower,
+    // //// scripts/check-bundle-syntax.mjs catches (its test builds the bundle).
+    target: ['safari15', 'chrome100', 'firefox100', 'edge100']
+  },
+  // Gives happy-dom tests a working localStorage on Node 24+ (#733).
+  test: { setupFiles: ['./src/test-setup.js'] }
 })

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, DATE_LOCALES, DERIVED_LOCALES,
-  baseLang, derivePack, dateLocale, getLang, t, _setLangState, exerciseNameClass, exerciseNameFor, CASED_NAME_LANGS
+  baseLang, derivePack, dateLocale, getLang, t, _setLangState, exerciseNameClass, exerciseNameFor, CASED_NAME_LANGS, RTL_LANGS
 } from './i18n-core.js'
 import { EXDB } from './exercises-data.js'
 import de from '../locales/de.js'
@@ -200,7 +200,9 @@ describe('English-name switches with every exercise-name pack', () => {
       _setLangState(lang, {}, null, names, true)
       // German keeps its own casing; a lower-case pack is title-cased like English.
       const translatedClass = CASED_NAME_LANGS.includes(lang) ? '' : 'capitalize'
-      expect(exerciseNameFor(ex)).toBe(`${names[ex.id]} (${ex.n})`)
+      // A right-to-left language isolates the English part, brackets included (exerciseNameFor).
+      const english = RTL_LANGS.has(lang) ? `\u2068(${ex.n})\u2069` : `(${ex.n})`
+      expect(exerciseNameFor(ex)).toBe(`${names[ex.id]} ${english}`)
       expect(exerciseNameClass(ex)).toBe(translatedClass)
       _setLangState(lang, {}, null, names, false)
       expect(exerciseNameFor(ex)).toBe(names[ex.id])
@@ -220,7 +222,9 @@ describe('English-name switches with every exercise-name pack', () => {
       const names = packFor(lang)
       const ex = EXDB.find(e => names[e.id] && names[e.id].toLocaleLowerCase(lang) !== e.n.toLocaleLowerCase('en'))
       _setLangState(lang, {}, null, names)
-      expect(exerciseNameFor(ex), lang).toBe(lang === 'fr' ? names[ex.id] : `${names[ex.id]} (${ex.n})`)
+      //// Neoffice — a right-to-left pack isolates the English part, brackets included (i18n-core exerciseNameFor, v1.4.3).
+      const english = RTL_LANGS.has(lang) ? `\u2068(${ex.n})\u2069` : `(${ex.n})`
+      expect(exerciseNameFor(ex), lang).toBe(lang === 'fr' ? names[ex.id] : `${names[ex.id]} ${english}`)
     }
     _setLangState('en', {}, null, null)
   })

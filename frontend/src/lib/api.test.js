@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { deviceOf, signIn, webauthnOK } from './api.js'   //// Neoffice — what our api.js exports: no passkeys, vault or biometrics
+import { deviceOf, signIn, webauthnOK, bio, BIO } from './api.js'   //// Neoffice — what our api.js exports: no passkeys, no passkeyError, no api() of upstream's
+import { _setLangState } from './i18n-core.js'
 
 const originalPublicKeyCredential = window.PublicKeyCredential
 const originalCredentials = navigator.credentials
@@ -171,3 +172,15 @@ describe('signIn', () => {   //// Neoffice — our sign-in, through Frappe's log
 
 //// Neoffice — upstream v1.3.10's `passkeyError` tests are not carried: passkeys are not ours (the
 //// Frappe session signs in), and api.js has no such function.
+
+// QA 1.3.9: "confirm with {0}" was translated and {0} was not — a German sign-in page read
+// "…bestätige mit your fingerprint, face or PIN".
+describe('bio', () => {
+  afterEach(() => _setLangState('en', {}, null, null))
+  it('reads the platform phrase in the UI language', () => {
+    expect(bio()).toBe(BIO)
+    _setLangState('de', { [BIO]: 'BIO-de' }, null, null)
+    expect(bio()).toBe('BIO-de')
+  })
+})
+//// Neoffice — upstream's passkeyError and wrong-address tests are not carried: no passkeys here, and api() answers the Frappe way.

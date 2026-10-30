@@ -122,6 +122,14 @@ Premier import filtré : v1.3.10 → v1.4.1, le 11.10 (note du coffre `Neoffice/
 Deuxième : v1.4.1 → v1.4.2, le 24.10 (note `…/93-…`) : 250 commits, 48 fichiers en conflit, 64 blocs. **Une PR de l'amont branchée avant la v1.4.1 et fusionnée après**
 donne un commit de la plage dont un parent est hors de la plage (un commit brut de l'historique de la v1.4.1, médias compris) : le script le remplace par
 NOTRE copie de ce parent (trouvée dans l'historique de `--base-filtered` par auteur, date et sujet) et refuse toujours l'import si un seul objet de média reste atteignable.
+Troisième : v1.4.2 → v1.4.3, le 30.10 (note `…/99-…`) : 378 commits, ~60 fichiers en conflit, `--base-filtered` = `1423bb24^2` (`3f8474c0`). **Un merge propre n'est pas un merge juste** :
+une variable de NOTRE code (`asked`, dans `api/coach/core/adapters/http.js`) est devenue, dans le même bloc, un nom que l'amont venait de donner à autre chose (le modèle demandé) : le texte
+fusionnait sans conflit, le message d'erreur disait « the model "null" ». Même famille : `S.exAliases` (chez nous les noms propres des exercices, chez eux les mots de recherche) et les doubles de
+`lib/api.js` des tests de l'amont, à qui il manque `BOOT`. **Les paquets de langues** : l'amont écrit ses clés neuves entre guillemets DOUBLES (`"clé": "valeur"`), un script qui ne lit que `'clé':` les
+perd sans bruit ; compter les clés avant/après (`check-locales` seul ne voit pas un manque commun à tous). Une langue neuve (v1.4.3 : `sv`) reçoit les chaînes de NOS écrans (Haiku, ~400). Les
+tests qui comparent des octets de PNG (`scripts/app-icons.test.mjs`) ne passent qu'avec Node 22, celui de la CI : `npx node@22 node_modules/vitest/vitest.mjs run scripts/app-icons.test.mjs`.
+Le service worker servi par Frappe (`opengym/www/gym_sw.js`) suit celui de `frontend/public/sw.js` à la main : ajouter le nouveau comportement des DEUX et passer `CACHE` à `v7` (v1.4.3 : les paquets
+hachés sont servis depuis le cache d'abord).
 
 **Pas de branche filet** (règle de la flotte : `version-15` seule, ni branche ni worktree) : l'état
 d'avant la fusion est le premier parent du commit de fusion. Faire la fusion dans un clone jetable,

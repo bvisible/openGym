@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useStore } from '../store/useStore.js'
 import { exOr } from '../lib/exercises.js'
 import { clampIncline, hasIncline, inclineFits, INCLINE_MAX, INCLINE_STEP } from '../lib/incline.js'
-import { exerciseNameFor, t } from '../lib/i18n.js'
+import { exerciseNameClass, exerciseNameFor, t } from '../lib/i18n.js'
 import { fmtDate, fmtNum, fmtPlate } from '../lib/format.js'
 import { EFFORT, effortOf, modeOf } from '../lib/history.js'
 import { lastEntryFor, pinnedNoteFor, setsRepsOf } from '../lib/history.js'
@@ -76,7 +76,8 @@ function Prescription({ entry, setIdx, unit, fallbackRest, children }) {
     ? `RPE ${fmtNum(target.rpeMin)}${target.rpeMax > target.rpeMin ? `–${fmtNum(target.rpeMax)}` : ''}`
     : ''
   //// Neoffice — upstream writes these two badges in English whatever the language; here they are translated.
-  const rest = target.restSec > 0 ? t('Rest {0}s', target.restSec) : fallbackRest > 0 ? t('Rest {0}s', fallbackRest) : ''
+  // An exercise on 'No timer' (restOff) shows no rest, whatever the default is.
+  const rest = target.restOff === true ? '' : target.restSec > 0 ? t('Rest {0}s', target.restSec) : fallbackRest > 0 ? t('Rest {0}s', fallbackRest) : ''
   const badges = [reps && t('{0} Reps', reps), load, rpe, rest, target.tempo].filter(Boolean)
 
   return <div className="focus-prescription">
@@ -111,7 +112,7 @@ function PlateBadge({ S, entry, set }) {
 
 export default function FocusView({
   entryIdx, unit, onToggle, onToggleSide, onField, onMutateSet, onStartTimed,
-  onAddWarmup, onRemoveSetAt, onProgressionSettings, onSwap, onRemoveExercise,
+  onAddSet, onAddWarmup, onRemoveSetAt, onProgressionSettings, onSwap, onRemoveExercise,
   onNoProg, busy, onSelectEntry, onAdvanceUnit, onPairPrev, onPairNext, onUnpair, pointerEpoch,
 }) {
   const S = useStore(state => state.S)
@@ -222,9 +223,17 @@ export default function FocusView({
 
   const openEffort = () => effortPickerSheet(effort, effortValue, value => onField(setIdx, effortField, value))
 
+  // One more set, or a warm-up in front, like the Cards layout's buttons (Discord: "how do I add an
+  // extra set?"). The set on screen goes back to the next one to do, which is the new set once the
+  // others are done; a stored pointer would also sit on the wrong row after a warm-up goes in front.
+  const addRow = add => () => { add(); clearPointer(entryIdx) }
   const openExerciseMenu = () => menuSheet({
     title: exerciseNameFor(exOr(entry.id)),
+    // Title-cased like the card's own heading and the Cards layout's menu, not the stored lower case.
+    titleClass: exerciseNameClass(exOr(entry.id)),
     items: [
+      { icon: 'plus', label: t('Add set'), onClick: addRow(onAddSet) },
+      { icon: 'sunrise', label: t('Add warm-up set'), onClick: addRow(onAddWarmup) },
       { icon: 'pencil', label: entry.note ? t('Edit note') : t('Add note'), onClick: () => exerciseNoteSheet(entryIdx) },
       { icon: 'info', label: t('Details'), onClick: () => exerciseDetailSheet(exOr(entry.id)) },
       { icon: 'history', label: t('History'), onClick: () => exerciseHistorySheet(entry.id) },
@@ -246,6 +255,8 @@ export default function FocusView({
       { icon: 'arrowDown', label: t('Add drop set'), onClick: () => onMutateSet(setIdx, row => addDropTo(row, entry.target)) },
       { icon: 'bolt', label: t('Add burst'), onClick: () => onMutateSet(setIdx, row => addBurstTo(row, entry.target?.intensifier?.type === 'restpause' ? entry.target.intensifier.restSec : (S.restPauseSec || 15))) },
       !isWarmupRow(set) && mode !== 'cardio' && { icon: 'gauge', label: t('Taken to failure'), sub: t('Nothing left in the tank'), on: isFailureSet(set), onClick: () => onMutateSet(setIdx, toggleFailure) },
+      // Cardio rates in RPE from here, as in the list's set menu (Workout.jsx): no column to spare.
+      !isWarmupRow(set) && mode === 'cardio' && { icon: 'gauge', label: t('How hard it felt'), sub: set.rpe != null ? t(EFFORT.rpe.hd) + ' ' + fmtNum(set.rpe) : t('Not rated yet'), onClick: () => effortPickerSheet('rpe', set.rpe ?? null, value => onField(setIdx, 'rpe', value), { cardio: true }) },
       { icon: 'trash', label: t('Delete set'), danger: true, disabled: entry.sets.length <= 1, onClick: () => onRemoveSetAt(setIdx) },
     ],
   })

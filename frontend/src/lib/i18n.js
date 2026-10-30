@@ -77,14 +77,16 @@ export async function setLang(l, showEn, enOnly) {
   lastShowEn = show
   lastEnOnly = only
   const base = baseLang(l)
-  let dict = {}, instr = null, exerciseNames = null
-  try { dict = base === 'en' ? {} : (await localePacks['../locales/' + base + '.js']()).default } catch (e) { dict = {} }
-  try { instr = base === 'en' || !INSTR_LANGS.includes(base) ? null : (await instrPacks['../instr/' + base + '.js']()).default } catch (e) { instr = null }
+  // The three packs are fetched side by side: one after the other, a start in any language but
+  // English waited three round trips before Home could draw.
+  const pack = async (packs, key, fallback) => { try { return (await packs[key]()).default } catch (e) { return fallback } }
+  let [dict, instr, exerciseNames] = await Promise.all([
+    base === 'en' ? {} : pack(localePacks, '../locales/' + base + '.js', {}),
+    base === 'en' || !INSTR_LANGS.includes(base) ? null : pack(instrPacks, '../instr/' + base + '.js', null),
+    base === 'en' || !EXERCISE_NAME_LANGS.includes(base) ? null : pack(exerciseNamePacks, '../exercise-names/' + base + '.js', null),
+  ])
+  //// Neoffice — the club's names win over the generated ones, exercise by exercise.
   try {
-    exerciseNames = base === 'en' || !EXERCISE_NAME_LANGS.includes(base)
-      ? null
-      : (await exerciseNamePacks['../exercise-names/' + base + '.js']()).default
-    //// Neoffice — the club's names win over the generated ones, exercise by exercise.
     const club = exerciseNames && clubNamePacks['../club-names/' + base + '.js']
     if (club) exerciseNames = layClubNames(exerciseNames, (await club()).default)
   } catch (e) { exerciseNames = null }

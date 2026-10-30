@@ -113,7 +113,13 @@ describe.each(Object.entries(WORKERS))('%s — the shell is cached only when som
     //// pass every test above and cache the guest shell anyway.
     expect(SW).toMatch(/const keep = cacheIfUsable\(e\.request, copy\)/)
     expect(SW).toMatch(/e\.waitUntil\(keep\)/)
-    expect(SW).not.toMatch(/caches\.open\(CACHE\)\.then\(c => c\.put\(e\.request, copy\)\)/)
+    //// Neoffice — v1.4.3's `cacheFirst` (the build's hashed chunks and stylesheets, never a page) writes with a direct put of its own.
+    //// That one is the only direct write allowed, and it has to sit inside `cacheFirst`.
+    const direct = [...SW.matchAll(/caches\.open\(CACHE\)\.then\(c => c\.put\(e\.request, copy\)\)/g)].map(m => m.index)
+    const from = SW.indexOf('const cacheFirst = e =>'), to = SW.indexOf("self.addEventListener('fetch'")
+    expect(direct).toHaveLength(1)
+    expect(direct[0]).toBeGreaterThan(from)
+    expect(direct[0]).toBeLessThan(to)
   })
 
   it('never caches API responses', () => {
@@ -130,7 +136,7 @@ describe.each(Object.entries(WORKERS))('%s — the shell is cached only when som
     //// the v1.3.9 merge: the media moved to a cache of their own (MEDIA). v5 since the v1.3.10 merge: a
     //// fixed name keeps every build's files, so it moves at each merge and activate drops the old ones.
     //// v6 since the v1.4.1 merge: the clips are played from the cache and the media folders are renamed.
-    expect(SW).toMatch(/const CACHE = 'opengym-rt-v6'/)
+    expect(SW).toMatch(/const CACHE = 'opengym-rt-v7'/)
   })
 
   it('precaches the shell through the same rule, never around it', () => {

@@ -133,6 +133,7 @@ export function ConnectSheet({ close, initialUrl = '', again = false }) {
     <Button variant="primary" onClick={go} disabled={busy}>{busy ? t('Connecting…') : t('Connect')}</Button>
     <div style={{ height: 10 }} />
     <Button icon="key" onClick={() => openCfAccess(normalizeServerUrl(url) || '')} disabled={busy}>{t('Cloudflare Access')}</Button>
+    {/* //// Neoffice — upstream's « Lost access? » (v1.4.3) opens its passkey and password recovery; neither ships here, the club's own sign-in is Frappe's. */}
   </div>
 }
 

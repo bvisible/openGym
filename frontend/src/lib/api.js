@@ -376,8 +376,10 @@ export async function pairRedeem() {   //// Neoffice — no pairing: the journal
 export const BIO = IS_APPLE ? 'Face ID / Touch ID' : IS_ANDROID ? 'fingerprint or face unlock' : 'your fingerprint, face or PIN'
 export const VAULT = IS_APPLE ? 'iCloud Keychain' : IS_ANDROID ? 'Google Password Manager' : 'your password manager'
 //// Neoffice — upstream v1.4's same phrases in the UI language (they go into translated sentences); kept real, like the two above.
+// The same phrase in the UI language. It goes into translated sentences ("confirm with {0}"),
+// so the English constant above left an English phrase in the middle of every other language.
+// Functions, not constants: the pack is loaded after this module is.
 export const bio = () => (IS_APPLE ? t('Face ID / Touch ID') : IS_ANDROID ? t('fingerprint or face unlock') : t('your fingerprint, face or PIN'))
-export const vault = () => (IS_APPLE ? t('iCloud Keychain') : IS_ANDROID ? t('Google Password Manager') : t('your password manager'))
 // PublicKeyCredential is the WebAuthn-specific capability signal. Do not also gate the UI on
 // navigator.credentials: some browsers expose WebAuthn while that generic Credential Management
 // API check produces a false negative (notably Chrome on iOS). The real create/get calls still run

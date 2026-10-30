@@ -32,9 +32,17 @@ export default function TabBar({ onStart }) {
   const trouble = useConnectionTrouble()
   if (!user && !isGuest) return null
   const cur = loc.pathname.split('/')[1] || 'home'
-  //// Neoffice — Settings have their own tab here (Account, far right), so they light it rather
-  //// than Home as upstream's bar does; a class booking lights Classes.
-  const on = k => cur === k || (cur === 'history' && k === 'stats') || (cur === 'muscles' && k === 'library') || (cur === 'structural-balance' && k === 'stats')
+  // A screen without a tab of its own lights the tab it is opened from (Muscles from both).
+  //// Neoffice — no `settings: 'home'` here (upstream's map): Settings have their own tab (Account, far right), so they light it rather than
+  //// Home; a class booking lights Classes.
+  const PARENT = { history: 'stats', 'structural-balance': 'stats', 'progress-photos': 'stats', measurements: 'stats', checkin: 'home', muscles: 'library' }
+  const parent = cur === 'muscles' && loc.state?.from === '/stats' ? 'stats' : PARENT[cur]
+  const on = k => cur === k || parent === k
+
+  // Root tabs are peers, not another level to unwind with Android Back.
+  const switchTab = path => {
+    if (loc.pathname !== path || loc.search) nav(path, { replace: true })
+  }
 
   //// Neoffice — the Classes tab rests on THREE conditions, and needs all
   //// three: there is a club behind it (the standalone mobile and demo builds
@@ -60,12 +68,12 @@ export default function TabBar({ onStart }) {
     //// Neoffice — `data-tabs` carries the column count: at seven, the labels
     //// have to shrink so they don't break in the middle of a word.
     <nav id="tabbar" data-tabs={showClasses ? 7 : 6}>
-      <Tab active={on('home')} icon="house" label={t('Home')} onClick={() => nav('/home')} />
-      {showClasses && <Tab active={on('classes')} icon="calendar" label={t('Classes')} onClick={() => nav('/classes')} />}
+      <Tab active={on('home')} icon="house" label={t('Home')} onClick={() => switchTab('/home')} />
+      {showClasses && <Tab active={on('classes')} icon="calendar" label={t('Classes')} onClick={() => switchTab('/classes')} />}
       {/* //// Neoffice — Plan moves from `calendar` to `clipboard`: classes ARE
            a calendar, and two neighbouring tabs wearing the same icon blur into
            one. It is already the icon the Plan screen shows when it is empty. */}
-      <Tab active={on('plan')} icon="clipboard" label={t('Plan')} onClick={() => nav('/plan')} />
+      <Tab active={on('plan')} icon="clipboard" label={t('Plan')} onClick={() => switchTab('/plan')} />
       {/* On the workout screen itself there is nothing to resume, so the button reads as the
           tab it is and stays lit (#29); anywhere else it brings you back to the exercise you
           were on — the marker is kept in S.active.cur and never moves on its own (#21). The
@@ -79,15 +87,15 @@ export default function TabBar({ onStart }) {
         {running ? <span className="tab-time"><Elapsed start={S.active.start} /></span>
           : <span>{S.active ? (cur === 'workout' ? t('Workout') : S.active.editingWorkoutId ? t('Edit workout') : t('Resume')) : t('Start')}</span>}
       </button>
-      <Tab active={on('stats')} icon="chart" label={t('Stats')} onClick={() => nav('/stats')} />
-      <Tab active={on('library')} icon="dumbbell" label={t('Exercises')} onClick={() => nav('/library')} />
+      <Tab active={on('stats')} icon="chart" label={t('Stats')} onClick={() => switchTab('/stats')} />
+      <Tab active={on('library')} icon="dumbbell" label={t('Exercises')} onClick={() => switchTab('/library')} />
       {/* //// Neoffice — the account, far right. Settings were already reachable
            through the cog on the home screen; the tab gives them a fixed place,
            and balances the end of the bar.
            Home stays the FIRST tab (correction from Jeremy, 2026-08-25): it is
            the starting point, classes come after. The connection's dot (upstream
            v1.3.10 puts it on Home, the tab Settings live under there) is on it. */}
-      <Tab active={on('settings')} icon="personCircle" label={t('Account')} dot={trouble} onClick={() => nav('/settings')} />
+      <Tab active={on('settings')} icon="personCircle" label={t('Account')} dot={trouble} onClick={() => switchTab('/settings')} />
     </nav>
   )
 }
