@@ -103,6 +103,18 @@ describe('the tab icons and labels', () => {
     expect(label(tabs()[2])).toBe('Resume')
   })
 
+  //// Neoffice — Simple (30.10): no « Exercises » tab, so the bar has five tabs (six with the club's classes) and room for bigger labels.
+  it('has no Exercises tab at the Simple level, and counts its tabs for the stylesheet', () => {
+    act(() => { useStore.getState().update(s => { s.level = 'simple' }, false) })
+    act(() => { root.render(<TabBar onStart={() => {}} />) })
+    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Stats', 'Account'])
+    expect(document.querySelector('#tabbar').getAttribute('data-tabs')).toBe('5')
+    act(() => { useStore.getState().update(s => { s.level = 'normal' }, false) })
+    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Stats', 'Exercises', 'Account'])
+    expect(document.querySelector('#tabbar').getAttribute('data-tabs')).toBe('6')
+    act(() => { useStore.getState().update(s => { delete s.level }, false) })
+  })
+
   it('shows a minimized session’s running time, still named Resume', () => {
     vi.useFakeTimers()
     try {

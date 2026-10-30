@@ -3,6 +3,8 @@
 // "more" button per exercise; each flag brings one of the old always-visible groups back.
 // Lives in its own module so views can read it without the store — the store's DEF only
 // references it.
+//// Neoffice — the level of the journal (lib/level.js).
+import { isSimple } from './level.js'
 export const WC_DEFAULT = Object.freeze({
   steppers: true,         // +/- buttons on every weight/reps/effort field
   setShortcuts: false,    // "+ Drop" / "+ Burst" chips on every set and the warm-up/remove/add row
@@ -16,6 +18,8 @@ export const WC_DEFAULT = Object.freeze({
                           // name, Plan's routines, loop and routine exercises too (Settings: "Swipe actions")
 })
 
+//// Neoffice — at the Simple level the figure in the workout's header is off (lib/level-visibility.js showsMuscleInfo): a picture that fills
+//// in as sets are ticked is a second thing to watch on a screen that has one job. A member's own choice (S.wc) still wins.
 export function workoutControls(S) {
-  return { ...WC_DEFAULT, ...((S && S.wc) || {}) }
+  return { ...WC_DEFAULT, ...(isSimple(S) ? { muscleMap: false } : {}), ...((S && S.wc) || {}) }
 }

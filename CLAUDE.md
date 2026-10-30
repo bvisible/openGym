@@ -182,6 +182,11 @@ et ne pousser qu'une fois les tests verts.
   (`Animations`, `anim-data-safety`, `watch-sync`) fixent `VITE_IMG_BASE` / `VITE_GIF_BASE` à ceux du paquet. **Une app native de NOTRE carnet doit les fixer de même** (note 92).
 - **Les niveaux des nouveautés** : une technique ou un réglage que le niveau Simple ne doit pas montrer entre dans `lib/level-visibility.js` avec sa règle « cacher le contrôle, jamais la donnée »
   (v1.4.2 : « Repos entre échauffements », `showsWarmupRestSetting`). `scripts/check-imports.mjs` est à nous : il a dû apprendre qu'une définition de méthode n'est pas un appel.
+- **Le niveau Simple, « de gros bébé »** (30.10, note `…/100-…`) : ce que garde Simple, c'est ce qu'on fait devant une machine (l'image de l'exercice, séries, répétitions, poids, repos). Sorti de l'écran et
+  revenu à Normal (jamais la donnée, un exercice qui le porte garde son contrôle) : feuille d'exercice (repos entre échauffements = Full, remplaçants, poids du corps), éditeur de routine (progression quand
+  c'est « off » d'un plan écrit par le club, muscles, copier, imprimer), séance (puces muscle et matériel, figure du muscle, menu : progression, ordre, mise à jour de la routine, disposition), résumé de fin
+  (volume, figure, « garder ce que vous avez ajouté »), accueil (plan de la salle, défis, séances récentes, série), rapport PDF et export CSV, saisons (Halloween), onglet Exercices ; et `src/simple-level.css`
+  (aucun texte sous 13 px, `html[data-level="simple"]`). **Reste à l'accueil de Simple : le poids** (Jérémy, 01.09 : « relégué, PAS planqué », `bodyweight.reachable.test.jsx`). Toutes les règles sont dans `lib/level-visibility.js`.
 - Partout ailleurs : **leur code**, avec nos `////` réappliqués par-dessus.
 
 > L'amont a son propre `CLAUDE.md`, qui décrit SON projet (docker, api, mcp,

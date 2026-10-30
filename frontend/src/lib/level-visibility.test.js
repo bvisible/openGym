@@ -15,6 +15,8 @@ import {
   showsSetIntensifierChips, showsInSessionWarmup, showsRestPauseSetting, showsWarmupRestSetting,
   showsFailureControl, showsBackoffControl, showsTripleProgression, showsOneRmFormula,
   showsSetPlanControl, showsPerSideControl, showsPlateLoading, showsProgressionControls,
+  showsWarmupRestRow, showsBackupsRow, showsBodyweightSwitch, showsMuscleInfo, showsExerciseChips, showsPlanTools,
+  showsSeasonalThemes, showsReports, showsHomeExtras,
 } from './level-visibility.js'
 
 const FULL = { level: 'full' }
@@ -273,3 +275,35 @@ describe('the rest between warm-ups (upstream v1.4.2)', () => {
     expect(showsWarmupRestSetting({ ...SIMPLE, warmupRestSec: undefined })).toBe(false)
   })
 })
+
+//// 30.10 — « de gros bébé ». What Simple keeps is what a person does in front of a machine; the rest comes back at Normal (or Full).
+describe('simple level, 30.10 — one screen, one job', () => {
+  it('hides the readings and the tools a beginner never asked for', () => {
+    for (const fn of [showsMuscleInfo, showsExerciseChips, showsPlanTools, showsReports, showsHomeExtras, showsBackupsRow, showsBodyweightSwitch]) {
+      expect(fn(SIMPLE), fn.name).toBe(false)
+      expect(fn(NORMAL), fn.name).toBe(true)
+      expect(fn(FULL), fn.name).toBe(true)
+    }
+    expect(showsSeasonalThemes(SIMPLE, 'halloween')).toBe(false)
+    expect(showsSeasonalThemes(NORMAL, 'halloween')).toBe(true)
+  })
+
+  it('the rest between warm-ups is a Full control, kept when the exercise already carries warm-ups', () => {
+    expect(showsWarmupRestRow(SIMPLE, {})).toBe(false)
+    expect(showsWarmupRestRow(NORMAL, {})).toBe(false)
+    expect(showsWarmupRestRow(FULL, {})).toBe(true)
+    expect(showsWarmupRestRow(SIMPLE, { warmupSets: 2 })).toBe(true)
+    expect(showsWarmupRestRow(SIMPLE, { warmupRestSec: 30 })).toBe(true)
+    expect(showsWarmupRestRow(SIMPLE, { warmupRestOff: true })).toBe(true)
+  })
+
+  it('hide the control, never the data: what an exercise already carries keeps its control', () => {
+    expect(showsBackupsRow(SIMPLE, { subs: ['0001'] })).toBe(true)
+    expect(showsBackupsRow(SIMPLE, { subs: [] })).toBe(false)
+    expect(showsBodyweightSwitch(SIMPLE, true)).toBe(true)
+    // a member who switched a season ON keeps it; Off or Auto is not a choice to keep
+    expect(showsSeasonalThemes({ ...SIMPLE, seasonal: { halloween: 'on' } }, 'halloween')).toBe(true)
+    expect(showsSeasonalThemes({ ...SIMPLE, seasonal: { halloween: 'auto' } }, 'halloween')).toBe(false)
+  })
+})
+

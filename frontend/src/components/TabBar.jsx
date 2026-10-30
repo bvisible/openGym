@@ -1,5 +1,7 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
+//// Neoffice — no « Exercises » tab at the Simple level (lib/level-visibility.js showsLibraryTab).
+import { showsLibraryTab } from '../lib/level-visibility.js'
 import { effectiveRoutineIds, effectiveRoutines } from '../lib/history.js'
 import { todayISO } from '../lib/format.js'
 import { t } from '../lib/i18n.js'
@@ -54,6 +56,9 @@ export default function TabBar({ onStart }) {
   //// tab would vanish for as long as the state takes to arrive from the server.
   const showClasses = !MOBILE && !DEMO && S.perms?.classes !== false && S.classesTab !== false
 
+  //// Neoffice — the catalogue tab from the Normal level up (showsLibraryTab); the bar has five or six tabs at Simple, seven at most elsewhere.
+  const showLibrary = showsLibraryTab(S)
+
   const running = !!S.active && cur !== 'workout' && !S.active.editingWorkoutId && !S.active.backfill && S.active.start > 0
   const startWorkout = () => {
     if (!S.active) {
@@ -67,7 +72,7 @@ export default function TabBar({ onStart }) {
   return (
     //// Neoffice — `data-tabs` carries the column count: at seven, the labels
     //// have to shrink so they don't break in the middle of a word.
-    <nav id="tabbar" data-tabs={showClasses ? 7 : 6}>
+    <nav id="tabbar" data-tabs={5 + (showClasses ? 1 : 0) + (showLibrary ? 1 : 0)}>
       <Tab active={on('home')} icon="house" label={t('Home')} onClick={() => switchTab('/home')} />
       {showClasses && <Tab active={on('classes')} icon="calendar" label={t('Classes')} onClick={() => switchTab('/classes')} />}
       {/* //// Neoffice — Plan moves from `calendar` to `clipboard`: classes ARE
@@ -88,7 +93,7 @@ export default function TabBar({ onStart }) {
           : <span>{S.active ? (cur === 'workout' ? t('Workout') : S.active.editingWorkoutId ? t('Edit workout') : t('Resume')) : t('Start')}</span>}
       </button>
       <Tab active={on('stats')} icon="chart" label={t('Stats')} onClick={() => switchTab('/stats')} />
-      <Tab active={on('library')} icon="dumbbell" label={t('Exercises')} onClick={() => switchTab('/library')} />
+      {showLibrary && <Tab active={on('library')} icon="dumbbell" label={t('Exercises')} onClick={() => switchTab('/library')} />}
       {/* //// Neoffice — the account, far right. Settings were already reachable
            through the cog on the home screen; the tab gives them a fixed place,
            and balances the end of the bar.

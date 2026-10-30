@@ -29,6 +29,8 @@ import WorkoutThumb, { hasWorkoutMedia } from '../components/WorkoutThumb.jsx'
 import { workoutSettingsSheet } from '../components/WorkoutSettingsSheet.jsx'
 import { SessionMapButton } from '../components/SessionMuscles.jsx'
 import { durationSheet } from '../components/DurationWheel.jsx'
+//// Neoffice — the Simple level's rules (lib/level-visibility.js): no muscle, equipment or best-set chips under an exercise's name.
+import { showsExerciseChips } from '../lib/level-visibility.js'
 import { REST_MAX, fmtRest, restWheelValue } from '../lib/duration.js'
 import { startFlow, exercisePicker, exConfigSheet, exerciseDetailSheet, finishWorkout, exitWorkoutEdit, workoutCompleteSheet, confirmSheet, exerciseNoteSheet, sessionNoteSheet, renameWorkoutSheet, swapActiveWorkoutExercise, barWeightSheet, menuSheet, effortPickerSheet, exerciseHistorySheet, addRoutineToSessionSheet, finishWorkoutSheet, finishWorkoutNow, swapActiveWorkoutToBackup, workoutOutlineSheet } from '../sheets.jsx'
 import { afterScrollRestore, scrollRestorePending } from '../components/Modals.jsx'
@@ -49,7 +51,7 @@ import { bindLiveActions } from '../lib/live-activity.js'
 import { isWarmupRow, isFailureSet, toggleFailure, isDropSet, isRestPauseSet, dropsOf, clustersOf, addDrop, addCluster, removeDropAt, removeClusterAt, setDropAt, setClusterAt, nextDropWeight, nextBurstReps, isSideSet, makeSideSet, setSideField, toggleSide, addSideDrop, removeSideDropAt, setSideDropAt, addSideCluster, removeSideClusterAt, setSideClusterAt, WEIGHT_ORIGIN_MANUAL } from '../lib/workout-model.js'
 import { canMoveActiveWorkoutUnit, moveActiveWorkoutUnit, canMoveActiveWorkoutEntry, moveActiveWorkoutEntry } from '../lib/active-workout-order.js'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
-import { showsSupersetControl, showsSetIntensifierChips, showsInSessionWarmup, showsFailureControl, showsPlateLoading, showsProgressionControls } from '../lib/level-visibility.js'
+import { showsSupersetControl, showsSetIntensifierChips, showsInSessionWarmup, showsFailureControl, showsPlateLoading, showsProgressionControls, showsPlanTools, showsExerciseOrder, showsLayoutChoice } from '../lib/level-visibility.js'
 import { nextOpenSet, workoutKeyAction } from '../lib/workout-keys.js'
 import { MUSCLE_NAME } from '../lib/muscles.js'
 import FocusView from './FocusView.jsx'
@@ -443,7 +445,8 @@ function ExerciseBlock({ entryIdx, compact, dense, editing, onToggle, onToggleSi
         //// does not offer warm-up ramps or supersets; one already in use keeps its controls.
         showsInSessionWarmup(S, entry.sets.some(isWarmupRow)) && { icon: 'sunrise', label: t('Add warm-up set'), onClick: onAddWarmup },
         { icon: 'note', label: entry.note ? t('Edit note') : t('Add note'), sub: entry.note || undefined, onClick: () => exerciseNoteSheet(entryIdx) },
-        onNoProg && { icon: 'chartLineSlash', label: t('Don’t count for progression'), sub: t('This exercise, this session only'), on: entry.noProg === true, onClick: () => onNoProg(entry.noProg !== true) },
+        //// Neoffice — progression, the routine's update, the order of the exercises and the layout are the Normal level's (lib/level-visibility.js, 30.10): a beginner's menu holds swap, note, history, how to do it, rest, remove.
+        onNoProg && showsProgressionControls(S, entry.target) && { icon: 'chartLineSlash', label: t('Don’t count for progression'), sub: t('This exercise, this session only'), on: entry.noProg === true, onClick: () => onNoProg(entry.noProg !== true) },
       ] },
       { title: t('Look it up'), items: [
         { icon: 'history', label: t('History'), sub: last ? t('Last time') + ' ' + fmtDate(last.d) : undefined, onClick: () => exerciseHistorySheet(entry.id) },
@@ -455,14 +458,14 @@ function ExerciseBlock({ entryIdx, compact, dense, editing, onToggle, onToggleSi
         onRest && { icon: 'timer', label: t('Rest timer'), sub: restSub, onClick: onRest },
         //// Neoffice — plate loading is offered from the Normal level, kept once this exercise has a bar weight or a way of loading of its own (lib/level-visibility.js).
         plateLoading && showsPlateLoading(S, entry.id) && { icon: 'plate', label: t('Plate loading'), sub: loadSummary, onClick: () => barWeightSheet(entry.id, cfg) },
-        routineUpdate && { icon: 'clipboard', label: t('Update routine'), sub: routineUpdate.sub, onClick: routineUpdate.run },
+        routineUpdate && showsPlanTools(S) && { icon: 'clipboard', label: t('Update routine'), sub: routineUpdate.sub, onClick: routineUpdate.run },
       ] },
       { title: t('Order and supersets'), items: [
         //// Neoffice — supersets are offered from the Complete level, kept once in use (lib/level-visibility.js).
         onPairPrev && showsSupersetControl(S, false) && { icon: 'link', label: t('Make superset with previous'), onClick: onPairPrev },
         onPairNext && showsSupersetControl(S, false) && { icon: 'link', label: t('Make superset with next'), onClick: onPairNext },
-        onMoveUp && { icon: 'chevronUp', label: t('Move up'), onClick: onMoveUp, disabled: busy || !canMoveUp },
-        onMoveDown && { icon: 'chevronDown', label: t('Move down'), onClick: onMoveDown, disabled: busy || !canMoveDown },
+        onMoveUp && showsExerciseOrder(S) && { icon: 'chevronUp', label: t('Move up'), onClick: onMoveUp, disabled: busy || !canMoveUp },
+        onMoveDown && showsExerciseOrder(S) && { icon: 'chevronDown', label: t('Move down'), onClick: onMoveDown, disabled: busy || !canMoveDown },
       ] },
       { items: [
         onRemoveExercise && { icon: 'trash', label: t('Remove exercise'), onClick: onRemoveExercise, danger: true, disabled: busy },
@@ -748,9 +751,10 @@ function ExerciseBlock({ entryIdx, compact, dense, editing, onToggle, onToggleSi
           derived, it is what you enter. The tag only flags that this is per-side. */}
       {!cardio && isPerSide(cfg) && <span className="tag acc nocap"><Icon name="sides" />{t('Per side')}</span>}
       {/* //// Neoffice — the term in sentence case (span.capitalize): a tag is a flex box, which ::first-letter does not reach, and its own word-by-word capitalize made « Poids Du Corps ». */}
-      {(ex.tg || ex.bp) && <span className="tag"><span className="capitalize">{t(MUSCLE_NAME[ex.tg] || ex.tg || ex.bp)}</span></span>}
-      {ex.eq && <span className="tag"><span className="capitalize">{t(ex.eq)}</span></span>}
-      {best > 0 && <span className="tag nocap">{t('Best:')} {fmtNum(best)} {S.unit}</span>}
+      {/* //// Neoffice — muscle, equipment and best set: from Normal (showsExerciseChips). The picture and the name say what it is. */}
+      {showsExerciseChips(S) && (ex.tg || ex.bp) && <span className="tag"><span className="capitalize">{t(MUSCLE_NAME[ex.tg] || ex.tg || ex.bp)}</span></span>}
+      {showsExerciseChips(S) && ex.eq && <span className="tag"><span className="capitalize">{t(ex.eq)}</span></span>}
+      {showsExerciseChips(S) && best > 0 && <span className="tag nocap">{t('Best:')} {fmtNum(best)} {S.unit}</span>}
     </div>
     {/* Three notes can apply to one exercise and they are not interchangeable, so each keeps its
         own line and its own icon: the plan's instruction (cfg.note, from the routine), the
@@ -1636,14 +1640,14 @@ function ActiveWorkout() {
       ] },
       { title: t('Add'), items: [
         { icon: 'plusCircle', label: t('Add exercise'), onClick: addExercise },
-        !editing && { icon: 'clipboard', label: t('Add routine'), sub: t('Bring another routine into this session'), onClick: addRoutineToSessionSheet },
+        !editing && showsPlanTools(S) && { icon: 'clipboard', label: t('Add routine'), sub: t('Bring another routine into this session'), onClick: addRoutineToSessionSheet },
       ] },
       { title: t('This workout'), items: [
         A.backfill && A.entries.length > 0 && { icon: 'checkCircle', label: t('Mark all sets done'), onClick: markAllDone },
         { icon: 'pencil', label: t('Rename workout'), onClick: renameWorkoutSheet },
-        { icon: 'layout', label: t('Layout'), sub: LAYOUT_LABEL[workoutView] || LAYOUT_LABEL.cards, onClick: openLayoutMenu },
+        showsLayoutChoice(S) && { icon: 'layout', label: t('Layout'), sub: LAYOUT_LABEL[workoutView] || LAYOUT_LABEL.cards, onClick: openLayoutMenu },
         { icon: 'note', label: A.note ? t('Edit session note') : t('Add session note'), onClick: sessionNoteSheet },
-        noProgSwitchable && { icon: 'chartLineSlash', label: t('Don’t count for progression'), sub: t('Every exercise in this workout'), on: sessionNoProg(A), onClick: toggleSessionNoProg },
+        noProgSwitchable && showsProgressionControls(S, null) && { icon: 'chartLineSlash', label: t('Don’t count for progression'), sub: t('Every exercise in this workout'), on: sessionNoProg(A), onClick: toggleSessionNoProg },
       ] },
     ],
   })

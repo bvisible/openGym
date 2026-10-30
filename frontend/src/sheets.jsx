@@ -92,7 +92,7 @@ import { hrLabel } from './lib/heart-rate.js'
 import { weeklyWeights } from './lib/bodyweight.js'
 import { workoutText } from './lib/workout-text.js'
 import { copyText } from './lib/clipboard.js'
-import { showsIntensifier, showsWarmupRamp, showsFailureControl, showsBackoffControl, showsTripleProgression, showsSetPlanControl, showsPerSideControl, showsPlateLoading, showsProgressionControls } from './lib/level-visibility.js'
+import { showsIntensifier, showsWarmupRamp, showsFailureControl, showsBackoffControl, showsTripleProgression, showsSetPlanControl, showsPerSideControl, showsPlateLoading, showsProgressionControls, showsWarmupRestRow, showsBackupsRow, showsBodyweightSwitch, showsMuscleInfo, showsPlanTools, showsSessionVolume, showsEstimated1RM } from './lib/level-visibility.js'
 import FloorPlanFor from './components/FloorPlan.jsx'
 import FloorPlanSheet from './components/FloorPlanSheet.jsx'
 //// Neoffice — see the same note in store/useStore.js: i18n-core, so mocks of i18n.js keep working.
@@ -2576,7 +2576,8 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
     </div>
     {/* The warm-ups' own rest: the profile's or like the work sets (no field, as always), no timer,
         or a time of their own. The last warm-up still rests the full work rest before the first work set. */}
-    {!cardio && <>
+    {/* //// Neoffice — Full only, unless this exercise already times its warm-ups (lib/level-visibility.js showsWarmupRestRow). */}
+    {!cardio && showsWarmupRestRow(st, c) && <>
       <div className="sect-b cfg-rest" style={{ marginBottom: 6 }}>
         <Row icon="timer" iconTint="var(--yellow)" title={t('Rest between warm-ups')} accessory="chevron"
           value={c.warmupRestOff === true ? t('No timer') : c.warmupRestSec > 0 ? fmtRest(c.warmupRestSec) : warmLikeAll}
@@ -2626,7 +2627,8 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
     </>}
     {/* Planned substitutes for this slot, in the routine editor: what the swap sheet offers first
         when the machine is taken. */}
-    {backupsEditable && <>
+    {/* //// Neoffice — Normal and up, or once the exercise has some (showsBackupsRow). */}
+    {backupsEditable && showsBackupsRow(st, c) && <>
       <div className="sect-b" style={{ marginBottom: 6 }}>
         <Row icon="swap" iconTint="var(--teal)" title={t('Backups')} accessory="chevron"
           value={(c.subs || []).length ? String((c.subs || []).filter(id => EXIDX[id]).length) : t('None')}
@@ -2638,12 +2640,13 @@ function ExConfig({ ex, existing, onSave: saveConfig, onDelete, onReplace, close
       </div>
     </>}
     {/* ---------- bodyweight + per side (issues #31/#32/#33) ---------- */}
-    {!cardio && <div className="sect-b" style={{ marginBottom: 8 }}>
-      <Row icon="figureStrength" iconTint="var(--acc)" title={t('Bodyweight')}
+    {!cardio && (showsBodyweightSwitch(st, bw) || showsPerSideControl(st, perSide)) && <div className="sect-b" style={{ marginBottom: 8 }}>
+      {/* //// Neoffice — the Bodyweight switch from Normal up, or once on (showsBodyweightSwitch): the catalogue knows which exercises are bodyweight. */}
+      {showsBodyweightSwitch(st, bw) && <Row icon="figureStrength" iconTint="var(--acc)" title={t('Bodyweight')}
         subtitle={bw ? (mode === 'time' ? t('No weight to enter. Just time the hold.') : t('No weight to enter. Just log the reps.')) : t('Ask for a weight on every set.')}>
         {/* //// Neoffice — bodyweight has no load to ask of a set: a per-set plan keeps its reps only. */}
         <Switch checked={bw} onChange={v => setC(x => { const next = { ...x, bodyweight: v, weight: v ? 0 : x.weight }; return v ? unloadSetPlan(next) : next })} />
-      </Row>
+      </Row>}
       {/* //// Neoffice — from the Normal level up; an exercise that IS per side keeps its switch (lib/level-visibility.js). */}
       {mode !== 'cardio' && showsPerSideControl(st, perSide) && <Row icon="sides" iconTint="var(--blue)" title={t('Per side')}
         subtitle={mode === 'time'
@@ -4126,20 +4129,23 @@ function FinishSummary({ w, prs, e1prs = [], additions = [], close }) {
     <h3 style={{ margin: '8px 0' }}>{t('Workout complete!')}</h3>
     <div className="tiles fin" style={{ textAlign: 'start' }}>
       <div className="tile"><div className="l">{t('Duration')}</div><div className="v" style={{ fontSize: '1.1rem' }}>{fmtDur(w.end - w.start)}</div></div>
-      <div className="tile"><div className="l">{t('Volume')}</div><div className="v" style={{ fontSize: '1.1rem' }}>{fmtVol(sessionVolume(w, st), st.unit)}</div></div>
+      {/* //// Neoffice — the Simple level (30.10, lib/level-visibility.js): how long, how many sets, a record when there is one; the volume, the estimated bests, the muscle figure and « keep what you added » are Normal's. */}
+      {showsSessionVolume(st) && <div className="tile"><div className="l">{t('Volume')}</div><div className="v" style={{ fontSize: '1.1rem' }}>{fmtVol(sessionVolume(w, st), st.unit)}</div></div>}
       <div className="tile wide"><div className="l">{t('Sets')}</div><div className="v" style={{ fontSize: '1.1rem' }}>{setsWorkCount(setsDone(w), workSetsDone(w))}</div></div>
-      <div className="tile narrow"><div className="l">{t('PRs')}</div><div className="v" style={{ fontSize: '1.1rem' }}>{prs.length || '–'}</div></div>
+      {(prs.length > 0 || showsSessionVolume(st)) && <div className="tile narrow"><div className="l">{t('PRs')}</div><div className="v" style={{ fontSize: '1.1rem' }}>{prs.length || '–'}</div></div>}
     </div>
-    {(prs.length > 0 || e1prs.length > 0) && <div style={{ textAlign: 'start', marginBottom: 12 }}>
+    {(prs.length > 0 || (e1prs.length > 0 && showsEstimated1RM(st))) && <div style={{ textAlign: 'start', marginBottom: 12 }}>
       {prs.map(id => <div key={id} className="small accent row" style={{ gap: 6, alignItems: 'flex-start' }}><Icon name="trophy" style={{ fontSize: 13, marginTop: 2, flex: 'none' }} /><span>{t('New PR:')} <span className={exerciseNameClass(EXIDX[id])}>{EXIDX[id] ? exerciseNameFor(EXIDX[id]) : id}</span></span></div>)}
-      {e1prs.map(p => <div key={p.id} className="small accent row" style={{ gap: 6, alignItems: 'flex-start' }}><Icon name="chartLine" style={{ fontSize: 13, marginTop: 2, flex: 'none' }} /><span>{t('Best estimated 1RM:')} <span className={exerciseNameClass(EXIDX[p.id])}>{EXIDX[p.id] ? exerciseNameFor(EXIDX[p.id]) : p.id}</span> · {fmtNum(p.est)} {st.unit}</span></div>)}
+      {showsEstimated1RM(st) && e1prs.map(p => <div key={p.id} className="small accent row" style={{ gap: 6, alignItems: 'flex-start' }}><Icon name="chartLine" style={{ fontSize: 13, marginTop: 2, flex: 'none' }} /><span>{t('Best estimated 1RM:')} <span className={exerciseNameClass(EXIDX[p.id])}>{EXIDX[p.id] ? exerciseNameFor(EXIDX[p.id]) : p.id}</span> · {fmtNum(p.est)} {st.unit}</span></div>)}
     </div>}
-    <h4 className="sec" style={{ textAlign: 'start' }}>{t('What you just trained')}</h4>
-    <BodyMap load={loadOfWorkouts([w])} body={st.body} />
-    <div style={{ height: 14 }} />
+    {showsMuscleInfo(st) && <>
+      <h4 className="sec" style={{ textAlign: 'start' }}>{t('What you just trained')}</h4>
+      <BodyMap load={loadOfWorkouts([w])} body={st.body} />
+      <div style={{ height: 14 }} />
+    </>}
     <LastAndNext st={st} w={w} />
     <CardioDone st={st} w={w} />
-    <KeepInRoutine additions={additions} />
+    {showsPlanTools(st) && <KeepInRoutine additions={additions} />}
     {/* The moment for a progress photo or the clip of a set: the workout is already saved, so
         what is added here goes straight onto its record. */}
     <div style={{ textAlign: 'start' }}><WorkoutMediaSection w={w} hint /></div>

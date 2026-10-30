@@ -29,7 +29,7 @@ import { POLICIES_FOR, POLICY_NAME, POLICY_DESC } from '../lib/progression.js'
 import BodyMap from '../components/BodyMap.jsx'
 import { loadOfRoutine, rankOf, MUSCLE_NAME } from '../lib/muscles.js'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
-import { showsRoutineSupersetLink, showsProgressionControls } from '../lib/level-visibility.js'
+import { showsRoutineSupersetLink, showsProgressionControls, showsMuscleInfo, showsPlanTools } from '../lib/level-visibility.js'
 import { clubAutoProgression } from '../lib/progression.js'
 
 export const ROUTINE_LONG_PRESS_MS = 380
@@ -481,7 +481,9 @@ export default function RoutineEdit() {
   //// Neoffice — what a routine with no rule of its own applies is the club's default (S.perms.autoProgression, lib/progression.js).
   const policy = r.prog ? (POLICIES_FOR.reps.includes(r.prog) ? r.prog : 'off') : (clubAutoProgression(S) ? 'linear' : 'off')
   //// Neoffice — the routine's progression rule and its « Deload routine » row are the progression section: from the Normal level up, kept once the routine has a rule or is a deload routine.
-  const showProg = showsProgressionControls(S, r)
+  //// Neoffice — a coach's « off » is written on every routine of its program: when the club writes the plan the row is a read-only line of it (mayEdit),
+  //// and « No automatic progression » alone is not a reason to draw it at Simple (30.10). A member who set « off » on a routine of their own keeps the row.
+  const showProg = showsProgressionControls(S, mayEdit || r.prog !== 'off' ? r : { ...r, prog: '' })
 
   return <div className="narrow">
     <div className="hdr">
@@ -618,7 +620,8 @@ export default function RoutineEdit() {
 
     {/* Coverage of the routine as planned, so a gap shows up while you're building it
         rather than after a month of training around it. */}
-    {r.ex.length > 0 && (() => {
+    {/* //// Neoffice — what the session hits: from Normal (lib/level-visibility.js showsMuscleInfo). */}
+    {r.ex.length > 0 && showsMuscleInfo(S) && (() => {
       const load = loadOfRoutine(r)
       const { worked } = rankOf(load)
       return <div className="card" style={{ marginTop: 12 }}>
@@ -635,14 +638,15 @@ export default function RoutineEdit() {
          is gone with it.) */}
     {mayEdit && showsRoutineSupersetLink(S) && <div className="small dim row" style={{ margin: '10px 2px', gap: 5 }}><Icon name="link" style={{ fontSize: 13 }} />{t('Tap the link button on an exercise to superset it with the one above. You’ll do them back-to-back.')}</div>}
     {/* //// Neoffice — a copy and a deletion change the plan: not when the club writes it (mayEdit). Printing does not. */}
-    {mayEdit && <><Button onClick={() => {
+    {mayEdit && showsPlanTools(S) && <><Button onClick={() => {
       const copy = copyRoutine(r, t('Copy'))
       update(s => { s.routines.push(copy) })
       nav('/plan/r/' + copy.id)
     }}>{t('Copy routine')}</Button>
     {/* //// Neoffice — end of the copy, drawn only when the member may edit (mayEdit). */}
     <div style={{ height: 10 }} /></>}
-    <Button disabled={!r.ex.length} onClick={printRoutine}>{t('Print / Save as PDF')}</Button>
+    {/* //// Neoffice — copying and printing a routine are the plan's tools: from Normal (showsPlanTools). */}
+    {showsPlanTools(S) && <Button disabled={!r.ex.length} onClick={printRoutine}>{t('Print / Save as PDF')}</Button>}
     {/* //// Neoffice — deleting the routine, only when the member may edit (mayEdit). */}
     {mayEdit && <><div style={{ height: 10 }} />
     <Button variant="danger" onClick={() => confirmSheet({

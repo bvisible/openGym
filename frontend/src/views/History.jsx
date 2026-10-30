@@ -7,6 +7,8 @@ import { Button } from '../components/ui.jsx'
 import Icon from '../components/Icon.jsx'
 import { dayNoteOf } from '../lib/day-notes.js'
 import { reportSheet } from '../components/ReportSheet.jsx'
+//// Neoffice — the performance report from the Normal level (lib/level-visibility.js showsReports).
+import { showsReports } from '../lib/level-visibility.js'
 
 // Newest first: every workout, and in between them the days off you left a note on (#261). A
 // note on a day that has a workout too stays in the day sheet; the workout speaks for that day.
@@ -45,7 +47,7 @@ export default function History() {
   return <>
     <div className="hdr"><button className="iconbtn" data-back="/stats" onClick={() => nav('/stats')} aria-label={t('Stats')}><Icon name="chevronLeft" /></button>
       <div style={{ flex: 1, marginInlineStart: 12 }}><h1>{t('History')}</h1><div className="sub">{tn('{0} workout', '{0} workouts', S.workouts.length)}</div></div>
-      {S.workouts.length > 0 && <button className="iconbtn" onClick={reportSheet} aria-label={t('Performance report')} title={t('Performance report')}><Icon name="note" /></button>}</div>
+      {S.workouts.length > 0 && showsReports(S) && <button className="iconbtn" onClick={reportSheet} aria-label={t('Performance report')} title={t('Performance report')}><Icon name="note" /></button>}</div>
     <Button icon="plus" onClick={logPastWorkoutSheet} style={{ marginBottom: 12 }}>{t('Log a past workout')}</Button>
     {rows.length ? <><div className="list">{(more ? rows.slice(0, shown) : rows).map(r => r.w
       //// Neoffice — a visible Share button on each row (the share-as-image sheet).

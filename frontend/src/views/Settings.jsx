@@ -52,7 +52,7 @@ import AppIconRow from '../components/AppIconRow.jsx'
 import { AnimationQualityRow } from '../components/Animations.jsx'
 import { Section, Row, SelectRow, Switch, Segmented, Button, SearchField } from '../components/ui.jsx'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
-import { showsEffortSetting, showsEquipmentProfiles, showsRestPauseSetting, showsWarmupRestSetting, showsOneRmFormula } from '../lib/level-visibility.js'
+import { showsEffortSetting, showsEquipmentProfiles, showsRestPauseSetting, showsWarmupRestSetting, showsOneRmFormula, showsSeasonalThemes, showsReports } from '../lib/level-visibility.js'
 import { PAGES, ROOT_GROUPS, pageVisible, searchSettings, pageTrail } from './settings-pages.js'
 import { platformNow } from '../lib/platform-now.js'
 import { pathBefore } from '../lib/nav.js'
@@ -856,10 +856,11 @@ export default function Settings({ page = null, find = null, via = null, entryKe
         </Row>
       </Section>
       {/* Halloween and whatever comes after it (lib/seasonal.js), on a page of their own. */}
-      <Section>
+      {/* //// Neoffice — from the Normal level (lib/level-visibility.js showsSeasonalThemes): no seasons for a beginner. */}
+      {showsSeasonalThemes(S, 'halloween') && <Section>
         <Row icon="pumpkin" iconTint="var(--orange)" title={t('Seasonal themes')} subtitle={t('Little extras for the time of year.')}
           value={activeSeasonTitle(S)} accessory="chevron" onClick={() => open('themes')} />
-      </Section>
+      </Section>}
       <Section title={t('On Home')}>
         {/* Membership QR codes on Home (views/CheckIn.jsx); off = no Home card, no route. */}
         <Row icon="qr" iconTint="var(--blue)" title={t('Gym check-in')}
@@ -925,9 +926,10 @@ export default function Settings({ page = null, find = null, via = null, entryKe
       <Section title={t('Back up')}>
         {/* //// Neoffice — the JSON backup only: no photos or videos on the club's server, so no zip. */}
         <Row icon="share" iconTint="var(--blue)" title={t('Export backup (JSON)')} accessory="chevron" onClick={doExport} />
-        <Row icon="note" iconTint="var(--green)" title={t('Performance report (PDF)')} subtitle={t('Charts, totals and every workout of the last days or weeks.')} accessory="chevron" onClick={reportSheet} />
+        {/* //// Neoffice — the report and the spreadsheet export: from the Normal level (showsReports). The JSON backup stays. */}
+        {showsReports(S) && <Row icon="note" iconTint="var(--green)" title={t('Performance report (PDF)')} subtitle={t('Charts, totals and every workout of the last days or weeks.')} accessory="chevron" onClick={reportSheet} />}
         {/* One row per set for spreadsheets and other apps (#647); our own importer reads it back. */}
-        <Row icon="share" iconTint="var(--green)" title={t('Export as spreadsheet (CSV)')} subtitle={t('Workouts, body weight and measurements')} accessory="chevron" onClick={csvExportSheet} />
+        {showsReports(S) && <Row icon="share" iconTint="var(--green)" title={t('Export as spreadsheet (CSV)')} subtitle={t('Workouts, body weight and measurements')} accessory="chevron" onClick={csvExportSheet} />}
         {/* 14 is AUTO_BACKUP_KEEP in lib/mobile.js, written out because the Settings tests mock
             that module wholesale; mobile.autobackup.test.js pins the two together. */}
         {MOBILE && <Row icon="folder" iconTint="var(--blue)" title={t('Auto-backup on changes')}

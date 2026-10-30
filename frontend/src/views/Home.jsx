@@ -20,6 +20,8 @@ import RecentWorkouts from '../components/RecentWorkouts.jsx'
 //// Neoffice — the badges the club put forward, first thing under the notices.
 import HomeBadges from '../components/HomeBadges.jsx'
 import MiniBodyMap from '../components/MiniBodyMap.jsx'
+//// Neoffice — what Home keeps at the Simple level (lib/level-visibility.js, 30.10): the notices, the badges, a coach's offer, today's session, the check-in codes.
+import { showsHomeExtras, showsMuscleInfo } from '../lib/level-visibility.js'
 import { queueOf, queueView, weekTally, pinState } from '../lib/queue.js'
 import { scheduleModeOf } from '../lib/rotation.js'
 import { useConnectionTrouble } from '../components/SyncBanner.jsx'
@@ -247,7 +249,7 @@ export default function Home() {
 
     {/* //// Neoffice — the room itself, one tap away: « voir le plan de la salle
         hors exercice » (2026-09-09). Only when the club drew one. */}
-    {floor.length > 0 && <div className="card tappable" style={{ cursor: 'pointer' }} {...tappable(() => floorPlanSheet(floor))}>
+    {floor.length > 0 && showsHomeExtras(S) && <div className="card tappable" style={{ cursor: 'pointer' }} {...tappable(() => floorPlanSheet(floor))}>
       <div className="row between">
         <div className="row" style={{ gap: 9 }}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="map" /></span>
           <div><div className="lbl2">{t('Floor plan')}</div><div className="small dim">{t('{0} zones · find every machine', floor.length)}</div></div></div>
@@ -277,7 +279,7 @@ export default function Home() {
          appointment you can miss, a challenge runs over weeks and waits.
          We show the member's OWN rank, never anyone else's — their score is
          health data, and it is asked for on the challenges screen. */}
-    {challenges.length > 0 && <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/challenges')}>
+    {challenges.length > 0 && showsHomeExtras(S) && <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/challenges')}>
       <div className="row between" style={{ marginBottom: 8 }}>
         <div className="lbl2">{t('Challenges')}</div>
         <span className="small acc">{t('See all')}</span>
@@ -347,7 +349,7 @@ export default function Home() {
         </div>
         {S.active ? <span className="tag" style={{ color: 'var(--orange)', background: 'color-mix(in srgb,var(--orange) 16%,transparent)' }}>{editingSaved ? t('Edit') : t('Resume')}</span>
           : doneToday ? <span className="tag" style={{ color: 'var(--green)', background: 'color-mix(in srgb,var(--green) 16%,transparent)' }}>{t('Done')}</span>
-          : routine ? <span className="row" style={{ gap: 8 }}><MiniBodyMap routines={todayRoutines} body={S.body} /><span className="tag acc">{t('Start')}</span></span>
+          : routine ? <span className="row" style={{ gap: 8 }}>{showsMuscleInfo(S) && <MiniBodyMap routines={todayRoutines} body={S.body} />}<span className="tag acc">{t('Start')}</span></span>
           : <Icon name="plus" className="chev" />}
       </div>
       {/* The row above starts today's plan in one tap, and so does the Start button in the tab
@@ -365,7 +367,7 @@ export default function Home() {
     </div>
 
     {/* //// Neoffice — the last three sessions, each with a visible Share button: sharing a session is one tap from the home screen. */}
-    <RecentWorkouts S={S} nav={nav} />
+    {showsHomeExtras(S) && <RecentWorkouts S={S} nav={nav} />}
 
     {/* Jump to the gym check-in cards (QR membership codes). Shown here as a quick tap on
         arrival at the gym; folds away per user via the "Gym check-in" switch in Settings. */}
@@ -396,6 +398,7 @@ export default function Home() {
       </div>
     )}
 
+    {/* //// Neoffice — the weight card stays on Home at EVERY level (Jérémy, 01.09: « relégué, PAS planqué »; views/bodyweight.reachable.test.jsx). */}
     {S.showWeightCard !== false && <div className="card">
       <div className="row between bw-head" style={{ marginBottom: 6 }}>
         <h2 style={{ margin: 0 }}>{t('Body weight')}</h2>
@@ -436,7 +439,7 @@ export default function Home() {
         : t("No weigh-ins yet. Log your weight to start the curve (we also ask before every workout).")}</div>}
     </div>}
 
-    <div className="card tappable" style={{ cursor: 'pointer' }} {...tappable(() => calendarSheet())}>
+    {showsHomeExtras(S) && <div className="card tappable" style={{ cursor: 'pointer' }} {...tappable(() => calendarSheet())}>
       <SeasonDeco spot="home-streak" />
       <div className="row between">
         <div>
@@ -451,6 +454,6 @@ export default function Home() {
         </div>
         <Icon name="calendar" className="chev" style={{ fontSize: 20 }} />
       </div>
-    </div>
+    </div>}
   </div>
 }

@@ -160,3 +160,55 @@ export const showsPlateLoading = (S, exId) => atLeast(S, 'normal')
  *  step, a deload, back-off sets, or is a deload routine. */
 export const showsProgressionControls = (S, config) => atLeast(S, 'normal')
   || Boolean(config && (config.prog || config.inc > 0 || config.deloadFactor != null || config.backoff === true || config.excludeFromProgression === true))
+
+//// ─── Simple, « de gros bébé » (30.10) ──────────────────────────────────────────────────────────────────
+//// Asked for by the pilot club, who had three of its members who did not know the journal try it: « trop d'informations, trop de
+//// texte, intimidant pour un débutant » (29.10), then by Jérémy: « un truc de Google, de gros bébé ». What Simple keeps is what
+//// a person does in front of a machine: the exercise (its picture), its sets, repetitions, weight and rest. Everything below leaves
+//// the screen at Simple and comes back at Normal. Same rule as above: the CONTROL goes, never the DATA, and what a plan, an
+//// exercise or a set already carries keeps its control.
+
+/** The exercise sheet's « Rest between warm-ups » row. Warm-ups are a Full technique here (their ramp and their in-session button are
+ *  hidden below it), so the row that times the rest between them goes with them, unless this exercise already carries one. */
+export const showsWarmupRestRow = (S, config) =>
+  atLeast(S, 'full') || Number((config && config.warmupSets) || 0) > 0
+  || (config && (config.warmupRestOff === true || Number(config.warmupRestSec) > 0)) || false
+
+/** The exercise sheet's « Backups » row (the planned replacement for a taken machine): from Normal, or once the exercise has some. */
+export const showsBackupsRow = (S, config) =>
+  atLeast(S, 'normal') || Boolean(config && Array.isArray(config.subs) && config.subs.length)
+
+/** The exercise sheet's « Bodyweight » switch: the catalogue already knows which exercises are bodyweight. From Normal, or once on. */
+export const showsBodyweightSwitch = (S, on) => atLeast(S, 'normal') || Boolean(on)
+
+/** What the plan and the session say about MUSCLES: the figure under a routine, in the workout's header and on the home card, the
+ *  muscle chip under an exercise's name. A picture, but a second thing to read on a screen that has one job. */
+export const showsMuscleInfo = S => atLeast(S, 'normal')
+
+/** The equipment and best-set chips under an exercise's name during a workout. */
+export const showsExerciseChips = S => atLeast(S, 'normal')
+
+/** Copying a routine and printing the plan: the plan's tools, from Normal. */
+export const showsPlanTools = S => atLeast(S, 'normal')
+
+/** The seasonal layer (Halloween's cobweb, bats and pumpkin, v1.4.3) and its settings: from Normal. A member who switched a season ON keeps it. */
+export const showsSeasonalThemes = (S, id) => atLeast(S, 'normal') || Boolean(id && S && S.seasonal && S.seasonal[id] === 'on')
+
+/** The performance report (PDF) and the exports (CSV): from Normal. */
+export const showsReports = S => atLeast(S, 'normal')
+
+/** The home screen: its extra cards. At Simple it keeps the club's notices, the badges, a coach's offer, today's session, the
+ *  check-in codes and the next class; the rest (floor plan, challenges, the week's recent workouts, weight, streak) is one tab away. */
+export const showsHomeExtras = S => atLeast(S, 'normal')
+
+/** The « Exercises » tab (the catalogue to browse): from Normal. At Simple the plan and the workout's own « Add exercise » reach the catalogue,
+ *  and a bar of five or six tabs has room to read. */
+export const showsLibraryTab = S => atLeast(S, 'normal')
+
+/** The live workout's menus: moving an exercise up or down, and choosing the layout (cards, list, focus): from Normal. At Simple the plan
+ *  already says the order, and the cards layout is the one a beginner meets. */
+export const showsExerciseOrder = S => atLeast(S, 'normal')
+export const showsLayoutChoice = S => atLeast(S, 'normal')
+
+/** The finish summary's volume tile (weight × reps, summed): from Normal. At Simple it says how long, how many sets, and a record when there is one. */
+export const showsSessionVolume = S => atLeast(S, 'normal')

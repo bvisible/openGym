@@ -3,7 +3,8 @@
 ////
 //// What an exercise's settings sheet holds at each detail level (12.10): at the first level only reps, sets,
 //// weight, rest and bodyweight; « different reps per set », « per side », plate loading and the progression section come from the
-//// second. And the rule they all follow: hide the control, never the data — an exercise that already uses one keeps it at Simple.
+//// second. Since 30.10 (« de gros bébé ») the bodyweight switch, the backups and the rest between warm-ups come from the second
+//// (Normal) and the third (Full) too. And the rule they all follow: hide the control, never the data — an exercise that already uses one keeps it at Simple.
 import React, { act } from 'react'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createRoot } from 'react-dom/client'
@@ -45,7 +46,7 @@ describe('exercise settings at each level', () => {
   })
   afterEach(() => { act(() => { mounted.splice(0).forEach(([root, host]) => { root.unmount(); host.remove() }) }) })
 
-  it('Simple: reps, sets, weight, rest and bodyweight — and none of the four', () => {
+  it('Simple: reps, sets, weight and rest — and none of what moved up', () => {
     setLevel('simple')
     const host = open()
     const text = host.textContent
@@ -54,7 +55,6 @@ describe('exercise settings at each level', () => {
     expect(text).toContain('Reps')
     expect(text).toContain('Weight (kg)')
     expect(titles(host)).toContain('Rest for this exercise')
-    expect(titles(host)).toContain('Bodyweight')
     // what moved up
     expect(titles(host)).not.toContain(PER_SET)
     expect(titles(host)).not.toContain(SIDE)
@@ -63,6 +63,31 @@ describe('exercise settings at each level', () => {
     expect(heads(host)).not.toContain('Progression')
     expect(labels(host)).not.toContain('Step (kg)')
     expect(text).not.toContain('Deload')
+    // 30.10 — the three the pilot club still saw at the first level
+    expect(titles(host)).not.toContain('Bodyweight')
+    expect(titles(host)).not.toContain('Rest between warm-ups')
+    expect(titles(host)).not.toContain('Backups')
+  })
+
+  it('Normal brings the bodyweight switch back, Full the rest between warm-ups', () => {
+    setLevel('normal')
+    expect(titles(open())).toContain('Bodyweight')
+    expect(titles(open())).not.toContain('Rest between warm-ups')
+    setLevel('full')
+    expect(titles(open())).toContain('Bodyweight')
+    expect(titles(open())).toContain('Rest between warm-ups')
+  })
+
+  describe('Simple keeps what the exercise already carries (30.10)', () => {
+    beforeEach(() => setLevel('simple'))
+    it('a bodyweight exercise keeps its switch (so it can be turned off)', () => {
+      expect(titles(open({ bodyweight: true, weight: 0 }))).toContain('Bodyweight')
+    })
+    it('warm-ups, or a rest of their own between them', () => {
+      expect(titles(open({ warmupSets: 2 }))).toContain('Rest between warm-ups')
+      expect(titles(open({ warmupRestSec: 30 }))).toContain('Rest between warm-ups')
+      expect(titles(open({ warmupRestOff: true }))).toContain('Rest between warm-ups')
+    })
   })
 
   it.each(['normal', 'full'])('%s: all four are there', level => {

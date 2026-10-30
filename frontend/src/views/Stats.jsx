@@ -39,7 +39,7 @@ import { Button, Segmented, SelectRow } from '../components/ui.jsx'
 import { tappable } from '../lib/use-sheet-keyboard.js'
 import { isWarmupRow } from '../lib/workout-model.js'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
-import { showsBodyMap, showsEffortHistogram, showsEstimated1RM } from '../lib/level-visibility.js'
+import { showsBodyMap, showsEffortHistogram, showsEstimated1RM, showsReports } from '../lib/level-visibility.js'
 import Badges from '../components/Badges.jsx'
 
 // Set 1 to 5 on the per-set chart — system colours, so each line keeps its hue in dark mode.
@@ -751,7 +751,7 @@ export default function Stats() {
   return <>
     <div className="hdr"><SeasonDeco spot="stats-hdr" /><div><h1>{t('Stats')}</h1><div className="sub">{t('Progress & history')}</div></div>
       <div className="row" style={{ gap: 8 }}>
-        <button className="iconbtn" onClick={reportSheet} aria-label={t('Performance report')} title={t('Performance report')}><Icon name="note" /></button>
+        {showsReports(S) && <button className="iconbtn" onClick={reportSheet} aria-label={t('Performance report')} title={t('Performance report')}><Icon name="note" /></button>}   {/* //// Neoffice — from Normal (showsReports) */}
         <button className="iconbtn" onClick={() => nav('/history')} aria-label={t('History')}><Icon name="history" /></button>
       </div></div>
 

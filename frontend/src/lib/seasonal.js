@@ -9,6 +9,9 @@
 // Absent reads as Auto, without the colours, and with the workout screen decorated.
 // What happens once a day (the pumpkin's surprise) is per device, in localStorage below.
 
+//// Neoffice — the level gate (see themeOn).
+import { showsSeasonalThemes } from './level-visibility.js'
+
 /* One entry per theme. `from` and `to` are [month, day], 1-based and inclusive, in local time:
    Halloween is on from 1 October to the end of 31 October and gone on 1 November. The strings
    are English keys, translated where they are shown. A theme with `colors` offers an accent
@@ -45,6 +48,9 @@ export function seasonChoice(S, id) {
 
 /** Whether the theme shows now: On always, Off never, Auto inside its window. */
 export function themeOn(S, id, now = new Date()) {
+  //// Neoffice — none of it at the Simple level (lib/level-visibility.js showsSeasonalThemes): a cobweb in the corner of every screen is
+  //// one more thing to read for a beginner. A member who switched the season ON keeps it.
+  if (!showsSeasonalThemes(S, id)) return false
   const c = seasonChoice(S, id)
   return c === 'on' || (c === 'auto' && inSeason(id, now))
 }

@@ -1,0 +1,21 @@
+/* //// Neoffice — added file (no upstream equivalent).
+   The Simple level reads bigger (30.10). The pilot club's members found the text too small (29.10): most of a screen is 13 px
+   secondary text, the muscle and equipment chips are 12, the tab labels 9 or 10. At Simple nothing a person has to read is under
+   13 px, and what they read most is 15. The rules sit behind html[data-level="simple"] (App.jsx sets it from lib/level.js), so
+   Normal and Full are what they were. Specificity is one attribute and one class above index.css's, which loads first. */
+html[data-level="simple"] .small,
+html[data-level="simple"] .sect-f,
+html[data-level="simple"] .lrow-s,
+html[data-level="simple"] .item .ss{font-size:15px}
+html[data-level="simple"] h4.sec,
+html[data-level="simple"] .card h2,
+html[data-level="simple"] .sect-t,
+html[data-level="simple"] .tile .l{font-size:15px}
+html[data-level="simple"] .tag{font-size:14px}
+html[data-level="simple"] .badge-name{font-size:14px}
+html[data-level="simple"] .badge-sub{font-size:13px}
+html[data-level="simple"] .wday .lbl,
+html[data-level="simple"] .lbl2{font-size:13px}
+/* The bar at the bottom: five or six tabs instead of seven, and labels one step up (they were 9 px at seven). */
+html[data-level="simple"] #tabbar button{font-size:12px}
+html[data-level="simple"] #tabbar[data-tabs="7"] button{font-size:11px}

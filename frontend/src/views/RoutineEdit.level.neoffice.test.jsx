@@ -73,6 +73,32 @@ describe('the routine screen at each detail level', () => {
     expect(rowTitled('Progression')).toBeTruthy()
   })
 
+  it('Simple: when the club writes the plan, its « No automatic progression » does not keep the rows on (30.10)', () => {
+    renderRoutine({ level: 'simple', routine: { prog: 'off' }, perms: { editPlan: false } })
+    expect(rowTitled('Progression')).toBeUndefined()
+    expect(rowTitled('Deload routine')).toBeUndefined()
+  })
+
+  it('Simple: a member who set « off » on a routine of their own keeps the row', () => {
+    renderRoutine({ level: 'simple', routine: { prog: 'off' } })
+    expect(rowTitled('Progression')).toBeTruthy()
+  })
+
+  it('Simple: no copy, no print, no muscle figure under the exercises (30.10); Normal brings them back', () => {
+    const ex = [{ id: '0009', sets: 3, reps: 8, mode: 'reps' }]
+    const buttons = () => [...container.querySelectorAll('button')].map(b => b.textContent.trim())
+    renderRoutine({ level: 'simple', routine: { ex } })
+    expect(buttons()).not.toContain('Copy routine')
+    expect(buttons()).not.toContain('Print / Save as PDF')
+    expect(container.textContent).not.toContain('What this session hits')
+    expect(buttons()).toContain('Delete routine')
+    act(() => root.unmount()); container.remove()
+    renderRoutine({ level: 'normal', routine: { ex } })
+    expect(buttons()).toContain('Copy routine')
+    expect(buttons()).toContain('Print / Save as PDF')
+    expect(container.textContent).toContain('What this session hits')
+  })
+
   it('Simple keeps the rows for a deload routine', () => {
     renderRoutine({ level: 'simple', routine: { excludeFromProgression: true } })
     expect(rowTitled('Deload routine')).toBeTruthy()

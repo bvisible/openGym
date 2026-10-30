@@ -3303,6 +3303,34 @@ describe('Workout exercise tags', () => {
   })
 })
 
+//// Neoffice — Simple (30.10, « de gros bébé »): the picture and the name say what the exercise is; no muscle, equipment or best-set chip under
+//// them. Normal brings the chips back.
+describe('Workout exercise chips by detail level', () => {
+  afterEach(unmount)
+  const chips = () => [...container.querySelectorAll('.tag')].map(tag => tag.textContent.trim())
+  const custom = async () => {
+    const { registerCustom } = await import('../lib/exercises.js')
+    registerCustom([{ id: 'cqa2', n: 'QA Custom Row', bp: 'back', eq: 'cable', custom: true, tg: 'lats', sm: [], primaries: ['lats'], secondaries: [], muscleGroups: ['lats'] }])
+    return () => registerCustom([])
+  }
+
+  it('Simple: none', async () => {
+    const done = await custom()
+    try {
+      await mount([exercise('cqa2', [false])], 0, { level: 'simple' })
+      expect(chips()).toEqual([])
+    } finally { done() }
+  })
+
+  it('Normal: they are there', async () => {
+    const done = await custom()
+    try {
+      await mount([exercise('cqa2', [false])], 0, { level: 'normal' })
+      expect(chips().length).toBeGreaterThan(0)
+    } finally { done() }
+  })
+})
+
 describe('set-row column header', () => {
   // The L/R rows carry a badge in front of the weight cell that a straight row does not have, so
   // the shared header needs to know it is sitting over per-side rows to offset its columns (QA C5).

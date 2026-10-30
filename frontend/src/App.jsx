@@ -46,6 +46,8 @@ import PrepCountdown from './components/PrepCountdown.jsx'
 //// (see views/SignIn.jsx and commit 2a97a09b). Upstream's imports of it and of
 //// the device-link redeem (components/Passkeys.jsx) came back with the merge
 //// and point at files we do not have.
+//// Neoffice — the detail level (lib/level.js), put on the root element for src/simple-level.css.
+import { levelOf } from './lib/level.js'
 import { SeasonalLayer } from './components/Seasonal.jsx'
 import { useAnimPacksBoot } from './components/Animations.jsx'
 import MobileOnboarding from './views/MobileOnboarding.jsx'
@@ -192,6 +194,9 @@ function Shell() {
   // Same shape as the language: a module-level display setting, pushed when it changes (#139).
   useEffect(() => { setWeightDecimals(S.wdec) }, [S.wdec])
   useEffect(() => { document.documentElement.lang = lang }, [langV, lang])
+  //// Neoffice — the detail level on the root element, for src/simple-level.css (the Simple level reads bigger).
+  const level = levelOf(S)
+  useEffect(() => { document.documentElement.dataset.level = level }, [level])
   // Forward navigation starts at the top; going back lands where you left off.
   // The position is recorded from scroll events rather than read at route
   // change, because by then a shorter page may already have clamped it.

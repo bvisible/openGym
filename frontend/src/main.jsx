@@ -11,6 +11,8 @@ import { startNativeKeyboard } from './lib/native-keyboard.js'
 import './admin.css'
 import './coach.css'
 import './index.css'
+//// Neoffice — the Simple level reads bigger (src/simple-level.css).
+import './simple-level.css'
 import { hideBoot, handOverFromLaunchScreen } from './lib/boot.js'
 
 // `beforeinstallprompt` fires once, early — before any component mounts. Caught
