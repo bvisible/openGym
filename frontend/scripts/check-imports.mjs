@@ -24,13 +24,16 @@ import { join, relative } from 'node:path'
 const SRC = new URL('../src/', import.meta.url).pathname
 // Data packs: thousands of keys, no code worth scanning.
 const SKIP_DIRS = ['locales', 'instr', 'exercise-names', 'names']
+//// Generated data, one line of JSON: exercise names such as "assisted straight arms lying stretch (chest)" read as a call of lib/challenges.js's
+//// stretch() (upstream v1.4.4 exports one). Found on the v1.4.4 merge.
+const SKIP_FILES = ['exercises-data.js']
 
 function walk(dir, out = []) {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry)
     if (statSync(full).isDirectory()) {
       if (!SKIP_DIRS.includes(entry)) walk(full, out)
-    } else if (/\.jsx?$/.test(entry)) {
+    } else if (/\.jsx?$/.test(entry) && !SKIP_FILES.includes(entry)) {
       out.push(full)
     }
   }
@@ -95,6 +98,9 @@ for (const file of files) {
   //// `subscribe(fn) {` in an object or a class were reported as missing imports of lib/anim-packs.js's own `remove` and
   //// `subscribe` (upstream v1.4.2 exports both). Found on the v1.4.2 merge.
   for (const m of src.matchAll(/^\s*(?:static\s+)?(?:async\s+)?(?:get\s+|set\s+)?\*?\s*([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{/gm)) known.add(m[1])
+  //// The same inside an object literal written on one line, with a space before the parenthesis: `return { remove () {} }` in
+  //// lib/watch-relay.js was reported as a missing import of lib/anim-packs.js's `remove` (upstream v1.4.4). Found on the v1.4.4 merge.
+  for (const m of src.matchAll(/[{,]\s*(?:async\s+)?([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{/g)) known.add(m[1])
   // Bare single-parameter arrows: `x => …`
   for (const m of src.matchAll(/(?:^|[^\w$.])([A-Za-z_$][\w$]*)\s*=>/g)) known.add(m[1])
 
