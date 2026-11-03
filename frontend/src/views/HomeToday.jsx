@@ -90,7 +90,7 @@ function Hero({ S, nav, hero, today, iso }) {
       </div>)}</div>}
 
     <div className="small dim home-hero-line" {...tappable(() => calendarSheet())}>
-      {done}{planned ? ' / ' + planned : ''} {t('this week')}{streak > 0 ? ' · ' + streakLine(streak) : ''}
+      {done}{planned ? ' / ' + planned : ''} {t('this week')}{streak > 0 && isOn(S, 'motivation') ? ' · ' + streakLine(streak) : ''}
     </div>
 
     {/* The way to another session: both the card and the Start button jump into the planned one, so this is the door to a freestyle session.
@@ -138,7 +138,8 @@ function CoachCard({ nav, doors }) {
 }
 
 function WeightRow({ S }) {
-  if (S.showWeightCard === false) return null
+  //// Neoffice — Settings → Modules: the weight is the Body module's, as upstream's home draws it (`on('body')`).
+  if (S.showWeightCard === false || !isOn(S, 'body')) return null
   const bw = lastBW(S)
   const prev = S.bodyweight.length > 1 ? S.bodyweight[S.bodyweight.length - 2] : null
   const delta = bw && prev ? bw.w - prev.w : null
@@ -188,7 +189,7 @@ export default function HomeToday() {
     <ToRead offers={feed.offers} notices={feed.notices} close={feed.close} />
     <HomeBadges onOpen={() => nav('/stats')} />
     {/* The challenges live with the classes (Planning); with no classes segment in the bar there is no such place, so they stay here. */}
-    {!classesPlaces({ mobile: MOBILE, demo: DEMO, perms: S.perms, classesTab: S.classesTab }).bar && showsHomeExtras(S) && <ChallengesCard />}
+    {!classesPlaces({ mobile: MOBILE, demo: DEMO, perms: S.perms, classesTab: S.classesTab }).bar && showsHomeExtras(S) && isOn(S, 'motivation') && <ChallengesCard />}
     <CoachCard nav={nav} doors={doors} />
     <WeightRow S={S} />
   </div>

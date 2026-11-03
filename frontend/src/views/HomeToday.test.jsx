@@ -215,6 +215,20 @@ describe('the weight', () => {
     await mount({ showWeightCard: false })
     expect(host.querySelector('.home-weight')).toBeNull()
   })
+
+  //// Neoffice — Settings → Modules (v1.4.4): the weight is the Body module's, on this home as on upstream's.
+  it('goes with the Body module, and a club that starts a member on « Just training » starts without it', async () => {
+    await mount({ modules: { body: false } })
+    expect(host.querySelector('.home-weight')).toBeNull()
+  })
+  it('is not there for a member who has not chosen under the club\'s « Just training »', async () => {
+    await mount({ perms: { defaultModules: 'training' } })
+    expect(host.querySelector('.home-weight')).toBeNull()
+  })
+  it('comes back when the member turns Body on over the club\'s default', async () => {
+    await mount({ perms: { defaultModules: 'training' }, modules: { body: true } })
+    expect(host.querySelector('.home-weight')).toBeTruthy()
+  })
 })
 
 describe('what moved elsewhere is not here', () => {
