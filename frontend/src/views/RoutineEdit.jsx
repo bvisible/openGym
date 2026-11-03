@@ -11,26 +11,24 @@ import { t, exerciseNameFor, exerciseNameClass } from '../lib/i18n.js'
 import { supersetUnits, moveRoutineEntry, cleanupSg, exLine, pickedExerciseConfig } from '../lib/history.js'
 import { Thumb } from '../components/Media.jsx'
 //// Neoffice — exerciseDetailSheet: what a row opens when the club writes the member's plan (see mayEdit).
-import { glyphPicker, exercisePicker, exConfigSheet, confirmSheet, exerciseDetailSheet, supersetSheet } from '../sheets.jsx'
+import { glyphPicker, exercisePicker, exConfigSheet, confirmSheet, exerciseDetailSheet, supersetSheet, printPlanSheet } from '../sheets.jsx'
 import { supersetMeta, setSupersetMeta } from '../lib/superset-meta.js'
 import { fmtRest } from '../lib/duration.js'
 import Icon from '../components/Icon.jsx'
 import { glyphOf } from '../lib/glyphs.js'
 import { Button, Row, SelectRow, Switch } from '../components/ui.jsx'
+import { shareRoutineSheet } from '../components/RoutineShare.jsx'
 import SwipeRow from '../components/SwipeRow.jsx'
 import { workoutControls } from '../lib/workout-controls.js'
 import { copyRoutine, deleteRoutine, replaceSlotExercise } from '../lib/routines.js'
-import { planPrintHTML, printPlan } from '../lib/plan-share.js'
-import { printOptions } from '../lib/print-doc.js'
 import { markEntryUndone } from '../lib/sync-merge.js'
-import { MOBILE, printHtml } from '../lib/mobile.js'
 import { speedUnitOf } from '../lib/speed.js'
-import { POLICIES_FOR, POLICY_NAME, POLICY_DESC } from '../lib/progression.js'
+import { POLICIES_FOR, POLICY_NAME, POLICY_DESC, profileRule } from '../lib/progression.js'
 import BodyMap from '../components/BodyMap.jsx'
 import { loadOfRoutine, rankOf, MUSCLE_NAME } from '../lib/muscles.js'
 //// Neoffice — what the detail level shows (Simple / Normal / Complete); see lib/level-visibility.js.
 import { showsRoutineSupersetLink, showsProgressionControls, showsMuscleInfo, showsPlanTools } from '../lib/level-visibility.js'
-import { clubAutoProgression } from '../lib/progression.js'
+import { viewTarget, exUnitOf } from '../lib/ex-unit.js'
 
 export const ROUTINE_LONG_PRESS_MS = 380
 export const ROUTINE_DRAG_SLOP = 8
@@ -432,16 +430,12 @@ export default function RoutineEdit() {
       exConfigSheet(ex, next, cfg => commit(ex, current => ({ id: ex.id, sg: current.sg, ...cfg })), null, r, null, null, t('Replace'), { backups: true })
     }, { title: t('Replace exercise'), like: openedOn, backups: r.ex[i]?.subs })
   }
-  // This routine on paper (#282): the weekly printout's page for one session, through the same
-  // two print paths — the browser's print dialog (→ Save as PDF) on the web, the native Print
-  // plugin in the app, where the WebView has no window.print().
-  const printRoutine = () => {
-    const owner = useStore.getState().user?.name || ''
-    // Android's print manager refuses a job without a name. The editor never leaves a name blank,
-    // but a routine that arrived from an import or another client may have none.
-    if (MOBILE) printHtml(planPrintHTML(S, owner, { routineId: id }), r.name || t('Routine'), printOptions()).catch(() => { /* dismissed */ })
-    else printPlan(S, owner, { routineId: id })
-  }
+  // This routine on paper (#282): the print step (sheets.jsx printPlanSheet, "With pictures"
+  // #817), then the weekly printout's page for one session through the same two print paths: the
+  // browser's print dialog (→ Save as PDF) on the web, the native Print plugin in the app.
+  // Android's print manager refuses a job without a name. The editor never leaves a name blank,
+  // but a routine that arrived from an import or another client may have none.
+  const printRoutine = () => printPlanSheet({ routineId: id, name: r.name || t('Routine') })
   const toggleLink = i => edit(ex => {
     if (i < 1) return
     const cur = ex[i], prev = ex[i - 1]
@@ -479,18 +473,18 @@ export default function RoutineEdit() {
   //// does not know is no progression. The row showed such a value raw (« none », written by the
   //// club's server for its sample program) over the description of linear progression.
   //// Neoffice — what a routine with no rule of its own applies is the club's default (S.perms.autoProgression, lib/progression.js).
-  const policy = r.prog ? (POLICIES_FOR.reps.includes(r.prog) ? r.prog : 'off') : (clubAutoProgression(S) ? 'linear' : 'off')
+  const policy = r.prog ? (POLICIES_FOR.reps.includes(r.prog) ? r.prog : 'off') : profileRule(S)
   //// Neoffice — the routine's progression rule and its « Deload routine » row are the progression section: from the Normal level up, kept once the routine has a rule or is a deload routine.
   const showProg = showsProgressionControls(S, r)
 
   return <div className="narrow">
     <div className="hdr">
-      <button className="iconbtn" data-back="/plan" onClick={() => nav('/plan')} aria-label={t('Plan')}><Icon name="chevronLeft" /></button>
+      <button className="iconbtn" data-back="/plan" data-tour="routine-back" onClick={() => nav('/plan')} aria-label={t('Plan')}><Icon name="chevronLeft" /></button>
       <div style={{ flex: 1, margin: '0 12px' }}>
         {/* //// Neoffice — read, not edited, when the club writes the plan (mayEdit). */}
-        {mayEdit
-          ? <input className="input" defaultValue={r.name} style={{ fontWeight: 600, fontSize: 20, letterSpacing: '-.021em' }}
-            onChange={e => update(s => { s.routines.find(x => x.id === id).name = e.target.value.trim() || t('Routine') })} />
+            {mayEdit
+              ? <input className="input" data-tour="routine-name" aria-label={t('Routine name')} defaultValue={r.name} style={{ fontWeight: 600, fontSize: 'var(--fs-title3)', letterSpacing: '-.021em' }}
+                onChange={e => update(s => { s.routines.find(x => x.id === id).name = e.target.value.trim() || t('Routine') })} />
           : <h1 style={{ fontSize: 20, letterSpacing: '-.021em', margin: 0 }}>{r.name}</h1>}
       </div>
       {/* //// Neoffice — the icon is shown, not picked, when the club writes the plan (mayEdit). */}
@@ -548,7 +542,7 @@ export default function RoutineEdit() {
       <h4 className="sec">{t('Exercises')}</h4>
       {/* //// Neoffice — nothing is added, moved, linked or removed when the club writes the plan
           //// (mayEdit): no Add button, no reordering list, no grip, arrows, link or swipe. */}
-      {mayEdit && <Button size="sm" variant="tinted" icon="plus" onClick={addExercise}>{t('Add exercise')}</Button>}
+          {mayEdit && <Button size="sm" variant="tinted" icon="plus" data-tour="routine-add" onClick={addExercise}>{t('Add exercise')}</Button>}
     </div>
     {r.ex.length ? <div ref={mayEdit ? reorder.listRef : undefined} onClickCapture={mayEdit ? reorder.onClickCapture : undefined}
       className={'list routine-list' + (reorder.drag ? ' is-reordering' : '')}>{r.ex.map((e, i) => {
@@ -564,35 +558,32 @@ export default function RoutineEdit() {
       const removeHere = () => removeRoutineExercise(id, i)
       // A tap anywhere on the row opens the exercise's sheet; its Remove is the keyboard's way
       // to take it out. The row itself is no button (it holds the link and Move buttons, which a
-      // screen reader would lose inside one): the name is, a real <button> a click bubbles up
-      // from. The long press treats it as the row (data-row-open, useRoutineReorder).
-      //// Neoffice — read-only (mayEdit): the row opens the exercise itself, not its settings in this routine.
-      const item = <div className={'item' + (inSS.has(i) ? ' in-ss' : '')} onClick={() => {
-          if (!mayEdit) { exerciseDetailSheet(ex); return }
-          exConfigSheet(ex, e, cfg => edit(x => { x[i] = { id: x[i].id, sg: x[i].sg, ...(x[i].sg ? { sgName: x[i].sgName, sgRest: x[i].sgRest } : {}), ...cfg }; cleanupSg(x) }), removeHere, r, null, () => replace(i), undefined, { backups: true })
-        }}>
+      // screen reader would lose inside one): the name is, a real <button> stretched over the row
+      // (.tap-main, card dismiss pass), with the rail's buttons above it, so pressing Move up
+      // neither opens the sheet nor fills the row. The long press treats it as the row
+      // (data-row-open, useRoutineReorder).
+          //// Neoffice — read-only (mayEdit): the row opens the exercise itself, not its settings in this routine.
+      const openEx = () => mayEdit ? exConfigSheet(ex, e, cfg => edit(x => { x[i] = { id: x[i].id, sg: x[i].sg, ...(x[i].sg ? { sgName: x[i].sgName, sgRest: x[i].sgRest } : {}), ...cfg }; cleanupSg(x) }), removeHere, r, null, () => replace(i), undefined, { backups: true }) : exerciseDetailSheet(ex)
+      const item = <div className={'item tap-host' + (inSS.has(i) ? ' in-ss' : '')}>
           {/* Shown on pointer devices only (index.css .routine-grip); the Move buttons and the
               long press stay the way in for a keyboard and a finger. */}
           {/* //// Neoffice — no grip, link or arrows when the club writes the plan (mayEdit). */}
           {mayEdit && <span className="routine-grip" data-drag-handle aria-hidden="true" title={t('Reorder exercises')}><Icon name="grip" /></span>}
           {ssPos.has(i) && <span className="ss-pos" aria-label={t('Superset position {0}', ssPos.get(i))}>{ssPos.get(i)}</span>}
           <Thumb ex={ex} />
-          <button type="button" className="grow item-open" data-row-open><span className={`tt ${exerciseNameClass(ex)}`}>{exerciseNameFor(ex)}</span><span className="ss">{exLine(e, S.unit, speedUnitOf(S))}</span>
+          <button type="button" className="grow item-open tap-main" data-row-open aria-haspopup="dialog" onClick={openEx}><span className={`tt ${exerciseNameClass(ex)}`}>{exerciseNameFor(ex)}</span><span className="ss">{exLine(viewTarget(S, e.id, e), exUnitOf(S, e.id), speedUnitOf(S))}</span>
             {e.note && <span className="small dim" style={{ marginTop: 2 }}>{e.note}</span>}</button>
           {noEquip && <span className="tag" style={{ color: 'var(--orange)', borderColor: 'var(--orange)' }} title={t('Needs {0}, which isn’t in your active profile', t(ex.eq))}><Icon name="warning" /></span>}
           {/* //// Neoffice — the link and the arrows, drawn only when the member may edit (mayEdit). */}
-          {mayEdit && <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 'none', alignItems: 'center' }}>
-            {/* //// Neoffice — the link is offered at every level (showsRoutineSupersetLink): the club's coach
-                 chains two or three exercises for beginners. It used to be hidden at the simple level. */}
-            {i > 0 && showsRoutineSupersetLink(S) && <button className={'iconbtn' + (linkedPrev ? ' on-ss' : '')} title={t('Superset with exercise above')} style={{ width: 32, height: 28, borderRadius: 8, fontSize: 15 }} onClick={ev => { ev.stopPropagation(); toggleLink(i) }}><Icon name="link" /></button>}
-            <div style={{ display: 'flex', gap: 2 }}>
-              <button className="iconbtn" aria-label={t('Move up')} title={leavesUp ? t('Move out of the superset') : t('Move up')} disabled={!moveRoutineEntry(r.ex, i, -1)} style={{ width: 28, height: 24, borderRadius: 7, fontSize: 12 }} onClick={ev => { ev.stopPropagation(); move(i, -1) }}><Icon name="chevronUp" /></button>
-              <button className="iconbtn" aria-label={t('Move down')} title={leavesDown ? t('Move out of the superset') : t('Move down')} disabled={!moveRoutineEntry(r.ex, i, 1)} style={{ width: 28, height: 24, borderRadius: 7, fontSize: 12 }} onClick={ev => { ev.stopPropagation(); move(i, 1) }}><Icon name="chevronDown" /></button>
-            </div>
-            {/* //// Neoffice — end of the controls drawn only when the member may edit (mayEdit). */}
-          </div>}
+              {mayEdit && <div className="re-rail">
+                {/* //// Neoffice — the link is offered at every level (showsRoutineSupersetLink): the club's coach chains two or three exercises for beginners. */}
+            {i > 0 && showsRoutineSupersetLink(S) ? <button className={'iconbtn re-link' + (linkedPrev ? ' on-ss' : '')} title={t('Superset with exercise above')} aria-label={t('Superset with exercise above')} aria-pressed={!!linkedPrev} onClick={() => toggleLink(i)}><Icon name="link" /></button>
+              : <span className="re-link" aria-hidden="true" />}
+            <button className="iconbtn re-up" aria-label={t('Move up')} title={leavesUp ? t('Move out of the superset') : t('Move up')} disabled={!moveRoutineEntry(r.ex, i, -1)} onClick={() => move(i, -1)}><Icon name="chevronUp" /></button>
+            <button className="iconbtn re-down" aria-label={t('Move down')} title={leavesDown ? t('Move out of the superset') : t('Move down')} disabled={!moveRoutineEntry(r.ex, i, 1)} onClick={() => move(i, 1)}><Icon name="chevronDown" /></button>
+              </div>}
         </div>
-      return <div key={i} data-routine-row data-ex-index={i}
+      return <div key={i} data-routine-row data-ex-index={i} data-tour={i === 0 ? 'routine-ex' : undefined}
         className={'routine-drag-row' + (isDragging ? ' is-dragging' : '')}
         style={isDragging ? { transform: `translate3d(0, ${reorder.drag.deltaY}px, 0)` } : undefined}>
         {unitFirst.has(i) && (() => {
@@ -631,29 +622,29 @@ export default function RoutineEdit() {
       </div>
     })()}
 
-    {/* //// Neoffice — the hint goes with the button it describes (both drawn at every level since the link is
-         offered everywhere). ("Add exercise" heads the list since upstream v1.3.11; ours under the last exercise
-         is gone with it.) */}
+        {/* //// Neoffice — the hint goes with the button it describes (the link is offered at every level). */}
     {mayEdit && showsRoutineSupersetLink(S) && <div className="small dim row" style={{ margin: '10px 2px', gap: 5 }}><Icon name="link" style={{ fontSize: 13 }} />{t('Tap the link button on an exercise to superset it with the one above. You’ll do them back-to-back.')}</div>}
-    {/* //// Neoffice — a copy and a deletion change the plan: not when the club writes it (mayEdit). Printing does not. */}
-    {mayEdit && showsPlanTools(S) && <><Button onClick={() => {
-      const copy = copyRoutine(r, t('Copy'))
-      update(s => { s.routines.push(copy) })
-      nav('/plan/r/' + copy.id)
-    }}>{t('Copy routine')}</Button>
-    {/* //// Neoffice — end of the copy, drawn only when the member may edit (mayEdit). */}
-    <div style={{ height: 10 }} /></>}
-    {/* //// Neoffice — copying and printing a routine are the plan's tools: from Normal (showsPlanTools). */}
-    {showsPlanTools(S) && <Button disabled={!r.ex.length} onClick={printRoutine}>{t('Print / Save as PDF')}</Button>}
-    {/* //// Neoffice — deleting the routine, only when the member may edit (mayEdit). */}
-    {mayEdit && <><div style={{ height: 10 }} />
-    <Button variant="danger" onClick={() => confirmSheet({
-      title: t('Delete routine?'), message: t('“{0}” and its exercises will be removed.', r.name), confirmText: t('Delete'), danger: true,
-      onConfirm: () => {
-        update(s => { deleteRoutine(s, id) })
-        nav('/plan')
-      }
-      //// Neoffice — drawn only when the member may edit (mayEdit).
-    })}>{t('Delete routine')}</Button></>}
+        {/* //// Neoffice — a copy, a share and a print are the plan's tools: from Normal (showsPlanTools); a copy and a deletion change the plan,
+            so not when the club writes it (mayEdit). */}
+        {showsPlanTools(S) && <div className="sect-b re-acts">
+          {mayEdit && <button type="button" className="lrow tap" onClick={() => {
+            const copy = copyRoutine(r, t('Copy'))
+            update(s => { s.routines.push(copy) })
+            nav('/plan/r/' + copy.id)
+          }}><Icon name="copy" className="re-act-i" /><span className="lrow-m"><span className="lrow-t">{t('Copy routine')}</span></span></button>}
+          {/* A link a friend taps to add this routine to their own openGym (components/RoutineShare.jsx). */}
+      <button type="button" className="lrow tap" disabled={!r.ex.length} onClick={() => shareRoutineSheet(r)}><Icon name="share" className="re-act-i" /><span className="lrow-m"><span className="lrow-t">{t('Share with a friend')}</span></span></button>
+      <button type="button" className="lrow tap" disabled={!r.ex.length} onClick={printRoutine}><Icon name="download" className="re-act-i" /><span className="lrow-m"><span className="lrow-t">{t('Print / Save as PDF')}</span></span></button>
+        </div>}
+        {mayEdit && <div className="sect-b re-acts re-danger">
+      <button type="button" className="lrow tap danger" onClick={() => confirmSheet({
+        title: t('Delete routine?'), message: t('“{0}” and its exercises will be removed.', r.name), confirmText: t('Delete'), danger: true,
+        onConfirm: () => {
+          update(s => { deleteRoutine(s, id) })
+          nav('/plan')
+        }
+      })}><Icon name="trash" className="re-act-i" /><span className="lrow-m"><span className="lrow-t">{t('Delete routine')}</span>
+        <span className="lrow-s">{t('“{0}” and its exercises will be removed.', r.name)}</span></span></button>
+        </div>}
   </div>
 }

@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import { useStore } from '../store/useStore.js'
 import { coachAvailable } from './coach.js'
+import { isOn } from './modules.js'
 import { myCoach } from './api.js'
 import { MOBILE } from './mobile.js'
 import { DEMO } from './demo.js'
@@ -18,6 +19,8 @@ export function useCoachDoors() {
   const config = useStore(s => s.config)
   const user = useStore(s => s.user)
   const coachMode = useStore(s => s.coachLocal?.mode)
+  // Settings → Modules: the AI Coach is the member's to switch off (use-coach-gate.js reads it for the routes). Their club's human coach is not a module: the thread stays.
+  const coachOn = useStore(s => isOn(s.S, 'coach'))
   const [human, setHuman] = useState(known)
   useEffect(() => {
     if (!user || MOBILE || DEMO) return undefined
@@ -32,6 +35,6 @@ export function useCoachDoors() {
       .catch(() => {})
     return () => { alive = false }
   }, [user])
-  const nora = coachAvailable(config, user, { demo: DEMO, mobile: MOBILE, coachMode })
+  const nora = coachOn && coachAvailable(config, user, { demo: DEMO, mobile: MOBILE, coachMode })
   return { nora, human: human === true, any: nora || human === true }
 }

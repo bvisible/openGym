@@ -5,7 +5,7 @@
 //// default off — an absent key (an older server, no club, the mobile build) keeps upstream's linear progression — and a rule written on
 //// the exercise or on its routine always wins over the club's default.
 import { describe, expect, it } from 'vitest'
-import { clubAutoProgression, nextPrescription, policyFor } from './progression.js'
+import { clubAutoProgression, nextPrescription, policyFor, profileRule } from './progression.js'
 import { EXDB, isAssisted } from './exercises.js'
 
 const LIFT = EXDB.find(e => e.bp !== 'cardio' && !['upper legs', 'lower legs', 'back', 'hips', 'glutes'].includes(e.bp) && !['body weight', 'band', 'resistance band'].includes(e.eq) && !isAssisted(e.id)).id
@@ -15,11 +15,13 @@ const ON = { perms: { autoProgression: true } }
 
 describe('policyFor — the club\'s default', () => {
   it('rep-based exercises: linear unless the club said false', () => {
-    expect(policyFor(cfg, null, 'reps')).toBe('linear')                     // no state at all: upstream's
-    expect(policyFor(cfg, null, 'reps', {})).toBe('linear')                 // a state with no perms
-    expect(policyFor(cfg, null, 'reps', { perms: {} })).toBe('linear')      // perms without the key (an older server)
-    expect(policyFor(cfg, null, 'reps', ON)).toBe('linear')
-    expect(policyFor(cfg, null, 'reps', OFF)).toBe('off')
+    // upstream's policyFor takes the profile's rule as its 4th argument (profileRule(S)); the club's default sits under the lifter's own pick there
+    expect(policyFor(cfg, null, 'reps')).toBe('linear')                                // no fallback at all: upstream's
+    expect(policyFor(cfg, null, 'reps', profileRule({}))).toBe('linear')               // a state with no perms
+    expect(policyFor(cfg, null, 'reps', profileRule({ perms: {} }))).toBe('linear')    // perms without the key (an older server)
+    expect(policyFor(cfg, null, 'reps', profileRule(ON))).toBe('linear')
+    expect(policyFor(cfg, null, 'reps', profileRule(OFF))).toBe('off')
+    expect(policyFor(cfg, null, 'reps', profileRule({ ...OFF, progDefault: 'double' }))).toBe('double')  // the lifter's pick wins over the club's default
   })
 
   it('only an explicit false turns it off', () => {
@@ -31,10 +33,10 @@ describe('policyFor — the club\'s default', () => {
   })
 
   it('an exercise\'s own rule wins, and so does its routine\'s', () => {
-    expect(policyFor({ ...cfg, prog: 'double' }, null, 'reps', OFF)).toBe('double')
-    expect(policyFor({ ...cfg, prog: 'linear' }, null, 'reps', OFF)).toBe('linear')
-    expect(policyFor(cfg, { id: 'r', prog: 'greyskull' }, 'reps', OFF)).toBe('greyskull')
-    expect(policyFor({ ...cfg, prog: 'off' }, { id: 'r', prog: 'linear' }, 'reps', ON)).toBe('off')
+    expect(policyFor({ ...cfg, prog: 'double' }, null, 'reps', profileRule(OFF))).toBe('double')
+    expect(policyFor({ ...cfg, prog: 'linear' }, null, 'reps', profileRule(OFF))).toBe('linear')
+    expect(policyFor(cfg, { id: 'r', prog: 'greyskull' }, 'reps', profileRule(OFF))).toBe('greyskull')
+    expect(policyFor({ ...cfg, prog: 'off' }, { id: 'r', prog: 'linear' }, 'reps', profileRule(ON))).toBe('off')
   })
 
   it('timed and cardio work never progressed by default, club or not', () => {

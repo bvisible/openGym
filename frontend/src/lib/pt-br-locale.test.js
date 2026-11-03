@@ -46,7 +46,8 @@ describe('Brazilian Portuguese locale', () => {
     //// 1,313 inherited; it was 1,540 and 1,262 after v1.4.2): the 17 strings of v1.4.3 whose wording upstream
     //// wrote in Brazilian Portuguese are overridden here as well, the other new ones stay inherited. With:
     //// node scripts/pt-br-inheritance-fingerprint.mjs
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('27cfb348806de54a04b34fc90e9911958e30440de2f9c205996e17f265736096')
+    //// Recomputed after the v1.4.4 merge (2,430 overrides, 1,586 inherited): upstream's overrides plus the 113 of ours that the locale rebuild had dropped.
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('aaab9fce4a210bf37ba4e0256ae7d0d6334413c6a26b2a70614affd7d4649bd0')
   })
 
   // pt-PT labelled Unpair 'Desfazer': Undo, in Portuguese (it is pt-BR's Undo), on the button that

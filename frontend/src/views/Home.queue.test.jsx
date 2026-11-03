@@ -17,8 +17,6 @@ vi.mock('react-router-dom', () => ({ useNavigate: () => () => {} }))
 vi.mock('../sheets.jsx', () => ({
   starterPlanSheet: vi.fn(), bwSheet: vi.fn(), goalSheet: vi.fn(), dayOverrideSheet: vi.fn(),
   calendarSheet: vi.fn(), startFlow: vi.fn(), bwDeltaColor: () => '',
-  //// Neoffice — Home's « Recent workouts » (components/RecentWorkouts.jsx) draws the sheet's own row; these tests are about the plan.
-  WorkoutRow: () => null, workoutDetailSheet: vi.fn(), shareWorkoutImageSheet: vi.fn(),
 }))
 
 const routines = [
@@ -58,7 +56,7 @@ const chips = () => [...host.querySelectorAll('.queue .chip')]
 const chipTexts = () => chips().map(c => c.textContent)
 const status = () => host.querySelector('.queue .queue-status')?.textContent
 const todayTitle = () => host.querySelector('.today-row .ttl')?.textContent
-const card = () => [...host.querySelectorAll('.card .muted.small')].map(e => e.textContent).find(x => x.includes('this week'))
+const card = () => [...host.querySelectorAll('.card .card-head-sub')].map(e => e.textContent).find(x => x.includes('this week'))
 
 describe('Home — coach week progress row', () => {
   it('replaces the weekday dots with one chip per session, in slot order, and lights the first', () => {
@@ -129,14 +127,13 @@ describe('Home — coach week progress row', () => {
     expect(host.querySelector('.today-row .ss')).toBeNull()
   })
 
-  it('Rotation chosen with nothing built yet hides the weekday strip and says nothing more on the home screen (the Plan has the empty state)', () => {
+  it('Rotation chosen with nothing built yet hides the weekday strip and offers an empty state instead', () => {
     setS({ queue: null, rotation: null, scheduleMode: 'rotation', week: {} })
     mount()
     expect(host.querySelector('.week')).toBeNull()
     expect(host.querySelectorAll('.wday').length).toBe(0)
     expect(host.querySelector('.queue')).toBeNull()
-    // //// Neoffice — the club's coach, 28.10: the home screen no longer opens on « No rotation yet »; the Plan keeps that empty state.
-    expect(host.textContent).not.toContain('No rotation yet')
+    expect(host.textContent).toContain('No rotation yet')
     expect(todayTitle()).toBe('Rest day')
     expect(host.querySelector('.today-row .ss')).toBeNull()
   })

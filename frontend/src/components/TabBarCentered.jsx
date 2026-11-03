@@ -12,18 +12,23 @@ import Elapsed from './Elapsed.jsx'
 import { barModel, classesPlaces, BAR_PLACES, litPlace } from '../lib/nav-model.js'
 import { useCoachDoors } from '../lib/use-coach-doors.js'
 import { showsLibraryTab } from '../lib/level-visibility.js'
+//// Neoffice — upstream v1.4.4's TabBar, mirrored here: the tab you are already on takes you to the top of its page (lib/scroll-top.js), and the tabs carry the app tour's targets.
+import { retapTab } from '../lib/scroll-top.js'
 
 // Module scope, not TabBar's render body. Declared inside it, `Tab` was a new function on every
 // render, so React saw a different component type each time and threw the button away and built a
 // fresh one — on a bar that is fixed on screen, and once a second for the whole of a rest. The
 // state it took with it is the DOM node itself: focus, the :active tint, any in-flight transition.
-function Tab({ active, icon, label, onClick }) {
+function Tab({ active, icon, label, onClick, tour }) {
   return (
-    <button className={active ? 'on' : ''} onClick={onClick}>
+    <button className={active ? 'on' : ''} onClick={onClick} data-tour={tour}>
       <span className="tab-ic"><Icon name={icon} /></span><span>{label}</span>
     </button>
   )
 }
+
+//// Neoffice — the app tour's targets (components/Tour.jsx): upstream names four tabs; the places upstream does not have carry none, the tour skips what it cannot find.
+const TOURS = { home: 'tab-home', plan: 'tab-plan', planning: 'tab-plan', library: 'tab-library', stats: 'tab-stats' }
 
 //// Neoffice — the labels as literal t() calls, so that the checks on the translation packs see every one of them.
 const labelOf = place => ({
@@ -50,9 +55,11 @@ export default function TabBarCentered({ onStart }) {
   const lit = litPlace(cur, { coach: doors.any, fromStats: loc.state?.from === '/stats' })
   const on = place => lit === place || (lit === 'plan' && place === 'planning')
 
-  // Root tabs are peers, not another level to unwind with Android Back.
+  // Root tabs are peers, not another level to unwind with Android Back. The tab you are already
+  // on takes you to the top of its page instead (lib/scroll-top.js).
   const switchTab = path => {
     if (loc.pathname !== path || loc.search) nav(path, { replace: true })
+    else retapTab(path)
   }
 
   const running = !!S.active && cur !== 'workout' && !S.active.editingWorkoutId && !S.active.backfill && S.active.start > 0
@@ -65,7 +72,7 @@ export default function TabBarCentered({ onStart }) {
     nav('/workout')
   }
 
-  const place = id => <Tab key={id} active={on(id)} icon={BAR_PLACES[id].icon} label={labelOf(id)} onClick={() => switchTab(BAR_PLACES[id].path)} />
+  const place = id => <Tab key={id} active={on(id)} icon={BAR_PLACES[id].icon} label={labelOf(id)} onClick={() => switchTab(BAR_PLACES[id].path)} tour={TOURS[id]} />
 
   return (
     <nav id="tabbar" data-tabs={model.left.length + model.right.length + 1} data-layout="centered">
@@ -77,7 +84,7 @@ export default function TabBarCentered({ onStart }) {
           A live session you stepped away from shows its running time instead of a word, the
           button still named Resume; a past workout being edited or logged after the fact has no
           clock to run. */}
-      <button className={'start' + (S.active ? ' rec' : '') + (S.active && cur === 'workout' ? ' on' : '')} onClick={startWorkout}
+      <button data-tour="start" className={'start' + (S.active ? ' rec' : '') + (S.active && cur === 'workout' ? ' on' : '')} onClick={startWorkout}
         aria-label={running ? t('Resume') : undefined}>
         <span className="cir"><Icon name="play" /></span>
         {running ? <span className="tab-time"><Elapsed start={S.active.start} /></span>

@@ -22,9 +22,7 @@ beforeEach(() => {
   const store = useStore.getState()
   originalS = store.S
   originalUser = store.user
-  //// Neoffice — classes off: our bar adds a Classes tab (when the club runs classes) and an Account
-  //// tab; with Classes off the indexes below are upstream's, and the bar holds six buttons.
-  useStore.setState({ S: { ...JSON.parse(JSON.stringify(DEF)), classesTab: false }, user: { id: 1, name: 'test' } })
+  useStore.setState({ S: JSON.parse(JSON.stringify(DEF)), user: { id: 1, name: 'test' } })
   host = document.createElement('div')
   document.body.appendChild(host)
   root = createRoot(host)
@@ -43,7 +41,7 @@ describe('the tab bar across a store write', () => {
   it('keeps the very same buttons instead of rebuilding them every tick', () => {
     act(() => { root.render(<TabBar onStart={() => {}} />) })
     const before = tabs()
-    expect(before).toHaveLength(6)  //// Neoffice — plus the Account tab
+    expect(before).toHaveLength(5)
 
     // What a rest does once a second: S is replaced, so everything reading it re-renders.
     act(() => { useStore.getState().update(s => { s.restSec = 91 }, false) })
@@ -67,9 +65,8 @@ describe('the tab bar across a store write', () => {
 
 // Settings → "Show connection status" off (#369, #330): a stuck sync shows as a dot on Home, the
 // tab Settings opens from, and the tab's name says it.
-//// Neoffice — on our bar it is the Account tab, far right: Settings open from there, not from Home.
 describe('the connection dot on Home', () => {
-  const home = () => tabs().at(-1)
+  const home = () => tabs()[0]
   it('is there for a sync problem only while the banner is switched off', () => {
     const original = useStore.getState().sync
     try {
@@ -78,8 +75,7 @@ describe('the connection dot on Home', () => {
       expect(home().querySelector('.tab-dot')).toBeNull()
       act(() => { useStore.getState().update(s => { s.connStatus = false }, false) })
       expect(home().querySelector('.tab-dot')).not.toBeNull()
-      //// Neoffice — the Account tab carries the dot on our bar (see the describe).
-      expect(home().getAttribute('aria-label')).toBe('Account, Connection problem')
+      expect(home().getAttribute('aria-label')).toBe('Home, Connection problem')
       act(() => { useStore.setState({ sync: { status: 'ok', lastError: null, pending: false } }) })
       expect(home().querySelector('.tab-dot')).toBeNull()
       expect(home().getAttribute('aria-label')).toBeNull()
@@ -94,25 +90,12 @@ describe('the tab icons and labels', () => {
   const label = el => el.querySelector('span:last-child').textContent
   it('labels every tab and uses one icon per concept', () => {
     act(() => { root.render(<TabBar onStart={() => {}} />) })
-    //// Neoffice — Plan is the clipboard (Classes is the calendar), and the Account tab ends the bar.
-    expect(tabs().map(icon)).toEqual(['house', 'clipboard', 'play', 'chart', 'dumbbell', 'personCircle'])
-    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Stats', 'Exercises', 'Account'])
+    expect(tabs().map(icon)).toEqual(['house', 'calendar', 'play', 'chart', 'dumbbell'])
+    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Stats', 'Exercises'])
 
     act(() => { useStore.getState().update(s => { s.active = { id: 'a', entries: [], cur: 0 } }, false) })
     expect(icon(tabs()[2])).toBe('play')
     expect(label(tabs()[2])).toBe('Resume')
-  })
-
-  //// Neoffice — Simple (30.10): no « Exercises » tab, so the bar has five tabs (six with the club's classes) and room for bigger labels.
-  it('has no Exercises tab at the Simple level, and counts its tabs for the stylesheet', () => {
-    act(() => { useStore.getState().update(s => { s.level = 'simple' }, false) })
-    act(() => { root.render(<TabBar onStart={() => {}} />) })
-    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Stats', 'Account'])
-    expect(document.querySelector('#tabbar').getAttribute('data-tabs')).toBe('5')
-    act(() => { useStore.getState().update(s => { s.level = 'normal' }, false) })
-    expect(tabs().map(label)).toEqual(['Home', 'Plan', 'Start', 'Stats', 'Exercises', 'Account'])
-    expect(document.querySelector('#tabbar').getAttribute('data-tabs')).toBe('6')
-    act(() => { useStore.getState().update(s => { delete s.level }, false) })
   })
 
   it('shows a minimized session’s running time, still named Resume', () => {
@@ -141,8 +124,7 @@ describe('the tab a screen without its own lights', () => {
   const lit = () => tabs().filter(b => b.classList.contains('on')).map(b => b.textContent)
   it.each([
     ['/history', 'Stats'], ['/structural-balance', 'Stats'], ['/progress-photos', 'Stats'], ['/measurements', 'Stats'],
-    //// Neoffice — Settings light the Account tab on our bar (components/TabBar.jsx), not Home.
-    ['/settings', 'Account'], ['/settings/units', 'Account'], ['/checkin', 'Home'], ['/muscles', 'Exercises'],
+    ['/settings', 'Home'], ['/settings/units', 'Home'], ['/checkin', 'Home'], ['/muscles', 'Exercises'],
   ])('%s lights %s', (pathname, tab) => {
     where.loc = { pathname }
     act(() => { root.render(<TabBar onStart={() => {}} />) })

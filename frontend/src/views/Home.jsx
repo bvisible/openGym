@@ -1,28 +1,21 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../store/useStore.js'
-import { effectiveRoutines, effectiveRoutineIds, nextTrainingDay, streakWeeks, lastBW, setsDoneActive } from '../lib/history.js'
-import { fmtNum, fmtDate, todayISO, isoOf, weekKey, weekStartOf, weekDayOffset, DAYS, DAYN, exCount } from '../lib/format.js'
+import { effectiveRoutines, effectiveRoutineIds, nextTrainingDay, lastBW, setsDoneActive } from '../lib/history.js'
+import { streakInfo } from '../lib/streak.js'
+import { StreakFlame, StreakMeta, StreakParty } from '../components/Streak.jsx'
+import { fmtNum, fmtDate, todayISO, isoOf, weekStartOf, weekDayOffset, DAYS, DAYN } from '../lib/format.js'
 import { t, tn, dateLocale } from '../lib/i18n.js'
-import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, starterPlanSheet, bwDeltaColor, coachOfferSheet, floorPlanSheet, weighInsSheet } from '../sheets.jsx'
-import { loadFloorPlan } from '../components/FloorPlanSheet.jsx'
-//// Neoffice — the "your coach sent you a program" banner.
-import { useEffect } from 'react'
-import { programInbox } from '../lib/api.js'
-import { describeOffer } from '../lib/coach-program.js'
-import { classesMine, challengesMine, announcements } from '../lib/api.js'
+import { bwSheet, goalSheet, dayOverrideSheet, calendarSheet, startFlow, starterPlanSheet, bwDeltaColor, weighInsSheet } from '../sheets.jsx'
 import LineChart from '../components/LineChart.jsx'
 import Icon from '../components/Icon.jsx'
-import InstallBanner from '../components/InstallBanner.jsx'
+import CardHead from '../components/CardHead.jsx'
 import QueueRow from '../components/QueueRow.jsx'
-//// Neoffice — « Recent workouts » on Home, each with a visible Share button (components/RecentWorkouts.jsx).
-import RecentWorkouts from '../components/RecentWorkouts.jsx'
-//// Neoffice — the badges the club put forward, first thing under the notices.
-import HomeBadges from '../components/HomeBadges.jsx'
 import MiniBodyMap from '../components/MiniBodyMap.jsx'
-//// Neoffice — what Home keeps at the Simple level (lib/level-visibility.js, 30.10): the notices, the badges, a coach's offer, today's session, the check-in codes.
-import { showsHomeExtras, showsMuscleInfo } from '../lib/level-visibility.js'
 import { queueOf, queueView, weekTally, pinState } from '../lib/queue.js'
+import { workoutsLeft } from '../lib/week-left.js'
+import { WeeklySetsHomeLine } from '../components/WeeklySets.jsx'
+import { RecapHomeCard } from '../components/Recap.jsx'
 import { scheduleModeOf } from '../lib/rotation.js'
 import { useConnectionTrouble } from '../components/SyncBanner.jsx'
 import { Button } from '../components/ui.jsx'
@@ -31,114 +24,21 @@ import { glyphOf } from '../lib/glyphs.js'
 import { dayNoteOf } from '../lib/day-notes.js'
 import { weighInAt } from '../lib/bodyweight.js'
 import WeightRate from '../components/WeightRate.jsx'
+import { programmeChip } from '../lib/programmes.js'
 import { SeasonDeco } from '../components/Seasonal.jsx'
-
-//// Neoffice — what the offer contains, said in the member's language.
-function offerSummary(o) {
-  const d = describeOffer(o)
-  if (!d.ok) return t('This program could not be read: {0}', d.error)
-  const parts = [t(d.routineCount === 1 ? '{0} routine' : '{0} routines', d.routineCount), exCount(d.exerciseCount)]
-  if (d.scheduledDays > 0) {
-    parts.push(t(d.scheduledDays === 1 ? 'scheduled on {0} day' : 'scheduled on {0} days', d.scheduledDays))
-  }
-  //// A cycle is stated BEFORE accepting: "on 3 days" describes a typical
-  //// week, and lets the member believe the schedule will not move again.
-  if (d.cycleSpan > 1) parts.push(t('{0}-week cycle', d.cycleSpan))
-  return parts.join(' · ')
-}
+import { WrappedHomeCard } from '../components/WrappedEntry.jsx'
+import RecoveryHint from '../components/RecoveryHint.jsx'
+import { ChallengesCard } from '../components/Challenges.jsx'
+import { isOn } from '../lib/modules.js'
 
 // Home = what to do now + a quick glance. Deep charts & history live in Stats.
 export default function Home() {
   const nav = useNavigate()
   const S = useStore(s => s.S)
   const user = useStore(s => s.user)
-  const [floor, setFloor] = useState([])
-  useEffect(() => { let alive = true; loadFloorPlan().then(z => { if (alive) setFloor(z || []) }); return () => { alive = false } }, [])
   // The banner switched off and the sync stuck: a dot on the gear (Settings → Show connection status).
   const trouble = useConnectionTrouble()
   const [weekOffset, setWeekOffset] = useState(0)
-
-  //// Neoffice — what the coach has sent.
-  ////
-  //// Polled on mount and whenever the tab comes back, not on an interval: a
-  //// member opens the logbook to train, and an offer appearing mid-session
-  //// helps nobody. Failure is SILENT — offline there is no offer to show, and
-  //// that is not an error to put in front of someone about to lift.
-  const [offers, setOffers] = useState([])
-  useEffect(() => {
-    let alive = true
-    const load = () => {
-      programInbox().then(list => { if (alive) setOffers(Array.isArray(list) ? list : []) }).catch(() => {})
-    }
-    //// Neoffice — le premier chargement est INCONDITIONNEL.
-    //// An early version skipped it when document.hidden was true. That is
-    //// wrong on mount: a tab mounted hidden will never get a visibilitychange
-    //// if it was already in that state — no offers at all, ever. The guard
-    //// only makes sense on later reloads, where it avoids a call at the very
-    //// moment the tab is being LEFT.
-    load()
-    const onVisible = () => { if (!document.hidden) load() }
-    document.addEventListener('visibilitychange', onVisible)
-    window.addEventListener('online', load)
-    return () => {
-      alive = false
-      document.removeEventListener('visibilitychange', onVisible)
-      window.removeEventListener('online', load)
-    }
-  }, [])
-
-  //// Neoffice — the next classes, if the club runs any.
-  //// Loaded separately from the program offers: two independent calls that do
-  //// not block one another, and a club without classes does not even pay for
-  //// the round trip — perms.classes decides before we hit the network.
-  const [classes, setClasses] = useState([])
-  //// Neoffice — the club's notice board. What a member dismissed is
-  //// remembered by THEIR device: writing it to the database would cost one
-  //// write per member per notice for a display convenience, and would hand the
-  //// club the list of who read what — which it never asked for.
-  //// The key carries the MODIFIED date: a notice corrected by the club reopens
-  //// for those who had read the wrong version. Without that, a schedule
-  //// correction would never be read by the very people it concerns.
-  const [notices, setNotices] = useState([])
-  const [seen, setSeen] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('gym_notices_seen') || '{}') } catch (e) { return {} }
-  })
-  useEffect(() => {
-    let alive = true
-    announcements()
-      .then(r => { if (alive) setNotices(r.announcements || []) })
-      .catch(() => {})
-    return () => { alive = false }
-  }, [])
-  const closeNotice = (n) => {
-    const next = { ...seen, [n.name]: n.modified }
-    setSeen(next)
-    try { localStorage.setItem('gym_notices_seen', JSON.stringify(next)) } catch (e) { /* private mode */ }
-  }
-  const openNotices = notices.filter(n => seen[n.name] !== n.modified)
-
-  //// Neoffice — the running challenges. Loaded separately from the classes: a
-  //// club may have one without the other, and a failure here must not empty
-  //// the schedule.
-  const [challenges, setChallenges] = useState([])
-  useEffect(() => {
-    let alive = true
-    challengesMine()
-      .then(r => { if (alive) setChallenges((r.challenges || []).filter(c => c.running).slice(0, 3)) })
-      .catch(() => {})
-    return () => { alive = false }
-  }, [])
-  useEffect(() => {
-    if (S.perms && S.perms.classes === false) return
-    let alive = true
-    const load = () => {
-      classesMine().then(list => { if (alive) setClasses(Array.isArray(list) ? list.slice(0, 3) : []) }).catch(() => {})
-    }
-    load()
-    const onVis = () => { if (!document.hidden) load() }
-    document.addEventListener('visibilitychange', onVis)
-    return () => { alive = false; document.removeEventListener('visibilitychange', onVis) }
-  }, [S.perms && S.perms.classes])
 
   const today = new Date()
   // A weekday can hold several routines. `todayRoutines` is the whole day; `routine` is the
@@ -206,136 +106,61 @@ export default function Home() {
   const next = !S.active && !todayRoutines.length && !(rotating && !plannerQueue) ? nextTrainingDay(S, todayISO()) : null
   // The streak card's fraction: this calendar week's workouts over the weekdays with a plan, or,
   // in a coach week, the queue's sessions and your own days together (lib/queue.js weekTally).
-  const { done: doneThisWeek, planned: plannedPerWeek } = weekTally(S, todayISO())
+  const tally = weekTally(S, todayISO())
+  const { done: doneThisWeek, planned: plannedPerWeek } = tally
+  const left = workoutsLeft(S, todayISO())
+  // The streak with its best run and freezes (lib/streak.js), read back from the workouts.
+  const todayKey = todayISO()
+  const streak = useMemo(() => streakInfo(S, todayKey), [S.workouts, S.weekStart, todayKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Settings → Modules (lib/modules.js): what a module switched off hides here.
+  const on = id => isOn(S, id)
   const bwPoints = S.bodyweight.slice(-30).map(b => ({ t: weighInAt(b), y: b.w, d: b.d }))
-  //// Neoffice — no routine and nothing running: the plan's set-up is ONE compact row below (it used to be a big « Welcome! » card,
-  //// and a second « No rotation yet » block inside the week card, on the screen a member opens the app on).
-  const noPlan = !S.routines.length && !S.active
 
   // today's session shown right under the week strip
   const onToday = () => { if (S.active) nav('/workout'); else if (todayRoutines.length) startFlow(effectiveRoutineIds(S, todayISO())); else dayOverrideSheet(todayISO()) }
   // A chip on the coach week's progress row starts that one routine, in any order. A session
   // already in progress wins, as on the today row — starting another would overwrite it.
+  const progChip = programmeChip(S)
   const onQueueStart = id => { if (S.active) nav('/workout'); else startFlow([id]) }
 
   return <div className="narrow">
     <div className="hdr">
       <SeasonDeco spot="header-bats" />
       <div><h1>{user ? t('Hi {0}', user.name) : 'openGym'}</h1><div className="sub">{today.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}</div></div>
-      <button className="iconbtn" onClick={() => nav('/settings')} aria-label={trouble ? t('Settings') + ', ' + t('Connection problem') : t('Settings')}><Icon name="gear" />{trouble && <span className="tab-dot" aria-hidden="true" />}</button>
+      <button className="iconbtn" data-tour="settings-gear" onClick={() => nav('/settings')} aria-label={trouble ? t('Settings') + ', ' + t('Connection problem') : t('Settings')}><Icon name="gear" />{trouble && <span className="tab-dot" aria-hidden="true" />}</button>
     </div>
 
-    {/* //// Neoffice — the notice board, BEFORE the classes: a notice can
-         correct the schedule read just below it ("the gym is closed on
-         Thursday"), so it has to be read first. */}
-    {/* //// Neoffice — "add to home screen", for a member still in the browser
-         on their phone. First, above the club's notices: it is the one thing that
-         makes every later visit shorter. Draws nothing once installed. */}
-    <InstallBanner />
-
-    {openNotices.map(n => <div key={n.name} className="card" style={{ borderColor: 'var(--acc)' }}>
-      <div className="row between" style={{ marginBottom: 6, gap: 10 }}>
-        <div className="lbl2">{n.title}</div>
-        <button className="iconbtn" onClick={() => closeNotice(n)} aria-label={t('Close')}>
-          <Icon name="xmark" />
-        </button>
-      </div>
-      <div className="small" style={{ lineHeight: 1.5, whiteSpace: 'pre-line' }}>{n.body}</div>
-    </div>)}
-
-    {/* //// Neoffice — the badges the club put forward, with their progress ring: what the club's coach asked to see first (28.10). Silent when the club
-         featured none, so the home screen of a club without badges is exactly what it was. */}
-    <HomeBadges onOpen={() => nav('/stats')} />
-
-    {/* //// Neoffice — the room itself, one tap away: « voir le plan de la salle
-        hors exercice » (2026-09-09). Only when the club drew one. */}
-    {floor.length > 0 && showsHomeExtras(S) && <div className="card tappable" style={{ cursor: 'pointer' }} {...tappable(() => floorPlanSheet(floor))}>
-      <div className="row between">
-        <div className="row" style={{ gap: 9 }}><span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="map" /></span>
-          <div><div className="lbl2">{t('Floor plan')}</div><div className="small dim">{t('{0} zones · find every machine', floor.length)}</div></div></div>
-        <Icon name="chevronRight" className="chev" />
-      </div>
-    </div>}
-
-    {/* //// Neoffice — les prochains cours. Sous les offres et au-dessus de la
-         semaine : un cours est un RENDEZ-VOUS, donc il se lit avant le plan. */}
-    {classes.length > 0 && <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/classes')}>
-      <div className="row between" style={{ marginBottom: 8 }}>
-        <div className="lbl2">{t('Your next classes')}</div>
-        <span className="small acc">{t('See the schedule')}</span>
-      </div>
-      {classes.map(c => <div key={c.id} className="row" style={{ gap: 9, padding: '4px 0', minWidth: 0 }}>
-        <span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="calendar" /></span>
-        <div style={{ minWidth: 0 }}>
-          <div className="ttl">{c.title}</div>
-          <div className="small dim">{c.start
-            ? new Date(c.start).toLocaleString(dateLocale(), { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
-            : ''}{c.coach ? ' \u00b7 ' + c.coach : ''}</div>
-        </div>
-      </div>)}
-    </div>}
-
-    {/* //// Neoffice — the running challenges. After the classes: a class is an
-         appointment you can miss, a challenge runs over weeks and waits.
-         We show the member's OWN rank, never anyone else's — their score is
-         health data, and it is asked for on the challenges screen. */}
-    {challenges.length > 0 && showsHomeExtras(S) && <div className="card" style={{ cursor: 'pointer' }} onClick={() => nav('/challenges')}>
-      <div className="row between" style={{ marginBottom: 8 }}>
-        <div className="lbl2">{t('Challenges')}</div>
-        <span className="small acc">{t('See all')}</span>
-      </div>
-      {challenges.map(c => <div key={c.name} className="row" style={{ gap: 9, padding: '4px 0', minWidth: 0 }}>
-        <span className="lrow-i" style={{ background: 'var(--surface-3)' }}><Icon name="trophy" /></span>
-        <div style={{ minWidth: 0 }}>
-          <div className="ttl">{c.title}</div>
-          <div className="small dim">{c.joined
-            ? (c.rank ? (c.rank === 1 ? t('You are 1st of {0}', c.of) : t('You are {0} of {1}', c.rank, c.of)) : t('You are taking part'))
-            : t('Take part if you want to')}</div>
-        </div>
-      </div>)}
-    </div>}
-
-    {/* //// Neoffice — above the week, never as a pop-up: a program offer does
-         not interrupt, it waits to be seen. */}
-    {offers.map(o => <div key={o.id} className="card" style={{ cursor: 'pointer', borderColor: 'var(--acc)' }} onClick={() => coachOfferSheet(o)}>
-      <div className="row" style={{ gap: 10, minWidth: 0 }}>
-        <span className="lrow-i" style={{ background: 'var(--acc)' }}><Icon name="clipboard" /></span>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div className="lbl2">{o.coach ? t('{0} sent you a program', o.coach) : t('Your coach sent you a program')}</div>
-          {/* //// Neoffice — the summary is composed HERE, not server-side.
-              The server would render the sentence in the COACH's language at
-              send time and it would stay frozen there: a French-speaking member
-              would read "1 routine · 2 exercises". The bundle travels with the
-              offer, so the logbook counts for itself, in its own language. */}
-          <div className="ttl">{offerSummary(o)}</div>
-        </div>
-        <Icon name="chevronRight" className="chev" />
-      </div>
-    </div>)}
-
     <div className="card">
+      {/* A running programme (lib/programmes.js) wrote this week's plan: where it stands, one tap from its screen. */}
+      {progChip && <button type="button" className="chip ichip prog-chip" onClick={() => nav('/plan/programmes')}><Icon name="calendar" /><span>{progChip}</span></button>}
       {/* A coach week runs by order, not by weekday, so its progress row stands in for the
           seven dots (components/QueueRow.jsx). The today row below stays as it is: the queue's
           next session reaches it through effectiveRoutineIds like any planned routine. */}
-      {/* //// Neoffice — an empty rotation says nothing on the home screen any more: « No rotation yet. Add routines to it in Plan » was the first thing
-           the club's coach read on opening the app (28.10), and it means nothing to most members, whose days change from week to week. The Plan screen
-           keeps its own empty state (Plan.jsx); the Today row below still starts the next session. */}
-      {rotating ? (queue ? <QueueRow S={S} today={todayISO()} onStart={onQueueStart} managed={managedQueue} /> : null) : <>
+      {rotating ? (queue ? <QueueRow S={S} today={todayISO()} onStart={onQueueStart} managed={managedQueue} /> : <div className="empty">
+        {t('No rotation yet. Add routines to it in Plan.')}
+        <div style={{ marginTop: 10 }}><Button size="sm" variant="tinted" onClick={() => nav('/plan')}>{t('Set up in Plan')}</Button></div>
+      </div>) : <>
         <div className="row between" style={{ marginBottom: 8 }}>
-          <button className="iconbtn" style={{ width: 30, height: 30, fontSize: 15 }} onClick={() => setWeekOffset(w => w - 1)} aria-label={t('Previous week')}><Icon name="chevronLeft" /></button>
+          <button className="iconbtn" style={{ width: 30, height: 30, fontSize: 'var(--fs-subhead)' }} onClick={() => setWeekOffset(w => w - 1)} aria-label={t('Previous week')}><Icon name="chevronLeft" /></button>
           <div className="small muted" style={{ fontWeight: 500 }}>{wkLabel}</div>
-          <button className="iconbtn" style={{ width: 30, height: 30, fontSize: 15 }} onClick={() => setWeekOffset(w => w + 1)} aria-label={t('Next week')}><Icon name="chevronRight" /></button>
+          <button className="iconbtn" style={{ width: 30, height: 30, fontSize: 'var(--fs-subhead)' }} onClick={() => setWeekOffset(w => w + 1)} aria-label={t('Next week')}><Icon name="chevronRight" /></button>
         </div>
         <div className="week">{strip}</div>
       </>}
+      {/* The week's plan as a countdown (#753, lib/week-left.js): "2 of 4 left this week". */}
+      {left && <div className={'small dim wkleft' + (left.left > 0 ? '' : ' done')}>
+        {left.left > 0 ? tn('{0} of {1} left this week', '{0} of {1} left this week', left.left, left.of) : t('All done this week. Nice.')}
+      </div>}
       {/* Once today's session is logged the row stops asking for it. The week strip already
           knew (its dot goes 'done'); this row did not, so a finished day kept showing the
           routine name behind a green Start tag and read as still outstanding (issue #4).
           An in-progress session still wins — that one is happening right now. Tapping the
           row keeps working, so a second session in one day is a tap away, just not urged. */}
-      <div className="today-row" {...tappable(onToday)}>
+      <div className="today-row" data-tour="today" {...tappable(onToday)}>
         <div className="row" style={{ gap: 9, minWidth: 0 }}>
-          <span className="lrow-i" style={{ background: S.active ? 'var(--orange)' : doneToday ? 'var(--surface-3)' : routine ? 'var(--acc)' : 'var(--surface-3)' }}>
+          <span className="lrow-i" style={{ background: S.active ? 'var(--orange)' : doneToday ? 'var(--surface-3)' : routine ? 'var(--acc)' : 'var(--surface-3)',
+            // the rest day's moon on the grey square: white on #e3e3e8 vanished in the light theme
+            ...(!S.active && !doneToday && !routine ? { color: 'var(--label-2)' } : {}) }}>
             <Icon name={S.active ? (editingSaved ? 'pencil' : 'play') : doneToday ? 'checkCircle' : routine ? glyphOf(routine.emoji) : 'moon'}
               style={doneToday && !S.active ? { color: 'var(--green)' } : undefined} />
           </span>
@@ -349,7 +174,7 @@ export default function Home() {
         </div>
         {S.active ? <span className="tag" style={{ color: 'var(--orange)', background: 'color-mix(in srgb,var(--orange) 16%,transparent)' }}>{editingSaved ? t('Edit') : t('Resume')}</span>
           : doneToday ? <span className="tag" style={{ color: 'var(--green)', background: 'color-mix(in srgb,var(--green) 16%,transparent)' }}>{t('Done')}</span>
-          : routine ? <span className="row" style={{ gap: 8 }}>{showsMuscleInfo(S) && <MiniBodyMap routines={todayRoutines} body={S.body} />}<span className="tag acc">{t('Start')}</span></span>
+          : routine ? <span className="row" style={{ gap: 8 }}><MiniBodyMap routines={todayRoutines} body={S.body} /><span className="tag acc">{t('Start')}</span></span>
           : <Icon name="plus" className="chev" />}
       </div>
       {/* The row above starts today's plan in one tap, and so does the Start button in the tab
@@ -366,62 +191,57 @@ export default function Home() {
       <SeasonDeco spot="home-hero" />
     </div>
 
-    {/* //// Neoffice — the last three sessions, each with a visible Share button: sharing a session is one tap from the home screen. */}
-    {showsHomeExtras(S) && <RecentWorkouts S={S} nav={nav} />}
+    {/* Monday: Your week; the 1st: Your month (lib/recap.js). Off in Settings → Look & Home. */}
+    <RecapHomeCard S={S} />
+
+    {/* Christmas (lib/seasonal.js): the advent calendar's card, 1 to 24 December, from the theme's chunk. */}
+    <SeasonDeco spot="home-advent" />
+
+    {/* December and January: the year in openGym is ready (lib/wrapped.js homeCardYear). */}
+    {on('motivation') && <WrappedHomeCard S={S} />}
+
+    {/* What has rested and what is still recovering, kindly (lib/recovery-hint.js). */}
+    {on('health') && <RecoveryHint S={S} />}
+
+    {/* This month's three challenges and how far you are (lib/challenges.js). */}
+    <ChallengesCard S={S} />
 
     {/* Jump to the gym check-in cards (QR membership codes). Shown here as a quick tap on
         arrival at the gym; folds away per user via the "Gym check-in" switch in Settings. */}
-    {S.checkIn !== false && (
-      <div className="card tappable" style={{ cursor: 'pointer' }} {...tappable(() => nav('/checkin'))}>
-        <div className="row between">
-          <div className="row" style={{ gap: 9 }}>
-            <span className="lrow-i" style={{ background: 'var(--blue)' }}><Icon name="qr" /></span>
-            <div>
-              <div className="lbl2">{t('At the gym')}</div>
-              <div className="ttl">{t('Check in')}</div>
-            </div>
-          </div>
-          <Icon name="chevronRight" className="chev" />
-        </div>
+    {on('checkin') && (
+      <div className="card tap-host checkin-card">
+        <CardHead icon="qr" tint="var(--blue)" eyebrow={t('At the gym')} title={t('Check in')} open={{ onClick: () => nav('/checkin') }}
+          action={<Icon name="chevronRight" className="chev" />} />
       </div>
     )}
 
-    {/* //// Neoffice — one compact row, below the recent workouts when there are some: a title and two small buttons. Upstream's
-        //// big « Welcome! » card took most of the screen on an account that had nothing to show yet. */}
-    {noPlan && (
-      <div className="card plan-compact">
-        <div className="plan-compact-row">
-          <div className="plan-compact-title">{t('Welcome!')}</div>
-          <Button size="sm" variant="primary" icon="clipboard" onClick={starterPlanSheet}>{t('Load starter plan')}</Button>
-          <Button size="sm" onClick={() => nav('/plan')}>{t('Build my own plan')}</Button>
-        </div>
+    {!S.routines.length && !S.active && (
+      <div className="card">
+        <CardHead icon="calendar" title={t('Welcome!')} sub={t('Set up your weekly routine to get going, or grab a ready-made starter plan.')} />
+        <Button variant="primary" icon="clipboard" onClick={starterPlanSheet}>{t('Load starter plan')}</Button>
+        <div style={{ height: 8 }} /><Button onClick={() => nav('/plan')}>{t('Build my own plan')}</Button>
       </div>
     )}
 
-    {/* //// Neoffice — the weight card stays on Home at EVERY level (Jérémy, 01.09: « relégué, PAS planqué »; views/bodyweight.reachable.test.jsx). */}
-    {S.showWeightCard !== false && <div className="card">
-      <div className="row between bw-head" style={{ marginBottom: 6 }}>
-        <h2 style={{ margin: 0 }}>{t('Body weight')}</h2>
-        <div className="row" style={{ gap: 8 }}>
-          <Button size="sm" icon="target" style={S.targetW ? { color: 'var(--yellow)' } : undefined} onClick={goalSheet}>{S.targetW ? fmtNum(S.targetW) : t('Goal')}</Button>
-          <Button size="sm" icon="plus" onClick={() => bwSheet()}>{t('Log')}</Button>
-        </div>
-      </div>
+    {on('body') && S.showWeightCard !== false && <div className="card">
+      {/* one trailing action, Log; the goal lives with the goal line and the weigh-ins below (P2) */}
+      <CardHead icon="scale" tint="var(--teal)" title={t('Body weight')} className="bw-head"
+        action={<Button size="sm" icon="plus" onClick={() => bwSheet()}>{t('Log')}</Button>} />
       {bw ? <>
         <div className="row" style={{ gap: 8, alignItems: 'baseline' }}>
-          <div className="big">{fmtNum(bw.w)} <span className="muted" style={{ fontSize: '1rem' }}>{S.unit}</span></div>
+          <div className="big">{fmtNum(bw.w)} <span className="muted" style={{ fontSize: 'var(--fs-callout)' }}>{S.unit}</span></div>
           {/* only when it actually moved — an unchanged weight used to read as "− 0" */}
           {!!delta && (
             <span className="small row" style={{ gap: 2, fontWeight: 500, color: bwDeltaColor(delta, bw.w) }}>
-              <Icon name={delta > 0 ? 'arrowUp' : 'arrowDown'} style={{ fontSize: 12 }} />
+              <Icon name={delta > 0 ? 'arrowUp' : 'arrowDown'} style={{ fontSize: 'var(--fs-caption)' }} />
               {fmtNum(Math.abs(delta))}
             </span>
           )}
           <span className="dim small" style={{ marginInlineStart: 'auto' }}>{fmtDate(bw.d, true)}</span>
         </div>
         {S.targetW && (
-          <div className="small row" style={{ color: 'var(--yellow)', marginTop: 4, gap: 5 }}>
-            <Icon name="target" style={{ fontSize: 13 }} />
+          <div className="small row" style={{ color: 'var(--gold-ink)', marginTop: 4, gap: 5 }}>
+            <Icon name="target" style={{ fontSize: 'var(--fs-footnote)' }} />
             <span>{t('Goal')} {fmtNum(S.targetW)} {S.unit} · {Math.abs(S.targetW - bw.w) < 0.05 ? t('reached!') : t(S.targetW > bw.w ? '{0} to gain' : '{0} to lose', fmtNum(Math.abs(S.targetW - bw.w)) + ' ' + S.unit)}</span>
           </div>
         )}
@@ -429,31 +249,35 @@ export default function Home() {
         {/* the weekly rate and, with one set, how it sits in its corridor (#759) */}
         <WeightRate S={S} />
         {/* every weigh-in, week by week with its average (Discord 'Weight') */}
-        <div className="row" style={{ justifyContent: 'flex-end', marginTop: 4 }}>
-          <Button size="sm" variant="ghost" trailingIcon="chevronRight" onClick={weighInsSheet}>{t('All weigh-ins')}</Button>
+        <div className="row between" style={{ marginTop: 4 }}>
+          <Button size="sm" variant="ghost" icon="target" className="bw-goal" style={S.targetW ? { color: 'var(--gold-ink)' } : undefined} onClick={goalSheet}>{S.targetW ? fmtNum(S.targetW) : t('Goal')}</Button>
+          <Button size="sm" variant="ghost" trailingIcon="chevronRight" data-tour="home-weighins" onClick={weighInsSheet}>{t('All weigh-ins')}</Button>
         </div>
-      </> : <div className="muted small">{/* //// Neoffice — "we also ask before every workout" is only true
-          //// when the member set our weighInEvery to 'workout'; the default asks nobody. */}
-        {S.weighIn === false || S.weighInEvery !== 'workout'
-        ? t('No weigh-ins yet. Log your weight to start the curve.')
-        : t("No weigh-ins yet. Log your weight to start the curve (we also ask before every workout).")}</div>}
+      </> : <>
+        <div className="muted small">{S.weighIn === false
+          ? t('No weigh-ins yet. Log your weight to start the curve.')
+          : t("No weigh-ins yet. Log your weight to start the curve (we also ask before every workout).")}</div>
+        <Button size="sm" variant="ghost" icon="target" className="bw-goal" style={{ marginTop: 6, ...(S.targetW ? { color: 'var(--gold-ink)' } : {}) }} onClick={goalSheet}>{S.targetW ? fmtNum(S.targetW) : t('Goal')}</Button>
+      </>}
     </div>}
 
-    {showsHomeExtras(S) && <div className="card tappable" style={{ cursor: 'pointer' }} {...tappable(() => calendarSheet())}>
+    {/* The streak opens its calendar from its text (CardHead open); the weekly-sets line and the
+        party banner are buttons of their own beside it, not inside a card that is a button. */}
+    {on('motivation') ? <div className="card tap-host streak-card">
       <SeasonDeco spot="home-streak" />
-      <div className="row between">
-        <div>
-          <div className="row" style={{ gap: 7, fontSize: 22, fontWeight: 600, letterSpacing: '-.021em' }}>
-            <Icon name="flame" style={{ color: 'var(--orange)' }} />
-            {/* //// Neoffice — a streak of one week is singular where the language agrees the noun with the count:
-                //// « série de 1 semaines » read as a mistake to the pilot club (maintenance#1262). A locale
-                //// without the « 1 week streak » entry keeps the general sentence. */}
-            {streakWeeks(S) === 1 && t('1 week streak') !== '1 week streak' ? t('1 week streak') : t('{0} week streak', streakWeeks(S))}
-          </div>
-          <div className="muted small" style={{ marginTop: 2 }}>{doneThisWeek}{plannedPerWeek ? ' / ' + plannedPerWeek : ''} {t('this week')} · {tn('{0} workout total', '{0} workouts total', S.workouts.length)}</div>
-        </div>
-        <Icon name="calendar" className="chev" style={{ fontSize: 20 }} />
-      </div>
-    </div>}
+      {/* in season, a Santa hat on the flame (components/Seasonal.jsx) */}
+      <CardHead className="streak-head" glyph={<span className="streak-flame-wrap"><StreakFlame lit={streak.current > 0} /><SeasonDeco spot="streak-flame" /></span>}
+        title={t('{0} week streak', streak.current)} open={{ onClick: () => calendarSheet(), haspopup: 'dialog' }}
+        sub={<>{doneThisWeek}{plannedPerWeek ? ' / ' + plannedPerWeek : ''} {t('this week')} · {tn('{0} workout total', '{0} workouts total', S.workouts.length)}</>}
+        action={<Icon name="calendar" className="chev" style={{ fontSize: 'var(--fs-title3)' }} />} />
+      {(streak.best > 0 || streak.freezes > 0) && <div className="muted small card-head-indent streak-meta-line"><StreakMeta info={streak} /></div>}
+      <StreakParty S={S} info={streak} tally={tally} />
+      {/* Settings → Look & Home → Weekly sets on Home (lib/muscle-targets.js): the muscle with
+          the most room this week, one tap from the Stats card. */}
+      {/* Straight to Stats → Lifts, where the card is, not to the top of Overview (P5 deep link). */}
+      {S.homeMuscleSets === true && <WeeklySetsHomeLine S={S} onOpen={() => nav('/stats?section=lifts')} />}
+    </div>
+      // Motivation off: no streak card, but the weekly sets line it carried keeps a card of its own.
+      : S.homeMuscleSets === true && <div className="card wsets-solo"><WeeklySetsHomeLine S={S} onOpen={() => nav('/stats?section=lifts')} /></div>}
   </div>
 }

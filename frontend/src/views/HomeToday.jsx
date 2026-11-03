@@ -26,6 +26,7 @@ import HomeBadges from '../components/HomeBadges.jsx'
 import ChallengesCard from '../components/ChallengesCard.jsx'
 import { classesPlaces } from '../lib/nav-model.js'
 import { showsHomeExtras } from '../lib/level-visibility.js'
+import { isOn } from '../lib/modules.js'
 import { MOBILE } from '../lib/mobile.js'
 import { DEMO } from '../lib/demo.js'
 import QueueRow from '../components/QueueRow.jsx'
@@ -177,7 +178,7 @@ export default function HomeToday() {
     <div className="hdr">
       <SeasonDeco spot="header-bats" />
       <div><h1>{user ? t('Hi {0}', user.name) : 'openGym'}</h1><div className="sub">{today.toLocaleDateString(dateLocale(), { weekday: 'long', day: 'numeric', month: 'long' })}</div></div>
-      {S.checkIn !== false && <div className="hdr-actions">
+      {isOn(S, 'checkin') && <div className="hdr-actions">
         {/* An icon, not a labelled pill: with a long member name the greeting wrapped on three lines at phone width. It still has its name (screen readers, long press). */}
         <button className="iconbtn" onClick={() => nav('/checkin')} aria-label={t('My access')} title={t('My access')}><Icon name="qr" /></button>
       </div>}

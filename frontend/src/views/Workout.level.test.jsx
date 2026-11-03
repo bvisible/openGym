@@ -129,6 +129,9 @@ describe('the exercise menu at each detail level', () => {
     const root = createRoot(box)
     mounted.push(root)
     act(() => root.render(sheet.render(() => {})))
+    //// Neoffice — upstream v1.4.4 folds the rarely used rows under « More » (MenuSheet): open it, as a member would.
+    const fold = box.querySelector('.menu-more')
+    if (fold) act(() => { fold.click() })
     const rows = [...box.querySelectorAll('.menu-item')].map(r => [r.querySelector('.tt')?.textContent, r.querySelector('.ss')?.textContent])
     return { titles: rows.map(r => r[0]), subOf: title => rows.find(r => r[0] === title)?.[1] }
   }

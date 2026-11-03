@@ -5,7 +5,7 @@
    system for less motion. Everything here sits behind [data-layout="centered"], so upstream's own rules in index.css are left alone. */
 #tabbar[data-layout="centered"]{display:grid;grid-template-columns:1fr 88px 1fr;align-items:flex-end;padding-left:4px;padding-right:4px}
 #tabbar[data-layout="centered"] .tab-side{display:flex;justify-content:space-around;align-items:flex-end;min-width:0}
-#tabbar[data-layout="centered"] .tab-side button{flex:1;min-width:0;font-size:12px}
+#tabbar[data-layout="centered"] .tab-side button{flex:1;min-width:0;font-size:.75rem}
 #tabbar[data-layout="centered"] .tab-side button span:last-child{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #tabbar[data-layout="centered"] button.start{flex:none;width:88px;justify-self:center}
 #tabbar[data-layout="centered"] button.start .cir{background-image:linear-gradient(145deg,rgba(255,255,255,.24),rgba(255,255,255,0) 58%)}

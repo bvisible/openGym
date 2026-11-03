@@ -21,6 +21,7 @@ import './home-today.css'
 import './skin-neoffice.css'
 import { startSkin } from './lib/skin.js'
 import { hideBoot, handOverFromLaunchScreen } from './lib/boot.js'
+import { guardFocusZoom } from './lib/viewport-zoom.js'
 
 // `beforeinstallprompt` fires once, early — before any component mounts. Caught
 // here so the home-screen banner can replay it from a button (lib/install-offer.js).
@@ -35,6 +36,9 @@ if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
 
 //// Neoffice — before the first paint, so the page never shows upstream's greys for a frame (lib/skin.js).
 startSkin()
+// The web build lets people pinch to zoom; on iOS a focused small field must not zoom the page.
+if (!MOBILE) guardFocusZoom()
+
 createRoot(document.getElementById('root')).render(
   <StrictMode><App /></StrictMode>
 )

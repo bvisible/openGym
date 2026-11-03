@@ -26,6 +26,8 @@ export const showsIntensifier = (S, config) =>
  *  a rule you have to know before the setting means anything. */
 export const showsWarmupRamp = (S, config) =>
   atLeast(S, 'full') || Number((config && config.warmupSets) || 0) > 0
+  //// Neoffice — v1.4.4's own warm-up choices (Auto / My own rows / None) are the same technique: an exercise that already carries one keeps its control.
+  || Boolean(config && (config.warmup || (Array.isArray(config.warmupRows) && config.warmupRows.length > 0)))
 
 /** The button that chains this exercise with the one next to it.
  *  `linked` = this row is ALREADY part of a superset. */
@@ -220,3 +222,22 @@ export const showsLayoutChoice = S => atLeast(S, 'normal')
 
 /** The finish summary's volume tile (weight × reps, summed): from Normal. At Simple it says how long, how many sets, and a record when there is one. */
 export const showsSessionVolume = S => atLeast(S, 'normal')
+
+//// ─── what v1.4.4 added (merged 03.11) ─────────────────────────────────────────────────────────────────────────────
+//// Same shape as everything above: the CONTROL goes, never the DATA — a set that already carries a video keeps its camera badge.
+
+/** « Ask the Coach » in the exercise's menu, mid-workout: the Normal level's. A beginner's menu holds swap, note, history, how to do it, rest, remove. */
+export const showsAskCoach = S => atLeast(S, 'normal')
+
+/** « Film a set » under More in the exercise's menu: the Normal level's (a video already on a set keeps its play button wherever it is drawn). */
+export const showsFormVideos = S => atLeast(S, 'normal')
+
+/** The strength level of each lift (Beginner to Elite, against body weight): a reading, so the Normal level's. */
+export const showsStrengthLevels = S => atLeast(S, 'normal')
+
+/** The month's challenges and the recaps (« Your year ») in Stats: the Normal level's. The badges are shown at every level. */
+export const showsMotivationExtras = S => atLeast(S, 'normal')
+
+/** « Automatic warm-ups » in Settings › Workout (v1.4.4): a Full-level technique, like the planned ramp, kept once the member chose one. */
+export const showsAutoWarmupSetting = S => atLeast(S, 'full') || Boolean(S && S.warmupAuto && S.warmupAuto !== 'off')
+

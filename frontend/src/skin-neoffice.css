@@ -58,11 +58,11 @@
 :root[data-skin="neoffice"] .home-hero-title{
   font-family:'Forum',Georgia,'Times New Roman',serif;font-weight:400;color:var(--label);
 }
-:root[data-skin="neoffice"] .hdr h1{font-size:32px;letter-spacing:0}
+:root[data-skin="neoffice"] .hdr h1{font-size:2rem;letter-spacing:0}
 :root[data-skin="neoffice"] .card h2,
-:root[data-skin="neoffice"] .sect-t{font-size:18px;letter-spacing:0}
-:root[data-skin="neoffice"] .home-hero-title{font-size:32px;letter-spacing:0}
-@media (max-width:420px){:root[data-skin="neoffice"] .hdr h1{font-size:30px}}
+:root[data-skin="neoffice"] .sect-t{font-size:1.125rem;letter-spacing:0}
+:root[data-skin="neoffice"] .home-hero-title{font-size:2rem;letter-spacing:0}
+@media (max-width:420px){:root[data-skin="neoffice"] .hdr h1{font-size:1.875rem}}
 
 /* ---- a border before a shadow: cards and grouped lists get a warm hairline ring ---- */
 :root[data-skin="neoffice"] .card,

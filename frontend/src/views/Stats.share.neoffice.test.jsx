@@ -30,9 +30,10 @@ beforeEach(() => {
 afterEach(() => { act(() => root.unmount()); container.remove() })
 
 describe('Stats — recent workouts can be shared in one tap', () => {
-  it('six rows, newest first, each with a Share handler', () => {
+  // Upstream v1.4.4 shows three recent workouts on Overview (RECENT_ROWS), History has the rest.
+  it('three rows, newest first, each with a Share handler', () => {
     act(() => { root.render(React.createElement(Stats)) })
-    expect(mocks.rows.map(r => r.w.id)).toEqual(['w8', 'w7', 'w6', 'w5', 'w4', 'w3'])
+    expect(mocks.rows.map(r => r.w.id)).toEqual(['w8', 'w7', 'w6'])
     expect(mocks.rows.every(r => typeof r.onShare === 'function')).toBe(true)
   })
 

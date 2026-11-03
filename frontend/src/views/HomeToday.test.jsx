@@ -127,6 +127,20 @@ describe('the access code', () => {
     await mount({ checkIn: false })
     expect(host.querySelector('[aria-label="My access"]')).toBeNull()
   })
+  //// Neoffice — Settings → Modules (v1.4.4): the check-in module off takes the button and its route together; « Just training » leaves it,
+  //// because the way into the club is not what a member means by « nothing else on the screen ».
+  it('follows the Gym check-in module', async () => {
+    await mount({ modules: { checkin: false } })
+    expect(host.querySelector('[aria-label="My access"]')).toBeNull()
+  })
+  it('stays under « Just training »', async () => {
+    await mount({ modules: { effort: true, plates: true, watch: true, checkin: true, body: false, coach: false } })
+    expect(host.querySelector('[aria-label="My access"]')).toBeTruthy()
+  })
+  it('stays under a club\'s default of « Just training »', async () => {
+    await mount({ perms: { defaultModules: 'training' } })
+    expect(host.querySelector('[aria-label="My access"]')).toBeTruthy()
+  })
 })
 
 describe('what is waiting to be read', () => {

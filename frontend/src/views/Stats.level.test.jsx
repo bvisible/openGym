@@ -82,9 +82,10 @@ afterEach(() => {
 describe('Stats — level of detail', () => {
   it('shows the technical cards at the full level', () => {
     const text = mount()
-    // The body map (fatigue / retained strength / muscle balance) and the
+    // The body map (fatigue / retained strength / sets per muscle) and the
     // effort histogram: the two the client named as off-putting.
-    expect(text).toContain('Muscle balance')
+    //// Neoffice — upstream v1.4.4 calls the first view of the body map « Sets » (it was « Muscle balance »), in a « Muscles » part.
+    expect(text).toContain('Muscles')
     expect(text).toContain('Fatigue')
     expect(text).toContain('Effort')
   })
@@ -92,7 +93,7 @@ describe('Stats — level of detail', () => {
   it('hides them at the simple level', () => {
     mocks.simple = true
     const text = mount()
-    expect(text).not.toContain('Muscle balance')
+    expect(text).not.toContain('Muscles')
     expect(text).not.toContain('Fatigue')
     expect(text).not.toContain('Est. 1RM')
   })
@@ -124,7 +125,7 @@ describe('Stats — level of detail', () => {
     root = createRoot(container)
     mocks.simple = false
     const text = mount()
-    expect(text).toContain('Muscle balance')
+    expect(text).toContain('Muscles')
     expect(text).toContain('Effort')
   })
 })

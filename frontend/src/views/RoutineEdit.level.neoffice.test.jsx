@@ -84,7 +84,8 @@ describe('the routine screen at each detail level', () => {
 
   it('Simple: no copy, no print, no muscle figure under the exercises (30.10); Normal brings them back', () => {
     const ex = [{ id: '0009', sets: 3, reps: 8, mode: 'reps' }]
-    const buttons = () => [...container.querySelectorAll('button')].map(b => b.textContent.trim())
+    //// a row's name is its title line (.lrow-t): v1.4.4 puts a sentence under « Delete routine ».
+    const buttons = () => [...container.querySelectorAll('button')].map(b => (b.querySelector('.lrow-t')?.textContent || b.textContent).trim())
     renderRoutine({ level: 'simple', routine: { ex } })
     expect(buttons()).not.toContain('Copy routine')
     expect(buttons()).not.toContain('Print / Save as PDF')

@@ -2,9 +2,10 @@
 //// Neoffice — added file (no upstream equivalent).
 ////
 //// THE FOCUS VIEW'S EXERCISE MENU AT EACH DETAIL LEVEL (the same gates as the live session's menu,
-//// lib/level-visibility.js): « Progression settings » and « Plate loading » are offered from the
-//// Normal level up. At Simple they stay for an exercise that already carries a rule of its own or a
-//// bar weight of its own ("hide the CONTROL, never the DATA").
+//// lib/level-visibility.js): since upstream v1.4.4 the menu leads with a few rows and folds the rest under « More »
+//// (MenuSheet), where « Exercise settings » (which was « Progression settings ») and « Plate loading » live. « Plate loading »
+//// is offered from the Normal level up, and « Exercise settings » names the exercise's progression from there too. At Simple
+//// both stay for an exercise that already carries a rule of its own or a bar weight of its own ("hide the CONTROL, never the DATA").
 import React, { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { MemoryRouter } from 'react-router-dom'
@@ -43,8 +44,13 @@ function menuTitles(level, { target = { sets: 1, reps: 5, weight: 95 }, over = {
   document.body.appendChild(sheetContainer)
   sheetRoot = createRoot(sheetContainer)
   act(() => sheetRoot.render(sheet.render(() => useUI.getState().closeSheet(sheet.id))))
-  return [...sheetContainer.querySelectorAll('.menu-item')].map(el => el.querySelector('.tt')?.textContent)
+  // The rarely used rows are folded under « More »: open it, as a member would.
+  const more = sheetContainer.querySelector('.menu-more')
+  if (more) act(() => more.click())
+  return [...sheetContainer.querySelectorAll('.menu-item')].map(el => ({ title: el.querySelector('.tt')?.textContent, sub: el.querySelector('.ss')?.textContent }))
 }
+const titlesOf = items => items.map(i => i.title)
+const subOf = (items, title) => items.find(i => i.title === title)?.sub
 
 beforeEach(() => {
   useUI.setState({ sheets: [], toastMsg: '', timer: null, work: null })
@@ -60,28 +66,29 @@ afterEach(() => {
 })
 
 describe('the focus view exercise menu at each detail level', () => {
-  it('Simple: neither « Progression settings » nor « Plate loading »', () => {
-    const titles = menuTitles('simple')
-    expect(titles).toContain('Swap exercise')
-    expect(titles).not.toContain('Progression settings')
-    expect(titles).not.toContain('Plate loading')
+  it('Simple: no « Plate loading », and « Exercise settings » does not name the progression', () => {
+    const items = menuTitles('simple')
+    expect(titlesOf(items)).toContain('Swap exercise')
+    expect(titlesOf(items)).toContain('Exercise settings')
+    expect(subOf(items, 'Exercise settings')).toBeUndefined()
+    expect(titlesOf(items)).not.toContain('Plate loading')
   })
 
   it.each(['normal', 'full'])('%s: both are offered', level => {
-    const titles = menuTitles(level)
-    expect(titles).toContain('Progression settings')
-    expect(titles).toContain('Plate loading')
+    const items = menuTitles(level)
+    expect(subOf(items, 'Exercise settings')).toBeTruthy()
+    expect(titlesOf(items)).toContain('Plate loading')
   })
 
-  it('Simple keeps « Progression settings » for an exercise with a rule of its own', () => {
-    const titles = menuTitles('simple', { target: { sets: 1, reps: 5, weight: 95, prog: 'double' } })
-    expect(titles).toContain('Progression settings')
-    expect(titles).not.toContain('Plate loading')
+  it('Simple keeps the progression in « Exercise settings » for an exercise with a rule of its own', () => {
+    const items = menuTitles('simple', { target: { sets: 1, reps: 5, weight: 95, prog: 'double' } })
+    expect(subOf(items, 'Exercise settings')).toBeTruthy()
+    expect(titlesOf(items)).not.toContain('Plate loading')
   })
 
   it('Simple keeps « Plate loading » for an exercise with a bar weight of its own', () => {
-    const titles = menuTitles('simple', { over: { barWeights: { [SQUAT]: 35 } } })
-    expect(titles).toContain('Plate loading')
-    expect(titles).not.toContain('Progression settings')
+    const items = menuTitles('simple', { over: { barWeights: { [SQUAT]: 35 } } })
+    expect(titlesOf(items)).toContain('Plate loading')
+    expect(subOf(items, 'Exercise settings')).toBeUndefined()
   })
 })
