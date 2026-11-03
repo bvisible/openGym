@@ -20,8 +20,13 @@ const stateListeners = new Set()
 /** Settings paired or unpaired a watch: the sync asks the server again. */
 export function relayChanged () { for (const fn of stateListeners) { try { fn() } catch { /* a listener's problem */ } } }
 
+//// Neoffice — false: the relay's routes (/api/watch/*) are upstream's Node server's, and a club's Frappe server answers 404 to every one of them.
+//// Nothing is asked of it at start or from the Modules page; the Zepp page is not offered (views/settings-pages.js). A stand-in `call` still works (the tests).
+export const RELAY_AVAILABLE = false
+
 /** The paired watches, for Settings. */
-export async function relayLinks (call = api) {
+export async function relayLinks (call = RELAY_AVAILABLE ? api : null) {
+  if (!call) return []
   const r = await call('/api/watch/links')
   return Array.isArray(r?.links) ? r.links : []
 }
@@ -90,6 +95,7 @@ export function relayBridge ({ call = api, doc = globalThis.document, pollMs = R
 
 /** Started once by the app: the sync of lib/watch-sync.js over the relay. Returns the stop. */
 export async function startWatchRelay ({ useStore, useUI }) {
+  if (!RELAY_AVAILABLE) return () => {}
   const stop = await startLinkSync(relayBridge({ signedIn: () => !!useStore.getState().user }), { useStore, useUI }, { health: false, clips: false })
   // Signed in or out since: asked again.
   const offUser = useStore.subscribe((s, prev) => { if ((s.user?.id || null) !== (prev.user?.id || null)) relayChanged() })

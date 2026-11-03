@@ -20,6 +20,11 @@
 // The core (logging, plans, history, the exercise library, the basic stats) is not a module.
 // Pure: no imports, so lib/ helpers such as history.js effortOf can use it without a cycle.
 
+//// Neoffice — the two areas whose surfaces need what only upstream's own server has (the watch relay, the webhooks and the MCP server are
+//// /api/watch/*, /api/integrations/* and the MCP process of its Node api) or a native app we do not ship (Apple Watch, Wear OS): on a club's
+//// Frappe server there is nothing behind them, so the page does not offer a switch for them. A stored choice for them is kept and read as before.
+const NOT_HERE = new Set(['watch', 'integrations'])
+
 /* `title` and `desc` are English keys, translated where they are shown. Order is the page's. */
 export const MODULES = [
   { id: 'effort', group: 'training', icon: 'gauge', tint: 'var(--purple)', title: 'Effort',
@@ -46,7 +51,7 @@ export const MODULES = [
     desc: 'Webhooks for Home Assistant and friends, and the MCP server.' },
   { id: 'seasonal', group: 'extras', icon: 'pumpkin', tint: 'var(--orange)', title: 'Seasonal themes',
     desc: 'Halloween, Christmas and the advent calendar. Spooky, festive, optional.' },
-]
+].filter(m => !NOT_HERE.has(m.id))
 export const MODULE_IDS = MODULES.map(m => m.id)
 export const MODULE = Object.fromEntries(MODULES.map(m => [m.id, m]))
 
@@ -59,7 +64,7 @@ export const GROUPS = [
 /* The presets, smallest first. Each names the modules it turns on; every other one is off. */
 //// Neoffice — the gym check-in is the club's door (the membership QR « My access »): « Just training » does not take it away from a
 //// member, who would otherwise be left without a way in (a member can still switch it off in Settings → Modules, or in Look & Home).
-const TRAINING = ['effort', 'plates', 'watch', 'checkin']
+const TRAINING = ['effort', 'plates', 'checkin']
 export const PRESETS = [
   { id: 'training', title: 'Just training', desc: 'Log, plan, progress. Nothing else on the screen.', on: TRAINING },
   { id: 'body', title: 'Training and body', desc: 'Plus weigh-ins, measurements, photos and your health apps.', on: [...TRAINING, 'strength', 'body', 'health'] },

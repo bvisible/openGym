@@ -102,7 +102,8 @@ describe('the root', () => {
     expect(host.querySelector('.sp-acct .lrow-s').textContent).toBe('Your data lives on this device. Sign in to sync.')
     // a guest in a browser has no reminders (no push server) and no Coach page (the server's Coach)
       //// Neoffice — and the member's membership, our own page (views/Settings.jsx).
-      expect(titles()).toEqual(['Guest', 'My membership', 'Modules', 'Workout', 'Timer alerts', 'Plan & schedule', 'Units & language', 'Equipment', 'Look & Home', 'Integrations', 'Data & backup', 'About & updates'])
+      expect(titles()).toEqual(['Guest', 'My membership', 'Modules', 'Workout', 'Timer alerts', 'Plan & schedule', 'Units & language', 'Equipment', 'Look & Home', 'Data & backup', 'About & updates'])
+      //// Neoffice — no Integrations page and no Zepp page: their routes are upstream's Node server's (views/settings-pages.js pageVisible).
     expect(rowTitled('Workout').querySelector('.lrow-v').textContent).toBe('1:30 rest · Cards')
     expect(rowTitled('Timer alerts').querySelector('.lrow-v').textContent).toBe('Sound · Vibrate')
     expect(rowTitled('Plan & schedule').querySelector('.lrow-v').textContent).toMatch(/^Fixed Week · Mon/)
@@ -320,7 +321,7 @@ describe('the pages', () => {
   it('each search entry is a row on its page (guest in a browser)', () => {
     const byPage = {}
     for (const e of SEARCH) if (pageVisible(PAGES[e.page].parent || e.page, guestWeb) && (!e.when || e.when(guestWeb))) (byPage[e.page] ||= []).push(e.title)
-    expect(Object.keys(byPage).sort()).toEqual(['about', 'advanced', 'alerts', 'data', 'equipment', 'integrations', 'look', 'modules', 'plan', 'themes', 'units', 'workout'])
+    expect(Object.keys(byPage).sort()).toEqual(['about', 'advanced', 'alerts', 'data', 'equipment', 'look', 'modules', 'plan', 'themes', 'units', 'workout'])
     for (const [page, want] of Object.entries(byPage)) {
       mount(page)
       // A row, or a button with the same words (the "Works with" chips on Integrations).

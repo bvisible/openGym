@@ -67,7 +67,8 @@ describe('the Modules page', () => {
     mount()
     expect(sw('Seasonal themes').getAttribute('aria-checked')).toBe('false')
     expect(row('Start from').querySelector('.lrow-v').textContent).toBe('Custom')
-    expect(host.textContent).toContain('11 of 12 modules on.')
+    //// Neoffice — ten modules here: the Watch and Integrations ones have nothing behind them on a club's server (lib/modules.js NOT_HERE).
+    expect(host.textContent).toContain('9 of 10 modules on.')
     act(() => sw('Seasonal themes').click())
     expect(isOn(mocks.S, 'seasonal')).toBe(true)
   })
@@ -118,7 +119,7 @@ describe('Settings follows the modules', () => {
 
   it('a module that is off takes its pages away', () => {
     const phone = { ...web, user: { id: 'u' }, mobile: true, ios: true }
-    for (const [page, mod] of [['coach', 'coach'], ['watch', 'watch'], ['zepp', 'watch'], ['apple-health', 'health'], ['themes', 'seasonal']]) {
+    for (const [page, mod] of [['coach', 'coach'], ['watch', 'watch'], ['apple-health', 'health'], ['themes', 'seasonal']]) {
       expect(pageVisible(page, phone), page).toBe(true)
       expect(pageVisible(page, { ...phone, mod: id => id !== mod }), page).toBe(false)
     }
@@ -131,7 +132,7 @@ describe('Settings follows the modules', () => {
     for (const [q, title, mod] of [
       ['rir', 'Effort per set', 'effort'], ['weigh', 'Ask me to weigh in', 'body'], ['recap', 'Week and month recap', 'motivation'],
       ['challenges', 'Monthly challenges', 'motivation'], ['halloween', 'Halloween', 'seasonal'], ['recovery', 'Recovery tips', 'health'],
-      ['webhook', 'Webhooks', 'integrations'], ['nfc', 'Set up an NFC sticker', 'checkin'], ['about you', 'About you', 'strength'],
+      ['nfc', 'Set up an NFC sticker', 'checkin'], ['about you', 'About you', 'strength'],
       ['warm-up', 'Automatic warm-ups', 'plates'],
     ]) {
       expect(has(q, web, title), title).toBe(true)

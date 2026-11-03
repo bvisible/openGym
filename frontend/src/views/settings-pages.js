@@ -62,8 +62,10 @@ export function pageVisible(page, ctx) {
   if (page === 'equipment') return ctx.equipment !== false
   // The iPhone app only: the watch app ships inside it.
   if (page === 'watch') return !!ctx.ios
-  // Signed in to a server: a Zepp OS watch reaches openGym through it (lib/watch-relay.js).
-  if (page === 'zepp') return !!ctx.user && !ctx.demo
+  //// Neoffice — no Zepp OS page and no Integrations page: the watch relay (/api/watch/*) and the webhooks and MCP server (/api/integrations/*)
+  //// are routes of upstream's own Node server, which a club's Frappe server does not have (« Impossible de joindre votre serveur »). Importing a file
+  //// and the CSV export are in Data & backup as before.
+  if (page === 'zepp' || page === 'integrations') return false
   // The phone app only: a browser cannot watch where you are with the page closed.
   if (page === 'gym' || page === 'gym-find' || page === 'gym-edit') return !!ctx.mobile && ctx.gymReminder !== false
   // The health store of the phone this runs on (unknown counts as yes, as for the watch).

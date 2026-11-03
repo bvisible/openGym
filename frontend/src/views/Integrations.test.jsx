@@ -240,15 +240,14 @@ describe('webhooks', () => {
 })
 
 describe('the Settings search', () => {
-  it('finds the page and its cards by what people type', () => {
-    const ctx = { user: null, mobile: false, demo: false }
+  //// Neoffice — the page is not offered on a club's server (views/settings-pages.js pageVisible): its search hits go with it.
+  it('is not found by what people type: the page is not offered here', () => {
+    const ctx = { user: { id: 'u' }, mobile: false, demo: false }
     const tr = s => s
-    expect(searchSettings('integrations', ctx, tr)[0]).toMatchObject({ page: 'integrations', isPage: true })
-    expect(searchSettings('home assistant', ctx, tr).map(h => h.title)).toContain('Webhooks')
-    expect(searchSettings('garmin', ctx, tr).map(h => h.title)).toContain('Garmin')
-    expect(searchSettings('webhook', { user: { id: 'u' }, mobile: false, integrations: [] }, tr).map(h => h.title)).not.toContain('Webhooks')
-    // On a phone the health store is its own page, found under Integrations.
-    const phone = searchSettings('healthkit', { mobile: true, ios: true }, tr)
-    expect(phone[0]).toMatchObject({ page: 'apple-health', trail: 'Settings' })
+    expect(searchSettings('integrations', ctx, tr).some(h => h.page === 'integrations')).toBe(false)
+    expect(searchSettings('home assistant', ctx, tr).map(h => h.title)).not.toContain('Webhooks')
+    expect(searchSettings('garmin', ctx, tr).map(h => h.title)).not.toContain('Garmin')
+    // The health store pages hang under Integrations (their parent): they go with it.
+    expect(searchSettings('healthkit', { mobile: true, ios: true }, tr).some(h => h.page === 'apple-health')).toBe(false)
   })
 })
