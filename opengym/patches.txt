@@ -1,0 +1,10 @@
+# //// Neoffice — added file (no upstream equivalent): bench (`is_frappe_app`) keeps an app in sites/apps.txt only if
+# //// it has hooks.py, modules.txt AND patches.txt. Without this file every `bench get-app` or `bench remove-app` on a
+# //// bench rewrote sites/apps.txt without opengym: its hooks were never loaded and every page under www/ answered 500
+# //// (/gym_sw.js among them). Empty sections, as `bench new-app` writes them.
+[pre_model_sync]
+# Patches added in this section will be executed before doctypes are migrated
+# Read docs to understand patches: https://frappeframework.com/docs/v14/user/en/database-migrations
+
+[post_model_sync]
+# Patches added in this section will be executed after doctypes are migrated
