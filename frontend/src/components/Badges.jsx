@@ -128,7 +128,7 @@ function Vouchers({ v }) {
       {v.available.map(c => <div key={c.id} className="reward on">
         <div className="grow">
           <div className="tt">{money(c.amount)}</div>
-          <div className="ss">{c.badge}{c.badge && c.validUntil ? ' · ' : ''}{c.validUntil ? t('valid until {0}', fmtDate(c.validUntil, true, true)) : ''}</div>
+          <div className="ss">{c.badge}{c.badge && c.validUntil ? ' · ' : ''}{c.validUntil ? t('valid until {0}', fmtDate(c.validUntil, false, true)) : ''}</div>
         </div>
       </div>)}
     </div>}

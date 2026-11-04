@@ -28,7 +28,7 @@ vi.mock('../lib/i18n.js', () => ({
   tn: (one, other, n, ...rest) => [n, ...rest].reduce((out, v, i) => out.replaceAll('{' + i + '}', v), n === 1 ? one : other),
   dateLocale: () => 'en-GB',
 }))
-vi.mock('../lib/format.js', () => ({ fmtNum: n => String(Math.round(n * 10) / 10), fmtDate: iso => 'D(' + iso + ')' }))
+vi.mock('../lib/format.js', () => ({ fmtNum: n => String(Math.round(n * 10) / 10), fmtDate: (iso, long) => 'D(' + iso + (long ? ',long' : '') + ')' }))
 vi.mock('./Icon.jsx', () => ({ default: () => React.createElement('i') }))
 
 import Badges from './Badges.jsx'
