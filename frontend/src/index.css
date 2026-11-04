@@ -3086,6 +3086,18 @@ button.wl-summary{width:100%;padding:0 0 10px;text-align:start;border-radius:var
 .ring-in { position: absolute; inset: 0; display: grid; place-items: center; font-size: 15px; font-weight: 700; color: var(--label); }
 .ring-in .icn { font-size: 24px; }
 
+/* //// Neoffice — the vouchers the badges give (components/Badges.jsx), and the medals of the years gone by. */
+.badge-history { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge-history .tag { font-size: .75rem; }
+.badge-history .tag.m-bronze { color: var(--medal-bronze); }
+.badge-history .tag.m-silver { color: var(--medal-silver); }
+.badge-history .tag.m-gold { color: var(--medal-gold); }
+.voucher-balance { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.voucher-sum { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.voucher-statement { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--sep); }
+.voucher-statement b { font-variant-numeric: tabular-nums; }
+.voucher-statement b.neg { color: var(--label-2); }
+
 .reward-list { display: flex; flex-direction: column; gap: 6px; }
 .reward {
   display: flex; align-items: center; gap: 10px;

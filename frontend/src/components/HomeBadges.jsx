@@ -10,7 +10,7 @@
 import { useEffect, useState } from 'react'
 import { myBadges } from '../lib/api.js'
 import { t } from '../lib/i18n.js'
-import { featuredBadges, tierState, progressLine, nextLine } from '../lib/badge-tiers.js'
+import { featuredBadges, tierState, progressLine, nextLine, fmtMoney } from '../lib/badge-tiers.js'
 import { tappable } from '../lib/use-sheet-keyboard.js'
 import BadgeRing from './BadgeRing.jsx'
 
@@ -33,6 +33,9 @@ export default function HomeBadges({ onOpen }) {
       <div className="lbl2">{t('Your badges')}</div>
       <span className="small acc">{t('See all')}</span>
     </div>
+    {/* //// Neoffice — the vouchers to spend at the front desk, so that nobody forgets they have some. */}
+    {data.vouchers && data.vouchers.enabled && data.vouchers.balance > 0 &&
+      <div className="small acc" style={{ marginBottom: 4 }}>{t('Vouchers: {0}', fmtMoney(data.vouchers.balance, data.vouchers.currency))}</div>}
     {items.map(b => {
       const st = tierState(b)
       return <div key={b.id} className="row home-badge" style={{ gap: 14, padding: '6px 0', minWidth: 0 }}>

@@ -4,10 +4,11 @@ import { describe, expect, it, vi } from 'vitest'
 vi.mock('./i18n.js', () => ({
   t: (s, ...a) => a.reduce((out, v, i) => out.replaceAll('{' + i + '}', v), s),
   tn: (one, other, n, ...rest) => [n, ...rest].reduce((out, v, i) => out.replaceAll('{' + i + '}', v), n === 1 ? one : other),
+  dateLocale: () => 'en-GB',
 }))
 vi.mock('./format.js', () => ({ fmtNum: n => String(Math.round(n * 10) / 10) }))
 
-import { medalOf, medalName, tierState, amountOf, progressLine, nextLine, featuredBadges } from './badge-tiers.js'
+import { medalOf, medalName, tierState, amountOf, progressLine, nextLine, featuredBadges, fmtMoney, historyLines } from './badge-tiers.js'
 
 const gold3 = (over = {}) => ({
   id: 'w', name: 'Total soulevé', metric: 'Weight Moved', levels: 3, thresholds: [20000, 40000, 60000],
@@ -100,5 +101,48 @@ describe('featuredBadges', () => {
     expect(featuredBadges([mk('a', { featured: false })])).toEqual([])
     expect(featuredBadges(undefined)).toEqual([])
     expect(featuredBadges([])).toEqual([])
+  })
+})
+
+describe("the club's loyalty measures", () => {
+  it('each one has its unit, singular and plural', () => {
+    expect(amountOf('Class Sign-Ups', 10)).toBe('10 classes')
+    expect(amountOf('Club Visits', 1)).toBe('1 visit')
+    expect(amountOf('Club Visits', 75)).toBe('75 visits')
+    expect(amountOf('Off-Peak Visits', 30)).toBe('30 visits')
+    expect(amountOf('Weeks With Visits', 25)).toBe('25 weeks')
+    expect(amountOf('Paying Referrals', 1)).toBe('1 referral')
+    expect(amountOf('Paying Referrals', 4)).toBe('4 referrals')
+  })
+
+  it('a regularity badge reads like the others: where it stands and what the next level takes', () => {
+    const b = { id: 'r', name: 'Régularité', metric: 'Club Visits', levels: 3, thresholds: [30, 75, 150], tier: 1, next: 75, value: 41, progress: 41 / 75, earned: true }
+    expect(progressLine(b)).toBe('41 / 75 visits')
+    expect(nextLine(b)).toBe('Silver in 34 visits')
+  })
+})
+
+describe('money', () => {
+  it('whole francs lose their cents, others keep two', () => {
+    expect(fmtMoney(5, 'CHF')).toMatch(/^CHF.?5$|^5.?CHF$/)
+    expect(fmtMoney(7.5, 'CHF')).toMatch(/7[.,]50/)
+    expect(fmtMoney(0, 'CHF')).toMatch(/0/)
+  })
+
+  it('a currency the runtime does not know falls back to the plain number and the code', () => {
+    expect(fmtMoney(5, 'not a currency')).toBe('5 not a currency')
+  })
+})
+
+describe('the years gone by', () => {
+  it('a badge with three levels names its medal, a single-level one says earned, newest year first as the server sends them', () => {
+    const lines = historyLines([
+      { id: 'r', name: 'Régularité', year: 2025, tier: 3, levels: 3 },
+      { id: 'c', name: 'Cours', year: 2025, tier: 1, levels: 1 },
+      { id: 'r', name: 'Régularité', year: 2024, tier: 2, levels: 3 },
+    ])
+    expect(lines.map(l => l.text)).toEqual(['Régularité · Gold · 2025', 'Cours · Earned · 2025', 'Régularité · Silver · 2024'])
+    expect(lines.map(l => l.key)).toEqual(['r:2025', 'c:2025', 'r:2024'])
+    expect(historyLines(null)).toEqual([])
   })
 })

@@ -26,8 +26,9 @@ vi.mock('../lib/api.js', () => ({
 vi.mock('../lib/i18n.js', () => ({
   t: (s, ...a) => a.reduce((out, v, i) => out.replaceAll('{' + i + '}', v), s),
   tn: (one, other, n, ...rest) => [n, ...rest].reduce((out, v, i) => out.replaceAll('{' + i + '}', v), n === 1 ? one : other),
+  dateLocale: () => 'en-GB',
 }))
-vi.mock('../lib/format.js', () => ({ fmtNum: n => String(Math.round(n * 10) / 10) }))
+vi.mock('../lib/format.js', () => ({ fmtNum: n => String(Math.round(n * 10) / 10), fmtDate: iso => 'D(' + iso + ')' }))
 vi.mock('./Icon.jsx', () => ({ default: () => React.createElement('i') }))
 
 import Badges from './Badges.jsx'
@@ -141,5 +142,82 @@ describe('badge case: levels', () => {
     expect(el.querySelector('.badge.got')).toBeNull()
     expect(el.querySelector('.badge-bar span').className).toBe('bronze')
     expect(el.textContent).toContain('Bronze in 15000 kg')
+  })
+})
+
+//// Neoffice — the vouchers the badges give (the pilot club, 2026-11-03).
+describe('badge case: vouchers', () => {
+  const vouchers = (over = {}) => ({
+    enabled: true, currency: 'CHF', balance: 10, cap: 15, minimumPurchase: null, canUse: true,
+    available: [
+      { id: 'v1', amount: 5, validUntil: '2027-06-01', badge: 'Régularité', tier: 1, year: 2026 },
+      { id: 'v2', amount: 5, validUntil: '2027-09-12', badge: 'Cours collectifs', tier: 2, year: 2026 },
+    ],
+    pending: [],
+    movements: [
+      { id: 'm3', on: '2026-11-04 10:00', type: 'used', amount: 5, effect: -5, badge: 'Régularité', staff: null },
+      { id: 'm2', on: '2026-10-20 18:30', type: 'won', amount: 5, effect: 5, badge: 'Cours collectifs', staff: null },
+      { id: 'm1', on: '2026-10-01 09:00', type: 'won', amount: 5, effect: 5, badge: 'Régularité', staff: null },
+    ],
+    ...over,
+  })
+  const answer = v => ({ enabled: true, pointsEnabled: false, points: 0, rewards: [], badges: [badge()], vouchers: v })
+
+  it('a club that gives none shows none', async () => {
+    mocks.answer = answer({ enabled: false })
+    expect((await render()).querySelector('.vouchers')).toBeNull()
+    mocks.answer = { ...answer(undefined), vouchers: undefined }
+    expect((await render()).querySelector('.vouchers')).toBeNull()
+  })
+
+  it('a member with nothing yet and nothing to show sees no empty block', async () => {
+    mocks.answer = answer(vouchers({ balance: 0, available: [], pending: [], movements: [] }))
+    expect((await render()).querySelector('.vouchers')).toBeNull()
+  })
+
+  it('the balance, the rule, and each voucher with its worth and its date', async () => {
+    mocks.answer = answer(vouchers())
+    const el = await render()
+    const box = el.querySelector('.vouchers')
+    expect(box.querySelector('.voucher-sum').textContent).toMatch(/10/)
+    expect(box.textContent).toContain('CHF')
+    expect(box.textContent).toContain("On the club's products only, not on the subscription. One voucher per visit.")
+    expect(box.textContent).toContain('valid until D(2027-06-01)')
+    expect(box.textContent).toContain('valid until D(2027-09-12)')
+    expect(box.querySelectorAll('.reward.on').length).toBe(2)
+  })
+
+  it("the club's minimum purchase is part of the rule when it has one", async () => {
+    mocks.answer = answer(vouchers({ minimumPurchase: 20 }))
+    expect((await render()).querySelector('.vouchers').textContent).toMatch(/Minimum purchase .*20/)
+  })
+
+  it('a voucher on hold says it waits for room and unlocks when one is spent', async () => {
+    mocks.answer = answer(vouchers({ pending: [{ id: 'h1', amount: 5, badge: 'Heures creuses', tier: 1 }] }))
+    expect((await render()).querySelector('.vouchers').textContent).toMatch(/waiting for room in your balance/)
+  })
+
+  it('the statement is behind a tap, newest first, spending in the minus colour and never with the name of the desk', async () => {
+    mocks.answer = answer(vouchers())
+    const el = await render()
+    expect(el.querySelector('.voucher-statement')).toBeNull()
+    const toggle = el.querySelector('.vouchers button')
+    await act(async () => { toggle.dispatchEvent(new window.MouseEvent('click', { bubbles: true })) })
+    const rows = [...el.querySelectorAll('.voucher-statement .row')]
+    expect(rows.length).toBe(3)
+    expect(rows[0].textContent).toContain('Voucher spent')
+    expect(rows[0].querySelector('b').className).toBe('neg')
+    expect(rows[0].querySelector('b').textContent).toMatch(/^\u2212/)
+    expect(rows[1].textContent).toContain('Voucher won')
+    expect(rows[1].querySelector('b').textContent).toMatch(/^\+/)
+  })
+
+  it('the levels of the years gone by are listed under the badges', async () => {
+    mocks.answer = { ...answer(vouchers()), history: [
+      { id: 'r', name: 'Régularité', year: 2025, tier: 3, levels: 3 },
+      { id: 'c', name: 'Cours collectifs', year: 2025, tier: 1, levels: 1 },
+    ] }
+    const tags = [...(await render()).querySelectorAll('.badge-history .tag')].map(x => x.textContent)
+    expect(tags).toEqual(['Régularité · Gold · 2025', 'Cours collectifs · Earned · 2025'])
   })
 })

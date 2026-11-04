@@ -16,7 +16,8 @@ import { useEffect, useState } from 'react'
 import { myBadges } from '../lib/api.js'
 import { t } from '../lib/i18n.js'
 //// Neoffice — levels: a badge may have bronze, silver and gold (lib/badge-tiers.js); the tile shows the level held and the way to the next.
-import { tierState, medalName, nextLine } from '../lib/badge-tiers.js'
+import { tierState, medalName, nextLine, fmtMoney, historyLines } from '../lib/badge-tiers.js'
+import { fmtDate } from '../lib/format.js'
 import Icon from './Icon.jsx'
 
 export default function Badges() {
@@ -47,6 +48,16 @@ export default function Badges() {
       {earned.map(b => <Badge key={b.id} badge={b} />)}
       {locked.map(b => <Badge key={b.id} badge={b} />)}
     </div>
+
+    {/* //// Neoffice — the levels of the years gone by, for the badges that start again every January. */}
+    {(data.history || []).length > 0 && <>
+      <h4 className="sec" style={{ marginTop: 16 }}>{t('Previous years')}</h4>
+      <div className="badge-history">
+        {historyLines(data.history).map(h => <span key={h.key} className={'tag' + (h.medal ? ' m-' + h.medal : '')}>{h.text}</span>)}
+      </div>
+    </>}
+
+    {data.vouchers && data.vouchers.enabled && <Vouchers v={data.vouchers} />}
 
     {data.pointsEnabled && (data.rewards || []).length > 0 && <>
       <h4 className="sec" style={{ marginTop: 16 }}>{t('What your points give you')}</h4>
@@ -85,6 +96,55 @@ function Badge({ badge }) {
       <div className="badge-bar"><span className={bar} style={{ width: st.pct + '%' }} /></div>
       {/* One level: what the club says about the badge, as before. Several: the level to come and what it takes. */}
       <div className="badge-sub">{st.levels === 3 ? nextLine(badge, st) : (badge.description || '')}</div>
+    </>}
+  </div>
+}
+
+//// Neoffice — THE VOUCHERS the badges give (the pilot club, 2026-11-03). Their balance, what each is worth and until when, what waits for
+//// room in the balance, and the statement of every movement: the balance is the total of that statement, so the member can always see where a
+//// voucher went. Spent at the front desk, on the club's products, one a visit: the rule is written under the balance, and the club's minimum
+//// purchase with it. Silent for a club that gives none and for a member with nothing yet and nothing to show.
+function Vouchers({ v }) {
+  const [open, setOpen] = useState(false)
+  const money = n => fmtMoney(n, v.currency)
+  const waiting = (v.pending || []).reduce((sum, p) => sum + (Number(p.amount) || 0), 0)
+  const movements = v.movements || []
+  if (!(v.balance > 0) && !waiting && !movements.length) return null
+  const names = {
+    won: t('Voucher won'), held: t('Voucher on hold'), unlocked: t('Voucher unlocked'),
+    used: t('Voucher spent'), lapsed: t('Voucher lapsed'), restored: t('Voucher given back'),
+  }
+  return <div className="vouchers">
+    <h4 className="sec" style={{ marginTop: 16 }}>{t('Your vouchers')}</h4>
+    <div className="voucher-balance">
+      <span className="voucher-sum">{money(v.balance)}</span>
+      <span className="small dim">{t('to spend at the front desk')}</span>
+    </div>
+    <div className="small dim" style={{ marginTop: 4 }}>
+      {t("On the club's products only, not on the subscription. One voucher per visit.")}
+      {v.minimumPurchase ? ' ' + t('Minimum purchase {0}.', money(v.minimumPurchase)) : ''}
+    </div>
+    {(v.available || []).length > 0 && <div className="reward-list" style={{ marginTop: 8 }}>
+      {v.available.map(c => <div key={c.id} className="reward on">
+        <div className="grow">
+          <div className="tt">{money(c.amount)}</div>
+          <div className="ss">{c.badge}{c.badge && c.validUntil ? ' · ' : ''}{c.validUntil ? t('valid until {0}', fmtDate(c.validUntil, true, true)) : ''}</div>
+        </div>
+      </div>)}
+    </div>}
+    {waiting > 0 && <div className="small dim" style={{ marginTop: 8 }}>
+      {t('{0} waiting for room in your balance. It unlocks as soon as you spend a voucher.', money(waiting))}
+    </div>}
+    {movements.length > 0 && <>
+      <button type="button" className="link small" style={{ marginTop: 8 }} aria-expanded={open} onClick={() => setOpen(!open)}>
+        {t('Statement')}
+      </button>
+      {open && <div className="voucher-statement">
+        {movements.map(m => <div key={m.id} className="row between small">
+          <span>{fmtDate(String(m.on).slice(0, 10), false, true)} · {names[m.type] || ''}{m.badge ? ' · ' + m.badge : ''}</span>
+          <b className={m.effect < 0 ? 'neg' : ''}>{m.effect > 0 ? '+' : m.effect < 0 ? '\u2212' : ''}{money(m.amount)}</b>
+        </div>)}
+      </div>}
     </>}
   </div>
 }

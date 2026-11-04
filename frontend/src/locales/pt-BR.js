@@ -2556,6 +2556,11 @@ export const PT_BR_OVERRIDES = {
   "Your club has no coach to write to yet.": "Seu clube ainda não tem nenhum treinador para quem escrever.",
   "My access": "Meu acesso",
   "To read": "Para ler",
+  //// Neoffice — vouchers and loyalty measures (2026-11-04): where the pt-PT wording reads European
+  "Your vouchers": "Seus vales",
+  "{0} waiting for room in your balance. It unlocks as soon as you spend a voucher.": "{0} aguardando espaço no saldo. É liberado assim que você usar um vale.",
+  "{0} referral": "{0} membro indicado",
+  "{0} referrals": "{0} membros indicados",
 }
 
 export default { ...pt, ...PT_BR_OVERRIDES }

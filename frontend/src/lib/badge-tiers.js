@@ -9,7 +9,7 @@
 //// bronze, silver, gold, a badge with one level has no medal; the names are translated here.
 //// A server that predates levels sends none of that: such a badge reads as one level, earned or not.
 
-import { t, tn } from './i18n.js'
+import { t, tn, dateLocale } from './i18n.js'
 import { fmtNum } from './format.js'
 
 const MEDALS = ['bronze', 'silver', 'gold']
@@ -49,6 +49,13 @@ export function amountOf(metric, n) {
     case 'Class Attendance': return tn('{0} class', '{0} classes', whole)
     case 'Week Streak': return tn('{0} week', '{0} weeks', whole)
     case 'Goals Reached': return tn('{0} goal', '{0} goals', whole)
+    //// The club's own loyalty measures (2026-11-03): classes signed up for, visits read at the front desk (all of them, or those in
+    //// the quiet hours), weeks with enough visits, referred members who subscribed and paid.
+    case 'Class Sign-Ups': return tn('{0} class', '{0} classes', whole)
+    case 'Club Visits':
+    case 'Off-Peak Visits': return tn('{0} visit', '{0} visits', whole)
+    case 'Weeks With Visits': return tn('{0} week', '{0} weeks', whole)
+    case 'Paying Referrals': return tn('{0} referral', '{0} referrals', whole)
     default: return fmtNum(x)
   }
 }
@@ -80,4 +87,27 @@ export function featuredBadges(badges, limit = 3) {
   const done = featured.filter(b => tierState(b).complete)
     .sort((a, b) => String(b.tierEarnedOn || b.earnedOn || '').localeCompare(String(a.tierEarnedOn || a.earnedOn || '')) || byName(a, b))
   return [...open, ...done].slice(0, limit)
+}
+
+/** An amount of money in the club's currency, in the member's language (« 5,00 CHF »; whole francs lose their cents). */
+export function fmtMoney(n, currency) {
+  const x = Number(n) || 0
+  const digits = Math.abs(x - Math.round(x)) < 0.005 ? 0 : 2
+  try {
+    return new Intl.NumberFormat(dateLocale(), { style: 'currency', currency: currency || 'CHF', minimumFractionDigits: digits, maximumFractionDigits: 2 }).format(x)
+  } catch {
+    return fmtNum(x) + ' ' + (currency || 'CHF')
+  }
+}
+
+/**
+ * The medals of the years gone by, for the badges that start again every January: « Regularity · Gold · 2025 ». A badge with one level has
+ * no medal to name, so the line says what it is: earned.
+ */
+export function historyLines(history) {
+  return (history || []).map(h => ({
+    key: h.id + ':' + h.year,
+    text: [h.name, medalOf(h.levels, h.tier) ? medalName(medalOf(h.levels, h.tier)) : t('Earned'), h.year].join(' · '),
+    medal: medalOf(h.levels, h.tier),
+  }))
 }

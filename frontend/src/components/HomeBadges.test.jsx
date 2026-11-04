@@ -17,6 +17,7 @@ vi.mock('../lib/api.js', () => ({
 vi.mock('../lib/i18n.js', () => ({
   t: (s, ...a) => a.reduce((out, v, i) => out.replaceAll('{' + i + '}', v), s),
   tn: (one, other, n, ...rest) => [n, ...rest].reduce((out, v, i) => out.replaceAll('{' + i + '}', v), n === 1 ? one : other),
+  dateLocale: () => 'en-GB',
 }))
 vi.mock('../lib/format.js', () => ({ fmtNum: n => String(Math.round(n * 10) / 10) }))
 vi.mock('./Icon.jsx', () => ({ default: ({ name }) => React.createElement('i', { 'data-icon': name }) }))
@@ -97,5 +98,22 @@ describe('the badges on the home screen', () => {
     const c = await render()
     await act(async () => { c.querySelector('.card').click() })
     expect(opened).toBe(1)
+  })
+})
+
+//// Neoffice — the vouchers to spend at the front desk (2026-11-03): one line on the home card, only when there is a balance.
+describe('the vouchers on the home badges', () => {
+  it('one line with the balance when the member has some to spend', async () => {
+    mocks.answer = { enabled: true, badges: [badge('a')], vouchers: { enabled: true, currency: 'CHF', balance: 10 } }
+    expect((await render()).textContent).toMatch(/Vouchers: .*10/)
+  })
+
+  it('nothing when the balance is zero, when the club gives none, or when the server predates them', async () => {
+    mocks.answer = { enabled: true, badges: [badge('a')], vouchers: { enabled: true, currency: 'CHF', balance: 0 } }
+    expect((await render()).textContent).not.toContain('Vouchers')
+    mocks.answer = { enabled: true, badges: [badge('a')], vouchers: { enabled: false } }
+    expect((await render()).textContent).not.toContain('Vouchers')
+    mocks.answer = { enabled: true, badges: [badge('a')] }
+    expect((await render()).textContent).not.toContain('Vouchers')
   })
 })
