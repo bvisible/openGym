@@ -116,12 +116,16 @@ const render = (Screen, level) => {
 const found = (text, terms = JARGON) => terms.filter(term => new RegExp(term.replace(/[-\s]/g, '[-\\s]?'), 'i').test(text))
 
 beforeEach(() => {
+  //// The fixtures are dated August and Stats shows a recent window: without a fixed clock
+  //// they age out of it, and this test turns red by itself some day (Weekly audit).
+  vi.useFakeTimers({ toFake: ['Date'], now: new Date('2026-09-01T10:00:00') })
   globalThis.IS_REACT_ACT_ENVIRONMENT = true
   useUI.setState({ sheets: [] })
   document.body.innerHTML = ''
 })
 
 afterEach(() => {
+  vi.useRealTimers()
   act(() => { mounted.splice(0).forEach(root => root.unmount()) })
 })
 
