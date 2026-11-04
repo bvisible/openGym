@@ -3088,7 +3088,7 @@ button.wl-summary{width:100%;padding:0 0 10px;text-align:start;border-radius:var
 
 /* //// Neoffice — the vouchers the badges give (components/Badges.jsx), and the medals of the years gone by. */
 .badge-history { display: flex; flex-wrap: wrap; gap: 6px; }
-.badge-history .tag { font-size: .75rem; }
+.badge-history .tag { font-size: .75rem; text-transform: none; }  /* the club's own wording of a badge name, not capitalised by .tag */
 .badge-history .tag.m-bronze { color: var(--medal-bronze); }
 .badge-history .tag.m-silver { color: var(--medal-silver); }
 .badge-history .tag.m-gold { color: var(--medal-gold); }
