@@ -35,6 +35,16 @@ async function startServer(t) {
   h.api = `http://127.0.0.1:${await boundPort(child, () => h.log)}`;
   return h;
 }
+//// Neoffice — the answer and the log come by two pipes, so the line can land after the
+//// answer: reading it at once gave undefined on a busy runner (Weekly audit). Wait for it.
+async function refusedLine(h) {
+  for (let i = 0; i < 250; i++) {
+    const line = h.log.match(/^refused cross-origin[^\n]*(?=\n)/m)?.[0];
+    if (line) return line;
+    await new Promise(resolve => setTimeout(resolve, 20));
+  }
+  assert.fail(`no refused line in the log: ${h.log}`);
+}
 const post = (h, p, body, headers = {}) => fetch(h.api + p, { method: 'POST', headers: { 'Content-Type': 'application/json', ...headers }, body: JSON.stringify(body) });
 
 test('a write from the LAN address names ORIGIN in the log and the answer', async t => {
@@ -42,7 +52,7 @@ test('a write from the LAN address names ORIGIN in the log and the answer', asyn
   const r = await post(h, '/api/login/options', {}, { Origin: 'http://10.11.0.4:3030' });
   assert.equal(r.status, 403);
   assert.deepEqual(await r.json(), { error: 'cross-origin request refused', code: 'origin-mismatch', expected: ORIGIN });
-  const line = h.log.split('\n').find(l => l.startsWith('refused cross-origin'));
+  const line = await refusedLine(h);
   assert.match(line, /origin="http:\/\/10\.11\.0\.4:3030" expected=http:\/\/localhost:8080/);
   assert.match(line, /set ORIGIN=http:\/\/10\.11\.0\.4:3030 and RP_ID=10\.11\.0\.4 on the api service/);
 });
@@ -52,7 +62,7 @@ test('a page on another site gets the same refusal, and the log does not advise 
   const r = await post(h, '/api/login/options', {}, { Origin: 'https://evil.test', 'Sec-Fetch-Site': 'cross-site' });
   assert.equal(r.status, 403);
   assert.equal((await r.json()).code, 'origin-mismatch');
-  const line = h.log.split('\n').find(l => l.startsWith('refused cross-origin'));
+  const line = await refusedLine(h);
   assert.doesNotMatch(line, /set ORIGIN/);
 });
 
