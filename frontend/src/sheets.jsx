@@ -4707,7 +4707,7 @@ const PAY_KINDS = {
     //// this screen leaves neither a firm booking nor an amount owed.
     open: s => payStart(s.id),
     openFailed: () => t('That slot could not be held. Try another time.'),
-    pay: (s, data, method) => payWith(data.booking, method),
+    pay: (s, data, method) => payWith(data.booking, method, getLang()),
     //: Called, never referenced: naming the function here would read it at
     //: module load, and a test that mocks the api module without this one
     //: could no longer even IMPORT the screen.
@@ -4721,7 +4721,7 @@ const PAY_KINDS = {
     //// is settling it. Opening this screen commits them to nothing.
     open: s => invoiceMethods(s.id, s.allowDeferred),
     openFailed: () => t('That invoice could not be opened. Try again in a moment.'),
-    pay: (s, _data, method) => payInvoice(s.id, method),
+    pay: (s, _data, method) => payInvoice(s.id, method, getLang()),
     state: args => invoicePayState(args),
     done: action => action?.action === 'none'
       ? { title: t('Nothing was charged'), sub: t('Your club will settle this invoice with you.') }
@@ -4879,6 +4879,9 @@ function PaySheet({ s, close, onDone, kind = 'class' }) {
     {!data.methods.length && <div className="card muted">
       {t('No online payment is set up. Ask your club.')}
     </div>}
+    {/* //// Neoffice — the moment between the tap and the provider's page (the invoice is raised and the page asked for: a second or two) used to show
+         nothing but a dimmed row: the club's members read it as a hang. A spinner and the word the screen already uses for a wait. */}
+    {busy && <div className="pay-wait" style={{ marginTop: 14 }}><span className="spin" />{t('Loading…')}</div>}
   </>
 }
 

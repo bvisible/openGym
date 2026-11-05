@@ -325,8 +325,9 @@ export const payStart = (session) =>
   api(M.payStart, { method: 'POST', body: JSON.stringify({ session }) })
 //// `payWith` takes the BOOKING, not an invoice: none exists yet. It's
 //// choosing the method that raises it — see `wallet.pay_with`.
-export const payWith = (booking, method) =>
-  api(M.payWith, { method: 'POST', body: JSON.stringify({ booking, method }) })
+//// Neoffice — `lang`: the language the member reads the journal in, so the provider's page opens in it (the desk account's own is often unset).
+export const payWith = (booking, method, lang) =>
+  api(M.payWith, { method: 'POST', body: JSON.stringify({ booking, method, lang }) })
 export const payState = ({ intent, invoice }) =>
   api(M.payState + '?' + new URLSearchParams(intent ? { intent } : { invoice }))
 
@@ -340,8 +341,8 @@ export const payState = ({ intent, invoice }) =>
 //// if the club allows it).
 export const invoiceMethods = (invoice, allowDeferred) =>
   api(M.invoiceMethods + '?' + new URLSearchParams({ invoice, allow_deferred: allowDeferred ? 1 : 0 }))
-export const payInvoice = (invoice, method) =>
-  api(M.payInvoice, { method: 'POST', body: JSON.stringify({ invoice, method }) })
+export const payInvoice = (invoice, method, lang) =>
+  api(M.payInvoice, { method: 'POST', body: JSON.stringify({ invoice, method, lang }) })
 export const invoicePayState = ({ intent, invoice }) =>
   api(M.invoicePayState + '?' + new URLSearchParams(intent ? { intent } : { invoice }))
 
