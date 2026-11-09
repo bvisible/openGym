@@ -25,6 +25,10 @@ import { layClubNames } from './club-names.js'
 // What setLang builds for French: the generated pack with its first letters raised, the club's names on top.
 const frNames = layClubNames(upstreamFr, clubFr)
 const LEGACY = new Set(V13_IDS)
+//// Neoffice — exercises added after v1.3 whose upstream French name contradicts the exercise (a « rouleau » that is a
+//// stability ball, a « couché » press done seated, « medecine ball », two different stretches under one name), named by
+//// the club from their steps (neoffice-maintenance#1475). Only these may join the v1.3 names in the club's layer.
+const CORRECTED = ['2200', '2991', '2093', '2097', '2103', '4856', '1029', '3422', '3439', '3442', '5031', '5144', '5161', '5238']
 const ID = V13_IDS[0]
 const EN = EXIDX[ID].n
 
@@ -38,8 +42,16 @@ describe('the club’s French exercise names', () => {
     expect(EXERCISE_NAME_LANGS).toContain('fr')
   })
 
-  it('name exactly the exercises of the v1.3 catalogue', () => {
-    expect(Object.keys(clubFr).sort()).toEqual([...V13_IDS].sort())
+  it('name exactly the exercises of the v1.3 catalogue, and the upstream names the club corrected', () => {
+    expect(Object.keys(clubFr).sort()).toEqual([...V13_IDS, ...CORRECTED].sort())
+  })
+
+  it('give a corrected exercise a name no other exercise carries', () => {
+    // Only the corrections: the v1.3 names share a few on purpose (two drawings of one movement).
+    for (const id of CORRECTED) {
+      const twin = Object.keys(frNames).find(other => other !== id && frNames[other].toLocaleLowerCase() === frNames[id].toLocaleLowerCase())
+      expect(twin, `${id} and ${twin}: « ${frNames[id]} »`).toBeUndefined()
+    }
   })
 
   it('laid over the generated pack, leave no exercise of the catalogue without a French name', () => {
@@ -51,7 +63,7 @@ describe('the club’s French exercise names', () => {
     const named = V13_IDS.find(id => upstreamFr[id] && upstreamFr[id] !== clubFr[id])
     expect(named, 'no exercise where the club’s name differs from the generated one').toBeTruthy()
     expect(frNames[named]).toBe(clubFr[named])
-    const added = CATALOGUE.find(e => !LEGACY.has(e.id))
+    const added = CATALOGUE.find(e => !LEGACY.has(e.id) && !CORRECTED.includes(e.id))
     expect(added, 'no exercise added after the v1.3 catalogue').toBeTruthy()
     expect(frNames[added.id]).toBe(upstreamFr[added.id].charAt(0).toLocaleUpperCase() + upstreamFr[added.id].slice(1))
   })
@@ -61,7 +73,7 @@ describe('the club’s French exercise names', () => {
   })
 
   it('leave no English qualifier behind', () => {
-    for (const id of V13_IDS) {
+    for (const id of [...V13_IDS, ...CORRECTED]) {
       expect(clubFr[id], id).not.toMatch(
         /(?:^|[^\p{L}])(?:barbell|dumbbell|cable|stability ball|medicine ball|assisted|weighted)(?=$|[^\p{L}])/iu
       )
@@ -88,7 +100,7 @@ describe('the club’s French exercise names', () => {
     ]
     // The ball is this stretch's assistance, and « au ballon de stabilité » says so.
     const exempt = { 1716: String(/assisted/iu) }
-    for (const id of V13_IDS) {
+    for (const id of [...V13_IDS, ...CORRECTED]) {
       for (const [english, french] of rules) {
         if (exempt[id] === String(english)) continue
         if (english.test(EXIDX[id].n)) expect(clubFr[id], `${id}: ${english}`).toMatch(french)
