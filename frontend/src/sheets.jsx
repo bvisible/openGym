@@ -3437,9 +3437,18 @@ function CoachOffer({ offer, close }) {
     </div>}
     <Button variant="primary" onClick={accept} disabled={busy}>{t('Add to my plan')}</Button>
     <div style={{ height: 8 }} />
-    <Button variant="ghost" className="dim" onClick={decline} disabled={busy}>{t('Not now')}</Button>
+    {/* //// Neoffice — a club can rule that a member does not decline what their coach sends (Gym Settings
+         member_can_decline_program, sent as perms.declineProgram). The server refuses the decline then, and a
+         « Not now » that ends on an error is a dead end: the member may only put the offer off, and it stays on
+         their home screen (neoffice-maintenance#2102). An absent flag (an older server) keeps the decline. */}
+    {canDecline(S())
+      ? <Button variant="ghost" className="dim" onClick={decline} disabled={busy}>{t('Not now')}</Button>
+      : <Button variant="ghost" className="dim" onClick={close} disabled={busy}>{t('Later')}</Button>}
   </>
 }
+
+//// Neoffice — whether the club lets a member decline a program from their coach (see CoachOffer).
+export const canDecline = st => !(st && st.perms && st.perms.declineProgram === false)
 
 export const dayOverrideSheet = iso => ui().openSheet(close => <DayOverride iso={iso} close={close} />)
 
