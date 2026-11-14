@@ -210,6 +210,7 @@ et ne pousser qu'une fois les tests verts.
   chaque appui #930, chrono en pause). `vite.config.js` n'a plus qu'UNE clé `test` (deux clés : la seconde gagnait, ni l'URL de happy-dom ni
   `vitest.setup.js` ne s'appliquaient depuis la v1.4.4). Les consignes de 78 exercices et 19 descriptions réécrites en anglais sont retraduites (les
   `id` dont le texte anglais a changé se remettent dans un lot de `translation-batches.mjs` : celui-ci ne voit que les manques).
+- **Les écrans, avant et après** (v1.4.5) : juste avant la fusion, un passage des parcours du club sur osiris (`neoffice_gym` `journeys/play.py --out /home/neoffice/journeys/gym/before-vX.Y.Z`) ; une fois la fusion tirée sur osiris, le même passage, puis comparer le texte de chaque écran (`steps[].pages[].text` des deux `report.json`) niveau par niveau. C'est ce qui a trouvé, à la v1.4.5, deux boutons de l'amont en trop au niveau Simple, que ni les tests ni le test du jargon ne voyaient.
 - Partout ailleurs : **leur code**, avec nos `////` réappliqués par-dessus.
 
 > L'amont a son propre `CLAUDE.md`, qui décrit SON projet (docker, api, mcp,
