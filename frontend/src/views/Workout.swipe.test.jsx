@@ -184,7 +184,7 @@ describe('a hold running while rows move', () => {
   it('writes what it held to its own row after a set above it was copied or removed', () => {
     setActive([timed([30, 40, 50])])
     render()
-    const play = () => [...container.querySelectorAll('button[aria-label="Start set"]')]
+    const play = () => [...container.querySelectorAll('button[aria-label*=": Start set"]')]
     act(() => play()[2].click())             // hold on the 50 s row
     act(() => { vi.advanceTimersByTime(3_000) })   //// Neoffice — through our 3-2-1 first (useUI.startWorkWithPrep)
     expect(useUI.getState().work).not.toBeNull()
@@ -200,7 +200,7 @@ describe('a hold running while rows move', () => {
   it('stops when its own row is removed, and logs nothing anywhere', () => {
     setActive([timed([30, 40])])
     render()
-    act(() => [...container.querySelectorAll('button[aria-label="Start set"]')][1].click())
+    act(() => [...container.querySelectorAll('button[aria-label*=": Start set"]')][1].click())
     act(() => { vi.advanceTimersByTime(3_000) })   //// Neoffice — through our 3-2-1 first
     act(() => { deleteActiveSet(0, 1) })
     expect(useUI.getState().work).toBeNull()
@@ -212,7 +212,7 @@ describe('a hold running while rows move', () => {
   it('moves the saved owner along too, so a reload brings the hold back to its own row', () => {
     setActive([timed([30, 40, 50])])
     render()
-    act(() => [...container.querySelectorAll('button[aria-label="Start set"]')][2].click())
+    act(() => [...container.querySelectorAll('button[aria-label*=": Start set"]')][2].click())
     act(() => { vi.advanceTimersByTime(3_000) })   //// Neoffice — through our 3-2-1 first
     expect(useUI.getState().work.owner).toMatchObject({ idx: 0, i: 2 })
     act(() => { copyActiveSet(0, 0) })
@@ -250,7 +250,7 @@ describe('the swipe on a rendered set row', () => {
   let widthSpy
   beforeEach(() => { widthSpy = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(360) })
   afterEach(() => widthSpy.mockRestore())
-  const repsPlus = k => swrows()[k].querySelectorAll('button[aria-label="Increase"]')[1]
+  const repsPlus = k => swrows()[k].querySelectorAll('button[aria-label*=": Increase"]')[1]
 
   it('wraps every set row when on, and none when off', () => {
     setActive([entry('1001', [row(80), row(80)])])

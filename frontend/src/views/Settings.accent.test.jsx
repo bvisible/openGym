@@ -174,6 +174,7 @@ describe('Settings: your own accent colour', () => {
   it('ignores a value that is not a colour', () => {
     mocks.S.accent = 'custom'; mocks.S.accentCustom = 'red;}'
     mount()
+    //// Neoffice — the old green keeps its plain name here (views/Settings.jsx accentName: no « openGym green » to tell it apart from).
     expect(host.querySelector('.lrow-v').textContent).toBe('Green')
     expect(own().classList.contains('unset')).toBe(true)
   })

@@ -127,8 +127,13 @@ export default defineConfig({
   //// document at a port nothing listens on makes such a test fail everywhere.
   //// Neoffice — setupFiles added: Node 25's own empty `localStorage` global
   //// shadows happy-dom's (see vitest.setup.js).
-  test: { environmentOptions: { happyDOM: { url: 'http://localhost:1/' } }, setupFiles: ['./vitest.setup.js'] },
-  define: { __APP_VERSION__: JSON.stringify(appVersion) },
+  //// Neoffice — ONE `test` key: upstream's (v1.4.4, src/test-setup.js, #733) sat below ours in the same object literal and the
+  //// later key won, so neither the happy-dom url nor vitest.setup.js applied (found at the v1.4.5 merge). Upstream's setup gives a DOM
+  //// test happy-dom's Storage; ours then covers a plain node test file, and only where the storage is still unusable.
+  test: { environmentOptions: { happyDOM: { url: 'http://localhost:1/' } }, setupFiles: ['./src/test-setup.js', './vitest.setup.js'] },
+  // __SEASON_CLOCK__: the seasonal QA date hook (src/lib/season-clock.js), only in a build made
+  // with VITE_SEASON_CLOCK=1 for screenshots. false everywhere else, so the hook is compiled out.
+  define: { __APP_VERSION__: JSON.stringify(appVersion), __SEASON_CLOCK__: JSON.stringify(process.env.VITE_SEASON_CLOCK === '1') },
   //// Neoffice — upstream v1.3.7 adds a `swStamp` plugin that names the service
   //// worker's cache after the build hash. Not taken: the worker Frappe serves is
   //// opengym/www/gym_sw.js, a static file no build rewrites, and the test in
@@ -162,7 +167,5 @@ export default defineConfig({
     // //// lookbehind kept 1.4.2 (and OUR bundle, media-refs) on its splash screen on iOS 15.5 to 16.3. What the transpiler cannot lower,
     // //// scripts/check-bundle-syntax.mjs catches (its test builds the bundle).
     target: ['safari15', 'chrome100', 'firefox100', 'edge100']
-  },
-  // Gives happy-dom tests a working localStorage on Node 24+ (#733).
-  test: { setupFiles: ['./src/test-setup.js'] }
+  }
 })

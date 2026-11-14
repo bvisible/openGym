@@ -151,7 +151,10 @@ et ne pousser qu'une fois les tests verts.
 - **`vite.config.js`, `.gitignore`, `opengym/`** — notre coquille Frappe :
   garder les nôtres, y ajouter leurs nouveautés.
 - **`locales/*.js`** — leurs nouvelles chaînes + nos surcharges. Les deux, jamais
-  l'un à la place de l'autre.
+  l'un à la place de l'autre. **Clé par clé, avec `node frontend/scripts/locale-merge3.mjs --fr-todo <fichier.json>`**
+  (v1.4.5) : il lit les trois versions de l'index (base, nous, eux), garde le texte de l'amont comme squelette, nos
+  surcharges et nos clés par-dessus, et liste les clés françaises dont le texte vient de l'amont (à passer au vouvoiement).
+  `pt-BR.js` après `pt.js`. Puis `node frontend/scripts/check-locales.mjs` : mêmes clés partout.
 - **`instr/fr.js`**, **`exercise-desc/fr.js`** — NOTRE version, toujours (consignes et descriptions vouvoyées, pour tout le
   catalogue). Après le merge, traduire ce que la nouvelle version ajoute (« Traduire le catalogue » ci-dessous) ;
   `lib/catalogue-coverage.neoffice.test.js` reste rouge tant qu'un exercice n'a pas ses deux textes en français.
@@ -193,6 +196,20 @@ et ne pousser qu'une fois les tests verts.
   replie le rare sous « Plus » (`MenuSheet`, `more`) : nos tests l'ouvrent avant de lire. `DEF.progDefault` vaut `null` chez nous, pas `'linear'` : sinon le choix du club (« pas de progression automatique »)
   ne s'applique jamais, personne n'ayant « choisi ». `locales/pt-BR.js` est une liste de SURCHARGES de `pt.js` : une fusion qui reconstruit les langues doit en garder les nôtres (113 retrouvées), sinon le
   test « n'emprunte pas le portugais d'Europe » le dit. Les phrases de Siri restent au tutoiement (`« Lance ma séance dans openGym »` : c'est ce que le raccourci du téléphone enregistre).
+- **La v1.4.5 (14.11, note `…/110-…`)** : 2 232 chaînes neuves par langue et six langues neuves (`cs`, `da`, `fa`, `id`, `lt`, `vi`), qui ont reçu les
+  410 chaînes de NOS écrans (Haiku ; en tchèque et en lituanien, nos six pluriels sont des objets `{ one, few, many, other }`). Les 2 223 chaînes françaises de
+  l'amont sont passées au vouvoiement par Haiku en deux passes : la première en laisse (« Pour toi », « Laisse vide… »), une recherche des pronoms
+  (`tu`, `te`, `t’`, `toi`, `ton`, `ta`, `tes`) et des impératifs qu'elle a changés ailleurs trouve le reste (« Ton de la relance » est un nom). Ce qui ne
+  vit que sur le serveur Node de l'amont reste caché, comme en v1.4.4 : connexion OIDC, jetons d'API, intégrations, bibliothèque communautaire
+  (`CommunityBits`, module `community` dans `NOT_HERE`), entraîneur et salle, connecteur MCP (« Utiliser votre abonnement », `CONNECTORS_HERE = false` dans
+  `Settings.jsx`), photos de progression, sauvegarde WebDAV, rappels de check-in et « Votre année » (`when: () => false`), widget en direct (mobile seulement).
+  Cinq règles de niveau neuves (`lib/level-visibility.js`) : `showsWorkoutTweaks` (les réglages fins de séance, de Normal), `showsRoutineTypeControl`
+  (le type d'une routine ; un circuit garde sa ligne), `showsRecoveryLog`, `showsLadders`, `showsStatsExtras` (journal, outils, forme du jour, cardio de la
+  semaine). L'amont remet `components/ShareWorkout.jsx` et `lib/share-card.js` : gardés INUTILISÉS (ses tests lisent `shareCardModel`), le partage d'une
+  séance reste `shareWorkoutImageSheet` → `ShareSheet`. `TabBarCentered.jsx` reprend son bouton Démarrer (jour séparé #908, sélecteur à l'appui long ou à
+  chaque appui #930, chrono en pause). `vite.config.js` n'a plus qu'UNE clé `test` (deux clés : la seconde gagnait, ni l'URL de happy-dom ni
+  `vitest.setup.js` ne s'appliquaient depuis la v1.4.4). Les consignes de 78 exercices et 19 descriptions réécrites en anglais sont retraduites (les
+  `id` dont le texte anglais a changé se remettent dans un lot de `translation-batches.mjs` : celui-ci ne voit que les manques).
 - Partout ailleurs : **leur code**, avec nos `////` réappliqués par-dessus.
 
 > L'amont a son propre `CLAUDE.md`, qui décrit SON projet (docker, api, mcp,

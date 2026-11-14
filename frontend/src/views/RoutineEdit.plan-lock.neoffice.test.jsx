@@ -44,7 +44,8 @@ function renderRoutine(routine = {}, perms = null) {
 }
 
 //// Neoffice — a row's name is its title line (.lrow-t): v1.4.4 puts a sentence under « Delete routine », which would otherwise be part of the label.
-const labels = () => [...container.querySelectorAll('button')].map(b => (b.getAttribute('aria-label') || b.querySelector('.lrow-t')?.textContent || b.textContent).trim())
+//: v1.4.5 names the exercise in the reorder buttons' label (« Move Squat up »), their title stays « Move up »: both are read.
+const labels = () => [...container.querySelectorAll('button')].flatMap(b => [(b.getAttribute('aria-label') || b.querySelector('.lrow-t')?.textContent || b.textContent).trim(), b.getAttribute('title')].filter(Boolean))
 const rowTitled = title => [...container.querySelectorAll('.lrow')].find(r => r.querySelector('.lrow-t')?.textContent === title)
 const note = () => container.querySelector('.sect-b + .small.dim').textContent
 

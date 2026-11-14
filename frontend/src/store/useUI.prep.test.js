@@ -71,7 +71,9 @@ describe('what the work timer knows about the set it counts', () => {
   it('tells the screen once the hold has started, after the hold it displaced handed back its time', () => {
     const order = []
     useUI.getState().startWork(60, 'First', elapsed => order.push(['first done', elapsed]))
-    vi.advanceTimersByTime(5000)
+    //// Half a second off the beat: since v1.4.5 the hold ticks on timeouts aimed at its whole seconds (useUI.js nextBeatMs), and a
+    //// count that ended exactly on a tick ran before it (the tick's timeout is the newer one), handing back 7 s for 8.
+    vi.advanceTimersByTime(5500)
     useUI.getState().startWorkWithPrep(45, 'Second', vi.fn(), 3, null, () => order.push(['second started', useUI.getState().work?.label]))
     expect(order).toEqual([])
     vi.advanceTimersByTime(3000)

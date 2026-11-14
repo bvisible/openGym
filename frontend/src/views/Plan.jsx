@@ -4,6 +4,7 @@ import { useStore } from '../store/useStore.js'
 import { useUI } from '../store/useUI.js'
 import { DAYN, DAYS, weekOrder, weekStartOf, uid, exCount, routineCount, todayISO, fmtDate } from '../lib/format.js'
 import { t } from '../lib/i18n.js'
+import { nameIn, said } from '../lib/a11y-name.js'
 import {
   dayAssignSheet, starterPlanSheet, confirmSheet, menuSheet,
   planHasRoutines, exportPlanFile, printWholePlan, importPlanFile,
@@ -35,6 +36,10 @@ import {
   chooseRotation, chooseFixedWeek, sequenceOf, isSimpleSequence, segmentAt, REST,
 } from '../lib/rotation.js'
 import { isOn } from '../lib/modules.js'
+import { groupRoutines, folderOpen, setFolderOpen, folderOf } from '../lib/routine-folders.js'
+import { isFavRoutine } from '../lib/routine-favs.js'
+import { routineFromWorkoutSheet } from '../components/RoutineFromWorkout.jsx'
+import { routineSources } from '../lib/session-routines.js'
 
 // Plan has two views (v1.3.11): Schedule (how you train, and when) and Routines (what you
 // train). The last one you looked at comes back: a per-device convenience, never synced, so it
@@ -178,8 +183,11 @@ export default function Plan() {
         { icon: 'note', label: t('Print / Save as PDF'), disabled: !has, onClick: printWholePlan },
         //// Neoffice — importing or loading a plan changes it: behind the club's lock. The Coach has its own
         //// button in the header since v1.4.1 (it said so here behind the lock; the Coach screen says it now).
+        //// v1.4.5's QR code and routine from a past workout write the plan too: behind the same lock.
         mayEdit && { icon: 'download', label: t('Import a plan file'), onClick: () => fileRef.current?.click() },
+        mayEdit && { icon: 'qr', label: t('Scan a QR code'), sub: t('A routine from a friend’s phone, the website or the poster by the squat rack.'), onClick: () => import('../components/ScanCode.jsx').then(m => m.scanQrCode()) },
         mayEdit && { icon: 'clipboard', label: t('Load starter plan'), onClick: starterPlanSheet },
+        mayEdit && { icon: 'history', label: t('Routine from a past workout'), disabled: !routineSources(S.workouts, 1).length, onClick: () => routineFromWorkoutSheet(id => nav('/plan/r/' + id)) },
             //// Neoffice — a block of weeks is a plan tool: the club's lock and the Normal level's (lib/level-visibility.js).
         mayEdit && showsPlanTools(S) && { icon: 'calendar', label: t('Programmes'), sub: t('Your routines as a block of weeks, with starter programmes to try.'), onClick: () => nav('/plan/programmes') },
       ],
@@ -232,6 +240,14 @@ export default function Plan() {
 }
 
 /* ================================ Schedule ================================ */
+
+// An empty routine, opened in its editor. From the Routines tab's header, and from the Schedule's
+// empty state: "Build my own plan" on Home lands there, and it said "Make one" without a way to.
+function newRoutine(update, nav) {
+  const r = { id: uid(), name: t('New routine'), emoji: DEFAULT_GLYPH, ex: [] }
+  update(s => { s.routines.push(r) })
+  nav('/plan/r/' + r.id)
+}
 
 //// Neoffice — `mayEdit`: where the club writes its members' plans, the schedule is read, not changed
 //// (no day sheet, no switch of how you train, no loop editing), like every other plan control.
@@ -366,6 +382,9 @@ function Schedule({ S, update, nav, mode, mayEdit = true }) {
         {/* //// Neoffice — the club may write the member's plan (S.perms.editPlan): no invitation to make one. */}
         {!S.routines.length && <EmptyState className="plan-empty" icon="clipboard" title={t('No routines yet.')} text={mayEdit ? t('Make one, or grab the starter plan to get going.') : undefined}>
           {mayEdit && <Button variant="tinted" icon="clipboard" onClick={starterPlanSheet}>{t('Load starter plan')}</Button>}
+        {mayEdit && <Button variant="plain" icon="plus" onClick={() => newRoutine(update, nav)}>{t('New routine')}</Button>}
+        {/* Workouts but no routines, an imported history mostly (#1010): start from those. */}
+        {mayEdit && routineSources(S.workouts, 1).length > 0 && <Button variant="plain" icon="history" onClick={() => routineFromWorkoutSheet(id => nav('/plan/r/' + id))}>{t('From a past workout')}</Button>}
         </EmptyState>}
 
     {/* A queue payload that arrived unusable: a fix-up, shown whichever way you train. Giving it
@@ -406,8 +425,10 @@ function Schedule({ S, update, nav, mode, mayEdit = true }) {
           // nothing to copy. The row the reorder measures is the swipe's outer element.
           const reorderProps = { 'data-reorder-row': '', style: loopReorder.rowStyle(i) }
           const name = rest ? t('Rest day') : r?.name ?? id
+          // A loop may hold a routine or a rest day more than once: its place tells them apart (P4).
+          const sayName = seq.filter(x => x === id).length > 1 ? `${i + 1}. ${name}` : name
           const row = <div key={swipe ? undefined : key} {...(swipe ? {} : reorderProps)} className={'item rotation-row' + (item?.state === 'done' ? ' is-done' : '') + (rest ? ' is-rest' : '')}>
-            {editing && <button className="plan-minus" aria-label={t('Remove {0}', name)} title={t('Remove')}
+            {editing && <button className="plan-minus" aria-label={t('Remove {0}', said(sayName))} title={t('Remove')}
               onClick={() => takeOut(i)}><Icon name="minus" /></button>}
             <span className={'plan-order' + (item?.state === 'next' ? ' next' : '')}>{item?.state === 'done' ? <Icon name="check" /> : i + 1}</span>
             <span className={'lrow-i' + (rest ? ' rest' : '')}><Icon name={rest ? 'moon' : glyphOf(r?.emoji)} /></span>
@@ -416,11 +437,11 @@ function Schedule({ S, update, nav, mode, mayEdit = true }) {
               <div className="ss">{item ? stateWord(item) : rest ? t('A day off before the next one') : r ? exCount(r.ex.length) : ''}</div>
             </div>
             {r && !rest && !editing && <MiniBodyMap routines={[r]} body={S.body} />}
-            {editing && seq.length > 1 && <button className="plan-handle" aria-label={t('Move {0}', name)} title={t('Drag to reorder')}
+            {editing && seq.length > 1 && <button className="plan-handle" aria-label={t('Move {0}', said(sayName))} title={t('Drag to reorder')}
               {...loopReorder.handle(i)}><Icon name="chevronsUpDown" /></button>}
           </div>
           return swipe
-            ? <SwipeRow key={key} {...reorderProps} className="swrow-item" deleteLabel={t('Remove')} deleteIcon="minus"
+            ? <SwipeRow key={key} {...reorderProps} className="swrow-item" deleteLabel={t('Remove')} deleteName={t('Remove {0}', said(sayName))} deleteIcon="minus"
               onDelete={() => takeOut(i)}>{row}</SwipeRow>
             : row
         })}
@@ -470,6 +491,9 @@ function Routines({ S, update, nav, mayEdit = true }) {
   const [edit, setEditState] = useState(false)
   const setEdit = v => setEditState(mayEdit ? v : false)
   const [flash, setFlash] = useState(null)
+  // Which folders are open on this device (lib/routine-folders.js), keyed by lower-case name.
+  const [openFolders, setOpenFolders] = useState({})
+  const toggleFolder = (f, open) => { setFolderOpen(f, open); setOpenFolders(o => ({ ...o, [f.toLowerCase()]: open })) }
   //// Neoffice — the club may write the member's plan (S.perms.editPlan): no swipe on routines.
   const swipe = workoutControls(S).swipeSets && mayEdit
   const routines = S.routines
@@ -482,11 +506,7 @@ function Routines({ S, update, nav, mayEdit = true }) {
     s.routines.splice(to, 0, m)
   }))
 
-  const addRoutine = () => {
-    const r = { id: uid(), name: t('New routine'), emoji: DEFAULT_GLYPH, ex: [] }
-    update(s => { s.routines.push(r) })
-    nav('/plan/r/' + r.id)
-  }
+  const addRoutine = () => newRoutine(update, nav)
   // The same delete as RoutineEdit's "Delete routine" button (lib/routines.js), with an Undo in
   // place of its confirm (v1.3.11): the swipe and the edit-mode minus both land here.
   const remove = r => deleteRoutineWithUndo(r.id)
@@ -510,7 +530,8 @@ function Routines({ S, update, nav, mayEdit = true }) {
   const daysOf = id => order.filter(d => [].concat(S.week[d] || []).includes(id)).map(d => t(DAYS[d]))
   //// Neoffice — and the coach's program it came from, when it did: two programs followed at once can
   //// both carry a « Full body ».
-  const sub = r => [exCount(r.ex.length), r.coachProgramName, daysOf(r.id).join(', ')].filter(Boolean).join(' · ')
+  //// Neoffice — (v1.4.5) a trainer's name (upstream's trainers, not served here) and the folder while editing follow.
+  const sub = r => [exCount(r.ex.length), r.coachProgramName, daysOf(r.id).join(', '), r._by?.kind === 'trainer' && r._by.name ? t('from {0}', r._by.name) : null, edit ? folderOf(r) : null].filter(Boolean).join(' · ')
 
   return <>
     <div className="row between plan-sec-h plan-routines-bar">
@@ -531,21 +552,41 @@ function Routines({ S, update, nav, mayEdit = true }) {
             {routines.length > 1 && <button className="plan-handle" aria-label={t('Move {0}', r.name)} title={t('Drag to reorder')}
               {...reorder.handle(i)}><Icon name="chevronsUpDown" /></button>}
           </div>)}</div>
-        : <div className="list routine-list plan-routines">{routines.map(r => {
+        // Starred routines first, under Favourites (#327, lib/routine-favs.js): out of their
+        // folder while starred, so each routine shows once. Edit still orders S.routines itself.
+        : [...(routines.some(isFavRoutine) ? [{ folder: '', fav: true, routines: routines.filter(isFavRoutine) }] : []),
+          ...groupRoutines(routines.filter(r => !isFavRoutine(r)))].map(g => {
+          if (!g.routines.length) return null
+          const open = !g.folder || (openFolders[g.folder.toLowerCase()] ?? folderOpen(g.folder))
+          const list = open && <div key={'l' + (g.fav ? '*' : g.folder)} className="list routine-list plan-routines" data-folder={g.folder || undefined} data-favs={g.fav || undefined}>{g.routines.map(r => {
           const row = <div key={r.id} className="item plan-routine" {...tappable(() => nav('/plan/r/' + r.id))}>
             <span className="lrow-i"><Icon name={glyphOf(r.emoji)} /></span>
-            <div className="grow"><div className="tt">{r.name}</div><div className="ss">{sub(r)}</div></div>
+            <div className="grow"><div className="tt">{isFavRoutine(r) && <Icon name="starFill" className="fav-star" />}{r.name}</div><div className="ss">{sub(r)}</div></div>
             <MiniBodyMap routines={[r]} body={S.body} />
             <Icon name="chevronRight" className="chev" /></div>
           // Swipe (v1.3.11, Settings → Swipe actions): toward the start deletes with an Undo,
           // toward the end duplicates. Edit's minus and the routine's own page stay the way in
           // for a keyboard and a screen reader.
           return swipe
-            ? <SwipeRow key={r.id} className="swrow-item" copyLabel={t('Duplicate')}
+            ? <SwipeRow key={r.id} className="swrow-item" copyLabel={t('Duplicate')} deleteName={t('Delete {0}', said(r.name))} copyName={nameIn(r.name, t('Duplicate'))}
               onDelete={() => remove(r)} onCopy={() => duplicate(r)}
               flash={flash?.id === r.id ? flash.n : 0}>{row}</SwipeRow>
             : row
-        })}</div>}
+        })}</div>
+          if (g.fav) return <div key="favs" className="plan-folder-sect plan-favs">
+            <h4 className="sec plan-favs-h"><Icon name="starFill" className="fav-star" />{t('Favourites')}</h4>
+            {list}
+          </div>
+          if (!g.folder) return list
+          // A folder's header folds its routines away; where it was left is remembered here.
+          return <div key={'f' + g.folder} className="plan-folder-sect">
+            <button type="button" className="plan-folder" aria-expanded={open} onClick={() => toggleFolder(g.folder, !open)}>
+              <Icon name="folder" /><span className="grow">{g.folder}</span><span className="n">{g.routines.length}</span>
+              <Icon name="chevronRight" className="chev" />
+            </button>
+            {list}
+          </div>
+        })}
       {/* //// Neoffice — the club may write the member's plan (S.perms.editPlan): no reorder or delete hint. */}
       {mayEdit && <p className="sect-f">{edit ? t('Drag to reorder. Tap the minus to delete.') : t('Tap a routine to edit it. Reorder and delete are behind Edit.')}</p>}
     </> : <>

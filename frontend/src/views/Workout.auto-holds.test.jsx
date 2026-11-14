@@ -38,7 +38,7 @@ const doneOf = (idx = 0) => entriesNow()[idx].sets.map(s => s.done)
 //// Neoffice — a tap on Start opens our 3-2-1 first (useUI prep, PrepCountdown); these tests are about the hold that follows,
 //// so the member is "already in position" (skipPrep), the way the overlay's own « Go now » does it.
 const tapStart = () => {
-  act(() => container.querySelector('button[aria-label="Start set"]').click())
+  act(() => container.querySelector('button[aria-label*=": Start set"]').click())
   act(() => useUI.getState().skipPrep())
 }
 const wait = ms => act(() => { vi.advanceTimersByTime(ms) })

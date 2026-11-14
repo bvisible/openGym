@@ -90,8 +90,23 @@ for (const file of files) {
   //// positive matters as much as the miss it was written for.
   for (const m of src.matchAll(/(?:function\s*[\w$]*|=>|\bcatch)\s*\(([^)]*)\)/g)) {
     for (const part of m[1].split(',')) {
-      const name = part.trim().split(/[=:\s]/)[0].replace(/^\.{3}/, '')
+      //// A destructured parameter binds the name after the colon, with or without a default: `{ onSave: saveConfig }` in
+      //// sheets.jsx, `{ api = garminCall }` in views/GarminSettings.jsx, `{ open = openForReturn }` in lib/oidc-app.js and
+      //// `{ modeOf, isPerSide }` in lib/session-targets.js were reported as missing imports (upstream v1.4.5). Found on the v1.4.5 merge.
+      const bare = part.trim().replace(/^[[{]\s*/, '').replace(/\s*[\]}]$/, '').trim()
+      const local = /^[\w$]+\s*:/.test(bare) ? bare.split(':')[1] : bare
+      const name = local.trim().split(/[=:\s]/)[0].replace(/^\.{3}/, '')
       if (/^[A-Za-z_$][\w$]*$/.test(name)) known.add(name)
+    }
+  }
+  //// `const [{ a }, { b, c }] = await Promise.all([import('…'), import('…')])`: several dynamic imports at once, each
+  //// destructured (upstream v1.4.5: renderCompare in components/PhotoCompare.jsx, loadHealth and vitalsSummary in lib/coach-api.js).
+  for (const m of src.matchAll(/(?:const|let|var)\s*\[((?:[^\]{}]|\{[^}]*\})*)\]\s*=/g)) {
+    for (const g of m[1].matchAll(/\{([^}]*)\}/g)) {
+      for (const part of g[1].split(',')) {
+        const name = part.split(':').pop().trim().split(/[=\s]/)[0]
+        if (/^[A-Za-z_$][\w$]*$/.test(name)) known.add(name)
+      }
     }
   }
   //// A METHOD DEFINITION is a name this file declares, not a call of the export of another one: `async remove(hash) {` and
@@ -110,6 +125,11 @@ for (const file of files) {
     .replace(/^import[^\n]*\n/gm, '')
     .replace(/\/\*[\s\S]*?\*\//g, '')
     .replace(/^\s*(?:\/\/|\*).*$/gm, '')
+    //// Prose in a one-line string is not code: 'The provider was having an outage (5xx…)' in views/AdminCoach.jsx and
+    //// 'Video or guide link (optional)' in components/CustomMediaField.jsx read as calls of lib/coach-ask.js's outage() and
+    //// lib/sister-nutrition.js's link() (upstream v1.4.5). Every one-line quoted string is read in turn (so the quotes pair up
+    //// from the left), and only one with a space in it is blanked; a template literal is left alone.
+    .replace(/'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"/g, q => (q.includes(' ') ? "''" : q))
 
   for (const [name, sources] of exportedBy) {
     if (known.has(name) || sources.has(file)) continue

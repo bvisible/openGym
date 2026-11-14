@@ -204,6 +204,9 @@ describe('the web boot', () => {
     expect(useStore.getState().user).toEqual(USER)
     expect(useStore.getState().sync).toMatchObject({ status: 'error', lastError: { status: 200, code: 'bad-response' } })
   })
+
+  //// Neoffice — upstream v1.4.5's « with a server that says whether anyone is signed in » is not here: its boot asks /api/config
+  //// and /api/me; ours reads the member from the page boot (lib/api.js BOOT) and asks nothing before the pull (see the test above).
 })
 
 //// Neoffice — added: Frappe answers a request without a valid session with 403 (and a page that

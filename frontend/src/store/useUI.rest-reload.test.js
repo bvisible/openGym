@@ -30,6 +30,15 @@ describe('the rest timer across a reload', () => {
     vi.useRealTimers()
   })
 
+  it('tells the server which set waits, for the body of its push (Q6)', () => {
+    useStore.setState({ S: { ...useStore.getState().S, unit: 'kg', active: { id: 'a', cur: 0, entries: [
+      { id: 'x1', n: 'Plank', target: { mode: 'time', sec: 45 }, sets: [{ done: true }, { done: false }] }] } } })
+    useUI.getState().startRest(60, 0)
+    //// Neoffice — no server push of the rest here: upstream's /api/push/rest-timer is its Node server's, the club instance has none
+    //// (store/useUI.js pushRestTimer does nothing). The line it would carry is still worked out for the page's own notification.
+    expect(pushes()).toEqual([])
+  })
+
   it('keeps the running rest, and forgets it once it is skipped', () => {
     useUI.getState().startRest(90, 2)
     expect(saved()).toMatchObject({ total: 90, forIdx: 2, paused: false, kind: null })

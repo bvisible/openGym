@@ -241,3 +241,36 @@ export const showsMotivationExtras = S => atLeast(S, 'normal')
 /** « Automatic warm-ups » in Settings › Workout (v1.4.4): a Full-level technique, like the planned ramp, kept once the member chose one. */
 export const showsAutoWarmupSetting = S => atLeast(S, 'full') || Boolean(S && S.warmupAuto && S.warmupAuto !== 'off')
 
+
+//// ─── what v1.4.5 added (merged 14.11) ─────────────────────────────────────────────────────────────────────────────
+//// Same shape as everything above: the CONTROL goes, never the DATA.
+
+/** The v1.4.5 rows of Settings › Workout that tune how a session flows: the rest before the next exercise, the record trophies and their
+ *  cheer, the next exercise when the rest ends, what the Start button does, the preview before starting, the daily check-in, the live strip.
+ *  The Normal level's: a beginner's Workout page keeps what it had (rest, logging, layout, the weigh-in question, the screen). A member who set
+ *  one at Normal and went back to Simple keeps what they chose; only the row goes. */
+export const showsWorkoutTweaks = S => atLeast(S, 'normal')
+
+/** « Routine type » in the routine editor and « How it runs » on a superset (v1.4.5: circuit, AMRAP, EMOM, intervals, run/walk): the Normal
+ *  level's. `circuit` = the routine's or the group's clock config (lib/circuit.js cleanCircuit), null for a plain one: a routine that already runs
+ *  on the clock keeps its control at every level (the coach may have sent it), so the member can always see and change what it is. */
+export const showsRoutineTypeControl = (S, circuit) => atLeast(S, 'normal') || Boolean(circuit)
+
+/** « Log recovery » in History (v1.4.5: a sauna, an ice bath): the Normal level's. A recovery already logged stays in the list at every level. */
+export const showsRecoveryLog = S => atLeast(S, 'normal')
+
+/** « Ladders » in the exercise library (v1.4.5: bodyweight skill chains, easiest to hardest): the Normal level's. */
+export const showsLadders = S => atLeast(S, 'normal')
+
+/** The v1.4.5 additions to Stats (the Journal of every note, the Tools page of calculators, Your month, the daily form card, the cardio
+ *  minutes of the week): the Normal level's. A beginner's Stats keeps the workouts, the weight, the streak, the badges. */
+export const showsStatsExtras = S => atLeast(S, 'normal')
+
+/** The Tools page of Stats (v1.4.5: a 1RM table, an RPE load chart, DOTS…): the lifter's calculators, so the FULL level's, where those
+ *  words are spoken (views/jargon.level.test.jsx found « 1RM table, RPE load » on the Normal level's Stats at the v1.4.5 merge). */
+export const showsStatsTools = S => atLeast(S, 'full')
+
+/** v1.4.5's records (lib/set-records.js). The trophy after a set stays at every level, in plain words: below Normal it never names
+ *  the estimated max (« Best e1RM », showsEstimated1RM). The line under the next set (« 1 more rep for a record · 92% of your best
+ *  e1RM ») is the Normal level's: Simple keeps what is done in front of the machine. */
+export const showsRecordHints = S => atLeast(S, 'normal')

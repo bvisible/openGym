@@ -82,12 +82,19 @@ describe('Stats redesign: Overview', () => {
     expect(mocks.nav).toHaveBeenCalledWith('/history')
   })
 
+  //// Neoffice — no progress photos on a club's journal (the club's server keeps no media), before the first workout or after.
+  it('offers Progress photos before the first workout, so the first photo can be taken', () => {
+    mount(Object.assign(clone(DEF), { workouts: [] }))
+    const titles = [...host.querySelectorAll('[data-stats-links] .lrow-t')].map(t => t.textContent)
+    expect(titles).not.toContain('Progress photos')
+  })
+
   it('puts the pages behind Stats in one grouped list of rows under Body', () => {
     mount(Object.assign(clone(DEF), buildDemoState()))
     const list = card('#stats-body [data-stats-links]')
     const titles = [...list.querySelectorAll('.lrow-t')].map(t => t.textContent)
-    //// Neoffice — no progress photos here (the club's server keeps no media): the list is measurements, balance, then the year.
-    expect(titles.slice(0, 3)).toEqual(['Body measurements', 'Structural balance', 'Your year'])
+    //// Neoffice — no progress photos here (the club's server keeps no media): the list is measurements, balance, then v1.4.5's Journal.
+    expect(titles.slice(0, 3)).toEqual(['Body measurements', 'Structural balance', 'Journal'])
     expect(titles).not.toContain('Progress photos')
     // rows, not cards with a paragraph and an Open button
     expect(btn(host, 'Open')).toBeUndefined()
@@ -111,7 +118,7 @@ describe('Stats redesign: Muscles', () => {
 
   it('draws each main muscle against its range, five rows until Show more, the plan as a tick', () => {
     mount(small({ workouts: [done('2026-09-30', 'chest', 8), done('2026-09-30', 'biceps', 3), done('2026-09-30', 'forearm', 2)] }))
-    expect(rows().map(r => r.dataset.muscleVolume)).toEqual(['chest', 'biceps', 'triceps', 'deltoids', 'upper-back'])
+    expect(rows().map(r => r.dataset.muscleVolume)).toEqual(['chest', 'biceps', 'triceps', 'front-delts', 'side-delts'])
     const chest = rowOf('chest')
     expect(chest.querySelector('.sbar-v').textContent).toBe('8 / 10–20')
     expect(chest.classList.contains('below')).toBe(true)

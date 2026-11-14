@@ -42,7 +42,7 @@ const eslint = new ESLint({
       sourceType: 'module',
       parserOptions: { ecmaFeatures: { jsx: true } },
       // What the build defines (vite.config.js `define`) beside the browser's and the worker's own.
-      globals: { ...globals.browser, ...globals.serviceworker, __APP_VERSION__: 'readonly', __BUILD__: 'readonly', process: 'readonly' },
+      globals: { ...globals.browser, ...globals.serviceworker, __APP_VERSION__: 'readonly', __BUILD__: 'readonly', __SEASON_CLOCK__: 'readonly', process: 'readonly' },
     },
     // The sources carry directives for rules this check does not load (react-hooks).
     linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: 'off' },

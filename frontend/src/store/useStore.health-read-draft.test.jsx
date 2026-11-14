@@ -10,8 +10,7 @@ vi.mock('../lib/api.js', () => ({ api: vi.fn() }))
 import { useStore } from './useStore.js'
 import { mergeHeartRate, mergeWeighIns } from '../lib/health-read.js'
 
-//// Neoffice — local time: the dates below are local days, and 17:00 UTC is already the next
-//// day at UTC+14 (Weekly audit).
+// 17:00 on the 14th on the machine's clock, so the fixture days are the local ones in any time zone.
 const T0 = new Date(2026, 9, 14, 17, 0, 0).getTime()
 const workout = () => ({
   id: 'w1', d: '2026-10-14', name: 'Push', start: T0, end: T0 + 30 * 60e3,

@@ -74,7 +74,8 @@ let editContainer = null
 function openEditSheet(idx = 0) {
   //// Since the v1.3.5 merge the actions live in upstream's per-exercise ⋯ menu
   //// (aria-label "More", lib menuSheet) — the same path a member takes.
-  const more = container.querySelectorAll('button[aria-label="More"]')[idx]
+  //// Since v1.4.5 a superset member's ⋯ names its exercise (« More, 2. Squat »): both forms are the menu.
+  const more = container.querySelectorAll('button[aria-label="More"], button[aria-label^="More, "]')[idx]
   //: No ⋯ at all — an empty freestyle session has no exercise header, and
   //: "hides the remove control" is a test of its own, so answer rather than throw.
   if (!more) return null

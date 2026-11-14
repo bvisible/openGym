@@ -17,6 +17,8 @@ import { fmtAgo, changeCount } from '../lib/format.js'
 //// sheets, only the menu: the changes kept for another account are saved as a backup file (v1.3.10).
 import { MOBILE, shareExport } from '../lib/mobile.js'
 import { menuSheet } from '../sheets.jsx'
+//// Neoffice — offlineBuild only (connectionView reads it); media-sync is not shipped here (see above).
+import { offlineBuild } from '../lib/build-caps.js'
 import { DEMO } from '../lib/demo.js'
 import { Row } from './ui.jsx'
 //// Neoffice — the page rendered again by the server (lib/api.js), see signInAgain.
@@ -58,7 +60,7 @@ export function useOnline() {
    network, which decides whether "offline" is the device or the server. Every state that is not
    'ok' says the changes are kept on this device — that is the one thing the person needs to hear
    first. */
-export function connectionView(sync, { mobile = MOBILE, online = isOnline() } = {}) {
+export function connectionView(sync, { mobile = MOBILE, online = isOnline(), offline = offlineBuild() } = {}) {
   if (!sync) return null
   const err = sync.lastError || {}
   // A device that says it has no network is offline whatever the last request found: said the
@@ -100,6 +102,8 @@ export function connectionView(sync, { mobile = MOBILE, online = isOnline() } = 
     // Settings still says it and offers Connect, the bar stays away. A guest in a browser is on a
     // server it could sign in to, so it still hears that its data stays in this browser.
     default:
+      // openGym Offline (lib/build-caps.js) has nothing to connect to: no button for it.
+      if (mobile && offline) return { tone: 'quiet', icon: 'lock', action: null, line: t('openGym Offline: on this phone, and only here'), banner: null }
       return mobile
         ? { tone: 'quiet', icon: 'lock', action: 'connect', line: t('On this phone only, not connected to a server'), banner: null }
         : { tone: 'quiet', icon: 'lock', action: canSignIn() ? 'signin' : null, line: t('Guest mode: your data lives only in this browser.'), banner: t('Guest mode: your data lives only in this browser.') }
@@ -122,6 +126,12 @@ export async function syncNowWithToast() {
 //// the server renders the journal's own sign-in screen (views/SignIn.jsx), and for one that is still
 //// valid (a page whose CSRF token went stale) a fresh token. What this device owes stays in its
 //// storage, with its owner, and merges once the same account is back.
+//// Neoffice — upstream's connectServer (pair this phone with a server) is not here: a club's journal is never paired. Kept as a
+//// name that does nothing so the pages that import it still build (views/ZeppSettings.jsx, hidden by pageVisible); found at the
+//// v1.4.5 merge, where the build refused the missing export.
+export function connectServer() {}
+
+//// Neoffice — signing in again is Frappe's: the journal reloads, and its page boot carries the session.
 export function signInAgain() {
   reloadJournal()
 }

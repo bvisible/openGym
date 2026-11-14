@@ -68,6 +68,10 @@ jobs:
       # //// Neoffice — the bundle Frappe serves (vite.config.js outDir), not frontend/dist.
       - run: node scripts/check-bundle-syntax.mjs ../opengym/public/frontend
         working-directory: frontend
+      # //// Neoffice — upstream v1.4.5's check that the seasonal QA date hook (src/lib/season-clock.js) is compiled out of a
+      # //// real build, pointed at the bundle Frappe serves. Their « Bundle size » step is not taken (it reads frontend/dist).
+      - run: node scripts/check-season-clock.mjs ../opengym/public/frontend
+        working-directory: frontend
       - run: node scripts/check-locales.mjs
         working-directory: frontend
       # check-locales compares the packs to each other, so a key missing from ALL of them is

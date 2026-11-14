@@ -61,7 +61,8 @@ export function litPlace(cur, { coach = false, fromStats = false } = {}) {
   if (cur === 'classes') return 'plan'
   if (cur === 'muscles') return fromStats ? 'stats' : (coach ? 'plan' : 'library')
   if (cur === 'library' && coach) return 'plan'
-  const parent = { history: 'stats', 'structural-balance': 'stats', 'progress-photos': 'stats', measurements: 'stats', checkin: 'home', membership: null, settings: null }
+  //// Neoffice — `tools` lights Stats as in upstream v1.4.5's TabBar (the Tools & Journal page opens from Stats); its `trainer` (upstream's trainer screen) is not routed here.
+  const parent = { history: 'stats', 'structural-balance': 'stats', tools: 'stats', 'progress-photos': 'stats', measurements: 'stats', checkin: 'home', membership: null, settings: null }
   if (cur in parent) return parent[cur]
   return own[cur] || null
 }

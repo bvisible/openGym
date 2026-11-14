@@ -15,9 +15,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 //// against '/api/data', 'PUT' and `baseRev` holds unchanged: the test double
 //// speaks upstream's protocol, the real helpers speak Frappe's. `who` is what
 //// the page boot says about the member (currentUser), upstream's /api/me.
+//// The double is HOISTED (upstream v1.4.5 resets the modules before each test, so a double made inside the factory would be a
+//// new one per test, out of the tests' reach).
 const who = vi.hoisted(() => ({ user: null }))
+const { api, toast, sheetAsk } = vi.hoisted(() => ({ api: vi.fn(), toast: vi.fn(), sheetAsk: vi.fn() }))
 vi.mock('../lib/api.js', () => {
-  const api = vi.fn()
   return {
     api,
     getState: () => api('/api/data'),
@@ -30,13 +32,13 @@ vi.mock('../lib/api.js', () => {
     setRemoteAuth: () => {},
   }
 })
-const { toast, sheetAsk } = vi.hoisted(() => ({ toast: vi.fn(), sheetAsk: vi.fn() }))
 vi.mock('./useUI.js', () => ({ useUI: { getState: () => ({ toast }) } }))
 // The question an adoption resumed by the store itself asks (resumeAdoption, checkRev, Sync now).
 vi.mock('../sheets.jsx', () => ({ askAddDeviceData: (...a) => sheetAsk(...a) }))
 
-import { api } from '../lib/api.js'
-import { DEF, hasData, useStore } from './useStore.js'
+// A fresh store per test: what the module keeps outside the state (the sign-in hold, whose copy it
+// last saw) is not reset by setState, and shuffled tests would see another test's leftovers.
+let { DEF, hasData, useStore } = await import('./useStore.js')
 
 const clone = value => JSON.parse(JSON.stringify(value))
 const routine = id => ({ id, name: id, ex: [] })
@@ -51,7 +53,12 @@ const server = { ...clone(DEF), _ts: 100, unit: 'lb', restSec: 60, workouts: [wo
 // what a guest tracked after signing out: newer, one workout, its own routine and settings
 const guest = { ...clone(DEF), _ts: 900, unit: 'kg', restSec: 120, workouts: [workout('w9', '2026-09-11')], routines: [routine('rg')], week: { 2: ['rg'] }, active: { id: 'running' } }
 
-beforeEach(() => { localStorage.clear(); api.mockReset(); toast.mockReset(); useStore.setState({ S: clone(DEF), user: null, ready: false }) })
+beforeEach(async () => {
+  localStorage.clear()
+  vi.resetModules()
+  ;({ DEF, hasData, useStore } = await import('./useStore.js'))
+  api.mockReset(); toast.mockReset(); useStore.setState({ S: clone(DEF), user: null, ready: false })
+})
 afterEach(() => { vi.useRealTimers(); localStorage.clear(); useStore.setState({ S: clone(DEF), user: null, ready: false }) })
 
 describe('adoptProfile — sign-in takes the server profile', () => {

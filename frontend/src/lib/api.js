@@ -395,3 +395,12 @@ export const webauthnOK = () => typeof window.PublicKeyCredential !== 'undefined
 const mediaDisabled = () => Object.assign(new Error('media-disabled'), { code: 'media-disabled', status: 0 })
 export const apiBlob = async () => { throw mediaDisabled() }
 export const apiUpload = () => Promise.reject(mediaDisabled())
+
+//// Neoffice — two of upstream v1.4.5's phone sign-in calls, imported by views/MobileOnboarding.jsx and lib/oidc-app.js. Both talk
+//// to upstream's Node server (its /api/config, its OIDC redemption); a club's journal is a page of the club instance, signed in
+//// by Frappe, and is never pointed at another server. `serverConfig` answers « no config », as upstream's does when the server
+//// cannot be read (the onboarding then offers no provider); `oidcRedeem` refuses plainly, like pairRedeem above.
+export async function serverConfig() { return null }
+export async function oidcRedeem() {
+  throw new Error('Signing in through another server is not available: this journal is served by your club instance.')
+}
