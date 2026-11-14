@@ -1,1 +1,0 @@
-var e=Object.freeze([`plan`,`training`,`bodyweight`,`profile`,`prefs`]);export{e as t};

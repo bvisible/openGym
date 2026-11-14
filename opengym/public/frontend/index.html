@@ -4,14 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>
-  // Set direction before first paint so an Arabic profile never flashes as LTR.
+  // Set direction before first paint so an RTL profile never flashes as LTR.
   // The app re-applies this on every language change (lib/i18n.js setLang).
   // i18n-core RTL_LANGS is the runtime source of truth — keep this list in sync.
   try {
     var s = JSON.parse(localStorage.getItem('gym_state_v1') || '{}');
-    var l = s.lang || ((navigator.language || '').slice(0, 2) === 'ar' ? 'ar' : 'en');
+    var browserLang = (navigator.language || '').slice(0, 2).toLowerCase();
+    var l = s.lang || (browserLang === 'ar' || browserLang === 'fa' ? browserLang : 'en');
     document.documentElement.lang = l;
-    document.documentElement.dir = l === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.dir = l === 'ar' || l === 'fa' ? 'rtl' : 'ltr';
   } catch (e) {}
   // Boot watchdog. A chunk this browser cannot parse (1.4.2's regex lookbehind on iOS 15.5 to
   // 16.3) kills the module graph before any of the app runs, and the logo lifted forever. Here,
@@ -74,38 +75,69 @@
 <link rel="manifest" href="manifest.json" crossorigin="use-credentials">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" type="image/png" href="icon-180.png">
-  <script type="module" crossorigin src="/assets/opengym/frontend/assets/index--CTvGhQA.js"></script>
+  <script type="module" crossorigin src="/assets/opengym/frontend/assets/index-BHlqKlls.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/rolldown-runtime-XKyaHtl9.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/exercises-xT7b7xWN.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/history-rG574aEI.js">
   <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/preload-helper-BH8OVgxH.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/mobile-BasHYJE7.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/ex-unit-B7jJDSFk.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/i18n-Dgn1-tpV.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/api-BykaWvAI.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-refs-CjgGBvJX.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/plan-share-9GSm2Aom.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/health-connect-CDBqc0Ip.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/health-sync-CbwOr8HH.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-store-fs-BDoajekg.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-store-atOuay2g.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/coach-device-DDWSUxFQ.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/useStore-BzwDedON.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/useUI-qvUtf3Zu.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/i18n-core-CP9NHm4z.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/exercises-Dg4mzhVG.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/format-C8-Mogpv.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/measurements-DVGZUDlt.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/accent-3eYeE7Bt.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-refs-DxhNxIu_.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/mobile-62xKLOkQ.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/sync-merge-BY1ZV9j5.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/backfill-Bvi1ZSJi.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/onerm-ClOszxNI.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/ex-unit-CTeWu8h7.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/i18n-Bo_z7j6-.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/api-Bi1-uEV6.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/coach-device-6x7aTvwA.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/coach-secrets-BEJb8rc2.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/build-caps-BESCkq_s.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/plan-share-CG_V_wk8.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/health-connect-h5jU8F3X.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/vitals-DwzpX_ig.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/health-sync-B0RTJYXk.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-store-fs-DPBnwzVO.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-store-BzGvib6P.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-owed-ClSPLI8c.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/finish-workout-C4cI5sYn.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/workout-date-EbBA7skj.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/oidc-app-DsreuFWN.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/remote-Coobf-JQ.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/useStore-QwMTHLcc.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/dist-D8dS8Cur.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/rest-sounds-DpCh4DrF.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/sound-Dw0ipYTc.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/rest-alert-Bo_ZFZGD.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/user-sounds-DHLL8UMv.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/voice-clips-DvdBhqyH.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/useUI-GjEKnem1.js">
   <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/jsx-runtime-LKYXHABd.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/ui-B6UuPLut.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/seasonal-DvF7A5dX.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/exercise-history-CNSvkBqz.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/equipment-DOV__W-M.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/measurements-I5rPc5UC.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-prefetch-wvPs0IgJ.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-limits-DUTtzBmx.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/platform-now-CIGTrnA-.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/DurationWheel-DAPnhDCS.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/workout-card-Dvic6Pa-.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/sheets-DpZ51hAf.js">
-  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/coach-api-CFBsYapy.js">
-  <link rel="stylesheet" crossorigin href="/assets/opengym/frontend/assets/index-C4-dkCR_.css">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/ui-CPbhNTbk.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/streak-icons-BFf_wZyw.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/forgotten-workout-BOVDOM_T.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/gym-reminder-DPuScnD2.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/exact-alarm-CHmc_At7.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/watch-sync-DXM_rzyq.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-prefetch-Bu7f8Oje.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-limits-BU_WfPm8.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/media-sync-Bwp9H1XM.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/channel-BtZ0Jd72.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/equipment-Cs9exdqA.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/starter-plans-BH2OJd49.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/starter-BUGDslyg.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/set-videos-qH5tBHIb.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/DurationWheel-DS3WXdTU.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/routine-library-CTnQzjhZ.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/sheets-D4Bwj6X-.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/watch-relay-D2f4M4oZ.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/coach-8-gOI2mY.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/use-offline-build-D6zsyPIk.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/categories-BNTX23tR.js">
+  <link rel="modulepreload" crossorigin href="/assets/opengym/frontend/assets/coach-api-C4FDGT70.js">
+  <link rel="stylesheet" crossorigin href="/assets/opengym/frontend/assets/index-D3amFiM_.css">
+  <link rel="stylesheet" crossorigin href="/assets/opengym/frontend/assets/coach-BSzl-0t7.css">
 </head>
 <body>
 <!-- The boot screen: painted with the HTML, before any script runs, so the gap between the

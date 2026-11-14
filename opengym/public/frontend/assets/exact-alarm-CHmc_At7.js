@@ -1,0 +1,1 @@
+import{n as e}from"./rolldown-runtime-XKyaHtl9.js";var t=e({withoutAlarmPrompt:()=>n});async function n(e,t,{prompt:n=!1}={}){if(n)return t;let r=!1;try{r=(await e.checkExactNotificationSetting?.())?.exact_alarm===`granted`}catch{}for(let e of t)e.isExactNotification=r;return t}export{n,t};
