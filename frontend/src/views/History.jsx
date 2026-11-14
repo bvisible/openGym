@@ -68,8 +68,9 @@ export default function History() {
       {more && <div ref={end} aria-hidden="true" style={{ height: 1 }} />}</>
       : <EmptyState icon="history" text={t('No workouts yet. Your first one will land here.')}>
         <Button variant="tinted" icon="plus" data-tour="history-add" onClick={logPastWorkoutSheet}>{t('Log a past workout')}</Button>
-        <div style={{ height: 8 }} />
-        <Button variant="ghost" icon="sparkles" onClick={() => recoverySheet()}>{t('Log recovery')}</Button>
+        {/* //// Neoffice — the Normal level's, as the button above the list (showsRecoveryLog). */}
+        {showsRecoveryLog(S) && <><div style={{ height: 8 }} />
+        <Button variant="ghost" icon="sparkles" onClick={() => recoverySheet()}>{t('Log recovery')}</Button></>}
       </EmptyState>}
   </>
 }

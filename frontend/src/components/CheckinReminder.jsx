@@ -83,6 +83,10 @@ export const checkinReminderSheet = () => useUI.getState().openSheet(close => <C
 /** The row in Settings → Notifications. */
 export function CheckinReminderRow() {
   const S = useStore(s => s.S)
+  //// Neoffice — on the club's web journal nothing would send these: upstream's push server is not a club's. The row is the phone
+  //// apps' only, which queue the notifications themselves (MOBILE, syncReminder). Found at the v1.4.5 merge, at every level of
+  //// the Measurements page.
+  if (!MOBILE) return null
   const r = reminderOf(S)
   const on = r.on && Object.keys(r.items).length > 0
   return <Row icon={on ? 'bell' : 'bellSlash'} iconTint="var(--orange)" title={t('Check-in reminders')} accessory="chevron"

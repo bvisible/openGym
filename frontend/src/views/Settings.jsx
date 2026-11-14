@@ -1748,6 +1748,8 @@ function MobileReminderCard({ S, update, toast }) {
 function WrappedNotifyRow({ S, update }) {
   // Part of the Motivation module (Settings → Modules): with it off there is nothing to notify.
   if (!isOn(S, 'motivation')) return null
+  //// Neoffice — the phone apps' only: on the web journal it is upstream's push server that would send it, and a club has none.
+  if (!MOBILE) return null
   const on = S.wrappedNotify !== false
   return <Row icon="sparkles" iconTint="var(--acc)" title={t('Your year in openGym')} subtitle={t('One notification on 1 December when your year is ready.')}>
     <Switch checked={on} onChange={() => update(s => { s.wrappedNotify = !on })} aria-label={t('Your year in openGym')} />
