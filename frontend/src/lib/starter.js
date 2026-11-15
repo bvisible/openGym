@@ -11,6 +11,20 @@ import { EXIDX } from './exercises.js'
 import { eqAvailable, ALL_EQUIPMENT } from './equipment.js'
 import { defaultConfig } from './history.js'
 import { STARTER_PLANS, AWAY_PLANS } from '../../../api/coach/core/starter-plans.js'
+//// Neoffice — a routine a member loads from a starter plan is named in the journal's language (neoffice-maintenance#2705): the
+//// catalogue names it in English (« Full Body A », « Push Day ») and the name was copied as is into a French member's plan. The
+//// names are literal t() calls, as the chooser's plan names in sheets.jsx, so the packs' checks see them; a name the table does not
+//// know stays as the catalogue wrote it, and a routine already loaded keeps its name (it is the member's from then on).
+import { t } from './i18n-core.js'
+const routineNames = () => ({
+  'Push Day': t('Push Day'), 'Pull Day': t('Pull Day'), 'Leg Day': t('Leg Day'),
+  'Upper A': t('Upper A'), 'Upper B': t('Upper B'), 'Lower A': t('Lower A'), 'Lower B': t('Lower B'),
+  'Full Body A': t('Full Body A'), 'Full Body B': t('Full Body B'), 'Full Body C': t('Full Body C'),
+  '5×5 A': t('5×5 A'), '5×5 B': t('5×5 B'), '5×5 C': t('5×5 C'),
+  'Bodyweight A': t('Bodyweight A'), 'Bodyweight B': t('Bodyweight B'), 'Dumbbells A': t('Dumbbells A'), 'Dumbbells B': t('Dumbbells B'),
+  'Bands A': t('Bands A'), 'Bands B': t('Bands B'), 'Hotel room': t('Hotel room'),
+})
+export const starterRoutineName = name => routineNames()[name] || name
 export { AWAY_PLANS }
 
 // The plans themselves live with the Coach's core (api/coach/core/starter-plans.js), which reads
@@ -25,7 +39,7 @@ export function starterEntry([id, sets, amount, mode]) {
 }
 
 const build = routines =>
-  routines.map(([, name, emoji, list]) => ({ id: uid(), name, emoji, ex: list.map(starterEntry) }))
+  routines.map(([, name, emoji, list]) => ({ id: uid(), name: starterRoutineName(name), emoji, ex: list.map(starterEntry) }))
 
 // Fresh routine objects (new ids) — [push, pull, legs]. The demo build seeds a history on
 // top of exactly these three, so this entry point keeps its shape.
