@@ -1,1 +1,0 @@
-import"./i18n-Bo_z7j6-.js";import"./api-Bi1-uEV6.js";var e=e=>e?.shared&&Array.isArray(e.shared.types)?e.shared:null,t=(t,n)=>!!n&&!n.guest&&!!e(t);export{t};
