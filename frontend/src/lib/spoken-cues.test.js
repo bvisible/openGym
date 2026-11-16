@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, test, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'   //// Neoffice — beforeEach: see the v1.4.5 Voice block
 
 vi.mock('./speech.js', () => ({ speak: vi.fn(() => Promise.resolve(true)), voiceOpts: S => ({ rate: S?.speechRate === 'fast' ? 1.25 : 1, pitch: 1, voice: '' }) }))
 const { speak } = await import('./speech.js')
@@ -84,6 +84,10 @@ const { _setClipPlayer, _resetCueQueue, isLastSet, speechMs } = await import('./
 const { _resetPicks } = await import('./voice-styles.js')
 describe('styles, the last set, records and clips (v1.4.5 Voice)', () => {
   afterEach(() => { _resetCueQueue(); _resetPicks(); vi.useRealTimers() })
+  //// Neoffice — and before each test too: a line spoken by a test of the blocks above (whose afterEach does not reset
+  //// the queue) keeps the voice busy for its length, and in a shuffled order (weekly audit) « a clip whose file is not
+  //// here » ran first in this block and waited past its 5 ms for that line to end.
+  beforeEach(() => { _resetCueQueue(); _resetPicks() })
   const two = () => S([entry(BENCH, [set(80, 8, true), set(80, 8), set(80, 8)])])
 
   test('the last work set of an exercise', () => {

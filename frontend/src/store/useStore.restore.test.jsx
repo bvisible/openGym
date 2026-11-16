@@ -43,6 +43,9 @@ const httpError = status => Object.assign(new Error('HTTP ' + status), { status 
 beforeEach(() => {
   localStorage.clear()
   api.mockReset()
+  //// Neoffice — no toast carried over from another test: « a save this device refuses » leaves two calls, and in a
+  //// shuffled order (weekly audit) « push failures » then read them as its own before its first push.
+  toast.mockClear()
   useStore.setState({ S: clone(DEF), user: null, ready: false })
 })
 
@@ -427,6 +430,12 @@ describe('a save this device refuses', () => {
     try {
       useStore.getState().update(s => { s.restSec = 150 }, false)
       await vi.waitFor(() => expect(toast).toHaveBeenCalledTimes(2))
-    } finally { undo2() }
+    } finally {
+      undo2()
+      //// Neoffice — one save that lands, so the store module no longer holds « the saved copy lags » (storeLag)
+      //// for the next test: useStore.setState cannot reset it, and in a shuffled order (weekly audit) « push
+      //// failures » then kept gym_dirty after a push that went through.
+      useStore.getState().update(s => { s.restSec = 90 }, false)
+    }
   })
 })

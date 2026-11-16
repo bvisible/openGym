@@ -12,18 +12,25 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true
 const st = vi.hoisted(() => ({ S: {}, loaded: 0, xmas: 0, tour: false }))
 vi.mock('../store/useStore.js', () => ({ useStore: Object.assign(sel => sel({ S: st.S }), { getState: () => ({ S: st.S }) }) }))
 vi.mock('../lib/tour.js', () => ({ useTourRunning: () => st.tour }))
-vi.mock('../seasonal/halloween.jsx', () => {
-  st.loaded++
-  return { Layer: () => <i className="layer" />, Deco: ({ spot }) => <i className={'deco-' + spot} /> }
-})
-vi.mock('../seasonal/christmas.jsx', () => {
-  st.xmas++
-  return {
-    Layer: ({ hidden, workout }) => <i className={'xlayer' + (hidden ? ' hidden' : '') + (workout ? ' workout' : '')} />,
-    Deco: ({ spot }) => <i className={'xdeco-' + spot} />,
-    open: what => { st.opened = what; return true },
-  }
-})
+//// Neoffice — the two theme doubles are named (vi.hoisted) so that beforeEach below can register them again: a
+//// factory runs once per registration, and vi.resetModules() alone keeps the module it made, so only vi.doMock makes
+//// the next import() of a theme count as a fetch again.
+const theme = vi.hoisted(() => ({
+  halloween: () => {
+    st.loaded++
+    return { Layer: () => <i className="layer" />, Deco: ({ spot }) => <i className={'deco-' + spot} /> }
+  },
+  christmas: () => {
+    st.xmas++
+    return {
+      Layer: ({ hidden, workout }) => <i className={'xlayer' + (hidden ? ' hidden' : '') + (workout ? ' workout' : '')} />,
+      Deco: ({ spot }) => <i className={'xdeco-' + spot} />,
+      open: what => { st.opened = what; return true },
+    }
+  },
+}))
+vi.mock('../seasonal/halloween.jsx', () => theme.halloween())
+vi.mock('../seasonal/christmas.jsx', () => theme.christmas())
 
 const SRC = join(__dirname, '..')
 const files = (dir, out = []) => {
@@ -54,6 +61,13 @@ describe('no theme code in the main bundle', () => {
 describe('fetched only while a theme shows', () => {
   let host, root
   beforeEach(() => {
+    //// Neoffice — every test starts from a fresh Seasonal.jsx (its `mods` cache) and theme modules not fetched yet,
+    //// with the counters at zero. Without it "nothing loaded" held only when no earlier test had fetched a theme: in a
+    //// shuffled order (weekly audit) the counters came in at 1, and a cached module could not have shown a new fetch.
+    vi.resetModules()
+    vi.doMock('../seasonal/halloween.jsx', () => theme.halloween())
+    vi.doMock('../seasonal/christmas.jsx', () => theme.christmas())
+    st.loaded = 0; st.xmas = 0; st.opened = undefined
     vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(new Date(2026, 9, 25, 12))
     host = document.createElement('div'); document.body.appendChild(host); root = createRoot(host)
   })

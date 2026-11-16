@@ -35,7 +35,10 @@ const { toast } = vi.hoisted(() => ({ toast: vi.fn() }))
 vi.mock('./useUI.js', () => ({ useUI: { getState: () => ({ toast }) } }))
 
 import { api } from '../lib/api.js'
-import { DEF, useStore } from './useStore.js'
+//// Neoffice — a fresh store per test (the pattern of useStore.adopt.test.jsx): what the module keeps outside the
+//// state (a push waiting in the debounce or in flight, a change owed from before boot) is not reset by setState,
+//// and in a shuffled order (weekly audit) a pull met another test's leftover push.
+let { DEF, useStore } = await import('./useStore.js')
 import { editCompletedSession } from '../lib/session-edit.js'
 
 const clone = value => JSON.parse(JSON.stringify(value))
@@ -47,8 +50,11 @@ const puts = () => api.mock.calls.filter(([, o]) => o?.method === 'PUT').map(([,
 const gets = () => api.mock.calls.filter(([, o]) => !o)
 const signedIn = (S, extra = {}) => useStore.setState({ S, user: { id: 'user-1' }, ready: true, ...extra })
 
-beforeEach(() => {
+beforeEach(async () => {
   localStorage.clear()
+  //// Neoffice — see the import of the store above.
+  vi.resetModules()
+  ;({ DEF, useStore } = await import('./useStore.js'))
   api.mockReset()
   useStore.setState({ S: clone(DEF), user: null, ready: false })
 })

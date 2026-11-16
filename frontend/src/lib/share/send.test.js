@@ -7,13 +7,20 @@ import { sendImage, copyImage, canCopyImage } from './send.js'
 const png = () => new Blob(['png'], { type: 'image/png' })
 const setNavigator = (key, value) => Object.defineProperty(navigator, key, { value, configurable: true, writable: true })
 
+// A browser that can neither share nor copy a picture, until a test says otherwise. Before each test, not only after:
+// happy-dom itself has a ClipboardItem, so the file's first test met a browser that could copy, and the copyImage
+// tests passed only once a test before them had cleaned up (in a shuffled order, the weekly audit, they did not).
+const noShareNoClipboard = () => {
+  delete globalThis.ClipboardItem
+  for (const key of ['share', 'canShare', 'clipboard']) { try { delete navigator[key] } catch { setNavigator(key, undefined) } }
+}
 beforeEach(() => {
   if (typeof URL.createObjectURL !== 'function') URL.createObjectURL = () => 'blob:test/1'
   if (typeof URL.revokeObjectURL !== 'function') URL.revokeObjectURL = () => {}
+  noShareNoClipboard()
 })
 afterEach(() => {
-  delete globalThis.ClipboardItem
-  for (const key of ['share', 'canShare', 'clipboard']) { try { delete navigator[key] } catch { setNavigator(key, undefined) } }
+  noShareNoClipboard()
   vi.restoreAllMocks()
 })
 

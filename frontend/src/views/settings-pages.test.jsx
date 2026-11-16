@@ -9,6 +9,9 @@ import { resolve } from 'node:path'
 import { PAGES, PAGE_IDS, ROOT_GROUPS, SEARCH, pageVisible, onRoot, searchSettings, pageTrail, fold } from './settings-pages.js'
 //// Neoffice — the level of detail's rules, for the search's own view of a page (ctxNow below).
 import { showsEffortSetting, showsEquipmentProfiles, showsRestPauseSetting, showsOneRmFormula } from '../lib/level-visibility.js'
+//// Neoffice — when the Advent calendar row is drawn (ctxNow below).
+import { activeSeason } from '../lib/seasonal.js'
+import { adventOpenable } from '../lib/advent.js'
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 
@@ -289,6 +292,8 @@ describe('the search lands on a row', () => {
     //// Neoffice — the rows our pages show or hide, read the way views/Settings.jsx reads them.
     restPause: showsRestPauseSetting(mocks.S), effort: showsEffortSetting(mocks.S), equipment: showsEquipmentProfiles(mocks.S), oneRmFormula: showsOneRmFormula(mocks.S),
     classes: !mocks.MOBILE && mocks.S.perms?.classes !== false, mayEdit: true,
+    //// Neoffice — the Advent calendar row: in December, while Christmas shows (ctx `advent` of views/Settings.jsx).
+    advent: activeSeason(mocks.S) === 'christmas' && adventOpenable(),
   })
   for (const [name, setUp] of Object.entries(scenarios)) it(name, async () => {
     setUp()

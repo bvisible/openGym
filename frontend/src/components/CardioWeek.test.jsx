@@ -13,6 +13,7 @@ vi.mock('../store/useUI.js', () => ({ useUI: { getState: () => ({ openSheet: () 
 
 import CardioWeekCard, { GoalSheet } from './CardioWeek.jsx'
 import { cardioGoalsOf } from '../lib/cardio-goals.js'
+import { todayISO } from '../lib/format.js'   //// Neoffice — the local day, see `today` below
 
 globalThis.IS_REACT_ACT_ENVIRONMENT = true
 let root, host
@@ -23,7 +24,10 @@ function render(el) {
   root = createRoot(host)
   act(() => root.render(el))
 }
-const today = new Date().toISOString().slice(0, 10)
+//// Neoffice — the workout's day as the app writes it: the LOCAL calendar day (lib/history.js workoutDay,
+//// lib/format.js todayISO). The UTC day (toISOString) is tomorrow on a Sunday evening west of UTC, so the run
+//// fell into next week and the card said 0 (weekly audit, America/Los_Angeles, Sunday 20:37).
+const today = todayISO()
 const run = (min, km) => ({ id: 'w' + min, d: today, start: Date.now() - 3600e3, end: Date.now(), entries: [{ id: '0685', sets: [{ min, km, done: true }] }] })
 const click = el => act(() => el.dispatchEvent(new MouseEvent('click', { bubbles: true })))
 const button = text => [...host.querySelectorAll('button')].find(b => b.textContent.trim() === text)

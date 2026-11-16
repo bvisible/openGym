@@ -493,6 +493,9 @@ export default function Settings({ page = null, find = null, via = null, entryKe
     library: libraryOn(config, user),
     rotation: scheduleModeOf(S) === 'rotation' && !externalQ,
     spokenCues: S.spokenCues === true,
+    //// Neoffice — the Advent calendar row of Seasonal themes, drawn while Christmas shows in December (themes page
+    //// below): its search entry asks the same (views/settings-pages.js).
+    advent: activeSeason(S) === 'christmas' && adventOpenable(),
     // Settings → Modules: which feature areas are on (pageVisible and the search ask it).
     mod: id => isOn(S, id),
   }

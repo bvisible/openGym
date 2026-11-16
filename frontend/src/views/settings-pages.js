@@ -309,6 +309,10 @@ export const SEARCH = [
   { page: 'themes', title: 'Spooky colors', icon: 'palette', tint: 'var(--purple)', kw: 'halloween orange purple accent color colour seasonal' },
   { page: 'themes', title: 'Christmas', icon: 'gift', tint: 'var(--red)', kw: 'christmas xmas seasonal theme snow santa sleigh reindeer advent calendar december decoration on off', when: () => available('christmas') },
   { page: 'themes', title: 'Festive colors', icon: 'palette', tint: 'var(--purple)', kw: 'christmas red green accent color colour seasonal', when: () => available('christmas') },
+  //// Neoffice — the Advent calendar row the page draws in December while Christmas shows (views/Settings.jsx, ctx `advent`).
+  //// It had no entry: "advent" found the Christmas switch, not the calendar, and settings-pages.test.jsx (every row on a
+  //// page is in the search) failed every December (weekly audit, clock six weeks ahead).
+  { page: 'themes', title: 'Advent calendar', icon: 'tree', tint: 'var(--green)', kw: 'advent calendar christmas xmas december doors seasonal', when: c => !!c.advent },
   { page: 'look', title: 'Motion', icon: 'sparkles', tint: 'var(--teal)', kw: 'reduce motion animation animations accessibility calm still vestibular', opts: ['Like the phone', 'Less'] },
   { page: 'look', title: 'Text size', icon: 'note', tint: 'var(--blue)', kw: 'text size font fonts letters type typeface bigger larger smaller tiny huge big small scale dynamic accessibility zoom read reading eyes glasses', opts: ['Smallest', 'Small', 'Default', 'Large', 'Larger', 'Largest'], tkw: () => t('font text size bigger smaller letters') },
   { page: 'look', title: 'Show connection status', icon: 'cloud', tint: 'var(--blue)', kw: 'sync offline banner bar connection', when: c => !c.demo },

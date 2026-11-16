@@ -15,13 +15,18 @@ vi.mock('../sheets.jsx', () => ({
 }))
 
 let host, root
+//// Neoffice — the store as the file found it, put back after every test: mountWith() spreads the previous S, so the
+//// old check-in switch (`checkIn: false`) of the last test stayed on, and in a shuffled order (weekly audit) the
+//// check-in card was missing from « Everything » and « one module at a time ».
+let storeBefore
 beforeEach(() => {
   globalThis.IS_REACT_ACT_ENVIRONMENT = true
+  storeBefore = useStore.getState()   //// Neoffice — see above
   host = document.createElement('div')
   document.body.appendChild(host)
   root = createRoot(host)
 })
-afterEach(() => { act(() => root.unmount()); host.remove() })
+afterEach(() => { act(() => root.unmount()); host.remove(); useStore.setState({ S: storeBefore.S, user: storeBefore.user }) })   //// Neoffice — see above
 
 const today = new Date().toISOString().slice(0, 10)
 const mountWith = (modules, extra = {}) => {

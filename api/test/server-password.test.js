@@ -11,7 +11,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { hashPassword, hashResetCode } from '../password.js';
+import { hashPassword, hashResetCode, verifyPassword } from '../password.js';   //// Neoffice — verifyPassword: see the race test below
 import { boundPort } from './helpers.mjs';
 
 const API = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -396,7 +396,15 @@ for (const [label, stored] of [['current', () => pwHash], ['older parameters', (
     for (const cookie of cookies) if ((await h.req('GET', '/api/me', { cookie })).status === 200) alive.push(cookie);
     assert.equal(alive.length, 0, `${alive.length} of ${cookies.length} sessions signed with the old password survived the change`);
     assert.equal((await h.req('GET', '/api/me', { cookie: done.cookie })).status, 200, "the owner's own session carries on");
-    assert.equal((await login(h, 'Ana', next, '203.0.113.201')).status, 200);
+    //// Neoffice — a sign-in the server reads after the change is a wrong password (audited as one), and the sixth
+    //// pauses the name (ACCOUNT_FAILS, free: 5). Stopping on the change's answer keeps those few, not under six: on a
+    //// busy runner the server still had sign-ins to read that were sent before the answer reached the test, and the
+    //// new password below met the pause (429, weekly audit). So: the new password signs in, or the name is paused
+    //// because of exactly those sign-ins, and the new password is then the one stored.
+    const wrong = h.audit().filter(e => e.ev === 'auth.password.fail' && e.uid === 'u1' && e.msg === 'bad-password').length;
+    const last = await login(h, 'Ana', next, '203.0.113.201');
+    assert.equal(last.status, wrong > 5 ? 429 : 200, `${wrong} sign-ins with the old password counted as wrong after the change`);
+    if (last.status === 429) assert.ok(await verifyPassword(next, h.db().users[0].pw.h), 'the new password is the one stored');
   });
 }
 

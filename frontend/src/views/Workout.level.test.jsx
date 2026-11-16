@@ -58,15 +58,20 @@ const at = (level, session = plainSession()) => {
   return host.textContent
 }
 
+//// The store as the file found it, put back after every test: a test that sets more than the level (the bar
+//// weight of « Simple keeps plate loading… ») must not hand it to the next one. Resetting `active` and `level`
+//// alone left `barWeights` behind, and in a shuffled order (weekly audit) Simple then offered plate loading.
+let storeBefore
 beforeEach(() => {
   globalThis.IS_REACT_ACT_ENVIRONMENT = true
+  storeBefore = useStore.getState().S
   useUI.setState({ sheets: [] })
   document.body.innerHTML = ''
 })
 
 afterEach(() => {
   act(() => { mounted.splice(0).forEach(root => root.unmount()) })
-  useStore.setState(s => ({ S: { ...s.S, active: null, level: null } }))
+  useStore.setState({ S: storeBefore })
 })
 
 describe('the workout screen at each detail level', () => {
