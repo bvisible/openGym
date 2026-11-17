@@ -50,7 +50,8 @@ describe('Brazilian Portuguese locale', () => {
     //// Recomputed after the vouchers (2026-11-04; 2,434 overrides, 1,600 inherited): 18 new strings, four of them given a Brazilian wording here, the others read the same in both.
     //// Recomputed after the v1.4.5 merge (4,282 overrides, 1,957 inherited): upstream's own pt-BR overrides of its 2,232 new strings, plus our 114.
     //// Recomputed for the starter routines' names (#2705; 4,282 overrides, 1,976 inherited): « Corpo inteiro A », « Halteres A »… read the same in Brazil.
-    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('c7795bd161e503d7690fc151b2d394e0918032cb7276bc360c3d4bc1994d4e40')
+    //// Recomputed for the package session's two sentences (#2734; 4,282 overrides, 1,978 inherited): « Foi utilizada uma sessão do teu pacote… » reads the same in Brazil.
+    expect(fingerprint, 'pt-PT inheritance changed; review the inherited pt-BR wording').toBe('7e9f50489990328acdd893b691927fda592193c78843d220439bde48f5eb768e')
   })
 
   // pt-PT labelled Unpair 'Desfazer': Undo, in Portuguese (it is pt-BR's Undo), on the button that

@@ -6330,4 +6330,7 @@ export default {
   "Dumbbells B": "Haltères B",
   "Bands A": "Élastiques A",
   "Bands B": "Élastiques B",
+  //// Neoffice — what the screen says once a class is settled by a session of the member's package (sheets.jsx `packageUsed`, neoffice-maintenance#2734)
+  "A session of your package was used: {0} sessions left.": "Une séance de votre forfait a été utilisée : il vous en reste {0}.",
+  "A session of your package was used: that was the last one.": "Une séance de votre forfait a été utilisée : c’était la dernière.",
 }

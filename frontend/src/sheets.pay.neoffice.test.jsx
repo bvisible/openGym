@@ -9,23 +9,27 @@ import React, { act } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createRoot } from 'react-dom/client'
 
-const calls = vi.hoisted(() => ({ payWith: [], payInvoice: [], release: null }))
+const calls = vi.hoisted(() => ({
+  payWith: [], payInvoice: [], release: null,
+  //// What the server answers a tap on a class payment, and the ways to pay it offers: a test sets them before opening the sheet.
+  answer: { action: 'none', invoice: 'FA-1' },
+  methods: [
+    { id: 'Facture - CHF', title: 'Facture', gateway_type: 'facture' },
+    { id: 'Payrexx - CHF', title: 'TWINT / Carte', gateway_type: 'payrexx' },
+  ],
+}))
 vi.mock('./lib/api.js', async importOriginal => {
   const real = await importOriginal()
   const slow = (list, answer) => (...args) => {
     list.push(args)
-    return new Promise(resolve => { calls.release = () => resolve(answer) })
+    return new Promise(resolve => { calls.release = () => resolve(typeof answer === 'function' ? answer() : answer) })
   }
   return {
     ...real,
     payStart: () => Promise.resolve({
-      booking: 'BKG-1', amount: 28, currency: 'CHF',
-      methods: [
-        { id: 'Facture - CHF', title: 'Facture', gateway_type: 'facture' },
-        { id: 'Payrexx - CHF', title: 'TWINT / Carte', gateway_type: 'payrexx' },
-      ],
+      booking: 'BKG-1', amount: 28, currency: 'CHF', methods: calls.methods,
     }),
-    payWith: slow(calls.payWith, { action: 'none', invoice: 'FA-1' }),
+    payWith: slow(calls.payWith, () => calls.answer),
     invoiceMethods: () => Promise.resolve({
       amount: 50, currency: 'CHF', methods: [{ id: 'Payrexx - CHF', title: 'TWINT / Carte', gateway_type: 'payrexx' }],
     }),
@@ -61,6 +65,11 @@ beforeEach(() => {
   useUI.setState({ sheets: [], timer: null, work: null })
   calls.payWith.length = 0
   calls.payInvoice.length = 0
+  calls.answer = { action: 'none', invoice: 'FA-1' }
+  calls.methods = [
+    { id: 'Facture - CHF', title: 'Facture', gateway_type: 'facture' },
+    { id: 'Payrexx - CHF', title: 'TWINT / Carte', gateway_type: 'payrexx' },
+  ]
 })
 afterEach(() => {
   mounted.splice(0).forEach(r => act(() => r.unmount()))
@@ -93,5 +102,56 @@ describe('the payment sheet', () => {
     await settle()
     expect(calls.payInvoice).toEqual([['FA-2', 'Payrexx - CHF', 'de']])
     await act(async () => { calls.release() })
+  })
+})
+
+//// Neoffice — a class settled by a session of the member's package (neoffice-maintenance#2734). The server (neoffice_gym api/wallet.py, #2630) lists a package among the ways to
+//// pay (`id: 'package:<name>'`, `gateway_type: 'package'`) and answers its tap with `{ action: 'none', invoice, package, sessionsLeft }`: the session is counted, the invoice
+//// is worth 0.00 and already validated. The screen used to read that `none` as « the invoice will follow », which is the text of the Invoice method: nothing follows here.
+describe('the payment sheet, a class settled by a package of sessions', () => {
+  const PACKAGE_ROW = { id: 'package:CP-1', title: 'Use a session of 10 classes', description: '7 sessions left', gateway_type: 'package' }
+  const pay = async left => {
+    calls.methods = [PACKAGE_ROW, ...calls.methods]
+    calls.answer = { action: 'none', invoice: 'FA-9', package: 'CP-1', sessionsLeft: left }
+    await open(() => paySheet({ id: 'BKS-1', title: 'Yoga', start: '2026-11-09T14:00:00' }))
+    act(() => host.querySelectorAll('.pay-m')[0].click())
+    await settle()
+    await act(async () => { calls.release() })
+    await settle()
+  }
+  const done = () => ({ title: host.querySelector('.pay-done .tt')?.textContent, sub: host.querySelector('.pay-done .ss')?.textContent })
+
+  it('says the place is booked and how many sessions are left, and does not speak of an invoice', async () => {
+    await pay(7)
+    expect(calls.payWith).toEqual([['BKG-1', 'package:CP-1', 'de']])
+    expect(done()).toEqual({ title: 'Your place is booked', sub: 'A session of your package was used: 7 sessions left.' })
+    expect(host.querySelector('.pay-done').textContent).not.toMatch(/invoice/i)
+  })
+
+  it('says it in the singular for the last session but one', async () => {
+    await pay(1)
+    expect(done().sub).toBe('A session of your package was used: 1 session left.')
+  })
+
+  it('says it was the last one when none is left', async () => {
+    await pay(0)
+    expect(done().sub).toBe('A session of your package was used: that was the last one.')
+  })
+
+  it('still says the invoice will follow for the Invoice method, which is true there', async () => {
+    await open(() => paySheet({ id: 'BKS-1', title: 'Yoga', start: '2026-11-09T14:00:00' }))
+    act(() => host.querySelectorAll('.pay-m')[0].click())
+    await settle()
+    await act(async () => { calls.release() })
+    await settle()
+    expect(done()).toEqual({ title: 'Your place is booked', sub: 'The invoice will follow — nothing to pay right now.' })
+  })
+
+  it('draws a package with the icon of what is already paid, not the padlock of a secure page', async () => {
+    calls.methods = [PACKAGE_ROW, ...calls.methods]
+    await open(() => paySheet({ id: 'BKS-1', title: 'Yoga', start: '2026-11-09T14:00:00' }))
+    const icons = [...host.querySelectorAll('.pay-m .lrow-i svg')].map(i => i.getAttribute('data-icon'))
+    expect(icons).toEqual(['checkCircle', 'clipboard', 'lock'])
+    expect(host.querySelector('.pay-m .ss').textContent).toBe('7 sessions left')
   })
 })

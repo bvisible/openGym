@@ -5441,8 +5441,11 @@ const PAY_KINDS = {
     //: module load, and a test that mocks the api module without this one
     //: could no longer even IMPORT the screen.
     state: args => payState(args),
+    //// Neoffice — `none` also answers a session of the member's package (neoffice_gym api/wallet.py, neoffice-maintenance#2630, #2734): the answer then carries
+    //// `package` and `sessionsLeft`. Nothing will follow there — the session is counted and the invoice is worth 0.00, already validated — so the screen says
+    //// what was used and what is left instead of the Invoice method's « the invoice will follow ».
     done: action => action?.action === 'none'
-      ? { title: t('Your place is booked'), sub: t('The invoice will follow — nothing to pay right now.') }
+      ? { title: t('Your place is booked'), sub: action.package ? packageUsed(action.sessionsLeft) : t('The invoice will follow — nothing to pay right now.') }
       : { title: t('Payment received'), sub: t('See you at the class.') },
   },
   invoice: {
@@ -5456,6 +5459,15 @@ const PAY_KINDS = {
       ? { title: t('Nothing was charged'), sub: t('Your club will settle this invoice with you.') }
       : { title: t('Payment received'), sub: t('Your invoice is settled.') },
   },
+}
+
+//// Neoffice — what a session of the member's package leaves them to read (see `PAY_KINDS.class.done`): how many sessions are left, or that it was the last.
+//// `tn` because Russian, Polish and Arabic count in three to six forms; the count is the server's (`sessionsLeft`), never computed here.
+function packageUsed(left) {
+  const n = Number(left) || 0
+  return n > 0
+    ? tn('A session of your package was used: {0} session left.', 'A session of your package was used: {0} sessions left.', n)
+    : t('A session of your package was used: that was the last one.')
 }
 
 function PaySheet({ s, close, onDone, kind = 'class' }) {
@@ -5588,7 +5600,9 @@ function PaySheet({ s, close, onDone, kind = 'class' }) {
           <span className="lrow-i">{m.logo
             ? <img src={m.logo} alt="" />
             : <Icon name={m.gateway_type === 'facture' ? 'clipboard'
-                : m.gateway_type === 'twint' ? 'bolt' : 'lock'} />}</span>
+                : m.gateway_type === 'twint' ? 'bolt'
+                //// Neoffice — a session of the member's package (neoffice-maintenance#2734): already paid for, not a secure page, so not the padlock.
+                : m.gateway_type === 'package' ? 'checkCircle' : 'lock'} />}</span>
           <div className="grow">
             <div className="tt">{m.title}</div>
             {m.description && <div className="ss">{m.description}</div>}
