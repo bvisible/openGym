@@ -1,0 +1,1 @@
+import"./i18n-DJlfm1Li.js";import{r as e}from"./useStore-C8VMzvk-.js";import"./measurements-DVGZUDlt.js";import"./i18n-core-CP9NHm4z.js";import"./format-C8-Mogpv.js";import"./mobile-62xKLOkQ.js";import"./useUI-BoptnE1r.js";import{t}from"./jsx-runtime-LKYXHABd.js";import"./ui-geLkHZSs.js";t();function n(){return e(e=>e.S),null}export{n as t};
